@@ -9,8 +9,8 @@ const advancedTeamStats = 'https://stats.nba.com/stats/leaguedashteamstats';
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  updateTeamStats.updateAllFullTeamBuilds();
-  updateTeamStats.updateAllLineupBuilds();
+  // updateTeamStats.updateAllFullTeamBuilds();
+  // updateTeamStats.updateAllLineupBuilds();
 
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchLineupParams(20, 'Bench')
@@ -23,7 +23,7 @@ router.get('/', function(req, res, next) {
   //     console.log(err);
   //   });
 
-  res.render('index', { title: 'Express' });
+  res.send({ Hi: 'there'});
 });
 
 module.exports = router;
