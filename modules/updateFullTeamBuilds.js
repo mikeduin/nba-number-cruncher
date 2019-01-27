@@ -1,10 +1,8 @@
-var express = require('express');
-var router = express.Router();
-const axios = require('axios');
 const knex = require('../db/knex');
-const dbBuilders = require('../modules/dbBuilders');
-
+const axios = require('axios');
+const dbBuilders = require('./dbBuilders');
 const advancedTeamStats = 'https://stats.nba.com/stats/leaguedashteamstats';
+
 const advancedParams = (games) => {
   return {
     MeasureType: 'Advanced',
@@ -29,20 +27,16 @@ const advancedParams = (games) => {
   }
 }
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  axios.get(advancedTeamStats, {
-      params: advancedParams(5)
-    })
+const updateFullTeamBuild = (games, db) => {
+  axios.get(advancedTeamStats, {params: advancedParams(games)})
     .then((response)=> {
       let teamData = response.data.resultSets[0].rowSet;
-      // dbBuilders.buildTeamDb('teams_full_l5', teamData);
-    })
-    .catch((err)=>{
-      console.log(err);
+      dbBuilders.updateTeamDb(db, teamData);
     });
+};
 
-  res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+// module.exports = {
+//   updateAllFullTeamBuilds: function () {
+//
+//   }
+// }

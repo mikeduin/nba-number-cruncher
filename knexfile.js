@@ -1,6 +1,6 @@
 module.exports = {
   development: {
-    client: 'pg',
+    client: 'postgresql',
     connection: 'postgres://localhost/nba-number-cruncher'
   }
 };
