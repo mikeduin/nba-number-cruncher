@@ -35,11 +35,11 @@ router.get('/', function(req, res, next) {
   // updateFullTeams.updateAllFullTeamBuilds();
 
   axios.get(advancedTeamStats, {
-      params: dbBuilders.fetchLineupParams(20, 'Starters')
+      params: dbBuilders.fetchLineupParams(20, 'Bench')
     })
     .then((response)=> {
       let teamData = response.data.resultSets[0].rowSet;
-      dbBuilders.buildTeamDb('teams_starters_l20', teamData);
+      dbBuilders.buildTeamDb('teams_bench_l20', teamData);
     })
     .catch((err)=>{
       console.log(err);
