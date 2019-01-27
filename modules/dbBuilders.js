@@ -1,6 +1,53 @@
 const knex = require('../db/knex');
 
 module.exports = {
+  fetchAdvancedParams: function (games) {
+    return {
+      MeasureType: 'Advanced',
+      PerMode: 'PerGame',
+      PlusMinus: 'N',
+      PaceAdjust: 'N',
+      Rank: 'N',
+      Season: '2018-19',
+      SeasonType: 'Regular Season',
+      Outcome: '',
+      SeasonSegment: '',
+      DateFrom: '',
+      DateTo: '',
+      OpponentTeamID: 0,
+      VsConference: '',
+      VsDivision: '',
+      LastNGames: games,
+      Location: '',
+      Period: 0,
+      GameSegment: '',
+      Month: 0
+    }
+  },
+  fetchLineupParams: function (games, lineup) {
+    return {
+      MeasureType: 'Advanced',
+      PerMode: 'PerGame',
+      PlusMinus: 'N',
+      PaceAdjust: 'N',
+      Rank: 'N',
+      Season: '2018-19',
+      SeasonType: 'Regular Season',
+      Outcome: '',
+      SeasonSegment: '',
+      DateFrom: '',
+      DateTo: '',
+      OpponentTeamID: 0,
+      VsConference: '',
+      VsDivision: '',
+      LastNGames: games,
+      Location: '',
+      Period: 0,
+      GameSegment: '',
+      Month: 0,
+      StarterBench: lineup
+    }
+  },
   buildTeamDb: function (db, arrayData) {
     arrayData.forEach(team => {
       knex(db).insert({
