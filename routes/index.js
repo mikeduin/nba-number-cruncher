@@ -32,17 +32,18 @@ const advancedParams = (games) => {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  // updateFullTeams.updateAllFullTeamBuilds();
+
   // axios.get(advancedTeamStats, {
-  //     params: advancedParams(5)
+  //     params: advancedParams(20)
   //   })
-    updateFullTeams.updateAllFullTeamBuilds();
-    // .then((response)=> {
-    //   // let teamData = response.data.resultSets[0].rowSet;
-    //   // dbBuilders.buildTeamDb('teams_full_l5', teamData);
-    // })
-    // .catch((err)=>{
-    //   console.log(err);
-    // });
+  //   .then((response)=> {
+  //     let teamData = response.data.resultSets[0].rowSet;
+  //     dbBuilders.buildTeamDb('teams_full_l20', teamData);
+  //   })
+  //   .catch((err)=>{
+  //     console.log(err);
+  //   });
 
   res.render('index', { title: 'Express' });
 });

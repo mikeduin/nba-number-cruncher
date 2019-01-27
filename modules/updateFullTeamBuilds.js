@@ -39,5 +39,8 @@ module.exports = {
   updateAllFullTeamBuilds: function () {
     updateFullTeamBuild(0, 'teams_full');
     updateFullTeamBuild(5, 'teams_full_l5');
+    updateFullTeamBuild(10, 'teams_full_l10');
+    updateFullTeamBuild(15, 'teams_full_l15');
+    updateFullTeamBuild(20, 'teams_full_l20');
   }
 }
