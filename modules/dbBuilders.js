@@ -51,7 +51,7 @@ module.exports = {
         cfid: team[44],
         cfparams: team[45],
         updated_at: new Date()
-      }, '*').then((team) =>{
+      }, '*').then(team =>{
         console.log(team[0].team_name, ' has been added to db');
       });
     })
@@ -106,6 +106,9 @@ module.exports = {
           cfid: team[44],
           cfparams: team[45],
           updated_at: new Date()
+        }, '*')
+        .then(team => {
+          console.log(team[0], ' has been updated in the ', db, ' db');
         })
     })
   }

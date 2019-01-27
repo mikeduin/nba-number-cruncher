@@ -29,14 +29,15 @@ const advancedParams = (games) => {
 
 const updateFullTeamBuild = (games, db) => {
   axios.get(advancedTeamStats, {params: advancedParams(games)})
-    .then((response)=> {
+    .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       dbBuilders.updateTeamDb(db, teamData);
     });
 };
 
-// module.exports = {
-//   updateAllFullTeamBuilds: function () {
-//
-//   }
-// }
+module.exports = {
+  updateAllFullTeamBuilds: function () {
+    updateFullTeamBuild(0, 'teams_full');
+    updateFullTeamBuild(5, 'teams_full_l5');
+  }
+}
