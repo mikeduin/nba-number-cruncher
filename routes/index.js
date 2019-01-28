@@ -4,15 +4,20 @@ const axios = require("axios");
 const knex = require("../db/knex");
 
 const dbBuilders = require("../modules/dbBuilders");
+const dbMappers = require("../modules/dbMappers");
 const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 const teamObjStruct = require("../modules/teamObjStruct");
 
+// To update all Team raw data DBs, run these functions on index page
+// updateTeamStats.updateAllFullTeamBuilds();
+// updateTeamStats.updateAllLineupBuilds();
+
+
 /* GET home page. */
 router.get("/", function(req, res, next) {
-  // updateTeamStats.updateAllFullTeamBuilds();
-  // updateTeamStats.updateAllLineupBuilds();
 
+  dbMappers.mapNetRatings();
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchLineupParams(20, 'Bench')
   //   })

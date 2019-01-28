@@ -16,7 +16,7 @@ exports.up = function(knex, Promise) {
     t.float('bench_full');
     t.float('bench_l5');
     t.float('bench_l10');
-    f.float('bench_l15');
+    t.float('bench_l15');
     t.float('bench_l20');
     t.float('1q_full');
     t.float('1q_l5');
@@ -38,6 +38,7 @@ exports.up = function(knex, Promise) {
     t.float('4q_l10');
     t.float('4q_l15');
     t.float('4q_l20');
+    t.timestamp('updated_at');
   })
 };
 
