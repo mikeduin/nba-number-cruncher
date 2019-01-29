@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const axios = require("axios");
 const knex = require("../db/knex");
+const schedule = require('node-schedule');
 
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
@@ -9,15 +10,20 @@ const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 const teamObjStruct = require("../modules/teamObjStruct");
 
-// To update all Team raw data DBs, run these functions on index page
-// updateTeamStats.updateAllFullTeamBuilds();
-// updateTeamStats.updateAllLineupBuilds();
+const updateRawDataTables = schedule.scheduleJob('* 2 * * *', function () {
+  updateTeamStats.updateAllFullTeamBuilds();
+  updateTeamStats.updateAllLineupBuilds();
+  console.log('raw data tables were updated at 2 AM');
+});
+
+const mapRawData = schedule.scheduleJob('5 2 * * *', function (){
+  dbMappers.mapNetRatings();
+  console.log('raw data mapped at 2:05 AM')
+})
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
 
-  updateTeamStats.updateAllFullTeamBuilds();
-  updateTeamStats.updateAllLineupBuilds();
 
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchLineupParams(20, 'Bench')
@@ -37,9 +43,6 @@ router.get("/api/getTeams", function(req, res, next) {
   // let teamsFull;
   // let teamObj = teamObjStruct.teamObj();
   //
-  console.log('pre map reached');
-  dbMappers.mapNetRatings();
-  console.log('post map reached');
 
 
   // return async () => {
