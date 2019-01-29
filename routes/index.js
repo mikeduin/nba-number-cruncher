@@ -13,11 +13,12 @@ const teamObjStruct = require("../modules/teamObjStruct");
 // updateTeamStats.updateAllFullTeamBuilds();
 // updateTeamStats.updateAllLineupBuilds();
 
-
 /* GET home page. */
 router.get("/", function(req, res, next) {
 
-  dbMappers.mapNetRatings();
+  updateTeamStats.updateAllFullTeamBuilds();
+  updateTeamStats.updateAllLineupBuilds();
+
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchLineupParams(20, 'Bench')
   //   })
@@ -32,9 +33,14 @@ router.get("/", function(req, res, next) {
   res.send({ Hi: "there" });
 });
 
-router.get("/api/getTeams", (req, res, next) => {
-  let teamsFull;
-  let teamObj = teamObjStruct.teamObj();
+router.get("/api/getTeams", function(req, res, next) {
+  // let teamsFull;
+  // let teamObj = teamObjStruct.teamObj();
+  //
+  console.log('pre map reached');
+  dbMappers.mapNetRatings();
+  console.log('post map reached');
+
 
   // return async () => {
   // console.log('hello');
@@ -99,6 +105,8 @@ router.get("/api/getTeams", (req, res, next) => {
   // updateFullStats();
   // setTimeout(updateFullLastFiveStats(), 5000);
   // console.log('done');
+
+  res.send({getTeams: 'reached'});
 
   // };
 });
