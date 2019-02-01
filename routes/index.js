@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const axios = require("axios");
 const knex = require("../db/knex");
-const schedule = require('node-schedule');
+const schedule = require("node-schedule");
 
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
@@ -10,21 +10,19 @@ const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 const teamObjStruct = require("../modules/teamObjStruct");
 
-const updateRawDataTables = schedule.scheduleJob('* 2 * * *', function () {
+const updateRawDataTables = schedule.scheduleJob("* 3 * * *", function() {
   updateTeamStats.updateAllFullTeamBuilds();
   updateTeamStats.updateAllLineupBuilds();
-  console.log('raw data tables were updated at 2 AM');
+  console.log("raw data tables updated at 3 AM");
 });
 
-const mapRawData = schedule.scheduleJob('5 2 * * *', function (){
+const mapRawData = schedule.scheduleJob("2 3 * * *", function() {
   dbMappers.mapNetRatings();
-  console.log('raw data mapped at 2:05 AM')
-})
+  console.log("raw data mapped at 3:02 AM");
+});
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
-
-
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchLineupParams(20, 'Bench')
   //   })
@@ -39,11 +37,16 @@ router.get("/", function(req, res, next) {
   res.send({ Hi: "there" });
 });
 
+router.get("/api/getNetRatings", function(req, res, next) {
+  knex("team_net_ratings").then(netRatings => {
+    res.json(netRatings[0]);
+  });
+});
+
 router.get("/api/getTeams", function(req, res, next) {
   // let teamsFull;
   // let teamObj = teamObjStruct.teamObj();
   //
-
 
   // return async () => {
   // console.log('hello');
@@ -109,7 +112,7 @@ router.get("/api/getTeams", function(req, res, next) {
   // setTimeout(updateFullLastFiveStats(), 5000);
   // console.log('done');
 
-  res.send({getTeams: 'reached'});
+  res.send({ getTeams: "reached" });
 
   // };
 });
