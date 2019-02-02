@@ -6,9 +6,11 @@ export const fetchNetRatings = () => async dispatch => {
   // const response = await fetch('/api/getNetRatings');
   // console.log(response);
   const response = await fetch('/api/getNetRatings');
-  const body = await response.json();
+  const data = await response.json();
 
-  console.log(body)
+  dispatch({ type: 'FETCH_NET_RATINGS', payload: data})
+
+  // console.log(body)
   // .then(res=>{
   //   console.log(res.data);
   // })

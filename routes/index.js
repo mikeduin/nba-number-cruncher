@@ -41,7 +41,7 @@ router.get("/", function(req, res, next) {
 
 router.get("/api/getNetRatings", function(req, res, next) {
   knex("team_net_ratings").then(netRatings => {
-    res.send(netRatings[0]);
+    res.send(netRatings);
   });
 
   let nbaNow = moment().format('YYYYMMDD');
