@@ -440,5 +440,309 @@ module.exports = {
             });
         });
       });
+
+    knex("teams_q1")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "1q_full": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 1q");
+            });
+        });
+      });
+
+    knex("teams_q1_l5")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "1q_l5": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 1q l5");
+            });
+        });
+      });
+
+    knex("teams_q1_l10")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "1q_l10": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 1q l10");
+            });
+        });
+      });
+
+    knex("teams_q1_l15")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "1q_l15": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 1q l15");
+            });
+        });
+      });
+
+    knex("teams_q2")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "2q_full": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 2q");
+            });
+        });
+      });
+
+    knex("teams_q2_l5")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "2q_l5": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 2q l5");
+            });
+        });
+      });
+
+    knex("teams_q2_l10")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "2q_l10": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 2q l10");
+            });
+        });
+      });
+
+    knex("teams_q2_l15")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "2q_l15": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 2q l15");
+            });
+        });
+      });
+
+    knex("teams_q3")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "3q_full": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 3q");
+            });
+        });
+      });
+
+    knex("teams_q3_l5")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "3q_l5": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 3q l5");
+            });
+        });
+      });
+
+    knex("teams_q3_l10")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "3q_l10": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 3q l10");
+            });
+        });
+      });
+
+    knex("teams_q3_l15")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "3q_l15": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 3q l15");
+            });
+        });
+      });
+
+    knex("teams_q4")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "4q_full": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 4q");
+            });
+        });
+      });
+
+    knex("teams_q4_l5")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "4q_l5": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 4q l5");
+            });
+        });
+      });
+
+    knex("teams_q4_l10")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "4q_l10": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 4q l10");
+            });
+        });
+      });
+
+    knex("teams_q4_l15")
+      .select("team_id", "net_rating")
+      .then(teams => {
+        teams.forEach(team => {
+          knex("team_net_ratings")
+            .where({ team_id: team.team_id })
+            .update(
+              {
+                "4q_l15": team.net_rating,
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(res => {
+              console.log(res[0].team_name, " net rtg updated for 4q l15");
+            });
+        });
+      });
   }
 };
