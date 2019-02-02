@@ -8,7 +8,7 @@ const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams
 let now = new Date();
 
 module.exports = {
-  fetchAdvancedParams: function (games) {
+  fetchAdvancedParams: function (games, period) {
     return {
       MeasureType: 'Advanced',
       PerMode: 'PerGame',
@@ -26,7 +26,7 @@ module.exports = {
       VsDivision: '',
       LastNGames: games,
       Location: '',
-      Period: 0,
+      Period: period,
       GameSegment: '',
       Month: 0
     }

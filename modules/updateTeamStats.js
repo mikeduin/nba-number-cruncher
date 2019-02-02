@@ -3,8 +3,8 @@ const axios = require('axios');
 const dbBuilders = require('./dbBuilders');
 const advancedTeamStats = 'https://stats.nba.com/stats/leaguedashteamstats';
 
-const updateFullTeamBuild = (games, db) => {
-  axios.get(advancedTeamStats, {params: dbBuilders.fetchAdvancedParams(games)})
+const updateFullTeamBuild = (games, db, period) => {
+  axios.get(advancedTeamStats, {params: dbBuilders.fetchAdvancedParams(games, period)})
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       dbBuilders.updateTeamDb(db, teamData);
@@ -17,15 +17,31 @@ const updatePartialTeamBuild = (games, db, lineup) => {
       let teamData = response.data.resultSets[0].rowSet;
       dbBuilders.updateTeamDb(db, teamData);
     })
-}
+};
 
 module.exports = {
   updateAllFullTeamBuilds: function () {
-    updateFullTeamBuild(0, 'teams_full');
-    updateFullTeamBuild(5, 'teams_full_l5');
-    updateFullTeamBuild(10, 'teams_full_l10');
-    updateFullTeamBuild(15, 'teams_full_l15');
-    updateFullTeamBuild(20, 'teams_full_l20');
+    updateFullTeamBuild(0, 'teams_full', 0);
+    updateFullTeamBuild(5, 'teams_full_l5', 0);
+    updateFullTeamBuild(10, 'teams_full_l10', 0);
+    updateFullTeamBuild(15, 'teams_full_l15', 0);
+    updateFullTeamBuild(20, 'teams_full_l20', 0);
+    updateFullTeamBuild(0, 'teams_q1', 1);
+    updateFullTeamBuild(5, 'teams_q1_l5', 1);
+    updateFullTeamBuild(10, 'teams_q1_l10', 1);
+    updateFullTeamBuild(15, 'teams_q1_l15', 1);
+    updateFullTeamBuild(0, 'teams_q2', 2);
+    updateFullTeamBuild(5, 'teams_q2_l5', 2);
+    updateFullTeamBuild(10, 'teams_q2_l10', 2);
+    updateFullTeamBuild(15, 'teams_q2_l15', 2);
+    updateFullTeamBuild(0, 'teams_q3', 3);
+    updateFullTeamBuild(5, 'teams_q3_l5', 3);
+    updateFullTeamBuild(10, 'teams_q3_l10', 3);
+    updateFullTeamBuild(15, 'teams_q3_l15', 3);
+    updateFullTeamBuild(0, 'teams_q4', 4);
+    updateFullTeamBuild(5, 'teams_q4_l5', 4);
+    updateFullTeamBuild(10, 'teams_q4_l10', 4);
+    updateFullTeamBuild(15, 'teams_q4_l15', 4);
   },
   updateAllLineupBuilds: function() {
     updatePartialTeamBuild(0, 'teams_starters', 'Starters');
