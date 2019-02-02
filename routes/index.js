@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const axios = require("axios");
 const knex = require("../db/knex");
 const schedule = require("node-schedule");
@@ -12,11 +11,11 @@ const dateFilters = require("../modules/dateFilters");
 const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
-
 const updateRawDataTables = schedule.scheduleJob("* 3 * * *", function() {
   updateTeamStats.updateAllFullTeamBuilds();
   updateTeamStats.updateAllLineupBuilds();
-  console.log("raw data tables updated at 3 AM");
+  dbBuilders.updateSchedule();
+  console.log("raw data tables + schedule updated at 3 AM");
 });
 
 const mapRawData = schedule.scheduleJob("2 3 * * *", function() {
@@ -46,87 +45,7 @@ router.get("/api/getNetRatings", function(req, res, next) {
   });
 
   let nbaNow = moment().format('YYYYMMDD');
-  // console.log(dateFilters.fetchGmWk(nbaNow));
-  dbBuilders.updateSchedule();
-
-  // dbBuilders.buildSchedule();
-
 });
 
-
-
-router.get("/api/getTeams", function(req, res, next) {
-  // let teamsFull;
-  // let teamObj = teamObjStruct.teamObj();
-  //
-
-  // return async () => {
-  // console.log('hello');
-
-  // const updateFullStats = () => {
-  //   knex("teams_full")
-  //     .select("team_id", "team_name", "net_rating")
-  //     .orderBy("team_name")
-  //     .then(teamsFullPull => {
-  //       // let teamsFull = teamsFullPull;
-  //       // console.log(teamsFull);
-  //       // teamsFullPull.forEach(nbaTeam=>{
-  //       //   teamObj[nbaTeam.team_name][net_rating][team].push(nbaTeam.net_rating);
-  //       // })
-  //       // console.log(teamsFullPull);
-  //
-  //       teamObj["Atlanta Hawks"].net_rating.team.push(
-  //         teamsFullPull[0].net_rating
-  //       );
-  //       console.log(teamObj["Atlanta Hawks"].net_rating.team);
-  //     });
-  // };
-
-  // const updateFullLastFiveStats = () => {
-  //   knex("teams_full_l5")
-  //     .select("team_id", "team_name", "net_rating")
-  //     .orderBy("team_name")
-  //     .then(teamsLastFivePull => {
-  //       // let teamsFull = teamsFullPull;
-  //       // console.log(teamsFull);
-  //       // teamsFullPull.forEach(nbaTeam=>{
-  //       //   teamObj[nbaTeam.team_name][net_rating][team].push(nbaTeam.net_rating);
-  //       // })
-  //       // console.log(teamsFullPull);
-  //
-  //       teamObj["Atlanta Hawks"].net_rating.team.push(
-  //         teamsLastFivePull[0].net_rating
-  //       );
-  //       console.log(teamObj["Atlanta Hawks"].net_rating.team);
-  //     });
-  // };
-
-  // async function execSeq () {
-  //   const tasks = [updateFullStats, updateFullLastFiveStats];
-  //
-  //   for (const fn of tasks) {
-  //     await fn()
-  //   }
-  //
-  //   console.log('all done');
-  // };
-  //
-  // execSeq();
-
-  // await updateFullStats();
-  // await updateFullLastFiveStats();
-
-  // Promise.all([updateFullLastFiveStats, updateFullLastFiveStats]).then(res=>{
-  //   console.log('promises done');
-  // });
-
-  // updateFullStats();
-  // setTimeout(updateFullLastFiveStats(), 5000);
-  // console.log('done');
-
-  res.send({ getTeams: "reached" });
-
-  // };
-});
 
 module.exports = router;

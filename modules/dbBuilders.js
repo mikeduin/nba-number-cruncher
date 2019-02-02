@@ -5,7 +5,6 @@ const moment = require('moment');
 const dateFilters = require('./dateFilters');
 
 const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
-
 let now = new Date();
 
 module.exports = {
@@ -57,6 +56,7 @@ module.exports = {
     }
   },
   buildSchedule: function () {
+    // This function builds out the initial schedule and should only need to be run at the beginning of each season
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
@@ -97,8 +97,6 @@ module.exports = {
     })
   },
   updateSchedule: function () {
-    let nbaNow = moment().format('YYYYMMDD');
-    let gmWk = dateFilters.fetchGmWk(nbaNow);
     let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.slice(currMonth).forEach(month => {
