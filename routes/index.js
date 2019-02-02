@@ -1,5 +1,6 @@
-var express = require("express");
+const express = require("express");
 var router = express.Router();
+
 const axios = require("axios");
 const knex = require("../db/knex");
 const schedule = require("node-schedule");
@@ -38,10 +39,14 @@ router.get("/", function(req, res, next) {
 });
 
 router.get("/api/getNetRatings", function(req, res, next) {
+  console.log('net ratings route entered');
   knex("team_net_ratings").then(netRatings => {
-    res.json(netRatings[0]);
+    // res.json(netRatings[0]);
+    res.send(netRatings[0]);
   });
 });
+
+
 
 router.get("/api/getTeams", function(req, res, next) {
   // let teamsFull;
