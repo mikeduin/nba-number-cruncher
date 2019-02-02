@@ -1,6 +1,13 @@
 const knex = require('../db/knex');
+const axios = require('axios');
+
+const dateFilters = require('./DateFilters');
+
+
+
 const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
-const axios = require("axios");
+
+let now = new Date();
 
 module.exports = {
   fetchAdvancedParams: function (games) {
@@ -81,7 +88,51 @@ module.exports = {
             gweek: game.gweek,
             h: [hObj],
             v: [vObj],
-            stt: game.stt
+            stt: game.stt,
+            updated_at: new Date()
+          }, '*').then(ent => {
+            console.log(ent[0].gcode, ' entered in DB');
+          });
+        })
+      })
+    })
+  },
+  updateSchedule: function () {
+    let nbaNow = moment().format('YYYYMMDD');
+    let gmWk = dateFilters.fetchGmWk(nbaNow);
+    console.log('gmWk is ', gmWk);
+    axios.get(leagueScheduleUrl).then(response => {
+      response.data.lscd.forEach(month => {
+        month.mscd.g.forEach(game => {
+          let hObj = {
+            tid: game.h.tid,
+            re: game.h.re,
+            ta: game.h.ta,
+            tn: game.h.tn,
+            tc: game.h.tc,
+            s: game.h.s
+          };
+          let vObj = {
+            tid: game.v.tid,
+            re: game.v.re,
+            ta: game.v.ta,
+            tn: game.v.tn,
+            tc: game.v.tc,
+            s: game.v.s
+          };
+          knex('schedule').insert({
+            gid: game.gid,
+            gcode: game.gcode,
+            gdte: game.gdte,
+            an: game.an,
+            ac: game.ac,
+            as: game.as,
+            etm: game.etm,
+            gweek: game.gweek,
+            h: [hObj],
+            v: [vObj],
+            stt: game.stt,
+            updated_at: new Date()
           }, '*').then(ent => {
             console.log(ent[0].gcode, ' entered in DB');
           });

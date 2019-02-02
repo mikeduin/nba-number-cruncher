@@ -4,9 +4,11 @@ const router = express.Router();
 const axios = require("axios");
 const knex = require("../db/knex");
 const schedule = require("node-schedule");
+const moment = require("moment");
 
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
+const dateFilters = require("../modules/dateFilters");
 const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
@@ -43,7 +45,10 @@ router.get("/api/getNetRatings", function(req, res, next) {
     res.send(netRatings[0]);
   });
 
-  dbBuilders.buildSchedule();
+  let nbaNow = moment().format('YYYYMMDD');
+  console.log(dateFilters.fetchGmWk(nbaNow));
+
+  // dbBuilders.buildSchedule();
 
 });
 

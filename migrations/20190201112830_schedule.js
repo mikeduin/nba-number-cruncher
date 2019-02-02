@@ -12,6 +12,7 @@ exports.up = function(knex, Promise) {
     t.specificType('h', 'jsonb[]');
     t.specificType('v', 'jsonb[]');
     t.string('stt');
+    t.timestamp('updated_at');
   });
 };
 
