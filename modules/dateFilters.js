@@ -1,7 +1,31 @@
 const moment = require('moment');
-let nbaDate = moment().format('YYYYMMDD');
+// let nbaDate = moment().format('YYYYMMDD');
 
 module.exports = {
+  fetchScoreMonth: function () {
+    // This fn is an array shortcut to cut through the league schedule JSON
+    let month = moment().format('M');
+    switch (true) {
+      case (month == 9):
+        return 0;
+      case (month == 10):
+        return 1;
+      case (month == 11):
+        return 2;
+      case (month == 12):
+        return 3;
+      case (month == 1):
+        return 4;
+      case (month == 2):
+        return 5;
+      case (month == 3):
+        return 6;
+      case (month == 4):
+        return 7;
+      default:
+        return 8;
+    }
+  },
   fetchGmWk: function (date) {
     switch (true) {
       case (date > 20181015 && date < 20181022):

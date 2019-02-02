@@ -46,7 +46,8 @@ router.get("/api/getNetRatings", function(req, res, next) {
   });
 
   let nbaNow = moment().format('YYYYMMDD');
-  console.log(dateFilters.fetchGmWk(nbaNow));
+  // console.log(dateFilters.fetchGmWk(nbaNow));
+  dbBuilders.updateSchedule();
 
   // dbBuilders.buildSchedule();
 
