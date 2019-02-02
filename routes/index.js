@@ -9,7 +9,7 @@ const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
 const updateTeamStats = require("../modules/updateTeamStats");
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
-const leagueSchedule = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
+
 
 const updateRawDataTables = schedule.scheduleJob("* 3 * * *", function() {
   updateTeamStats.updateAllFullTeamBuilds();
@@ -39,18 +39,11 @@ router.get("/", function(req, res, next) {
 });
 
 router.get("/api/getNetRatings", function(req, res, next) {
-  console.log('net ratings route entered');
   knex("team_net_ratings").then(netRatings => {
     res.send(netRatings[0]);
   });
 
-  axios.get(leagueSchedule).then(response => {
-    response.data.lscd.forEach(month => {
-      month.mscd.g.forEach(game => {
-        console.log(game.gcode);
-      })
-    })
-  })
+  dbBuilders.buildSchedule();
 
 });
 

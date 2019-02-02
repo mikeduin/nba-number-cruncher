@@ -1,4 +1,6 @@
 const knex = require('../db/knex');
+const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
+const axios = require("axios");
 
 module.exports = {
   fetchAdvancedParams: function (games) {
@@ -47,6 +49,45 @@ module.exports = {
       Month: 0,
       StarterBench: lineup
     }
+  },
+  buildSchedule: function () {
+    axios.get(leagueScheduleUrl).then(response => {
+      response.data.lscd.forEach(month => {
+        month.mscd.g.forEach(game => {
+          let hObj = {
+            tid: game.h.tid,
+            re: game.h.re,
+            ta: game.h.ta,
+            tn: game.h.tn,
+            tc: game.h.tc,
+            s: game.h.s
+          };
+          let vObj = {
+            tid: game.v.tid,
+            re: game.v.re,
+            ta: game.v.ta,
+            tn: game.v.tn,
+            tc: game.v.tc,
+            s: game.v.s
+          };
+          knex('schedule').insert({
+            gid: game.gid,
+            gcode: game.gcode,
+            gdte: game.gdte,
+            an: game.an,
+            ac: game.ac,
+            as: game.as,
+            etm: game.etm,
+            gweek: game.gweek,
+            h: [hObj],
+            v: [vObj],
+            stt: game.stt
+          }, '*').then(ent => {
+            console.log(ent[0].gcode, ' entered in DB');
+          });
+        })
+      })
+    })
   },
   buildTeamDb: function (db, arrayData) {
     arrayData.forEach(team => {
