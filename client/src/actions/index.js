@@ -17,13 +17,12 @@ export const fetchNetRatings = () => async dispatch => {
   // })
 }
 
-export const fetchGmWk = () => async dispatch => {
+export const fetchWeek = () => async dispatch => {
   let digitDate = moment().format('YYYYMMDD');
-  let response = await fetch(`/api/fetchGmWk/${digitDate}`);
+  let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
+  console.log('data sent to action is ', data);
 
-  console.log('game week is ', data);
-
-  dispatch({ type: 'FETCH_GM_WK', payload: data})
+  dispatch({ type: 'FETCH_WEEK', payload: data})
 }

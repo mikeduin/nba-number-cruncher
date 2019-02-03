@@ -1,11 +1,11 @@
 import React from 'react';
 
 import { connect } from 'react-redux';
-import { fetchGmWk } from '../actions';
+import { fetchWeek } from '../actions';
 
 class GameSheets extends React.Component {
   componentDidMount () {
-    this.props.fetchGmWk();
+    this.props.fetchWeek();
   }
 
   render () {
@@ -42,7 +42,7 @@ class GameSheets extends React.Component {
 };
 
 const mapStateToProps = state => {
-  return {gmWk: state.gmWk };
+  return {week: state.week };
 }
 
-export default connect(mapStateToProps, {fetchGmWk}) (GameSheets);
+export default connect(mapStateToProps, {fetchWeek}) (GameSheets);

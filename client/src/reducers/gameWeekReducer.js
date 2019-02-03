@@ -1,6 +1,6 @@
 export default (state = [], action) => {
   switch (action.type) {
-    case 'FETCH_GM_WK':
+    case 'FETCH_WEEK':
       return action.payload;
     default:
       return state;

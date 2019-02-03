@@ -4,5 +4,5 @@ import gameWeekReducer from './gameWeekReducer';
 
 export default combineReducers ({
   netRatings: netRatingsReducer,
-  gmWk: gameWeekReducer
+  week: gameWeekReducer
 })
