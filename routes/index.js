@@ -25,7 +25,6 @@ const mapRawData = schedule.scheduleJob("54 3 * * *", function() {
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
-
   // axios.get(advancedTeamStats, {
   //     params: dbBuilders.fetchAdvancedParams(15, 4)
   //   })
@@ -36,18 +35,46 @@ router.get("/", function(req, res, next) {
   //   .catch((err)=>{
   //     console.log(err);
   //   });
+  let digitSched = [
+    [null],
+    [20181016, 20181017, 20181018, 20181019, 20181020, 20181021]
+  ];
+  let day = moment().set('year', 2018).set('month', 9).set('date', 21);
+  let week = [];
+
+  const dayAdder = function () {
+    while (moment(day).isBefore('2019-04-11')){
+      day = moment(day).add(1, 'days');
+      let digitDay = moment(day).format('YYYYMMDD');
+      if (week.length < 7) {
+        // console.log(week);
+        week.push(parseInt(digitDay));
+      } else {
+        digitSched.push(week);
+        // console.log(digitSched);
+        week = [];
+        week.push(parseInt(digitDay));
+      }
+    };
+
+    console.log(digitSched);
+  };
+
+  dayAdder();
 
   res.send({ Hi: "there" });
 });
 
 router.get("/api/getNetRatings", function(req, res, next) {
-
   knex("team_net_ratings").then(netRatings => {
     res.send(netRatings);
   });
 
-  let nbaNow = moment().format('YYYYMMDD');
+  // let nbaNow = moment().format('YYYYMMDD');
 });
 
+router.get("/api/todaysGames", function(req, res, next) {
+  knex("schedule");
+});
 
 module.exports = router;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
-    <div className="ui secondary pointing menu">
+    <div className="ui pointing menu">
       <Link to="/netratings" className="item">
         Net Ratings
       </Link>
