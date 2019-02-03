@@ -53,8 +53,6 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
   let week = dateFilters.fetchGmWk(req.params.date);
   let weekArray = dateFilters.fetchGmWkArrays(week);
   let weekGames = [];
-  // console.log("game week is ", week);
-  // console.log("weekArray is ", weekArray);
   knex("schedule")
     .where({ gweek: week })
     .orderBy('etm')
@@ -67,7 +65,5 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
       })
     });
 });
-
-router.get("/api/fetchWkGames/:week", (req, res, next) => {});
 
 module.exports = router;
