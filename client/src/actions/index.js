@@ -1,12 +1,13 @@
-import _ from 'lodash';
-import axios from 'axios';
+// import _ from 'lodash';
+// import axios from 'axios';
+import moment from 'moment';
 
 export const fetchNetRatings = () => async dispatch => {
   // const response = await axios.get('/api/getNetRatings');
   // const response = await fetch('/api/getNetRatings');
   // console.log(response);
-  const response = await fetch('/api/getNetRatings');
-  const data = await response.json();
+  let response = await fetch('/api/getNetRatings');
+  let data = await response.json();
 
   dispatch({ type: 'FETCH_NET_RATINGS', payload: data})
 
@@ -14,4 +15,15 @@ export const fetchNetRatings = () => async dispatch => {
   // .then(res=>{
   //   console.log(res.data);
   // })
-};
+}
+
+export const fetchGmWk = () => async dispatch => {
+  let digitDate = moment().format('YYYYMMDD');
+  let response = await fetch(`/api/fetchGmWk/${digitDate}`);
+  let data = await response.json();
+
+
+  console.log('game week is ', data);
+
+  dispatch({ type: 'FETCH_GM_WK', payload: data})
+}

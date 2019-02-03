@@ -1,6 +1,12 @@
 import React from 'react';
 
+import { connect } from 'react-redux';
+import { fetchGmWk } from '../actions';
+
 class GameSheets extends React.Component {
+  componentDidMount () {
+    this.props.fetchGmWk();
+  }
 
   render () {
     return (
@@ -35,4 +41,8 @@ class GameSheets extends React.Component {
   }
 };
 
-export default GameSheets;
+const mapStateToProps = state => {
+  return {gmWk: state.gmWk };
+}
+
+export default connect(mapStateToProps, {fetchGmWk}) (GameSheets);

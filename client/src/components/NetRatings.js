@@ -7,7 +7,6 @@ import { fetchNetRatings } from "../actions";
 
 class NetRatings extends React.Component {
   componentDidMount() {
-    console.log("net ratings component has mounted");
     this.props.fetchNetRatings();
   }
 
