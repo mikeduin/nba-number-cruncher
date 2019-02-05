@@ -24,8 +24,8 @@ class GameSheets extends React.Component {
     return dashedDates.map(date => {
       return (
         <div className="column">
-          <div className="ui segment">
-            <div className="ui statistic">
+          <div className={`ui segment ${date === this.props.week.today ? 'inverted' : null}`}>
+            <div className={`ui statistic ${date === this.props.week.today ? 'blue' : null}`}>
               <div class="label">
                 {moment(date).format('ddd')}
               </div>
@@ -34,6 +34,45 @@ class GameSheets extends React.Component {
               </div>
               <div class="label">
                 {countedDates[date]} Games
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    })
+  }
+
+  renderGameGrid () {
+    let todayGames = this.props.week.weekGames.filter(game => {
+      return game.gdte === this.props.week.today;
+    })
+
+    return todayGames.map(game => {
+      return (
+        <div className="column">
+          <div className="ui special cards">
+            <div className="card">
+              <div className="blurring dimmable image">
+                <div className="ui dimmer">
+                  <div className="content">
+                    <div className="center">
+                      <div class="ui inverted button"> View Analysis </div>
+                    </div>
+                  </div>
+                </div>
+                <img src="" />
+              </div>
+              <div className="content">
+                <div className="header"> {game.v[0].tc} {game.v[0].tn} @ {game.h[0].tc} {game.h[0].tn} </div>
+                <div className="meta">
+                  <span className="date"> {moment(game.etm).format('h:mm A')} EST </span>
+                </div>
+              </div>
+              <div className="extra content">
+                <div>
+                  <i class="users icon"></i>
+                  More data here
+                </div>
               </div>
             </div>
           </div>
@@ -53,6 +92,9 @@ class GameSheets extends React.Component {
             <div className={`seven column row`}>
               {this.renderWeekGrid()}
             </div>
+          </div>
+          <div className="ui four column grid">
+            {this.renderGameGrid()}
           </div>
         </div>
       );

@@ -14,8 +14,11 @@ export const fetchNetRatings = () => async dispatch => {
 
 export const fetchWeek = () => async dispatch => {
   let digitDate = moment().format('YYYYMMDD');
+  let today = moment().format('YYYY-MM-DD');
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
-  dispatch({ type: 'FETCH_WEEK', payload: data})
+  let updated = {...data, today};
+
+  dispatch({ type: 'FETCH_WEEK', payload: updated})
 }
