@@ -25,7 +25,8 @@ export const fetchGame = ({gid}) => async dispatch => {
   let data = await response.json();
   let conv = {
     info: data.info,
-    netRatings: [data.homeNetRtg, data.visNetRtg]
+    netRatings: [data.homeNetRtg, data.visNetRtg],
+    pace: [data.homePace, data.visPace]
   }
 
   dispatch({ type: 'FETCH_GAME', payload: conv});

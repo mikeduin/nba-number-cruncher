@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactTable from 'react-table';
 
-const ByQuarter = props => {
+const PaceByQuarter = props => {
   return (
     <ReactTable
-      data={props.netRatings}
+      data={props.pace}
       defaultPageSize={2}
       showPaginationBottom={false}
       columns={[
         {
-          Header: 'Net_Rtg by Q',
+          Header: 'Pace by Q',
           accessor: 'team_name',
           width: 150
         },
@@ -118,4 +118,4 @@ const ByQuarter = props => {
   )
 }
 
-export default ByQuarter;
+export default PaceByQuarter;

@@ -16,7 +16,19 @@ let now = Date.now();
 
 const cheerio = require('cheerio');
 const sportsbook = {
-  full: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/200.sbk?&_='+now
+  full: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/200.sbk?&_='+now,
+  firstQ: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/3005.sbk?&_='+now,
+  firstH: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/3003.sbk?&_='+now,
+}
+
+const bol = {
+  full: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=0&wt=&tsr=',
+  firstH: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=1&wt=&tsr=',
+  secondH: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=2&wt=s&tsr=',
+  firstQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=3&wt=s&tsr=',
+  secondQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=4&wt=&tsr=',
+  thirdQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=5&wt=s&tsr=',
+  fourthQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=6&wt=&tsr='
 }
 
 /* GET home page. */
@@ -32,31 +44,14 @@ router.get("/", (req, res, next) => {
   //     console.log(err);
   //   });
 
-  // axios.get('https://dev.to/aurelkurtula')
-  //   .then(res => {
-  //     if (res.status === 200) {
-  //       const html = res.data;
-  //       const $ = cheerio.load(html);
-  //       $('.single-article').each((i, elem) => {
-  //         console.log($(this));
-  //       })
-  //     } else {
-  //       console.log('fail no 200');
-  //     }
-  //
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //   });
-
   axios.get(sportsbook.full)
     .then((response) => {
         if(response.status === 200) {
             const html = response.data;
             const $ = cheerio.load(html);
-            let line = [];
+            let lines = [];
             $('.eventbox').each(function(i, elem) {
-                line[i] = {
+                lines[i] = {
                     id: $(this).attr('id'),
                     time: $(this).find('.hour').text(),
                     awayTeam: $(this).find('.team-title').eq(0).text(),
@@ -66,17 +61,44 @@ router.get("/", (req, res, next) => {
                     homeTeam: $(this).find('.team-title').eq(1).text(),
                     under: $(this).find('.money').eq(1).find('.market').text(),
                     homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
-                    homeMoney: $(this).find('.total').eq(1).find('.market').text()                  
-
+                    homeMoney: $(this).find('.total').eq(1).find('.market').text()
                 }
             });
-            console.log(line);
+            // console.log(lines);
             // const devtoListTrimmed = devtoList.filter(n => n != undefined )
             // fs.writeFile('devtoList.json',
             //               JSON.stringify(devtoListTrimmed, null, 4),
             //               (err)=> console.log('File successfully written!'))
-    }
+        }
     }, (error) => console.log(err) );
+
+    axios.get(sportsbook.firstH)
+      .then((response) => {
+          if(response.status === 200) {
+              const html = response.data;
+              const $ = cheerio.load(html);
+              let lines = [];
+              $('.eventbox').each(function(i, elem) {
+                  lines[i] = {
+                      id: $(this).attr('id'),
+                      time: $(this).find('.hour').text(),
+                      awayTeam: $(this).find('.team-title').eq(0).text(),
+                      over: $(this).find('.money').eq(0).find('.market').text(),
+                      awaySpread: $(this).find('.spread').eq(0).find('.market').text(),
+                      awayMoney: $(this).find('.total').eq(0).find('.market').text(),
+                      homeTeam: $(this).find('.team-title').eq(1).text(),
+                      under: $(this).find('.money').eq(1).find('.market').text(),
+                      homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
+                      homeMoney: $(this).find('.total').eq(1).find('.market').text()
+                  }
+              });
+              console.log(lines);
+              // const devtoListTrimmed = devtoList.filter(n => n != undefined )
+              // fs.writeFile('devtoList.json',
+              //               JSON.stringify(devtoListTrimmed, null, 4),
+              //               (err)=> console.log('File successfully written!'))
+          }
+      }, (error) => console.log(err) );
 
   res.send({ Hi: "there" });
 });
@@ -114,11 +136,17 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 
     knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
       knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
-        res.send({
-          info: game[0],
-          homeNetRtg: homeNetRtg[0],
-          visNetRtg: visNetRtg[0]
-        });
+        knex("team_pace").where({team_id: home}).then(homePace => {
+          knex("team_pace").where({team_id: vis}).then(visPace => {
+            res.send({
+              info: game[0],
+              homeNetRtg: homeNetRtg[0],
+              visNetRtg: visNetRtg[0],
+              homePace: homePace[0],
+              visPace: visPace[0]
+            });
+          })
+        })
       })
     })
   })

@@ -5,8 +5,9 @@ import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup } from 'victory';
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
 
-import ByQuarter from './netRatingGrids/ByQuarter';
+import NetRtgByQuarter from './netRatingGrids/NetRtgByQuarter';
 import ByRotation from './netRatingGrids/ByRotation';
+import PaceByQuarter from './paceGrids/PaceByQuarter';
 
 
 class GameSheet extends React.Component {
@@ -96,9 +97,10 @@ class GameSheet extends React.Component {
         </h2>
         <ByRotation netRatings={this.props.game.netRatings} />
         <br />
-        <ByQuarter netRatings={this.props.game.netRatings} />
-
-
+        <NetRtgByQuarter netRatings={this.props.game.netRatings} />
+        <br />
+        <PaceByQuarter pace={this.props.game.pace} />
+        <br />
         </div>
       )
     }
