@@ -1,11 +1,12 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import moment from "moment";
 import _ from 'lodash';
 
 import { connect } from "react-redux";
 import { fetchWeek } from "../actions";
 
-class GameSheets extends React.Component {
+class Schedule extends React.Component {
   componentDidMount() {
     this.props.fetchWeek();
   }
@@ -23,16 +24,16 @@ class GameSheets extends React.Component {
 
     return dashedDates.map(date => {
       return (
-        <div className="column">
+        <div className="column" key={date}>
           <div className={`ui segment ${date === this.props.week.today ? 'inverted' : null}`}>
             <div className={`ui statistic ${date === this.props.week.today ? 'blue' : null}`}>
-              <div class="label">
+              <div className="label">
                 {moment(date).format('ddd')}
               </div>
-              <div class="value">
+              <div className="value">
                 {moment(date).format('M/D')}
               </div>
-              <div class="label">
+              <div className="label">
                 {countedDates[date]} Games
               </div>
             </div>
@@ -49,28 +50,30 @@ class GameSheets extends React.Component {
 
     return todayGames.map(game => {
       return (
-        <div className="column">
+        <div className="column" key={game.gid}>
           <div className="ui special cards">
             <div className="card">
               <div className="blurring dimmable image">
                 <div className="ui dimmer">
                   <div className="content">
                     <div className="center">
-                      <div class="ui inverted button"> View Analysis </div>
+                      <div className="ui inverted button"> View Analysis </div>
                     </div>
                   </div>
                 </div>
-                <img src="" />
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/21/Portland_Trail_Blazers_logo.svg/1200px-Portland_Trail_Blazers_logo.svg.png" />
               </div>
               <div className="content">
-                <div className="header"> {game.v[0].tc} {game.v[0].tn} @ {game.h[0].tc} {game.h[0].tn} </div>
+                <Link className="header" to={`/gamesheet/${game.gid}`}>
+                  {game.v[0].tc} {game.v[0].tn} @ {game.h[0].tc} {game.h[0].tn}
+                </Link>
                 <div className="meta">
                   <span className="date"> {moment(game.etm).format('h:mm A')} EST </span>
                 </div>
               </div>
               <div className="extra content">
                 <div>
-                  <i class="users icon"></i>
+                  <i className="users icon"></i>
                   More data here
                 </div>
               </div>
@@ -112,4 +115,4 @@ const mapStateToProps = state => {
 export default connect(
   mapStateToProps,
   { fetchWeek }
-)(GameSheets);
+)(Schedule);

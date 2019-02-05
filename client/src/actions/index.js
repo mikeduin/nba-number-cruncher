@@ -22,3 +22,7 @@ export const fetchWeek = () => async dispatch => {
 
   dispatch({ type: 'FETCH_WEEK', payload: updated})
 }
+
+export const fetchGameData = () => async dispatch => {
+  
+}

@@ -7,8 +7,8 @@ const Header = () => {
       <Link to="/netratings" className="item">
         Net Ratings
       </Link>
-      <Link to="/gamesheets" className="item">
-        Game Sheets
+      <Link to="/schedule" className="item">
+        Schedule
       </Link>
     </div>
   )

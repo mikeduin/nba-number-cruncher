@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
 import NetRatings from './NetRatings';
-import GameSheets from './GameSheets';
+import Schedule from './Schedule';
+import GameSheet from './GameSheet';
 import Header from './Header';
 
 const App = () => {
@@ -10,8 +11,9 @@ const App = () => {
       <BrowserRouter>
         <div>
           <Header />
-          <Route path='/gamesheets' exact component={GameSheets} />
+          <Route path='/schedule' exact component={Schedule} />
           <Route path='/netratings' exact component={NetRatings} />
+          <Route path='/gamesheet/:gid' component={GameSheet} />
         </div>
       </BrowserRouter>
     </div>
