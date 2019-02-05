@@ -61,7 +61,11 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 
     knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
       knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
-        console.log('for ', game, ' homeNetRtg is ', homeNetRtg, ' and visNetRtg is ', visNetRtg);
+        res.send({
+          info: game[0],
+          homeNetRtg: homeNetRtg[0],
+          visNetRtg: visNetRtg[0]
+        });
       })
     })
   })

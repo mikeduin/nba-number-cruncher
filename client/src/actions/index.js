@@ -23,7 +23,10 @@ export const fetchWeek = () => async dispatch => {
 export const fetchGame = ({gid}) => async dispatch => {
   let response = await fetch(`/api/fetchGame/${gid}`);
   let data = await response.json();
+  let conv = {
+    info: data.info,
+    teams: [data.homeNetRtg, data.visNetRtg]
+  }
 
-  dispatch({ type: 'FETCH_GAME', payload: data});
-
+  dispatch({ type: 'FETCH_GAME', payload: conv});
 }
