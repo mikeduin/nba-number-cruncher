@@ -3,13 +3,10 @@
 import moment from 'moment';
 
 export const fetchNetRatings = () => async dispatch => {
-  // const response = await axios.get('/api/getNetRatings');
-  // const response = await fetch('/api/getNetRatings');
-  // console.log(response);
   let response = await fetch('/api/getNetRatings');
   let data = await response.json();
 
-  dispatch({ type: 'FETCH_NET_RATINGS', payload: data})
+  dispatch({ type: 'FETCH_NET_RATINGS', payload: data});
 }
 
 export const fetchWeek = () => async dispatch => {
@@ -20,9 +17,13 @@ export const fetchWeek = () => async dispatch => {
 
   let updated = {...data, today};
 
-  dispatch({ type: 'FETCH_WEEK', payload: updated})
+  dispatch({ type: 'FETCH_WEEK', payload: updated});
 }
 
-export const fetchGameData = () => async dispatch => {
-  
+export const fetchGame = ({gid}) => async dispatch => {
+  let response = await fetch(`/api/fetchGame/${gid}`);
+  let data = await response.json();
+
+  dispatch({ type: 'FETCH_GAME', payload: data});
+
 }

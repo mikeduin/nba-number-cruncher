@@ -53,6 +53,20 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
     });
 });
 
+router.get("/api/fetchGame/:gid", (req, res, next) => {
+  let gid = req.params.gid;
+  knex("schedule").where({gid: gid}).then(game => {
+    let home = game[0].h[0].tid;
+    let vis = game[0].v[0].tid;
+
+    knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
+      knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
+        console.log('for ', game, ' homeNetRtg is ', homeNetRtg, ' and visNetRtg is ', visNetRtg);
+      })
+    })
+  })
+})
+
 const updateFullTeamBuilds = schedule.scheduleJob("0 4 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })

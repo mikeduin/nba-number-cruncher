@@ -1,8 +1,11 @@
 import React from 'react';
 
+import { connect } from 'react-redux';
+import { fetchGame } from '../actions';
+
 class GameSheet extends React.Component {
   componentDidMount () {
-    console.log(this.props.match.params);
+    this.props.fetchGame(this.props.match.params);
   }
 
   render () {
@@ -13,4 +16,10 @@ class GameSheet extends React.Component {
 
 }
 
-export default GameSheet;
+const mapStateToProps = state => {
+  return {
+    game: state.game
+  }
+}
+
+export default connect(mapStateToProps, {fetchGame}) (GameSheet);
