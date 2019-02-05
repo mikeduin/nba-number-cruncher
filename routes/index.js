@@ -12,6 +12,13 @@ const dateFilters = require("../modules/dateFilters");
 
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
+let now = Date.now();
+
+const cheerio = require('cheerio');
+const sportsbook = {
+  full: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/200.sbk?&_='+now
+}
+
 /* GET home page. */
 router.get("/", (req, res, next) => {
   // axios.get(advancedTeamStats, {
@@ -24,6 +31,52 @@ router.get("/", (req, res, next) => {
   //   .catch((err)=>{
   //     console.log(err);
   //   });
+
+  // axios.get('https://dev.to/aurelkurtula')
+  //   .then(res => {
+  //     if (res.status === 200) {
+  //       const html = res.data;
+  //       const $ = cheerio.load(html);
+  //       $('.single-article').each((i, elem) => {
+  //         console.log($(this));
+  //       })
+  //     } else {
+  //       console.log('fail no 200');
+  //     }
+  //
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
+
+  axios.get(sportsbook.full)
+    .then((response) => {
+        if(response.status === 200) {
+            const html = response.data;
+            const $ = cheerio.load(html);
+            let line = [];
+            $('.eventbox').each(function(i, elem) {
+                line[i] = {
+                    id: $(this).attr('id'),
+                    time: $(this).find('.hour').text(),
+                    awayTeam: $(this).find('.team-title').eq(0).text(),
+                    over: $(this).find('.money').eq(0).find('.market').text(),
+                    awaySpread: $(this).find('.spread').eq(0).find('.market').text(),
+                    awayMoney: $(this).find('.total').eq(0).find('.market').text(),
+                    homeTeam: $(this).find('.team-title').eq(1).text(),
+                    under: $(this).find('.money').eq(1).find('.market').text(),
+                    homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
+                    homeMoney: $(this).find('.total').eq(1).find('.market').text()                  
+
+                }
+            });
+            console.log(line);
+            // const devtoListTrimmed = devtoList.filter(n => n != undefined )
+            // fs.writeFile('devtoList.json',
+            //               JSON.stringify(devtoListTrimmed, null, 4),
+            //               (err)=> console.log('File successfully written!'))
+    }
+    }, (error) => console.log(err) );
 
   res.send({ Hi: "there" });
 });
