@@ -5,23 +5,12 @@ const knex = require("../db/knex");
 const schedule = require("node-schedule");
 const moment = require("moment");
 
+const updateTeamStats = require("../modules/updateTeamStats");
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
 const dateFilters = require("../modules/dateFilters");
-const updateTeamStats = require("../modules/updateTeamStats");
+
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
-
-const updateRawDataTables = schedule.scheduleJob("29 3 * * *", () => {
-  updateTeamStats.updateAllFullTeamBuilds();
-  updateTeamStats.updateAllLineupBuilds();
-  dbBuilders.updateSchedule();
-  console.log("raw data tables + schedule updated at 3:29 AM");
-});
-
-const mapRawData = schedule.scheduleJob("54 3 * * *", () => {
-  dbMappers.mapNetRatings();
-  console.log("raw data mapped at 3:54 AM");
-});
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
@@ -52,18 +41,52 @@ router.get("/api/todaysGames", (req, res, next) => {
 router.get("/api/fetchWeek/:date", (req, res, next) => {
   let week = dateFilters.fetchGmWk(req.params.date);
   let weekArray = dateFilters.fetchGmWkArrays(week);
-  let weekGames = [];
   knex("schedule")
     .where({ gweek: week })
     .orderBy('etm')
     .then(games => {
-      weekGames = games;
       res.send({
         week: week,
         weekArray: weekArray,
-        weekGames: weekGames
+        weekGames: games
       })
     });
 });
+
+const updateFullTeamBuilds = schedule.scheduleJob("0 4 * * *", () => {
+  updateTeamStats.updateFullTeamBuilds();
+})
+
+const updateStarterBuilds = schedule.scheduleJob("4 4 * * *", () => {
+  updateTeamStats.updateStarterBuilds();
+})
+
+const updateBenchBuilds = schedule.scheduleJob("8 4 * * *", () => {
+  updateTeamStats.updateBenchBuilds();
+})
+
+const updateQ1Builds = schedule.scheduleJob("12 4 * * *", () => {
+  updateTeamStats.updateQ1Builds();
+})
+
+const updateQ2Builds = schedule.scheduleJob("16 4 * * *", () => {
+  updateTeamStats.updateQ2Builds();
+})
+
+const updateQ3Builds = schedule.scheduleJob("20 4 * * *", () => {
+  updateTeamStats.updateQ3Builds();
+})
+
+const updateQ4Builds = schedule.scheduleJob("24 4 * * *", () => {
+  updateTeamStats.updateQ4Builds();
+})
+
+const updateSchedule = schedule.scheduleJob("28 4 * * *", () => {
+  dbBuilders.updateSchedule();
+})
+
+const mapRawData = schedule.scheduleJob("32 4 * * *", () => {
+  dbMappers.mapNetRatings();
+})
 
 module.exports = router;

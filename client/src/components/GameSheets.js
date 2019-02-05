@@ -1,5 +1,6 @@
 import React from "react";
-// import moment from "moment";
+import moment from "moment";
+import _ from 'lodash';
 
 import { connect } from "react-redux";
 import { fetchWeek } from "../actions";
@@ -9,17 +10,37 @@ class GameSheets extends React.Component {
     this.props.fetchWeek();
   }
 
-  // findLength () {
-  //   // return this.props.week.weekArray.length;
-  //
-  // }
+  renderWeekGrid () {
+    const dashedDates = this.props.week.weekArray.map(date => {
+      date = date.toString();
+      return date.slice(0,4)+'-'+date.slice(4,6)+'-'+date.slice(6,8);
+    });
 
-  // renderWeekGrid () {
-  //   // return this.props.week.weekArray.map(date => {
-  //   //
-  //   // })
-  //   // return this.props.week.
-  // }
+    const countedDates = this.props.week.weekGames.reduce((sums, game) => {
+      sums[game.gdte] = (sums[game.gdte] || 0) + 1;
+      return sums;
+    }, {})
+
+    return dashedDates.map(date => {
+      return (
+        <div className="column">
+          <div className="ui segment">
+            <div className="ui statistic">
+              <div class="label">
+                {moment(date).format('ddd')}
+              </div>
+              <div class="value">
+                {moment(date).format('M/D')}
+              </div>
+              <div class="label">
+                {countedDates[date]} Games
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    })
+  }
 
   render() {
     if (!this.props.week.weekArray) {
@@ -29,28 +50,8 @@ class GameSheets extends React.Component {
         <div>
           Week {this.props.week.week}
           <div className="ui grid">
-            <div className={`${this.props.week.weekArray.length} column row`}>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
-              <div className="column">
-                <div className="ui segment"> a </div>
-              </div>
+            <div className={`seven column row`}>
+              {this.renderWeekGrid()}
             </div>
           </div>
         </div>
