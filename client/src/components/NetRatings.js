@@ -14,7 +14,6 @@ class NetRatings extends React.Component {
     return (
       <div>
         {" "}
-        This is Net Ratings
         <ReactTable
           data={this.props.netRatings}
           defaultPageSize={30}

@@ -29,6 +29,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-table": "^6.9.0",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "victory": "^31.2.0"
   }
 }
