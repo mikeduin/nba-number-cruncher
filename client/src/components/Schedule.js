@@ -61,7 +61,7 @@ class Schedule extends React.Component {
                     </div>
                   </div>
                 </div>
-                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/21/Portland_Trail_Blazers_logo.svg/1200px-Portland_Trail_Blazers_logo.svg.png" />
+                <img src="https://cdn.vox-cdn.com/thumbor/CBq_sDJeOYFiuW2c_ZqklBzdz4A=/0x0:863x628/1400x1400/filters:focal(348x225:486x363):format(png)/cdn.vox-cdn.com/uploads/chorus_image/image/54143335/nick_young_logo.0.png" />
               </div>
               <div className="content">
                 <Link className="header" to={`/gamesheet/${game.gid}`}>

@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
 
 import ByQuarter from './netRatingGrids/ByQuarter';
+import ByRotation from './netRatingGrids/ByRotation';
 
 
 class GameSheet extends React.Component {
@@ -93,7 +94,10 @@ class GameSheet extends React.Component {
           <i className="circular users icon"></i>
           {game.info.v[0].tc} {game.info.v[0].tn} @ {game.info.h[0].tc} {game.info.h[0].tn}
         </h2>
+        <ByRotation netRatings={this.props.game.netRatings} />
+        <br />
         <ByQuarter netRatings={this.props.game.netRatings} />
+
 
         </div>
       )
