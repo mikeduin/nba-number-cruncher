@@ -14,7 +14,7 @@ class Schedule extends React.Component {
   renderWeekGrid () {
     const dashedDates = this.props.week.weekArray.map(date => {
       date = date.toString();
-      return date.slice(0,4)+'-'+date.slice(4,6)+'-'+date.slice(6,8);
+      return `${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`;
     });
 
     const countedDates = this.props.week.weekGames.reduce((sums, game) => {

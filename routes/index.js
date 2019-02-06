@@ -4,17 +4,18 @@ const axios = require("axios");
 const knex = require("../db/knex");
 const schedule = require("node-schedule");
 const moment = require("moment");
+const cheerio = require('cheerio');
 
 const updateTeamStats = require("../modules/updateTeamStats");
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
 const dateFilters = require("../modules/dateFilters");
+const teamLookup = require("../modules/teamLookup");
 
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
 let now = Date.now();
 
-const cheerio = require('cheerio');
 const sportsbook = {
   full: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/200.sbk?&_='+now,
   firstH: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/3003.sbk?&_='+now,
@@ -55,21 +56,47 @@ router.get("/", (req, res, next) => {
             const html = response.data;
             const $ = cheerio.load(html);
             let lines = [];
+            // must leave cheerio fn in old ES syntax
             $('.eventbox').each(function(i, elem) {
-                lines[i] = {
-                    id: $(this).attr('id'),
-                    time: $(this).find('.hour').text(),
-                    awayTeam: $(this).find('.team-title').eq(0).text(),
-                    over: $(this).find('.money').eq(0).find('.market').text(),
-                    awaySpread: $(this).find('.spread').eq(0).find('.market').text(),
-                    awayMoney: $(this).find('.total').eq(0).find('.market').text(),
-                    homeTeam: $(this).find('.team-title').eq(1).text(),
-                    under: $(this).find('.money').eq(1).find('.market').text(),
-                    homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
-                    homeMoney: $(this).find('.total').eq(1).find('.market').text()
-                }
+              lines[i] = {
+                id: $(this).attr('id'),
+                time: $(this).find('.hour').text(),
+                awayTeam: $(this).find('.team-title').eq(0).text(),
+                over: $(this).find('.money').eq(0).find('.market').text(),
+                awaySpread: $(this).find('.spread').eq(0).find('.market').text(),
+                awayMoney: $(this).find('.total').eq(0).find('.market').text(),
+                homeTeam: $(this).find('.team-title').eq(1).text(),
+                under: $(this).find('.money').eq(1).find('.market').text(),
+                homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
+                homeMoney: $(this).find('.total').eq(1).find('.market').text()
+              };
             });
+
             // console.log(lines);
+            lines.forEach(line => {
+              let year = line.id.slice(-2);
+              let date = line.id.slice(-6, -2);
+              let hSplit = line.homeTeam.split(' ');
+              let hAbb = teamLookup.findTeam(hSplit[hSplit.length-1]).a;
+              let aSplit = line.awayTeam.split(' ');
+              let aAbb = teamLookup.findTeam(aSplit[aSplit.length-1]).a;
+
+              let gcode = `20${year}${date}/${aAbb}${hAbb}`;
+              console.log(gcode);
+
+              knex('odds_sportsbook').where({sb_id: line.id}).then(res => {
+                if (!res[0]) {
+                  knex('odds_sportsbook').insert({
+                    sb_id: line.id,
+                    
+                  })
+                } else {
+                  console.log('found');
+                }
+              })
+            })
+
+
             // const devtoListTrimmed = devtoList.filter(n => n != undefined )
             // fs.writeFile('devtoList.json',
             //               JSON.stringify(devtoListTrimmed, null, 4),
@@ -97,7 +124,7 @@ router.get("/", (req, res, next) => {
                       homeMoney: $(this).find('.total').eq(1).find('.market').text()
                   }
               });
-              console.log(lines);
+              // console.log(lines);
               // const devtoListTrimmed = devtoList.filter(n => n != undefined )
               // fs.writeFile('devtoList.json',
               //               JSON.stringify(devtoListTrimmed, null, 4),
