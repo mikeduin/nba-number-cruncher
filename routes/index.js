@@ -34,28 +34,6 @@ router.get("/", (req, res, next) => {
 
   oddsLoaders.sportsbookFull();
 
-    axios.get(sportsbook.thirdQ)
-      .then((response) => {
-          if(response.status === 200) {
-              const html = response.data;
-              const $ = cheerio.load(html);
-              let lines = [];
-              $('.eventbox').each(function(i, elem) {
-                  lines[i] = {
-                      id: $(this).attr('id'),
-                      time: $(this).find('.hour').text(),
-                      awayTeam: $(this).find('.team-title').eq(0).text(),
-                      over: $(this).find('.money').eq(0).find('.market').text(),
-                      awaySpread: $(this).find('.spread').eq(0).find('.market').text(),
-                      awayMoney: $(this).find('.total').eq(0).find('.market').text(),
-                      homeTeam: $(this).find('.team-title').eq(1).text(),
-                      under: $(this).find('.money').eq(1).find('.market').text(),
-                      homeSpread: $(this).find('.spread').eq(1).find('.market').text(),
-                      homeMoney: $(this).find('.total').eq(1).find('.market').text()
-                  }
-              });
-          }
-      }, (error) => console.log(err) );
 
   res.send({ Hi: "there" });
 });

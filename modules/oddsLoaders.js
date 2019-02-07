@@ -74,7 +74,30 @@ module.exports = {
         }
       }, (error) => console.log(err) );
   },
-  sportsbookThird: () => {
+  sportsbookFirstQ: () => {
+    axios.get(sportsbook.firstQ).then(response => {
+      if (response.status === 200) {
+        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        lines.forEach(line => {
+          let parsed = webScrapeHelpers.sbLineParser(line);
+          knex('odds_sportsbook').where({sb_id: line.id}).update({
+            home_spread_1q: hspread,
+            home_spread_1q_juice: hJuice,
+            home_money_1q: hMoney,
+            away_spread_1q: aSpread,
+            away_spread_1q_juice: aJuice,
+            away_money_1q: aMoney,
+            total_1q: total,
+            total_1q_over_juice: overJuice,
+            total_1q_under_juice: underJuice
+          }, '*').then(game => {
+            console.log(game[0].gcode, ' updated for 3Q');
+          })
+        })
+      }
+    })
+  },
+  sportsbookThirdQ: () => {
     axios.get(sportsbook.thirdQ).then(response => {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
