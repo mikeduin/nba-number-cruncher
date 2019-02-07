@@ -22,6 +22,7 @@ module.exports = {
                 knex('odds_sportsbook').insert({
                   sb_id: line.id,
                   gcode: parsed.gcode,
+                  gdte: parsed.gdte,
                   home_team: line.homeTeam,
                   home_id: parsed.home_id,
                   home_spread_full: parsed.hSpread,
