@@ -4,29 +4,11 @@ const cheerio = require('cheerio');
 
 const teamLookup = require("../modules/teamLookup");
 const webScrapeHelpers = require("../modules/webScrapeHelpers");
-
-const sportsbook = {
-  full: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/200.sbk?&_='+now,
-  firstH: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/3003.sbk?&_='+now,
-  secondH: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/nba-game-lines-2nd-half-lines.sbk?fromMenu=true&_='+now,
-  firstQ: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/getevents/3005.sbk?&_='+now,
-  thirdQ: 'https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/nba-game-lines-3rd-quarter-lines.sbk?fromMenu=true&_='+now,
-  live: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/nba-live-betting-all-nba-live.sbk?fromMenu=true&_='+now
-}
-const bol = {
-  full: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=0&wt=&tsr=',
-  firstH: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=1&wt=&tsr=',
-  secondH: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=2&wt=s&tsr=',
-  firstQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=3&wt=s&tsr=',
-  secondQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=4&wt=&tsr=',
-  thirdQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=5&wt=s&tsr=',
-  fourthQ: 'https://mobile.betonline.ag/sports/offerings?s=Basketball&l=NBA&p=6&wt=&tsr='
-}
-
+const apiRefs = require('../modules/apiRefs');
 
 module.exports = {
   sportsbookFull: () => {
-    axios.get(sportsbook.full)
+    axios.get(apiRefs.sportsbook().full)
       .then(response => {
         if(response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
@@ -74,8 +56,54 @@ module.exports = {
         }
       }, (error) => console.log(err) );
   },
+  sportsbookFirstH: () => {
+    axios.get(apiRefs.sportsbook().firstH).then(response => {
+      if (response.status === 200) {
+        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        lines.forEach(line => {
+          let parsed = webScrapeHelpers.sbLineParser(line);
+          knex('odds_sportsbook').where({sb_id: line.id}).update({
+            home_spread_1h: hspread,
+            home_spread_1h_juice: hJuice,
+            home_money_1h: hMoney,
+            away_spread_1h: aSpread,
+            away_spread_1h_juice: aJuice,
+            away_money_1h: aMoney,
+            total_1h: total,
+            total_1h_over_juice: overJuice,
+            total_1h_under_juice: underJuice
+          }, '*').then(game => {
+            console.log(game[0].gcode, ' updated for 1H');
+          })
+        })
+      }
+    })
+  },
+  sportsbookSecondH: () => {
+    axios.get(apiRefs.sportsbook().secondH).then(response => {
+      if (response.status === 200) {
+        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        lines.forEach(line => {
+          let parsed = webScrapeHelpers.sbLineParser(line);
+          knex('odds_sportsbook').where({sb_id: line.id}).update({
+            home_spread_2h: hspread,
+            home_spread_2h_juice: hJuice,
+            home_money_2h: hMoney,
+            away_spread_2h: aSpread,
+            away_spread_2h_juice: aJuice,
+            away_money_2h: aMoney,
+            total_2h: total,
+            total_2h_over_juice: overJuice,
+            total_2h_under_juice: underJuice
+          }, '*').then(game => {
+            console.log(game[0].gcode, ' updated for 2H');
+          })
+        })
+      }
+    })
+  },
   sportsbookFirstQ: () => {
-    axios.get(sportsbook.firstQ).then(response => {
+    axios.get(apiRefs.sportsbook().firstQ).then(response => {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
@@ -91,14 +119,14 @@ module.exports = {
             total_1q_over_juice: overJuice,
             total_1q_under_juice: underJuice
           }, '*').then(game => {
-            console.log(game[0].gcode, ' updated for 3Q');
+            console.log(game[0].gcode, ' updated for 1Q');
           })
         })
       }
     })
   },
   sportsbookThirdQ: () => {
-    axios.get(sportsbook.thirdQ).then(response => {
+    axios.get(apiRefs.sportsbook().thirdQ).then(response => {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
