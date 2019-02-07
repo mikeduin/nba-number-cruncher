@@ -1,3 +1,5 @@
+let now = Date.now();
+
 module.exports = {
   sportsbook: () => {
     return {

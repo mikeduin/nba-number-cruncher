@@ -15,7 +15,6 @@ const oddsLoaders = require("../modules/oddsLoaders");
 
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
-let now = Date.now();
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
@@ -31,7 +30,6 @@ router.get("/", (req, res, next) => {
   //   .catch((err)=>{
   //     console.log(err);
   //   });
-
   oddsLoaders.sportsbookFull();
 
 
@@ -87,43 +85,43 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   })
 })
 
-const updateFullTeamBuilds = schedule.scheduleJob("49 13 * * *", () => {
+const updateFullTeamBuilds = schedule.scheduleJob("10 12 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })
 
-const updateStarterBuilds = schedule.scheduleJob("51 13 * * *", () => {
+const updateStarterBuilds = schedule.scheduleJob("11 12 * * *", () => {
   updateTeamStats.updateStarterBuilds();
 })
 
-const updateBenchBuilds = schedule.scheduleJob("53 13 * * *", () => {
+const updateBenchBuilds = schedule.scheduleJob("12 12 * * *", () => {
   updateTeamStats.updateBenchBuilds();
 })
 
-const updateQ1Builds = schedule.scheduleJob("26 13 * * *", () => {
+const updateQ1Builds = schedule.scheduleJob("13 12 * * *", () => {
   updateTeamStats.updateQ1Builds();
 })
 
-const updateQ2Builds = schedule.scheduleJob("28 13 * * *", () => {
+const updateQ2Builds = schedule.scheduleJob("14 12 * * *", () => {
   updateTeamStats.updateQ2Builds();
 })
 
-const updateQ3Builds = schedule.scheduleJob("30 13 * * *", () => {
+const updateQ3Builds = schedule.scheduleJob("15 12 * * *", () => {
   updateTeamStats.updateQ3Builds();
 })
 
-const updateQ4Builds = schedule.scheduleJob("32 13 * * *", () => {
+const updateQ4Builds = schedule.scheduleJob("16 12 * * *", () => {
   updateTeamStats.updateQ4Builds();
 })
 
-const updateSchedule = schedule.scheduleJob("34 13 * * *", () => {
+const updateSchedule = schedule.scheduleJob("17 12 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapNetRatings = schedule.scheduleJob("13 14 * * *", () => {
+const mapNetRatings = schedule.scheduleJob("18 12 * * *", () => {
   dbMappers.mapNetRatings();
 })
 
-const mapPace = schedule.scheduleJob("14 14 * * *", () => {
+const mapPace = schedule.scheduleJob("19 12 * * *", () => {
   dbMappers.mapPace();
 })
 

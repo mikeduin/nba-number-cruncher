@@ -1,5 +1,6 @@
 const cheerio = require('cheerio');
 
+const teamLookup = require("../modules/teamLookup");
 const nullChecker = (value) => {
   if (value === '-') {
     return null;
@@ -34,25 +35,25 @@ module.exports = {
     parsed.year = nullChecker(line.id.slice(-2));
     parsed.date = nullChecker(line.id.slice(-6, -2));
     parsed.hSplit = nullChecker(line.homeTeam.split(' '));
-    parsed.hAbb = nullChecker(teamLookup.findTeam(hSplit[hSplit.length-1]).a);
+    parsed.hAbb = nullChecker(teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).a);
     parsed.aSplit = nullChecker(line.awayTeam.split(' '));
-    parsed.aAbb = nullChecker(teamLookup.findTeam(aSplit[aSplit.length-1]).a);
+    parsed.aAbb = nullChecker(teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).a);
     parsed.aParen = nullChecker(line.awaySpread.indexOf('('));
-    parsed.aSpread = nullChecker(line.awaySpread.slice(0, aParen));
-    parsed.aJuice = nullChecker(line.awaySpread.slice(aParen+1, line.awaySpread.length-1));
+    parsed.aSpread = nullChecker(line.awaySpread.slice(0, parsed.aParen));
+    parsed.aJuice = nullChecker(line.awaySpread.slice(parsed.aParen+1, line.awaySpread.length-1));
     parsed.hParen = nullChecker(line.homeSpread.indexOf('('));
-    parsed.hSpread = nullChecker(line.homeSpread.slice(0, hParen));
-    parsed.hJuice = nullChecker(line.homeSpread.slice(hParen+1, line.homeSpread.length-1));
+    parsed.hSpread = nullChecker(line.homeSpread.slice(0, parsed.hParen));
+    parsed.hJuice = nullChecker(line.homeSpread.slice(parsed.hParen+1, line.homeSpread.length-1));
     parsed.oParen = nullChecker(line.over.indexOf('('));
-    parsed.total = nullChecker(line.over.slice(2, oParen));
-    parsed.overJuice = nullChecker(line.over.slice(oParen+1, line.over.length-1));
-    parsed.underJuice = nullChecker(line.under.slice(oParen+1, line.over.length-1));
+    parsed.total = nullChecker(line.over.slice(2, parsed.oParen));
+    parsed.overJuice = nullChecker(line.over.slice(parsed.oParen+1, line.over.length-1));
+    parsed.underJuice = nullChecker(line.under.slice(parsed.oParen+1, line.over.length-1));
     parsed.hMoney = nullChecker(line.homeMoney);
     parsed.aMoney = nullChecker(line.awayMoney);
 
-    parsed.gcode = `20${year}${date}/${aAbb}${hAbb}`;
-    parsed.home_id = teamLookup.findTeam(hSplit[hSplit.length-1]).id;
-    parsed.away_id = teamLookup.findTeam(aSplit[aSplit.length-1]).id;
+    parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
+    parsed.home_id = teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).id;
+    parsed.away_id = teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).id;
     return parsed;
   }
 }
