@@ -1,5 +1,5 @@
 import React from 'react';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel } from 'victory';
+import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel, VictoryTheme } from 'victory';
 
 class QuarterChart extends React.Component {
 
@@ -11,6 +11,27 @@ class QuarterChart extends React.Component {
       {x: 4, y: this.props.homeData.netRatings['4q_full']},
     ];
 
+    let homel5 = [
+      {x: 1, y: this.props.homeData.netRatings['1q_l5']},
+      {x: 2, y: this.props.homeData.netRatings['2q_l5']},
+      {x: 3, y: this.props.homeData.netRatings['3q_l5']},
+      {x: 4, y: this.props.homeData.netRatings['4q_l5']},
+    ];
+
+    let homel10 = [
+      {x: 1, y: this.props.homeData.netRatings['1q_l10']},
+      {x: 2, y: this.props.homeData.netRatings['2q_l10']},
+      {x: 3, y: this.props.homeData.netRatings['3q_l10']},
+      {x: 4, y: this.props.homeData.netRatings['4q_l10']},
+    ];
+
+    let homel15 = [
+      {x: 1, y: this.props.homeData.netRatings['1q_l15']},
+      {x: 2, y: this.props.homeData.netRatings['2q_l15']},
+      {x: 3, y: this.props.homeData.netRatings['3q_l15']},
+      {x: 4, y: this.props.homeData.netRatings['4q_l15']},
+    ];
+
     let visFull = [
       {x: 1, y: this.props.visData.netRatings['1q_full']},
       {x: 2, y: this.props.visData.netRatings['2q_full']},
@@ -18,38 +39,110 @@ class QuarterChart extends React.Component {
       {x: 4, y: this.props.visData.netRatings['4q_full']},
     ];
 
+    let visl5 = [
+      {x: 1, y: this.props.visData.netRatings['1q_l5']},
+      {x: 2, y: this.props.visData.netRatings['2q_l5']},
+      {x: 3, y: this.props.visData.netRatings['3q_l5']},
+      {x: 4, y: this.props.visData.netRatings['4q_l5']},
+    ];
+
+    let visl10 = [
+      {x: 1, y: this.props.visData.netRatings['1q_l10']},
+      {x: 2, y: this.props.visData.netRatings['2q_l10']},
+      {x: 3, y: this.props.visData.netRatings['3q_l10']},
+      {x: 4, y: this.props.visData.netRatings['4q_l10']},
+    ];
+
+    let visl15 = [
+      {x: 1, y: this.props.visData.netRatings['1q_l15']},
+      {x: 2, y: this.props.visData.netRatings['2q_l15']},
+      {x: 3, y: this.props.visData.netRatings['3q_l15']},
+      {x: 4, y: this.props.visData.netRatings['4q_l15']},
+    ];
+
     return (
       <div>
-        <VictoryChart>
+        <VictoryChart
+          theme={VictoryTheme.material}
+          domainPadding={{y: 30}}
+        >
           <VictoryAxis crossAxis
             domain={[-20, 20]}
             orientation={'top'}
           />
           <VictoryAxis
             dependentAxis
+            categories={{
+              x: ["1Q", "2Q", "3Q", "4Q"]
+            }}
             invertAxis={true}
             style={{
               axis: {
-                strokeWidth: 80,
                 stroke: 'white',
                 strokeLinecap: null
               },
               tickLabels: {
-                padding: -20
+                padding: -10
               }
             }}
           />
-          <VictoryGroup horizontal offset={20}>
+
+          <VictoryGroup horizontal offset={6}>
             <VictoryBar
-              categories={{
-                x: ["1Q", "2Q", "3Q", "4Q"]
-              }}
               data={homeFull}
+              barWidth={8}
+              style={{ data: { fill: this.props.homeData.info.color}}}
               labels={(d) => d.y}
+            />
+
+            <VictoryBar
+              data={homel5}
+              barWidth={4}
+              style={{ data: { fill: this.props.homeData.info.color}}}
               labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
             />
-            <VictoryBar data={visFull} />
+
+            <VictoryBar
+              data={homel10}
+              barWidth={4}
+              style={{ data: { fill: this.props.homeData.info.color}}}
+              labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
+            />
+
+            <VictoryBar
+              data={homel15}
+              barWidth={4}
+              style={{ data: { fill: this.props.homeData.info.color}}}
+              labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
+            />
+
+            <VictoryBar
+              data={visFull}
+              barWidth={8}
+              style={{ data: { fill: this.props.visData.info.color}}}
+              labels={(d) => d.y}
+            />
+
+            <VictoryBar
+              data={visl5}
+              barWidth={4}
+              style={{ data: { fill: this.props.visData.info.color}}}
+            />
+
+            <VictoryBar
+              data={visl10}
+              barWidth={4}
+              style={{ data: { fill: this.props.visData.info.color}}}
+            />
+
+            <VictoryBar
+              data={visl15}
+              barWidth={4}
+              style={{ data: { fill: this.props.visData.info.color}}}
+            />
+
           </VictoryGroup>
+
         </VictoryChart>
       </div>
     )

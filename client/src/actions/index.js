@@ -32,11 +32,6 @@ export const fetchGame = ({gid}) => async dispatch => {
     visObj: {}
   };
 
-  // conv.netRatingsObj[data.info.h[0].ta] = data.homeNetRtg;
-  // conv.netRatingsObj[data.info.v[0].ta] = data.visNetRtg;
-  // conv.paceObj[data.info.h[0].ta] = data.homePace;
-  // conv.paceObj[data.info.v[0].ta] = data.visPace;
-
   conv.homeObj.netRatings = data.homeNetRtg;
   conv.homeObj.pace = data.homePace;
   conv.homeObj.info = data.homeInfo;
