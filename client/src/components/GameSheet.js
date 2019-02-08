@@ -28,8 +28,8 @@ class GameSheet extends React.Component {
           {game.info.v[0].tc} {game.info.v[0].tn} @ {game.info.h[0].tc} {game.info.h[0].tn}
         </h2>
         <QuarterChart
-          homeData={this.props.game.netRatingsObj.h}
-          visData={this.props.game.netRatingsObj.v}
+          homeData={this.props.game.homeObj}
+          visData={this.props.game.visObj}
         />
         <br />
         <ByRotation netRatings={this.props.game.netRatingsArr} />

@@ -76,13 +76,19 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
       knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
         knex("team_pace").where({team_id: home}).then(homePace => {
           knex("team_pace").where({team_id: vis}).then(visPace => {
-            res.send({
-              info: game[0],
-              homeNetRtg: homeNetRtg[0],
-              visNetRtg: visNetRtg[0],
-              homePace: homePace[0],
-              visPace: visPace[0]
-            });
+            knex("teams").where({tid: home}).then(homeInfo => {
+              knex("teams").where({tid: vis}).then(visInfo => {
+                res.send({
+                  info: game[0],
+                  homeNetRtg: homeNetRtg[0],
+                  visNetRtg: visNetRtg[0],
+                  homePace: homePace[0],
+                  visPace: visPace[0],
+                  homeInfo: homeInfo[0],
+                  visInfo: visInfo[0]
+                });
+              })
+            })
           })
         })
       })

@@ -1,21 +1,21 @@
 import React from 'react';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup } from 'victory';
+import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel } from 'victory';
 
 class QuarterChart extends React.Component {
 
   render () {
     let homeFull = [
-      {x: 1, y: this.props.homeData['1q_full']},
-      {x: 2, y: this.props.homeData['2q_full']},
-      {x: 3, y: this.props.homeData['3q_full']},
-      {x: 4, y: this.props.homeData['4q_full']},
+      {x: 1, y: this.props.homeData.netRatings['1q_full']},
+      {x: 2, y: this.props.homeData.netRatings['2q_full']},
+      {x: 3, y: this.props.homeData.netRatings['3q_full']},
+      {x: 4, y: this.props.homeData.netRatings['4q_full']},
     ];
 
     let visFull = [
-      {x: 1, y: this.props.visData['1q_full']},
-      {x: 2, y: this.props.visData['2q_full']},
-      {x: 3, y: this.props.visData['3q_full']},
-      {x: 4, y: this.props.visData['4q_full']},
+      {x: 1, y: this.props.visData.netRatings['1q_full']},
+      {x: 2, y: this.props.visData.netRatings['2q_full']},
+      {x: 3, y: this.props.visData.netRatings['3q_full']},
+      {x: 4, y: this.props.visData.netRatings['4q_full']},
     ];
 
     return (
@@ -25,7 +25,9 @@ class QuarterChart extends React.Component {
             domain={[-20, 20]}
             orientation={'top'}
           />
-          <VictoryAxis dependentAxis
+          <VictoryAxis
+            dependentAxis
+            invertAxis={true}
             style={{
               axis: {
                 strokeWidth: 80,
@@ -43,6 +45,8 @@ class QuarterChart extends React.Component {
                 x: ["1Q", "2Q", "3Q", "4Q"]
               }}
               data={homeFull}
+              labels={(d) => d.y}
+              labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
             />
             <VictoryBar data={visFull} />
           </VictoryGroup>
