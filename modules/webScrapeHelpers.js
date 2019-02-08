@@ -60,6 +60,7 @@ module.exports = {
     parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
 
     parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
+    parsed.gcodeAlt = `20${parsed.year}${parsed.date+1}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gdte = `${parsed.gcode.slice(0, 4)}-${parsed.gcode.slice(4, 6)}-${parsed.gcode.slice(6, 8)}`;
     parsed.home_id = teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).id;
     parsed.away_id = teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).id;
