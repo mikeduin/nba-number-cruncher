@@ -30,8 +30,19 @@ router.get("/", (req, res, next) => {
   //   .catch((err)=>{
   //     console.log(err);
   //   });
-  oddsLoaders.sportsbookFull();
+  // oddsLoaders.sportsbookFull();
+  // oddsLoaders.sportsbookFirstQ();
+  // oddsLoaders.sportsbookFirstH();
 
+  setInterval(()=>{
+    oddsLoaders.sportsbookFull();
+    oddsLoaders.sportsbookFirstH();
+    oddsLoaders.sportsbookFirstQ();
+  }, 120000);
+  setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+  setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+
+  // setInterval(console.log('hello'), 10000)
 
   res.send({ Hi: "there" });
 });

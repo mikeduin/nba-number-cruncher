@@ -9,6 +9,14 @@ const nullChecker = (value) => {
   }
 };
 
+const mlChecker = (value) => {
+  if (value === 'even') {
+    return 100;
+  } else {
+    return value;
+  }
+};
+
 module.exports = {
   parseSbHtml: (html) => {
     const $ = cheerio.load(html);
@@ -48,8 +56,8 @@ module.exports = {
     parsed.total = nullChecker(line.over.slice(2, parsed.oParen));
     parsed.overJuice = nullChecker(line.over.slice(parsed.oParen+1, line.over.length-1));
     parsed.underJuice = nullChecker(line.under.slice(parsed.oParen+1, line.over.length-1));
-    parsed.hMoney = nullChecker(line.homeMoney);
-    parsed.aMoney = nullChecker(line.awayMoney);
+    parsed.hMoney = nullChecker(mlChecker(line.homeMoney));
+    parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
 
     parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gdte = `${parsed.gcode.slice(0, 4)}-${parsed.gcode.slice(4, 6)}-${parsed.gcode.slice(6, 8)}`;

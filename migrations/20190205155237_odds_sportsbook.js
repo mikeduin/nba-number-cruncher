@@ -71,6 +71,8 @@ exports.up = function(knex, Promise) {
     t.float('total_4q');
     t.integer('total_4q_over_juice');
     t.integer('total_4q_under_juice');
+    t.string('last_updated');
+    t.timestamp('updated_at');
   })
 };
 

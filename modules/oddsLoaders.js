@@ -14,7 +14,6 @@ module.exports = {
       .then(response => {
         if(response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
-          console.log(lines);
           lines.forEach(line => {
             let parsed = webScrapeHelpers.sbLineParser(line);
             knex('odds_sportsbook').where({sb_id: line.id}).then(res => {
@@ -35,7 +34,9 @@ module.exports = {
                   away_money_full: parsed.aMoney,
                   total_full: parsed.total,
                   total_full_over_juice: parsed.overJuice,
-                  total_full_under_juice: parsed.underJuice
+                  total_full_under_juice: parsed.underJuice,
+                  last_updated: 'full add',
+                  updated_at: new Date()
                 }, '*').then(game => {
                   console.log(game[0].gcode, ' added for full game');
                 })
@@ -49,7 +50,9 @@ module.exports = {
                   away_money_full: parsed.aMoney,
                   total_full: parsed.total,
                   total_full_over_juice: parsed.overJuice,
-                  total_full_under_juice: parsed.underJuice
+                  total_full_under_juice: parsed.underJuice,
+                  last_updated: 'full upd',
+                  updated_at: new Date()
                 }, '*').then(game => {
                   console.log(game[0].gcode, ' updated for full game');
                 })
@@ -65,8 +68,8 @@ module.exports = {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
           let parsed = webScrapeHelpers.sbLineParser(line);
-          knex('odds_sportsbook').where({sb_id: line.id}).update({
-            home_spread_1h: parsed.hspread,
+          knex('odds_sportsbook').where({gcode: parsed.gcode}).update({
+            home_spread_1h: parsed.hSpread,
             home_spread_1h_juice: parsed.hJuice,
             home_money_1h: parsed.hMoney,
             away_spread_1h: parsed.aSpread,
@@ -74,7 +77,9 @@ module.exports = {
             away_money_1h: parsed.aMoney,
             total_1h: parsed.total,
             total_1h_over_juice: parsed.overJuice,
-            total_1h_under_juice: parsed.underJuice
+            total_1h_under_juice: parsed.underJuice,
+            last_updated: '1h',
+            updated_at: new Date()
           }, '*').then(game => {
             console.log(game[0].gcode, ' updated for 1H');
           })
@@ -86,22 +91,29 @@ module.exports = {
     axios.get(apiRefs.sportsbook().secondH).then(response => {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
-        lines.forEach(line => {
-          let parsed = webScrapeHelpers.sbLineParser(line);
-          knex('odds_sportsbook').where({sb_id: line.id}).update({
-            home_spread_2h: parsed.hspread,
-            home_spread_2h_juice: parsed.hJuice,
-            home_money_2h: parsed.hMoney,
-            away_spread_2h: parsed.aSpread,
-            away_spread_2h_juice: parsed.aJuice,
-            away_money_2h: parsed.aMoney,
-            total_2h: parsed.total,
-            total_2h_over_juice: parsed.overJuice,
-            total_2h_under_juice: parsed.underJuice
-          }, '*').then(game => {
-            console.log(game[0].gcode, ' updated for 2H');
+        if (lines.length < 1) {
+          console.log('no 2H lines found')
+        } else {
+          console.log('2H lines are ', lines);
+          lines.forEach(line => {
+            let parsed = webScrapeHelpers.sbLineParser(line);
+            knex('odds_sportsbook').where({gcode: parsed.gcode}).update({
+              home_spread_2h: parsed.hSpread,
+              home_spread_2h_juice: parsed.hJuice,
+              home_money_2h: parsed.hMoney,
+              away_spread_2h: parsed.aSpread,
+              away_spread_2h_juice: parsed.aJuice,
+              away_money_2h: parsed.aMoney,
+              total_2h: parsed.total,
+              total_2h_over_juice: parsed.overJuice,
+              total_2h_under_juice: parsed.underJuice,
+              last_updated: '2h',
+              updated_at: new Date()
+            }, '*').then(game => {
+              console.log(game[0].gcode, ' updated for 2H');
+            })
           })
-        })
+        }
       }
     })
   },
@@ -111,8 +123,8 @@ module.exports = {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
           let parsed = webScrapeHelpers.sbLineParser(line);
-          knex('odds_sportsbook').where({sb_id: line.id}).update({
-            home_spread_1q: parsed.hspread,
+          knex('odds_sportsbook').where({gcode: parsed.gcode}).update({
+            home_spread_1q: parsed.hSpread,
             home_spread_1q_juice: parsed.hJuice,
             home_money_1q: parsed.hMoney,
             away_spread_1q: parsed.aSpread,
@@ -120,7 +132,9 @@ module.exports = {
             away_money_1q: parsed.aMoney,
             total_1q: parsed.total,
             total_1q_over_juice: parsed.overJuice,
-            total_1q_under_juice: parsed.underJuice
+            total_1q_under_juice: parsed.underJuice,
+            last_updated: '1q',
+            updated_at: new Date()
           }, '*').then(game => {
             console.log(game[0].gcode, ' updated for 1Q');
           })
@@ -132,22 +146,29 @@ module.exports = {
     axios.get(apiRefs.sportsbook().thirdQ).then(response => {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
-        lines.forEach(line => {
-          let parsed = webScrapeHelpers.sbLineParser(line);
-          knex('odds_sportsbook').where({sb_id: line.id}).update({
-            home_spread_3q: parsed.hspread,
-            home_spread_3q_juice: parsed.hJuice,
-            home_money_3q: parsed.hMoney,
-            away_spread_3q: parsed.aSpread,
-            away_spread_3q_juice: parsed.aJuice,
-            away_money_3q: parsed.aMoney,
-            total_3q: parsed.total,
-            total_3q_over_juice: parsed.overJuice,
-            total_3q_under_juice: parsed.underJuice
-          }, '*').then(game => {
-            console.log(game[0].gcode, ' updated for 3Q');
+        console.log('3Q lines are ', lines);
+        if (lines.length < 1) {
+          console.log('no 3Q lines found')
+        } else {
+          lines.forEach(line => {
+            let parsed = webScrapeHelpers.sbLineParser(line);
+            knex('odds_sportsbook').where({gcode: parsed.gcode}).update({
+              home_spread_3q: parsed.hSpread,
+              home_spread_3q_juice: parsed.hJuice,
+              home_money_3q: parsed.hMoney,
+              away_spread_3q: parsed.aSpread,
+              away_spread_3q_juice: parsed.aJuice,
+              away_money_3q: parsed.aMoney,
+              total_3q: parsed.total,
+              total_3q_over_juice: parsed.overJuice,
+              total_3q_under_juice: parsed.underJuice,
+              last_updated: '3q',
+              updated_at: new Date()
+            }, '*').then(game => {
+              console.log(game[0].gcode, ' updated for 3Q');
+            })
           })
-        })
+        }
       }
     })
   }
