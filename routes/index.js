@@ -15,6 +15,13 @@ const oddsLoaders = require("../modules/oddsLoaders");
 
 const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
+setInterval(()=>{
+  oddsLoaders.sportsbookFull();
+  oddsLoaders.sportsbookFirstH();
+  oddsLoaders.sportsbookFirstQ();
+}, 120000);
+setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
@@ -30,19 +37,6 @@ router.get("/", (req, res, next) => {
   //   .catch((err)=>{
   //     console.log(err);
   //   });
-  // oddsLoaders.sportsbookFull();
-  // oddsLoaders.sportsbookFirstQ();
-  // oddsLoaders.sportsbookFirstH();
-
-  setInterval(()=>{
-    oddsLoaders.sportsbookFull();
-    oddsLoaders.sportsbookFirstH();
-    oddsLoaders.sportsbookFirstQ();
-  }, 120000);
-  setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-  setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
-
-  // setInterval(console.log('hello'), 10000)
 
   res.send({ Hi: "there" });
 });

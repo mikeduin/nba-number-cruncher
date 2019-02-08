@@ -1,38 +1,55 @@
-// <VictoryChart>
-//   <VictoryAxis crossAxis
-//     domain={[-20, 20]}
-//     orientation={'top'}
-//   />
-//   <VictoryAxis dependentAxis
-//     tickValues={['1Q', '2Q', '3Q', '4Q']}
-//     style={{
-//       axis: {
-//         strokeWidth: 80,
-//         stroke: 'white',
-//         strokeLinecap: null
-//       },
-//       tickLabels: {
-//         padding: -20
-//       }
-//     }}
-//   />
-//   <VictoryGroup horizontal offset={20}>
-//     <VictoryBar data={dataSetOne} />
-//     <VictoryBar data={dataSetTwo} />
-//   </VictoryGroup>
-// </VictoryChart>
+import React from 'react';
+import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup } from 'victory';
 
+class QuarterChart extends React.Component {
 
-const dataSetOne = [
-  {x: 1, y: 10.6},
-  {x: 2, y: 14},
-  {x: 3, y: -4},
-  {x: 4, y: 7}
-];
+  render () {
+    let homeFull = [
+      {x: 1, y: this.props.homeData['1q_full']},
+      {x: 2, y: this.props.homeData['2q_full']},
+      {x: 3, y: this.props.homeData['3q_full']},
+      {x: 4, y: this.props.homeData['4q_full']},
+    ];
 
-const dataSetTwo = [
-  {x: 1, y: 4},
-  {x: 2, y: 8},
-  {x: 3, y: -4},
-  {x: 4, y: -12}
-];
+    let visFull = [
+      {x: 1, y: this.props.visData['1q_full']},
+      {x: 2, y: this.props.visData['2q_full']},
+      {x: 3, y: this.props.visData['3q_full']},
+      {x: 4, y: this.props.visData['4q_full']},
+    ];
+
+    return (
+      <div>
+        <VictoryChart>
+          <VictoryAxis crossAxis
+            domain={[-20, 20]}
+            orientation={'top'}
+          />
+          <VictoryAxis dependentAxis
+            style={{
+              axis: {
+                strokeWidth: 80,
+                stroke: 'white',
+                strokeLinecap: null
+              },
+              tickLabels: {
+                padding: -20
+              }
+            }}
+          />
+          <VictoryGroup horizontal offset={20}>
+            <VictoryBar
+              categories={{
+                x: ["1Q", "2Q", "3Q", "4Q"]
+              }}
+              data={homeFull}
+            />
+            <VictoryBar data={visFull} />
+          </VictoryGroup>
+        </VictoryChart>
+      </div>
+    )
+  }
+}
+
+export default QuarterChart;
