@@ -41,3 +41,15 @@ export const fetchGame = ({gid}) => async dispatch => {
 
   dispatch({ type: 'FETCH_GAME', payload: conv});
 }
+
+export const changeTeamColor = () => async dispatch => {
+  // let payload = [l, color];
+
+  dispatch({ type: 'CHANGE_VIS_COLOR', payload: '#F79F31'})
+}
+
+export const populateTodaysGames = (arr) => async dispatch => {
+  console.log(arr);
+
+  dispatch ({type: 'DAILY_GAMES', payload: arr})
+}

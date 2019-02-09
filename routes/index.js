@@ -69,8 +69,9 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
 router.get("/api/fetchGame/:gid", (req, res, next) => {
   let gid = req.params.gid;
   knex("schedule")
-    .innerJoin('odds_sportsbook as odds', 'schedule.gcode', 'odds.gcode')
+    .leftOuterJoin('odds_sportsbook as odds', 'schedule.gcode', 'odds.gcode')
     .where({gid: gid}).then(game => {
+      console.log('game is ', game);
     let home = game[0].h[0].tid;
     let vis = game[0].v[0].tid;
 

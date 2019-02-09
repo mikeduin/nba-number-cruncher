@@ -1,11 +1,13 @@
 import React from 'react';
 import {
-  VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel, VictoryTheme, VictoryLine
+  VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel, VictoryTheme, VictoryLine, VictoryTooltip
 } from 'victory';
 
 class QuarterChart extends React.Component {
 
   render () {
+    // let labelMath = datum._y > 0 ? -(homeFull[0].y)*2.5 : (homeFull[0].y)*2.5;
+
     let homeFull = [
       {x: 1, y: this.props.homeData.netRatings['1q_full']},
       {x: 2, y: this.props.homeData.netRatings['2q_full']},
@@ -139,6 +141,16 @@ class QuarterChart extends React.Component {
               barWidth={8}
               style={{ data: { fill: this.props.homeData.info.color}}}
               labels={(d) => d.y}
+              labelComponent={
+                <VictoryLabel
+                  dx={-(homeFull[0].y)*2.5}
+                  verticalAnchor={'middle'}
+                  style={{
+                    fill: '#91A4AD',
+                    fontSize: 10
+                  }}
+                />
+              }
             />
 
             <VictoryBar

@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactTable from 'react-table';
 
-
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
 
@@ -9,6 +8,8 @@ import NetRtgByQuarter from './netRatingGrids/NetRtgByQuarter';
 import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
+import InfoTable from './gamesheets/InfoTable';
+import TodaysGames from './gamesheets/TodaysGames';
 
 
 class GameSheet extends React.Component {
@@ -23,6 +24,8 @@ class GameSheet extends React.Component {
     } else {
       return (
         <div>
+        <TodaysGames />
+        <InfoTable />
         <h2 className="ui center aligned icon header">
           <i className="circular users icon"></i>
           {game.info.v[0].tc} {game.info.v[0].tn} @ {game.info.h[0].tc} {game.info.h[0].tn}
