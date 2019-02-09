@@ -1,5 +1,7 @@
 import React from 'react';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel, VictoryTheme } from 'victory';
+import {
+  VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLabel, VictoryTheme, VictoryLine
+} from 'victory';
 
 class QuarterChart extends React.Component {
 
@@ -69,23 +71,67 @@ class QuarterChart extends React.Component {
           <VictoryAxis crossAxis
             domain={[-20, 20]}
             orientation={'top'}
+
           />
           <VictoryAxis
             dependentAxis
             categories={{
               x: ["1Q", "2Q", "3Q", "4Q"]
             }}
+            tickValues={[1, 2, 3, 4]}
+            tickFormat={[null]}
             invertAxis={true}
             style={{
               axis: {
                 stroke: 'white',
                 strokeLinecap: null
-              },
-              tickLabels: {
-                padding: -10
               }
             }}
           />
+
+          <VictoryLine
+            style={{
+              data: {stroke: "#91A4AD", strokeWidth: 2},
+              labels: {angle: 0, fill: "#91A4AD", fontSize: 15}
+            }}
+            labelComponent={<VictoryLabel y={95} x={275}/>}
+            labels={["Q1"]}
+            y={() => 1.5}
+          >
+          </VictoryLine>
+
+          <VictoryLine
+            style={{
+              data: {stroke: "#91A4AD", strokeWidth: 2},
+              labels: {angle: 0, fill: "#91A4AD", fontSize: 15}
+            }}
+            labelComponent={<VictoryLabel y={150} x={275}/>}
+            labels={["Q2"]}
+            y={() => 2.5}
+          >
+          </VictoryLine>
+
+          <VictoryLine
+            style={{
+              data: {stroke: "#91A4AD", strokeWidth: 2},
+              labels: {angle: 0, fill: "#91A4AD", fontSize: 15}
+            }}
+            labelComponent={<VictoryLabel y={205} x={275}/>}
+            labels={["Q3"]}
+            y={() => 3.5}
+          >
+          </VictoryLine>
+
+          <VictoryLine
+            style={{
+              data: {stroke: "#91A4AD", strokeWidth: 2},
+              labels: {angle: 0, fill: "#91A4AD", fontSize: 15}
+            }}
+            labelComponent={<VictoryLabel y={260} x={275}/>}
+            labels={["Q4"]}
+            y={() => 4.5}
+          >
+          </VictoryLine>
 
           <VictoryGroup horizontal offset={6}>
             <VictoryBar
