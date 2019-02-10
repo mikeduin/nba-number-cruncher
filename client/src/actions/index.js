@@ -45,9 +45,15 @@ export const fetchGame = ({gid}) => async dispatch => {
 export const changeTeamColor = () => async dispatch => {
   // let payload = [l, color];
 
-  dispatch({ type: 'CHANGE_VIS_COLOR', payload: '#F79F31'})
+  dispatch({ type: 'CHANGE_VIS_COLOR', payload: '#F79F31'});
 }
 
-export const populateTodaysGames = (arr) => async dispatch => {
-  dispatch ({type: 'DAILY_GAMES', payload: arr})
+export const populateDailyGames = (arr) => async dispatch => {
+  dispatch ({type: 'DAILY_GAMES', payload: arr});
+}
+
+export const setActiveDay = (date) => async dispatch => {
+  console.log('date in action is ', date);
+
+  dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }

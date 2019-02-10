@@ -9,7 +9,7 @@ import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
-import TodaysGames from './gamesheets/TodaysGames';
+import ActiveDayGrid from './gamesheets/ActiveDayGrid';
 
 
 class GameSheet extends React.Component {
@@ -24,7 +24,7 @@ class GameSheet extends React.Component {
     } else {
       return (
         <div>
-        <TodaysGames />
+        <ActiveDayGrid />
         <InfoTable />
         <h2 className="ui center aligned icon header">
           <i className="circular users icon"></i>

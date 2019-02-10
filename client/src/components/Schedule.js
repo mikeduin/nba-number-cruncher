@@ -4,7 +4,7 @@ import moment from "moment";
 import _ from 'lodash';
 
 import { connect } from "react-redux";
-import { fetchWeek, populateTodaysGames } from "../actions";
+import { fetchWeek, populateDailyGames, setActiveDay } from "../actions";
 
 class Schedule extends React.Component {
   componentDidMount() {
@@ -48,7 +48,7 @@ class Schedule extends React.Component {
       return game.gdte === this.props.week.today;
     })
 
-    this.props.populateTodaysGames(todayGames);
+    // this.props.populateDailyGames(todayGames);
 
     return todayGames.map(game => {
       return (
@@ -116,5 +116,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { fetchWeek, populateTodaysGames }
+  { fetchWeek, setActiveDay, populateDailyGames }
 )(Schedule);

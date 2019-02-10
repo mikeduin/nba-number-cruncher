@@ -12,6 +12,7 @@ const App = () => {
         <div>
           <Header />
           <Route path='/schedule' exact component={Schedule} />
+          <Route path='/schedule/:date' component={Schedule} />
           <Route path='/netratings' exact component={NetRatings} />
           <Route path='/gamesheet/:gid' component={GameSheet} />
         </div>

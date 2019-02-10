@@ -1,9 +1,9 @@
 import React from 'react';
 
-const TodaysGames = () => {
+const ActiveDayGrid = () => {
   return (
     <div> hello </div>
   )
 }
 
-export default TodaysGames;
+export default ActiveDayGrid;

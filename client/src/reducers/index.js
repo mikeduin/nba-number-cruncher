@@ -3,10 +3,12 @@ import netRatingsReducer from './netRatingsReducer';
 import gameWeekReducer from './gameWeekReducer';
 import gameReducer from './gameReducer';
 import todaysGamesReducer from './todaysGamesReducer';
+import activeDayReducer from './activeDayReducer';
 
 export default combineReducers ({
   netRatings: netRatingsReducer,
   week: gameWeekReducer,
   game: gameReducer,
-  todaysGames: todaysGamesReducer
+  todaysGames: todaysGamesReducer,
+  activeDay: activeDayReducer
 })
