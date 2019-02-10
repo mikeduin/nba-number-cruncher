@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
-import _ from "lodash";
 
 import { connect } from "react-redux";
 import { fetchWeek, populateDailyGames, setActiveDay } from "../actions";
@@ -12,7 +11,7 @@ class Schedule extends React.Component {
     if (!this.props.match.params.date) {
       this.props.setActiveDay(moment().format('YYYY-MM-DD'));
     } else {
-      this.props.setActiveDay(this.props.match.params.date)
+      this.props.setActiveDay(this.props.match.params.date);
     }
   }
 
@@ -37,12 +36,12 @@ class Schedule extends React.Component {
         >
           <div
             className={`ui segment ${
-              date === this.props.week.today ? "inverted" : null
+              date === this.props.activeDay ? "inverted" : null
             }`}
           >
             <div
               className={`ui statistic ${
-                date === this.props.week.today ? "blue" : null
+                date === this.props.activeDay ? "blue" : null
               }`}
             >
               <div className="label">{moment(date).format("ddd")}</div>
@@ -59,8 +58,6 @@ class Schedule extends React.Component {
     let todayGames = this.props.week.weekGames.filter(game => {
       return game.gdte === this.props.activeDay;
     });
-
-    // this.props.populateDailyGames(todayGames);
 
     return todayGames.map(game => {
       return (

@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
+import { Button } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
   componentDidMount() {
@@ -52,9 +53,9 @@ class InfoTable extends React.Component {
             <tr>
               <td> H </td>
               <td> {game.info.h[0].tc} {game.info.h[0].tn}
-                <button className="ui button" value={'visObj'} onClick={this.toggleColor}>
+                <Button value={'visObj'} onClick={this.toggleColor}>
                   <i className="sync alternate icon" />
-                </button>
+                </Button>
               </td>
               <td>
 

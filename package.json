@@ -1,5 +1,5 @@
 {
-  "name": "nba-betting-buddy",
+  "name": "yarn",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -30,7 +30,13 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-table": "^6.9.0",
+    "semantic-ui-react": "^0.85.0",
+    "semver": "^5.6.0",
     "serve-favicon": "^2.5.0",
     "victory": "^31.2.0"
-  }
+  },
+  "main": "index.js",
+  "repository": "https://github.com/mikeduin/nba-number-cruncher.git",
+  "author": "Mike Duin <michael.s.duin@gmail.com>",
+  "license": "MIT"
 }
