@@ -7,8 +7,7 @@ import moment from 'moment';
 class Header extends React.Component {
 
   setActiveDay = () => {
-    let today = moment().format('YYYYMMDD');
-    console.log('today is ', today);
+    let today = moment().format('YYYY-MM-DD');
     this.props.setActiveDay(today);
   }
 
@@ -27,13 +26,4 @@ class Header extends React.Component {
 
 }
 
-// const mapStateToProps = state => {
-//   return {
-//     setActiveDay: setActiveDay
-//   }
-// }
-
-
 export default connect(null, { setActiveDay }) (Header);
-
-// as soon as you click schedule, you are going to set the active day state
