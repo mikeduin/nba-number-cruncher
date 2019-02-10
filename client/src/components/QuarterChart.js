@@ -141,16 +141,7 @@ class QuarterChart extends React.Component {
               barWidth={8}
               style={{ data: { fill: this.props.homeData.info.color}}}
               labels={(d) => d.y}
-              labelComponent={
-                <VictoryLabel
-                  dx={-(homeFull[0].y)*2.5}
-                  verticalAnchor={'middle'}
-                  style={{
-                    fill: '#91A4AD',
-                    fontSize: 10
-                  }}
-                />
-              }
+
             />
 
             <VictoryBar

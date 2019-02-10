@@ -9,7 +9,6 @@ let sbFull = apiRefs.sportsbook().full;
 
 module.exports = {
   sportsbookFull: () => {
-    console.log("gets to sb");
     axios.get(sbFull).then(
       response => {
         if (response.status === 200) {
@@ -19,6 +18,7 @@ module.exports = {
             knex("odds_sportsbook")
               .where({ sb_id: line.id })
               .then(res => {
+                console.log('res is ', res);
                 if (!res[0]) {
                   knex("odds_sportsbook")
                     .insert(
@@ -68,7 +68,10 @@ module.exports = {
                     )
                     .then(game => {
                       console.log(game[0].gcode, " updated for full game");
-                    });
+                    })
+                    .catch(err => {
+                      console.log('err is ', err);
+                    })
                 }
               });
           });

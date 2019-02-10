@@ -71,7 +71,6 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   knex("schedule")
     .leftOuterJoin('odds_sportsbook as odds', 'schedule.gcode', 'odds.gcode')
     .where({gid: gid}).then(game => {
-      console.log('game is ', game);
     let home = game[0].h[0].tid;
     let vis = game[0].v[0].tid;
 
@@ -99,43 +98,43 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   })
 })
 
-const updateFullTeamBuilds = schedule.scheduleJob("10 12 * * *", () => {
+const updateFullTeamBuilds = schedule.scheduleJob("20 12 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })
 
-const updateStarterBuilds = schedule.scheduleJob("11 12 * * *", () => {
+const updateStarterBuilds = schedule.scheduleJob("21 12 * * *", () => {
   updateTeamStats.updateStarterBuilds();
 })
 
-const updateBenchBuilds = schedule.scheduleJob("12 12 * * *", () => {
+const updateBenchBuilds = schedule.scheduleJob("22 12 * * *", () => {
   updateTeamStats.updateBenchBuilds();
 })
 
-const updateQ1Builds = schedule.scheduleJob("13 12 * * *", () => {
+const updateQ1Builds = schedule.scheduleJob("23 12 * * *", () => {
   updateTeamStats.updateQ1Builds();
 })
 
-const updateQ2Builds = schedule.scheduleJob("14 12 * * *", () => {
+const updateQ2Builds = schedule.scheduleJob("24 12 * * *", () => {
   updateTeamStats.updateQ2Builds();
 })
 
-const updateQ3Builds = schedule.scheduleJob("15 12 * * *", () => {
+const updateQ3Builds = schedule.scheduleJob("25 12 * * *", () => {
   updateTeamStats.updateQ3Builds();
 })
 
-const updateQ4Builds = schedule.scheduleJob("16 12 * * *", () => {
+const updateQ4Builds = schedule.scheduleJob("26 12 * * *", () => {
   updateTeamStats.updateQ4Builds();
 })
 
-const updateSchedule = schedule.scheduleJob("17 12 * * *", () => {
+const updateSchedule = schedule.scheduleJob("27 12 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapNetRatings = schedule.scheduleJob("18 12 * * *", () => {
+const mapNetRatings = schedule.scheduleJob("28 12 * * *", () => {
   dbMappers.mapNetRatings();
 })
 
-const mapPace = schedule.scheduleJob("19 12 * * *", () => {
+const mapPace = schedule.scheduleJob("29 12 * * *", () => {
   dbMappers.mapPace();
 })
 

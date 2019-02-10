@@ -49,7 +49,5 @@ export const changeTeamColor = () => async dispatch => {
 }
 
 export const populateTodaysGames = (arr) => async dispatch => {
-  console.log(arr);
-
   dispatch ({type: 'DAILY_GAMES', payload: arr})
 }

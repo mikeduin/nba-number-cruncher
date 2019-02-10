@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const moment = require('moment');
 
 const teamLookup = require("../modules/teamLookup");
 const nullChecker = (value) => {
@@ -16,6 +17,16 @@ const mlChecker = (value) => {
     return value;
   }
 };
+
+const spreadChecker = (value, ml) => {
+  if (value === '-') {
+    if (ml !== '-') {
+      return 0;
+    } else {
+      return value;
+    };
+  }
+}
 
 module.exports = {
   parseSbHtml: (html) => {
@@ -46,22 +57,28 @@ module.exports = {
     parsed.hAbb = nullChecker(teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).a);
     parsed.aSplit = nullChecker(line.awayTeam.split(' '));
     parsed.aAbb = nullChecker(teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).a);
+    parsed.hMoney = nullChecker(mlChecker(line.homeMoney));
+    parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
     parsed.aParen = nullChecker(line.awaySpread.indexOf('('));
-    parsed.aSpread = nullChecker(line.awaySpread.slice(0, parsed.aParen));
+    parsed.aSpread = nullChecker(spreadChecker(line.awaySpread.slice(0, parsed.aParen), parsed.aMoney));
     parsed.aJuice = nullChecker(mlChecker(line.awaySpread.slice(parsed.aParen+1, line.awaySpread.length-1)));
     parsed.hParen = nullChecker(line.homeSpread.indexOf('('));
-    parsed.hSpread = nullChecker(line.homeSpread.slice(0, parsed.hParen));
+    parsed.hSpread = nullChecker(spreadChecker(line.homeSpread.slice(0, parsed.hParen), parsed.hMoney));
     parsed.hJuice = nullChecker(mlChecker(line.homeSpread.slice(parsed.hParen+1, line.homeSpread.length-1)));
     parsed.oParen = nullChecker(line.over.indexOf('('));
     parsed.total = nullChecker(line.over.slice(2, parsed.oParen));
     parsed.overJuice = nullChecker(mlChecker(line.over.slice(parsed.oParen+1, line.over.length-1)));
     parsed.underJuice = nullChecker(mlChecker(line.under.slice(parsed.oParen+1, line.over.length-1)));
-    parsed.hMoney = nullChecker(mlChecker(line.homeMoney));
-    parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
-    let alt = parseInt(parsed.date)-1;
+    let yestMM = parsed.date.slice(0, 2);
+    let yestDD = parsed.date.slice(2, 4);
 
-    parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
-    parsed.gcodeAlt = `20${parsed.year}${alt}/${parsed.aAbb}${parsed.hAbb}`;
+    let moPrior = moment(`20${parsed.year}-${yestMM}-${yestDD}`).subtract(1, 'days');
+    console.log('moPrior is ', moPrior);
+    let dayPrior = moment(moPrior).format('YYYYMMDD');
+    console.log('dayPrior is ', dayPrior);
+
+    parsed.gcode = `{20${parsed.year}${parsed.date}}/${parsed.aAbb}${parsed.hAbb}`;
+    parsed.gcodeAlt = `${dayPrior}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gdte = `${parsed.gcode.slice(0, 4)}-${parsed.gcode.slice(4, 6)}-${parsed.gcode.slice(6, 8)}`;
     parsed.home_id = teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).id;
     parsed.away_id = teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).id;
