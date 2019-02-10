@@ -11,7 +11,6 @@ import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
 import ActiveDayGrid from './gamesheets/ActiveDayGrid';
 
-
 class GameSheet extends React.Component {
   componentDidMount () {
     this.props.fetchGame(this.props.match.params);
