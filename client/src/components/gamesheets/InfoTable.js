@@ -28,8 +28,8 @@ class InfoTable extends React.Component {
         <table className="ui celled table">
           <thead>
             <tr>
-              <th colspan="2"> </th>
-              <th colspan="3"> 1Q </th>
+              <th colSpan="2"> </th>
+              <th colSpan="3"> 1Q </th>
             </tr>
           </thead>
           <tbody>

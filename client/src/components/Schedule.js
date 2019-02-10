@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 
 import { connect } from "react-redux";
-import { fetchWeek, populateDailyGames, setActiveDay } from "../actions";
+import { fetchWeek, setActiveDay } from "../actions";
 
 class Schedule extends React.Component {
   componentDidMount() {
-    this.props.fetchWeek();
     if (!this.props.match.params.date) {
       this.props.setActiveDay(moment().format('YYYY-MM-DD'));
     } else {
@@ -55,11 +54,11 @@ class Schedule extends React.Component {
   }
 
   renderGameGrid() {
-    let todayGames = this.props.week.weekGames.filter(game => {
+    let dayGames = this.props.week.weekGames.filter(game => {
       return game.gdte === this.props.activeDay;
     });
 
-    return todayGames.map(game => {
+    return dayGames.map(game => {
       return (
         <div className="column" key={game.gid}>
           <div className="ui special cards">
@@ -125,5 +124,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { fetchWeek, setActiveDay, populateDailyGames }
+  { fetchWeek, setActiveDay }
 )(Schedule);

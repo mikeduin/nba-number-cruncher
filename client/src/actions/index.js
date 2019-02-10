@@ -2,6 +2,8 @@
 // import axios from 'axios';
 import moment from 'moment';
 
+let today = moment().format('YYYY-MM-DD');
+
 export const fetchNetRatings = () => async dispatch => {
   let response = await fetch('/api/getNetRatings');
   let data = await response.json();
@@ -9,14 +11,18 @@ export const fetchNetRatings = () => async dispatch => {
   dispatch({ type: 'FETCH_NET_RATINGS', payload: data});
 }
 
-export const fetchWeek = () => async dispatch => {
-  let digitDate = moment().format('YYYYMMDD');
-  let today = moment().format('YYYY-MM-DD');
+export const fetchWeek = (date = today) => async dispatch => {
+  let digitDate = moment(date).format('YYYYMMDD');
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
   let updated = {...data, today};
 
+  let todayGames = data.weekGames.filter(game => {
+    return game.gdte === today;
+  });
+
+  dispatch({ type: 'TODAY_GAMES', payload: todayGames});
   dispatch({ type: 'FETCH_WEEK', payload: updated});
 }
 
@@ -48,12 +54,10 @@ export const changeTeamColor = () => async dispatch => {
   dispatch({ type: 'CHANGE_VIS_COLOR', payload: '#F79F31'});
 }
 
-export const populateDailyGames = (arr) => async dispatch => {
-  dispatch ({type: 'DAILY_GAMES', payload: arr});
+export const getTodaysGames = () => async dispatch => {
+  dispatch ({type: 'DAILY_GAMES', payload: null});
 }
 
 export const setActiveDay = (date) => async dispatch => {
-  console.log('date in action is ', date);
-
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
