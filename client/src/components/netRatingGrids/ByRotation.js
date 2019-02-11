@@ -19,7 +19,16 @@ const ByRotation = props => {
             {
               Header: 'Season',
               accessor: 'team_full',
-              maxWidth: 60
+              maxWidth: 60,
+              Cell: row => (
+                <span style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#CB1844'
+                }}>
+                  { row.value }
+                </span>
+              )
             },
             {
               Header: 'L5',

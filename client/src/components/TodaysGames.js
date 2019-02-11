@@ -16,6 +16,7 @@ class TodaysGames extends React.Component {
     console.log('gets here');
     this.setState({ visible: false });
   };
+
   showSidebar = () => this.setState({ visible: true });
 
   mapTodaysGames = () => {
@@ -53,6 +54,9 @@ class TodaysGames extends React.Component {
             {this.mapTodaysGames()}
           </Menu>
         </Sidebar>
+        <Button circular icon visible={!this.state.visible} onClick={this.showSidebar}>
+          <Icon name='calendar alternate' />
+        </Button>
       </div>
     );
   }
