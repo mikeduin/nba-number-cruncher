@@ -98,43 +98,43 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   })
 })
 
-const updateFullTeamBuilds = schedule.scheduleJob("20 12 * * *", () => {
+const updateFullTeamBuilds = schedule.scheduleJob("35 4 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })
 
-const updateStarterBuilds = schedule.scheduleJob("21 12 * * *", () => {
+const updateStarterBuilds = schedule.scheduleJob("36 4 * * *", () => {
   updateTeamStats.updateStarterBuilds();
 })
 
-const updateBenchBuilds = schedule.scheduleJob("22 12 * * *", () => {
+const updateBenchBuilds = schedule.scheduleJob("37 4 * * *", () => {
   updateTeamStats.updateBenchBuilds();
 })
 
-const updateQ1Builds = schedule.scheduleJob("23 12 * * *", () => {
+const updateQ1Builds = schedule.scheduleJob("38 4 * * *", () => {
   updateTeamStats.updateQ1Builds();
 })
 
-const updateQ2Builds = schedule.scheduleJob("24 12 * * *", () => {
+const updateQ2Builds = schedule.scheduleJob("39 4 * * *", () => {
   updateTeamStats.updateQ2Builds();
 })
 
-const updateQ3Builds = schedule.scheduleJob("25 12 * * *", () => {
+const updateQ3Builds = schedule.scheduleJob("40 4 * * *", () => {
   updateTeamStats.updateQ3Builds();
 })
 
-const updateQ4Builds = schedule.scheduleJob("26 12 * * *", () => {
+const updateQ4Builds = schedule.scheduleJob("41 4 * * *", () => {
   updateTeamStats.updateQ4Builds();
 })
 
-const updateSchedule = schedule.scheduleJob("27 12 * * *", () => {
+const updateSchedule = schedule.scheduleJob("42 4 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapNetRatings = schedule.scheduleJob("28 12 * * *", () => {
+const mapNetRatings = schedule.scheduleJob("43 4 * * *", () => {
   dbMappers.mapNetRatings();
 })
 
-const mapPace = schedule.scheduleJob("29 12 * * *", () => {
+const mapPace = schedule.scheduleJob("44 4 * * *", () => {
   dbMappers.mapPace();
 })
 

@@ -1,14 +1,22 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Sidebar, Menu, Item } from "semantic-ui-react";
+import { Sidebar, Menu, Item, Button, Icon } from "semantic-ui-react";
 
-import { fetchGame } from '../actions';
+import { fetchGame } from "../actions";
 
 class TodaysGames extends React.Component {
+  state = { visible: true };
+
   componentDidMount() {
     console.log(this.props);
   }
+
+  hideSidebar = () => {
+    console.log('gets here');
+    this.setState({ visible: false });
+  };
+  showSidebar = () => this.setState({ visible: true });
 
   mapTodaysGames = () => {
     return this.props.todaysGames.map(game => {
@@ -32,11 +40,15 @@ class TodaysGames extends React.Component {
   render() {
     return (
       <div>
-        <Sidebar animation={"push"} direction={"bottom"} visible={true}>
+        <Sidebar animation={"push"} direction={"bottom"} visible={this.state.visible}>
           <Menu inverted={true}>
-            <Menu.Item>
+            <Menu.Item
+              style={{ textAlign: "center" }}
+              onClick={this.hideSidebar}
+            >
               {" "}
-              TODAY'S <br /> GAMES <br />{" "}
+              TODAY'S <br /> GAMES <br />
+              (click to hide)
             </Menu.Item>
             {this.mapTodaysGames()}
           </Menu>

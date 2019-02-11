@@ -19,6 +19,7 @@ const mlChecker = (value) => {
 };
 
 const spreadChecker = (value, ml) => {
+  console.log('spreadchecker vals are ', value, ml);
   if (value === '-') {
     if (ml !== '-') {
       return 0;
@@ -60,10 +61,10 @@ module.exports = {
     parsed.hMoney = nullChecker(mlChecker(line.homeMoney));
     parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
     parsed.aParen = nullChecker(line.awaySpread.indexOf('('));
-    parsed.aSpread = nullChecker(spreadChecker(line.awaySpread.slice(0, parsed.aParen), parsed.aMoney));
+    parsed.aSpread = nullChecker(line.awaySpread.slice(0, parsed.aParen), parsed.aMoney);
     parsed.aJuice = nullChecker(mlChecker(line.awaySpread.slice(parsed.aParen+1, line.awaySpread.length-1)));
     parsed.hParen = nullChecker(line.homeSpread.indexOf('('));
-    parsed.hSpread = nullChecker(spreadChecker(line.homeSpread.slice(0, parsed.hParen), parsed.hMoney));
+    parsed.hSpread = nullChecker(line.homeSpread.slice(0, parsed.hParen), parsed.hMoney);
     parsed.hJuice = nullChecker(mlChecker(line.homeSpread.slice(parsed.hParen+1, line.homeSpread.length-1)));
     parsed.oParen = nullChecker(line.over.indexOf('('));
     parsed.total = nullChecker(line.over.slice(2, parsed.oParen));
@@ -73,11 +74,9 @@ module.exports = {
     let yestDD = parsed.date.slice(2, 4);
 
     let moPrior = moment(`20${parsed.year}-${yestMM}-${yestDD}`).subtract(1, 'days');
-    console.log('moPrior is ', moPrior);
     let dayPrior = moment(moPrior).format('YYYYMMDD');
-    console.log('dayPrior is ', dayPrior);
 
-    parsed.gcode = `{20${parsed.year}${parsed.date}}/${parsed.aAbb}${parsed.hAbb}`;
+    parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gcodeAlt = `${dayPrior}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gdte = `${parsed.gcode.slice(0, 4)}-${parsed.gcode.slice(4, 6)}-${parsed.gcode.slice(6, 8)}`;
     parsed.home_id = teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).id;
