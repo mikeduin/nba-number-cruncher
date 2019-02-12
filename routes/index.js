@@ -84,18 +84,24 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
                 knex("team_pace").where({team_id: vis}).then(visPace => {
                   knex("teams").where({tid: home}).then(homeInfo => {
                     knex("teams").where({tid: vis}).then(visInfo => {
-                      res.send({
-                        info: game[0],
-                        odds: odds[0],
-                        homeTen: homeSched,
-                        visTen: visSched,
-                        homeNetRtg: homeNetRtg[0],
-                        visNetRtg: visNetRtg[0],
-                        homePace: homePace[0],
-                        visPace: visPace[0],
-                        homeInfo: homeInfo[0],
-                        visInfo: visInfo[0]
-                      });
+                      knex("schedule")
+                      .where('gcode', 'like', `%${hAbb}${vAbb}%`)
+                      .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`)
+                      .then(matchups => {
+                        res.send({
+                          info: game[0],
+                          odds: odds[0],
+                          homeTen: homeSched,
+                          visTen: visSched,
+                          matchups: matchups,
+                          homeNetRtg: homeNetRtg[0],
+                          visNetRtg: visNetRtg[0],
+                          homePace: homePace[0],
+                          visPace: visPace[0],
+                          homeInfo: homeInfo[0],
+                          visInfo: visInfo[0]
+                        });
+                      })
                     })
                   })
                 })

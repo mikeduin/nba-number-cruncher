@@ -33,6 +33,7 @@ export const fetchGame = ({gid}) => async dispatch => {
   let conv = {
     info: data.info,
     odds: data.odds,
+    matchups: data.matchups,
     netRatingsArr: [data.visNetRtg, data.homeNetRtg],
     paceArr: [data.visPace, data.homePace],
     hObj: {},

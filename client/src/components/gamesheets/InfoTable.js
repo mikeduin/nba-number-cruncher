@@ -2,7 +2,8 @@ import React from "react";
 import moment from 'moment';
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
-import { Button, Icon, Link, Table } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import { Button, Icon, Table, Grid } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
   oddsFormat = value => {
@@ -37,14 +38,19 @@ class InfoTable extends React.Component {
     this.props.changeTeamColor(hv, colorObj);
   };
 
-  dateResult = (hv, date) => {
+  formatMatchup (res, hv = null) {
     let game = this.props.game;
-
-    let res = this.props.game[`${hv}Obj`].sched.find(entry => {
-      return entry.gdte === date;
-    });
-
-    if (res) {
+    if (!hv) {
+      return (
+        <div key={res.gcode}>
+          {moment(res.gdte).format('M/D')}:
+          <a target='blank' href={`https://www.nba.com/games/${res.gcode}#/matchup`}>
+            <div> {res.v[0].ta} {res.v[0].s} @  </div>
+            <div> {res.h[0].ta} {res.h[0].s} </div>
+          </a>
+        </div>
+      )
+    } else {
       if (res.stt === 'Final') {
         if (res.h[0].ta === game.info[`${hv}`][0].ta) {
           return (
@@ -76,23 +82,47 @@ class InfoTable extends React.Component {
           )
         }
       }
+    }
+  }
+
+  dateResult = (hv, date) => {
+    let game = this.props.game;
+
+    let res = this.props.game[`${hv}Obj`].sched.find(entry => {
+      return entry.gdte === date;
+    });
+
+    if (res) {
+      return this.formatMatchup(res, hv);
     } else {
       return '';
     }
   }
 
+  returnMatchups = () => {
+    return (
+      <Grid columns={this.props.game.matchups.length}>
+        {this.props.game.matchups.map(game => {
+          if (game.stt === 'Final') {
+            return this.formatMatchup(game);
+          };
+        })}
+      </Grid>
+    )
+  }
+
   render() {
     let game = this.props.game;
     return (
-        <Table celled definition>
+        <Table celled structured>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell colSpan="2"> </Table.HeaderCell>
+              <Table.HeaderCell colSpan="2" textAlign='center'> PREVIOUS MATCHUPS </Table.HeaderCell>
               <Table.HeaderCell colSpan="3" textAlign='center'> ODDS </Table.HeaderCell>
               <Table.HeaderCell colSpan="10" textAlign='center'> SCHEDULE WINDOW </Table.HeaderCell>
             </Table.Row>
             <Table.Row>
-              <Table.HeaderCell colSpan="2"> </Table.HeaderCell>
+              <Table.HeaderCell colSpan="2" textAlign='center'>  {this.returnMatchups()} </Table.HeaderCell>
               <Table.HeaderCell> Game <br /> {this.totalFormat(game.odds.total_full)} </Table.HeaderCell>
               <Table.HeaderCell> 1H <br /> {this.totalFormat(game.odds.total_1h)} </Table.HeaderCell>
               <Table.HeaderCell> 1Q <br /> {this.totalFormat(game.odds.total_1q)} </Table.HeaderCell>
@@ -110,8 +140,8 @@ class InfoTable extends React.Component {
           </Table.Header>
           <Table.Body>
             <Table.Row>
-              <Table.Cell> A </Table.Cell>
-              <Table.Cell width={250}
+              <Table.Cell style={{fontWeight: 700, backgroundColor: 'rgb(0,0,0,.03)'}}> A </Table.Cell>
+              <Table.Cell
                 style={{
                   backgroundColor: this.props.vColors.active,
                   color: "white"
@@ -161,7 +191,7 @@ class InfoTable extends React.Component {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell> H </Table.Cell>
+              <Table.Cell style={{fontWeight: 700, backgroundColor: 'rgb(0,0,0,.03)'}}> H </Table.Cell>
               <Table.Cell
               style={{
                 backgroundColor: this.props.hColors.active,

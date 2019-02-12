@@ -22,12 +22,11 @@ class TodaysGames extends React.Component {
     return this.props.todaysGames.map(game => {
       return (
         <Menu.Item
-          key={game.id}
+          key={game.gid}
           as={Link}
           to={`/gamesheet/${game.gid}`}
           style={{ display: "inline" }}
-          gameId={game.gid}
-          onClick={() => {this.fetchGame(this.gameId)}}
+          onClick={() => {this.fetchGame(this.key)}}
           fitted='vertically'
         >
           <Item.Image size="mini" src={`/images/logos/${game.v[0].ta}.svg`} />
