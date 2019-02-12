@@ -14,5 +14,8 @@ const updatePlayerStats = (games, db) => {
 module.exports = {
   updatePlayerStatBuilds: () => {
     updatePlayerStats(0, 'players_full');
+    updatePlayerStats(5, 'players_l5');
+    updatePlayerStats(10, 'players_l10');
+    updatePlayerStats(5, 'players_l15');
   }
 }

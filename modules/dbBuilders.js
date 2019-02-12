@@ -329,7 +329,7 @@ module.exports = {
             cfparams: player[72],
             updated_at: new Date()
           }, '*').then(entered => {
-            console.log(entered[0].player_name, ' entered into full season player db');
+            console.log(entered[0].player_name, ' entered into ', db);
           })
         } else {
           knex(db).where({player_id: player[0]}).update({
@@ -401,7 +401,7 @@ module.exports = {
             fg_pct_rank: player[70],
             updated_at: new Date()
           }, '*').then(updated => {
-            console.log(updated[0].player_name, ' updated in full season player DB');
+            console.log(updated[0].player_name, ' updated in ', db);
           })
         }
       })

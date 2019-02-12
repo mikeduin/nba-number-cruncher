@@ -24,10 +24,7 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-setTimeout(()=>{
-  updatePlayerStats.updatePlayerStatBuilds()}, 5000)
-
-// updatePlayerStats.updatePlayerStatBuilds();
+setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 5000);
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
@@ -142,6 +139,10 @@ const updateQ3Builds = schedule.scheduleJob("8 14 * * *", () => {
 
 const updateQ4Builds = schedule.scheduleJob("9 14 * * *", () => {
   updateTeamStats.updateQ4Builds();
+})
+
+const updateFullPlayersBuild = schedule.scheduleJob("10 14 * * *", () => {
+  updatePlayerStats.updatePlayerStatBuilds();
 })
 
 const updateSchedule = schedule.scheduleJob("10 14 * * *", () => {
