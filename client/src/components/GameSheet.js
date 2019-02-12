@@ -33,8 +33,8 @@ class GameSheet extends React.Component {
           <div className="two column row">
             <div className="column">
               <QuarterChart
-                homeData={game.homeObj}
-                visData={game.visObj}
+                homeData={game.hObj}
+                visData={game.vObj}
               />
             </div>
             <div className="column">

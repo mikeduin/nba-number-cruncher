@@ -17,11 +17,11 @@ const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
 
 let now = moment().format('YYYY-MM-DD');
 
-setInterval(()=>{
-  oddsLoaders.sportsbookFull();
-  oddsLoaders.sportsbookFirstH();
-  oddsLoaders.sportsbookFirstQ();
-}, 120000);
+// setInterval(()=>{
+//   oddsLoaders.sportsbookFull();
+//   oddsLoaders.sportsbookFirstH();
+//   oddsLoaders.sportsbookFirstQ();
+// }, 120000);
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
@@ -47,10 +47,6 @@ router.get("/api/getNetRatings", (req, res, next) => {
   knex("team_net_ratings").then(netRatings => {
     res.send(netRatings);
   });
-});
-
-router.get("/api/todaysGames", (req, res, next) => {
-  knex("schedule");
 });
 
 router.get("/api/fetchWeek/:date", (req, res, next) => {

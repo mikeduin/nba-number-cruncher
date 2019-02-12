@@ -37,17 +37,18 @@ export const fetchGame = ({gid}) => async dispatch => {
     info: data.info,
     netRatingsArr: [data.visNetRtg, data.homeNetRtg],
     paceArr: [data.visPace, data.homePace],
-    homeObj: {},
-    visObj: {}
+    hObj: {},
+    vObj: {}
   };
 
-  conv.homeObj.netRatings = data.homeNetRtg;
-  conv.homeObj.pace = data.homePace;
-  conv.homeObj.info = data.homeInfo;
-  conv.visObj.netRatings = data.visNetRtg;
-  conv.visObj.pace = data.visPace;
-  conv.visObj.info = data.visInfo;
-
+  conv.hObj.netRatings = data.homeNetRtg;
+  conv.hObj.pace = data.homePace;
+  conv.hObj.info = data.homeInfo;
+  conv.hObj.sched = data.homeTen;
+  conv.vObj.netRatings = data.visNetRtg;
+  conv.vObj.pace = data.visPace;
+  conv.vObj.info = data.visInfo;
+  conv.vObj.sched = data.visTen;
 
   dispatch({ type: 'FETCH_GAME', payload: conv});
 }
