@@ -24,7 +24,23 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 5000);
+// setTimeout(()=>{
+//   knex("players_full").then(players => {
+//     players.forEach(player => {
+//       knex("player_data").insert({
+//         player_id: player.player_id,
+//         player_name: player.player_name,
+//         team_id: player.team_id,
+//         team_abbreviation: player.team_abbreviation
+//       }, '*').then(entered => {
+//         console.log(entered[0].player_name, ' entered into player data db');
+//       })
+//     })
+//   })
+// }, 5000);
+
+// setTimeout(()=>{dbMappers.mapFullPlayerData()}, 5000);
+setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 5000);
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
@@ -149,12 +165,12 @@ const updateSchedule = schedule.scheduleJob("10 14 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapNetRatings = schedule.scheduleJob("11 14 * * *", () => {
-  dbMappers.mapNetRatings();
+const mapTeamNetRatings = schedule.scheduleJob("11 14 * * *", () => {
+  dbMappers.mapTeamNetRatings();
 })
 
-const mapPace = schedule.scheduleJob("12 14 * * *", () => {
-  dbMappers.mapPace();
+const mapTeamPace = schedule.scheduleJob("12 14 * * *", () => {
+  dbMappers.mapTeamPace();
 })
 
 module.exports = router;

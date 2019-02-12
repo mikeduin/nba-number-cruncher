@@ -1,7 +1,103 @@
 const knex = require("../db/knex");
 
 module.exports = {
-  mapNetRatings: function() {
+  mapFullPlayerData: function() {
+    knex("players_full")
+      .select("player_id", "player_name", "team_id", "team_abbreviation", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+      .then(players => {
+        players.forEach(player => {
+          knex("player_data").where({player_id: player.player_id}).then(res => {
+            if (!res[0]) {
+              knex("player_data").insert({
+                player_id: player.player_id,
+                player_name: player.player_name,
+                team_id: player.team_id,
+                team_abbreviation: player.team_abbreviation,
+                gp_full: player.gp,
+                min_full: player.min,
+                net_rtg_full: player.net_rating,
+                off_rtg_full: player.off_rating,
+                def_rtg_full: player.def_rating,
+                pace_full: player.pace,
+                updated_at: new Date()
+              }, '*').then(updated => {
+                console.log(updated[0].player_name, ' added to player data');
+              })
+            } else {
+              knex("player_data").where({player_id: player.player_id}).update({
+                team_id: player.team_id,
+                team_abbreviation: player.team_abbreviation,
+                gp_full: player.gp,
+                min_full: player.min,
+                net_rtg_full: player.net_rating,
+                off_rtg_full: player.off_rating,
+                def_rtg_full: player.def_rating,
+                pace_full: player.pace,
+                updated_at: new Date()
+              }, '*').then(updated => {
+                console.log(updated[0].player_name, ' updated for FS in player data');
+              })
+            }
+          })
+        })
+      });
+  },
+  mapSegmentedPlayerData: function () {
+    knex("players_l5")
+      .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+      .then(players => {
+        players.forEach(player => {
+          knex("player_data").where({player_id: player.player_id}).update({
+            gp_l5: player.gp,
+            min_l5: player.min,
+            net_rtg_l5: player.net_rating,
+            off_rtg_l5: player.off_rating,
+            def_rtg_l5: player.def_rating,
+            pace_l5: player.pace,
+            updated_at: new Date()
+          }, '*').then(updated => {
+            console.log(updated[0].player_name, ' updated for l5 in player data');
+          })
+        })
+      });
+
+    knex("players_l10")
+      .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+      .then(players => {
+        players.forEach(player => {
+          knex("player_data").where({player_id: player.player_id}).update({
+            gp_l10: player.gp,
+            min_l10: player.min,
+            net_rtg_l10: player.net_rating,
+            off_rtg_l10: player.off_rating,
+            def_rtg_l10: player.def_rating,
+            pace_l10: player.pace,
+            updated_at: new Date()
+          }, '*').then(updated => {
+            console.log(updated[0].player_name, ' updated for l10 in player data');
+          })
+        })
+      });
+
+      knex("players_l15")
+        .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+        .then(players => {
+          players.forEach(player => {
+            knex("player_data").where({player_id: player.player_id}).update({
+              gp_l15: player.gp,
+              min_l15: player.min,
+              net_rtg_l15: player.net_rating,
+              off_rtg_l15: player.off_rating,
+              def_rtg_l15: player.def_rating,
+              pace_l15: player.pace,
+              updated_at: new Date()
+            }, '*').then(updated => {
+              console.log(updated[0].player_name, ' updated for l15 in player data');
+            })
+          })
+        });
+  },
+  mapTeamNetRatings: function() {
     knex("teams_full")
       .select("team_id", "net_rating")
       .then(teams => {
@@ -745,7 +841,7 @@ module.exports = {
         });
       });
   },
-  mapPace: function() {
+  mapTeamPace: function() {
     knex("teams_full")
       .select("team_id", "pace")
       .then(teams => {

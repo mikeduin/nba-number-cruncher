@@ -333,6 +333,9 @@ module.exports = {
           })
         } else {
           knex(db).where({player_id: player[0]}).update({
+            team_id: player[2],
+            team_abbreviation: player[3],
+            age: player[4],
             gp: player[5],
             w: player[6],
             l: player[7],
