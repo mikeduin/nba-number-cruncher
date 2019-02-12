@@ -3,17 +3,16 @@ const axios = require('axios');
 const advancedPlayerStats = 'https://stats.nba.com/stats/leaguedashplayerstats';
 const dbBuilders = require("../modules/dbBuilders");
 
-const updatePlayerStats = (games) => {
+const updatePlayerStats = (games, db) => {
   axios.get(advancedPlayerStats, {params: dbBuilders.fetchAdvancedPlayerParams(games)})
     .then(response => {
       let playerData = response.data.resultSets[0].rowSet;
-      console.log(playerData);
+      dbBuilders.updatePlayerDb(db, playerData);
     });
 };
 
 module.exports = {
   updatePlayerStatBuilds: () => {
-    console.log('player stat build fn reached');
-    updatePlayerStats(0);
+    updatePlayerStats(0, 'players_full');
   }
 }

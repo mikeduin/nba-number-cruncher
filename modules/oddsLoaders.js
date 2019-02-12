@@ -15,11 +15,9 @@ module.exports = {
           let lines = webScrapeHelpers.parseSbHtml(response.data);
           lines.forEach(line => {
             let parsed = webScrapeHelpers.sbLineParser(line);
-            console.log('parsed is ', parsed);
             knex("odds_sportsbook")
               .where({ sb_id: line.id })
               .then(res => {
-                // console.log('res is ', res);
                 if (!res[0]) {
                   knex("odds_sportsbook")
                     .insert(
@@ -87,7 +85,6 @@ module.exports = {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
           let parsed = webScrapeHelpers.sbLineParser(line);
-          console.log('parsed 1H is ', parsed);
           knex("odds_sportsbook")
             .where({ gcode: parsed.gcode })
             .update(

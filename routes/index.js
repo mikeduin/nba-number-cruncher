@@ -25,7 +25,6 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
 setTimeout(()=>{
-  console.log('timeout fn reached');
   updatePlayerStats.updatePlayerStatBuilds()}, 5000)
 
 // updatePlayerStats.updatePlayerStatBuilds();
