@@ -50,7 +50,21 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.vObj.info = data.visInfo;
   conv.vObj.sched = data.visTen;
 
+  let homeColors = {
+    color_one: data.homeInfo.color,
+    color_two: data.homeInfo.color_2,
+    active: data.homeInfo.color
+  };
+
+  let visColors = {
+    color_one: data.visInfo.color,
+    color_two: data.visInfo.color_2,
+    active: data.visInfo.color
+  };
+
   dispatch({ type: 'FETCH_GAME', payload: conv});
+  dispatch({ type: 'SET_HOME_COLOR', payload: homeColors });
+  dispatch({ type: 'SET_VIS_COLOR', payload: visColors });
 }
 
 export const changeTeamColor = () => async dispatch => {
