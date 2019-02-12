@@ -24,23 +24,6 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-// setTimeout(()=>{
-//   knex("players_full").then(players => {
-//     players.forEach(player => {
-//       knex("player_data").insert({
-//         player_id: player.player_id,
-//         player_name: player.player_name,
-//         team_id: player.team_id,
-//         team_abbreviation: player.team_abbreviation
-//       }, '*').then(entered => {
-//         console.log(entered[0].player_name, ' entered into player data db');
-//       })
-//     })
-//   })
-// }, 5000);
-
-// setTimeout(()=>{dbMappers.mapFullPlayerData()}, 5000);
-setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 5000);
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
@@ -77,8 +60,6 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   let gid = req.params.gid;
   knex("schedule").where({gid: gid}).then(game => {
     knex("odds_sportsbook").where({gcode: game[0].gcode}).then(odds => {
-      console.log('odds are ', odds);
-
       let home = game[0].h[0].tid;
       let vis = game[0].v[0].tid;
       let hAbb = game[0].h[0].ta;
@@ -161,16 +142,24 @@ const updateFullPlayersBuild = schedule.scheduleJob("10 14 * * *", () => {
   updatePlayerStats.updatePlayerStatBuilds();
 })
 
-const updateSchedule = schedule.scheduleJob("10 14 * * *", () => {
+const updateSchedule = schedule.scheduleJob("11 14 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapTeamNetRatings = schedule.scheduleJob("11 14 * * *", () => {
+const mapTeamNetRatings = schedule.scheduleJob("12 14 * * *", () => {
   dbMappers.mapTeamNetRatings();
 })
 
-const mapTeamPace = schedule.scheduleJob("12 14 * * *", () => {
+const mapTeamPace = schedule.scheduleJob("13 14 * * *", () => {
   dbMappers.mapTeamPace();
+})
+
+const mapFullPlayerData = schedule.scheduleJob("14 14 * * *", () => {
+  dbMappers.mapFullPlayerData();
+})
+
+const mapSegmentedPlayerData = schedule.scheduleJob("15 14 * * *", () => {
+  dbMappers.mapSegmentedPlayerData();
 })
 
 module.exports = router;

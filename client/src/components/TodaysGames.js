@@ -12,6 +12,10 @@ class TodaysGames extends React.Component {
     this.setState({ visible: false });
   };
 
+  fetchGame = (id) => {
+    this.props.fetchGame(id);
+  }
+
   showSidebar = () => this.setState({ visible: true });
 
   mapTodaysGames = () => {
@@ -22,7 +26,8 @@ class TodaysGames extends React.Component {
           as={Link}
           to={`/gamesheet/${game.gid}`}
           style={{ display: "inline" }}
-          onClick={this.props.fetchGame(game.gid)}
+          gameId={game.gid}
+          onClick={() => {this.fetchGame(this.gameId)}}
           fitted='vertically'
         >
           <Item.Image size="mini" src={`/images/logos/${game.v[0].ta}.svg`} />

@@ -2,14 +2,9 @@ import React from "react";
 import moment from 'moment';
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
-import { Button, Icon, Link } from 'semantic-ui-react';
+import { Button, Icon, Link, Table } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
-  componentDidMount() {
-    // console.log(this.props);
-    console.log('in comp did mount ', this.props.game);
-  };
-
   oddsFormat = value => {
     if (value > 0) {
       return `+${value}`;
@@ -89,35 +84,34 @@ class InfoTable extends React.Component {
   render() {
     let game = this.props.game;
     return (
-      <div>
-        <table className="ui celled table">
-          <thead>
-            <tr>
-              <th colSpan="2"> </th>
-              <th colSpan="3" style={{textAlign: 'center'}}> ODDS </th>
-              <th colSpan="10" style={{textAlign: 'center'}}> SCHEDULE WINDOW </th>
-            </tr>
-            <tr>
-              <th colSpan="2"> </th>
-              <th> Game <br /> {this.totalFormat(game.odds.total_full)} </th>
-              <th> 1H <br /> {this.totalFormat(game.odds.total_1h)} </th>
-              <th> 1Q <br /> {this.totalFormat(game.odds.total_1q)} </th>
-              <th> {moment().subtract(6, 'days').format('M/D')}</th>
-              <th> {moment().subtract(5, 'days').format('M/D')}</th>
-              <th> {moment().subtract(4, 'days').format('M/D')}</th>
-              <th> {moment().subtract(3, 'days').format('M/D')}</th>
-              <th> {moment().subtract(2, 'days').format('M/D')}</th>
-              <th> {moment().subtract(1, 'days').format('M/D')}</th>
-              <th> {moment().format('M/D')} </th>
-              <th> {moment().add(1, 'days').format('M/D')}</th>
-              <th> {moment().add(2, 'days').format('M/D')}</th>
-              <th> {moment().add(3, 'days').format('M/D')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td> A </td>
-              <td
+        <Table celled definition>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell colSpan="2"> </Table.HeaderCell>
+              <Table.HeaderCell colSpan="3" textAlign='center'> ODDS </Table.HeaderCell>
+              <Table.HeaderCell colSpan="10" textAlign='center'> SCHEDULE WINDOW </Table.HeaderCell>
+            </Table.Row>
+            <Table.Row>
+              <Table.HeaderCell colSpan="2"> </Table.HeaderCell>
+              <Table.HeaderCell> Game <br /> {this.totalFormat(game.odds.total_full)} </Table.HeaderCell>
+              <Table.HeaderCell> 1H <br /> {this.totalFormat(game.odds.total_1h)} </Table.HeaderCell>
+              <Table.HeaderCell> 1Q <br /> {this.totalFormat(game.odds.total_1q)} </Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(6, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(5, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(4, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(3, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(2, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(1, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().format('M/D')} </Table.HeaderCell>
+              <Table.HeaderCell> {moment().add(1, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().add(2, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().add(3, 'days').format('M/D')}</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            <Table.Row>
+              <Table.Cell> A </Table.Cell>
+              <Table.Cell width={250}
                 style={{
                   backgroundColor: this.props.vColors.active,
                   color: "white"
@@ -131,44 +125,44 @@ class InfoTable extends React.Component {
                 onClick={() => this.toggleColor('v')}>
                   <Icon name="sync" inverted />
                 </Button>
-              </td>
-              <td> {this.oddsFormat(game.odds.away_spread_full)} <br /> {this.oddsFormat(game.odds.away_money_full)}</td>
-              <td> {this.oddsFormat(game.odds.away_spread_1h)} <br /> {this.oddsFormat(game.odds.away_money_1h)}</td>
-              <td> {this.oddsFormat(game.odds.away_spread_1q)} <br /> {this.oddsFormat(game.odds.away_money_1q)}</td>
-              <td>
+              </Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.away_spread_full)} <br /> {this.oddsFormat(game.odds.away_money_full)}</Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.away_spread_1h)} <br /> {this.oddsFormat(game.odds.away_money_1h)}</Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.away_spread_1q)} <br /> {this.oddsFormat(game.odds.away_money_1q)}</Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(5, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(4, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(3, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(2, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().subtract(1, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().add(1, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().add(2, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('v', (moment().add(3, 'days').format('YYYY-MM-DD')))}
-              </td>
-            </tr>
-            <tr>
-              <td> H </td>
-              <td
+              </Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.Cell> H </Table.Cell>
+              <Table.Cell
               style={{
                 backgroundColor: this.props.hColors.active,
                 color: "white"
@@ -182,44 +176,43 @@ class InfoTable extends React.Component {
                 onClick={() => this.toggleColor('h')}>
                   <Icon inverted name="sync" />
                 </Button>
-              </td>
-              <td> {this.oddsFormat(game.odds.home_spread_full)} <br /> {this.oddsFormat(game.odds.home_money_full)}</td>
-              <td> {this.oddsFormat(game.odds.home_spread_1h)} <br /> {this.oddsFormat(game.odds.home_money_1h)}</td>
-              <td> {this.oddsFormat(game.odds.home_spread_1q)} <br /> {this.oddsFormat(game.odds.home_money_1q)}</td>
-              <td>
+              </Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.home_spread_full)} <br /> {this.oddsFormat(game.odds.home_money_full)}</Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.home_spread_1h)} <br /> {this.oddsFormat(game.odds.home_money_1h)}</Table.Cell>
+              <Table.Cell> {this.oddsFormat(game.odds.home_spread_1q)} <br /> {this.oddsFormat(game.odds.home_money_1q)}</Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(5, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(4, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(3, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(2, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().subtract(1, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().add(1, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().add(2, 'days').format('YYYY-MM-DD')))}
-              </td>
-              <td>
+              </Table.Cell>
+              <Table.Cell>
                 {this.dateResult('h', (moment().add(3, 'days').format('YYYY-MM-DD')))}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
     );
   }
 }
