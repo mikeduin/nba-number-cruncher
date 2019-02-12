@@ -9,7 +9,36 @@ const leagueScheduleUrl =
 let now = new Date();
 
 module.exports = {
-  fetchAdvancedParams: function(games, period) {
+  fetchAdvancedPlayerParams: function (games) {
+    return {
+      LastNGames: games,
+      LeagueID: "00",
+      Location: null,
+      MeasureType: "Advanced",
+      Month: 0,
+      OpponentTeamID: 0,
+      Outcome: null,
+      PORound: 0,
+      PaceAdjust: "N",
+      PerMode: "PerGame",
+      Period: 0,
+      PlayerExperience: null,
+      PlayerPosition: null,
+      PlusMinus: "N",
+      Rank: "N",
+      Season: "2018-19",
+      SeasonSegment: null,
+      SeasonType: "Regular Season",
+      ShotClockRange: null,
+      StarterBench: null,
+      TeamID: 0,
+      TwoWay: 0,
+      VsConference: null,
+      VsDivision: null,
+      Weight: null,
+    }
+  },
+  fetchAdvancedTeamParams: function(games, period) {
     return {
       MeasureType: "Advanced",
       PerMode: "PerGame",

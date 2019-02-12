@@ -4,7 +4,7 @@ const advancedTeamStats = 'https://stats.nba.com/stats/leaguedashteamstats';
 const dbBuilders = require("../modules/dbBuilders");
 
 const updateFullTeamBuild = (games, db, period) => {
-  axios.get(advancedTeamStats, {params: dbBuilders.fetchAdvancedParams(games, period)})
+  axios.get(advancedTeamStats, {params: dbBuilders.fetchAdvancedTeamParams(games, period)})
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       dbBuilders.updateTeamDb(db, teamData);

@@ -13,32 +13,21 @@ const dateFilters = require("../modules/dateFilters");
 const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
 
-const advancedTeamStats = "https://stats.nba.com/stats/leaguedashteamstats";
-
 let now = moment().format('YYYY-MM-DD');
 
-// setInterval(()=>{
-//   oddsLoaders.sportsbookFull();
-//   oddsLoaders.sportsbookFirstH();
-//   oddsLoaders.sportsbookFirstQ();
-// }, 120000);
-// setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-// setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+setInterval(()=>{
+  oddsLoaders.sportsbookFull();
+  oddsLoaders.sportsbookFirstH();
+  oddsLoaders.sportsbookFirstQ();
+}, 120000);
+setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
-  // axios.get(advancedTeamStats, {
-  //     params: dbBuilders.fetchAdvancedParams(15, 4)
-  //   })
-  //   .then((response)=> {
-  //     let teamData = response.data.resultSets[0].rowSet;
-  //     dbBuilders.buildTeamDb('teams_q4_l15', teamData);
-  //   })
-  //   .catch((err)=>{
-  //     console.log(err);
-  //   });
+
 
   res.send({ Hi: "there" });
 });

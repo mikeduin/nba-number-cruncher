@@ -95,7 +95,7 @@ class InfoTable extends React.Component {
             <tr>
               <th colSpan="2"> </th>
               <th colSpan="3" style={{textAlign: 'center'}}> ODDS </th>
-              <th colSpan="10" style={{textAlign: 'center'}}> 10-DAY SCHEDULE WINDOW </th>
+              <th colSpan="10" style={{textAlign: 'center'}}> SCHEDULE WINDOW </th>
             </tr>
             <tr>
               <th colSpan="2"> </th>

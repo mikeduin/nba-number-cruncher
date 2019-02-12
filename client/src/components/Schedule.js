@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import { Segment, Statistic } from "semantic-ui-react";
 
 import { connect } from "react-redux";
 import { fetchWeek, setActiveDay } from "../actions";
@@ -33,21 +34,21 @@ class Schedule extends React.Component {
           to={`/schedule/${date}`}
           onClick={() => this.props.setActiveDay(date)}
         >
-          <div
-            className={`ui segment ${
+          <Segment
+            className={`${
               date === this.props.activeDay ? "inverted" : null
             }`}
           >
-            <div
-              className={`ui statistic ${
+            <Statistic
+              className={`${
                 date === this.props.activeDay ? "blue" : null
               }`}
             >
-              <div className="label">{moment(date).format("ddd")}</div>
-              <div className="value">{moment(date).format("M/D")}</div>
-              <div className="label">{countedDates[date]} Games</div>
-            </div>
-          </div>
+              <Statistic.Label>{moment(date).format("ddd")}</Statistic.Label>
+              <Statistic.Value>{moment(date).format("M/D")}</Statistic.Value>
+              <Statistic.Label>{countedDates[date]>0 ? countedDates[date] : 'NO'} Games</Statistic.Label>
+            </Statistic>
+          </Segment>
         </Link>
       );
     });
