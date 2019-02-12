@@ -139,7 +139,7 @@ class QuarterChart extends React.Component {
             <VictoryBar
               data={homeFull}
               barWidth={8}
-              style={{ data: { fill: this.props.homeData.info.color}}}
+              style={{ data: { fill: this.props.hColor}}}
               labels={(d) => d.y}
 
             />
@@ -147,47 +147,47 @@ class QuarterChart extends React.Component {
             <VictoryBar
               data={homel5}
               barWidth={4}
-              style={{ data: { fill: this.props.homeData.info.color}}}
+              style={{ data: { fill: this.props.hColor}}}
               labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
             />
 
             <VictoryBar
               data={homel10}
               barWidth={4}
-              style={{ data: { fill: this.props.homeData.info.color}}}
+              style={{ data: { fill: this.props.hColor}}}
               labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
             />
 
             <VictoryBar
               data={homel15}
               barWidth={4}
-              style={{ data: { fill: this.props.homeData.info.color}}}
+              style={{ data: { fill: this.props.hColor}}}
               labelComponent={<VictoryLabel dx={0} verticalAnchor={'middle'}/>}
             />
 
             <VictoryBar
               data={visFull}
               barWidth={8}
-              style={{ data: { fill: this.props.visData.info.color}}}
+              style={{ data: { fill: this.props.vColor}}}
               labels={(d) => d.y}
             />
 
             <VictoryBar
               data={visl5}
               barWidth={4}
-              style={{ data: { fill: this.props.visData.info.color}}}
+              style={{ data: { fill: this.props.vColor}}}
             />
 
             <VictoryBar
               data={visl10}
               barWidth={4}
-              style={{ data: { fill: this.props.visData.info.color}}}
+              style={{ data: { fill: this.props.vColor}}}
             />
 
             <VictoryBar
               data={visl15}
               barWidth={4}
-              style={{ data: { fill: this.props.visData.info.color}}}
+              style={{ data: { fill: this.props.vColor}}}
             />
 
           </VictoryGroup>

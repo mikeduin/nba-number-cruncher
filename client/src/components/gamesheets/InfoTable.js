@@ -2,13 +2,29 @@ import React from "react";
 import moment from 'moment';
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
-import { Button, Icon } from 'semantic-ui-react';
+import { Button, Icon, Link } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
   componentDidMount() {
     // console.log(this.props);
     console.log('in comp did mount ', this.props.game);
   };
+
+  oddsFormat = value => {
+    if (value > 0) {
+      return `+${value}`;
+    } else {
+      return value;
+    }
+  }
+
+  totalFormat = value => {
+    if (value) {
+      return `[${value}]`;
+    } else {
+      return '';
+    }
+  }
 
   toggleColor = (hv) => {
     let teamColors = this.props[`${hv}Colors`];
@@ -37,17 +53,17 @@ class InfoTable extends React.Component {
       if (res.stt === 'Final') {
         if (res.h[0].ta === game.info[`${hv}`][0].ta) {
           return (
-            <div>
+            <a target='blank' href={`https://www.nba.com/games/${res.gcode}#/matchup`}>
               <div> vs. {res.v[0].ta} </div>
               <div> {res.h[0].s} - {res.v[0].s} </div>
-            </div>
+            </a>
           )
         } else {
           return (
-            <div>
+            <a target='blank' href={`https://www.nba.com/games/${res.gcode}#/matchup`}>
               <div> @ {res.h[0].ta} </div>
               <div> {res.v[0].s} - {res.h[0].s} </div>
-            </div>
+            </a>
           )
         }
       } else {
@@ -78,6 +94,14 @@ class InfoTable extends React.Component {
           <thead>
             <tr>
               <th colSpan="2"> </th>
+              <th colSpan="3" style={{textAlign: 'center'}}> ODDS </th>
+              <th colSpan="10" style={{textAlign: 'center'}}> 10-DAY SCHEDULE WINDOW </th>
+            </tr>
+            <tr>
+              <th colSpan="2"> </th>
+              <th> Game <br /> {this.totalFormat(game.odds.total_full)} </th>
+              <th> 1H <br /> {this.totalFormat(game.odds.total_1h)} </th>
+              <th> 1Q <br /> {this.totalFormat(game.odds.total_1q)} </th>
               <th> {moment().subtract(6, 'days').format('M/D')}</th>
               <th> {moment().subtract(5, 'days').format('M/D')}</th>
               <th> {moment().subtract(4, 'days').format('M/D')}</th>
@@ -100,12 +124,17 @@ class InfoTable extends React.Component {
                 }}
               >
                 {game.info.v[0].tc} {game.info.v[0].tn}
-                <Button style={{backgroundColor: this.props.vColors.secondary}}
-
+                <Button style={{
+                  backgroundColor: this.props.vColors.secondary,
+                  marginLeft: 10
+                }}
                 onClick={() => this.toggleColor('v')}>
                   <Icon name="sync" inverted />
                 </Button>
               </td>
+              <td> {this.oddsFormat(game.odds.away_spread_full)} <br /> {this.oddsFormat(game.odds.away_money_full)}</td>
+              <td> {this.oddsFormat(game.odds.away_spread_1h)} <br /> {this.oddsFormat(game.odds.away_money_1h)}</td>
+              <td> {this.oddsFormat(game.odds.away_spread_1q)} <br /> {this.oddsFormat(game.odds.away_money_1q)}</td>
               <td>
                 {this.dateResult('v', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
               </td>
@@ -145,12 +174,18 @@ class InfoTable extends React.Component {
                 color: "white"
               }}
               > {game.info.h[0].tc} {game.info.h[0].tn}
-                <Button style={{backgroundColor: this.props.hColors.secondary}}
-
+                <Button
+                style={{
+                  backgroundColor: this.props.hColors.secondary,
+                  marginLeft: 10
+                }}
                 onClick={() => this.toggleColor('h')}>
                   <Icon inverted name="sync" />
                 </Button>
               </td>
+              <td> {this.oddsFormat(game.odds.home_spread_full)} <br /> {this.oddsFormat(game.odds.home_money_full)}</td>
+              <td> {this.oddsFormat(game.odds.home_spread_1h)} <br /> {this.oddsFormat(game.odds.home_money_1h)}</td>
+              <td> {this.oddsFormat(game.odds.home_spread_1q)} <br /> {this.oddsFormat(game.odds.home_money_1q)}</td>
               <td>
                 {this.dateResult('h', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
               </td>

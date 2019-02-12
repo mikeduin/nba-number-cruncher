@@ -32,6 +32,7 @@ export const fetchGame = ({gid}) => async dispatch => {
   // both Obj and Arr data types ideal for custom component injection
   let conv = {
     info: data.info,
+    odds: data.odds,
     netRatingsArr: [data.visNetRtg, data.homeNetRtg],
     paceArr: [data.visPace, data.homePace],
     hObj: {},

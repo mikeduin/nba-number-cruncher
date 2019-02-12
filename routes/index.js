@@ -66,44 +66,47 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
 
 router.get("/api/fetchGame/:gid", (req, res, next) => {
   let gid = req.params.gid;
-  knex("schedule")
-    .leftOuterJoin('odds_sportsbook as odds', 'schedule.gcode', 'odds.gcode')
-    .where({gid: gid}).then(game => {
-    let home = game[0].h[0].tid;
-    let vis = game[0].v[0].tid;
-    let hAbb = game[0].h[0].ta;
-    let vAbb = game[0].v[0].ta;
+  knex("schedule").where({gid: gid}).then(game => {
+    knex("odds_sportsbook").where({gcode: game[0].gcode}).then(odds => {
+      console.log('odds are ', odds);
 
-    let sevenAgo = moment().subtract(6, 'days').format('YYYY-MM-DD');
-    let threeAhead = moment().add(3, 'days').format('YYYY-MM-DD');
+      let home = game[0].h[0].tid;
+      let vis = game[0].v[0].tid;
+      let hAbb = game[0].h[0].ta;
+      let vAbb = game[0].v[0].ta;
 
-    knex("schedule")
-    .where('gcode', 'like', `%${hAbb}%`)
-    .whereBetween('gdte', [sevenAgo, threeAhead])
-    .orderBy('gdte')
-    .then(homeSched => {
+      let sevenAgo = moment().subtract(6, 'days').format('YYYY-MM-DD');
+      let threeAhead = moment().add(3, 'days').format('YYYY-MM-DD');
+
       knex("schedule")
-      .where('gcode', 'like', `%${vAbb}%`)
+      .where('gcode', 'like', `%${hAbb}%`)
       .whereBetween('gdte', [sevenAgo, threeAhead])
       .orderBy('gdte')
-      .then(visSched => {
-        knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
-          knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
-            knex("team_pace").where({team_id: home}).then(homePace => {
-              knex("team_pace").where({team_id: vis}).then(visPace => {
-                knex("teams").where({tid: home}).then(homeInfo => {
-                  knex("teams").where({tid: vis}).then(visInfo => {
-                    res.send({
-                      info: game[0],
-                      homeTen: homeSched,
-                      visTen: visSched,
-                      homeNetRtg: homeNetRtg[0],
-                      visNetRtg: visNetRtg[0],
-                      homePace: homePace[0],
-                      visPace: visPace[0],
-                      homeInfo: homeInfo[0],
-                      visInfo: visInfo[0]
-                    });
+      .then(homeSched => {
+        knex("schedule")
+        .where('gcode', 'like', `%${vAbb}%`)
+        .whereBetween('gdte', [sevenAgo, threeAhead])
+        .orderBy('gdte')
+        .then(visSched => {
+          knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
+            knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
+              knex("team_pace").where({team_id: home}).then(homePace => {
+                knex("team_pace").where({team_id: vis}).then(visPace => {
+                  knex("teams").where({tid: home}).then(homeInfo => {
+                    knex("teams").where({tid: vis}).then(visInfo => {
+                      res.send({
+                        info: game[0],
+                        odds: odds[0],
+                        homeTen: homeSched,
+                        visTen: visSched,
+                        homeNetRtg: homeNetRtg[0],
+                        visNetRtg: visNetRtg[0],
+                        homePace: homePace[0],
+                        visPace: visPace[0],
+                        homeInfo: homeInfo[0],
+                        visInfo: visInfo[0]
+                      });
+                    })
                   })
                 })
               })
