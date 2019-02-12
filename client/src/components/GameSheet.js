@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactTable from 'react-table';
 
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
@@ -9,6 +8,7 @@ import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
+import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
 class GameSheet extends React.Component {
   componentDidMount () {
@@ -17,14 +17,15 @@ class GameSheet extends React.Component {
 
   render () {
     let game = this.props.game;
-    if (!this.props.game.info) {
+    if (!this.props.game.info || !this.props.hPlayers[0] || !this.props.vPlayers[0]) {
       return <div> Loading ... </div>
     } else {
       return (
         <div>
         <InfoTable />
         <div className="ui grid">
-          <div className="two column row">
+          <ScenarioBuilder  />
+          <div className="three column row">
             <div className="column">
               <QuarterChart
                 homeData={game.hObj}
@@ -32,8 +33,6 @@ class GameSheet extends React.Component {
                 hColor={this.props.hColors.active}
                 vColor={this.props.vColors.active}
               />
-            </div>
-            <div className="column">
             </div>
           </div>
         </div>
@@ -49,12 +48,13 @@ class GameSheet extends React.Component {
       )
     }
   }
-
 }
 
 const mapStateToProps = state => {
   return {
     game: state.game,
+    hPlayers: state.hPlayers,
+    vPlayers: state.vPlayers,
     hColors: state.hColors,
     vColors: state.vColors
   }

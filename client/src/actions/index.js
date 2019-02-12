@@ -34,38 +34,43 @@ export const fetchGame = ({gid}) => async dispatch => {
     info: data.info,
     odds: data.odds,
     matchups: data.matchups,
-    netRatingsArr: [data.visNetRtg, data.homeNetRtg],
-    paceArr: [data.visPace, data.homePace],
+    netRatingsArr: [data.vNetRtg, data.hNetRtg],
+    paceArr: [data.vPace, data.hPace],
     hObj: {},
     vObj: {}
   };
 
-  conv.hObj.netRatings = data.homeNetRtg;
-  conv.hObj.pace = data.homePace;
-  conv.hObj.info = data.homeInfo;
-  conv.hObj.sched = data.homeTen;
-  conv.vObj.netRatings = data.visNetRtg;
-  conv.vObj.pace = data.visPace;
-  conv.vObj.info = data.visInfo;
-  conv.vObj.sched = data.visTen;
+  conv.hObj.netRatings = data.hNetRtg;
+  conv.hObj.pace = data.hPace;
+  conv.hObj.info = data.hInfo;
+  conv.hObj.sched = data.hTen;
+  conv.vObj.netRatings = data.vNetRtg;
+  conv.vObj.pace = data.vPace;
+  conv.vObj.info = data.vInfo;
+  conv.vObj.sched = data.vTen;
+
+  let hPlayers = data.hPlayers;
+  let vPlayers = data.vPlayers;
 
   let hColors = {
-    color_one: data.homeInfo.color,
-    color_two: data.homeInfo.color_2,
-    active: data.homeInfo.color,
-    secondary: data.homeInfo.color_2
+    color_one: data.hInfo.color,
+    color_two: data.hInfo.color_2,
+    active: data.hInfo.color,
+    secondary: data.hInfo.color_2
   };
 
   let vColors = {
-    color_one: data.visInfo.color,
-    color_two: data.visInfo.color_2,
-    active: data.visInfo.color,
-    secondary: data.visInfo.color_2
+    color_one: data.vInfo.color,
+    color_two: data.vInfo.color_2,
+    active: data.vInfo.color,
+    secondary: data.vInfo.color_2
   };
 
   dispatch({ type: 'FETCH_GAME', payload: conv});
   dispatch({ type: 'SET_H_COLOR', payload: hColors });
   dispatch({ type: 'SET_V_COLOR', payload: vColors });
+  dispatch({ type: 'SET_H_PLAYERS', payload: hPlayers });
+  dispatch({ type: 'SET_V_PLAYERS', payload: vPlayers });
 }
 
 export const changeTeamColor = (hv, colorObj) => async dispatch => {

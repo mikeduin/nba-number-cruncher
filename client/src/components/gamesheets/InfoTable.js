@@ -2,7 +2,6 @@ import React from "react";
 import moment from 'moment';
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
-import { Link } from 'react-router-dom';
 import { Button, Icon, Table, Grid } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
@@ -86,8 +85,6 @@ class InfoTable extends React.Component {
   }
 
   dateResult = (hv, date) => {
-    let game = this.props.game;
-
     let res = this.props.game[`${hv}Obj`].sched.find(entry => {
       return entry.gdte === date;
     });

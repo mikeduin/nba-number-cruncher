@@ -16,13 +16,13 @@ const oddsLoaders = require("../modules/oddsLoaders");
 
 let now = moment().format('YYYY-MM-DD');
 
-// setInterval(()=>{
-//   oddsLoaders.sportsbookFull();
-//   oddsLoaders.sportsbookFirstH();
-//   oddsLoaders.sportsbookFirstQ();
-// }, 120000);
-// setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-// setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+setInterval(()=>{
+  oddsLoaders.sportsbookFull();
+  oddsLoaders.sportsbookFirstH();
+  oddsLoaders.sportsbookFirstQ();
+}, 120000);
+setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
@@ -60,8 +60,8 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   let gid = req.params.gid;
   knex("schedule").where({gid: gid}).then(game => {
     knex("odds_sportsbook").where({gcode: game[0].gcode}).then(odds => {
-      let home = game[0].h[0].tid;
-      let vis = game[0].v[0].tid;
+      let h = game[0].h[0].tid;
+      let v = game[0].v[0].tid;
       let hAbb = game[0].h[0].ta;
       let vAbb = game[0].v[0].ta;
 
@@ -72,35 +72,41 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
       .where('gcode', 'like', `%${hAbb}%`)
       .whereBetween('gdte', [sevenAgo, threeAhead])
       .orderBy('gdte')
-      .then(homeSched => {
+      .then(hSched => {
         knex("schedule")
         .where('gcode', 'like', `%${vAbb}%`)
         .whereBetween('gdte', [sevenAgo, threeAhead])
         .orderBy('gdte')
-        .then(visSched => {
-          knex("team_net_ratings").where({team_id: home}).then(homeNetRtg => {
-            knex("team_net_ratings").where({team_id: vis}).then(visNetRtg => {
-              knex("team_pace").where({team_id: home}).then(homePace => {
-                knex("team_pace").where({team_id: vis}).then(visPace => {
-                  knex("teams").where({tid: home}).then(homeInfo => {
-                    knex("teams").where({tid: vis}).then(visInfo => {
+        .then(vSched => {
+          knex("team_net_ratings").where({team_id: h}).then(hNetRtg => {
+            knex("team_net_ratings").where({team_id: v}).then(vNetRtg => {
+              knex("team_pace").where({team_id: h}).then(hPace => {
+                knex("team_pace").where({team_id: v}).then(vPace => {
+                  knex("teams").where({tid: h}).then(hInfo => {
+                    knex("teams").where({tid: v}).then(vInfo => {
                       knex("schedule")
                       .where('gcode', 'like', `%${hAbb}${vAbb}%`)
                       .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`)
                       .then(matchups => {
-                        res.send({
-                          info: game[0],
-                          odds: odds[0],
-                          homeTen: homeSched,
-                          visTen: visSched,
-                          matchups: matchups,
-                          homeNetRtg: homeNetRtg[0],
-                          visNetRtg: visNetRtg[0],
-                          homePace: homePace[0],
-                          visPace: visPace[0],
-                          homeInfo: homeInfo[0],
-                          visInfo: visInfo[0]
-                        });
+                        knex("player_data").where({team_id: h}).then(hPlayers => {
+                          knex("player_data").where({team_id: v}).then(vPlayers => {
+                            res.send({
+                              info: game[0],
+                              odds: odds[0],
+                              hTen: hSched,
+                              vTen: vSched,
+                              matchups: matchups,
+                              hNetRtg: hNetRtg[0],
+                              vNetRtg: vNetRtg[0],
+                              hPace: hPace[0],
+                              vPace: vPace[0],
+                              hInfo: hInfo[0],
+                              vInfo: vInfo[0],
+                              hPlayers: hPlayers,
+                              vPlayers: vPlayers
+                            });
+                          })
+                        })
                       })
                     })
                   })
@@ -116,55 +122,55 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 
 
 
-const updateFullTeamBuilds = schedule.scheduleJob("3 14 * * *", () => {
+const updateFullTeamBuilds = schedule.scheduleJob("13 6 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })
 
-const updateStarterBuilds = schedule.scheduleJob("4 14 * * *", () => {
+const updateStarterBuilds = schedule.scheduleJob("14 6 * * *", () => {
   updateTeamStats.updateStarterBuilds();
 })
 
-const updateBenchBuilds = schedule.scheduleJob("5 14 * * *", () => {
+const updateBenchBuilds = schedule.scheduleJob("15 6 * * *", () => {
   updateTeamStats.updateBenchBuilds();
 })
 
-const updateQ1Builds = schedule.scheduleJob("6 14 * * *", () => {
+const updateQ1Builds = schedule.scheduleJob("16 6 * * *", () => {
   updateTeamStats.updateQ1Builds();
 })
 
-const updateQ2Builds = schedule.scheduleJob("7 14 * * *", () => {
+const updateQ2Builds = schedule.scheduleJob("17 6 * * *", () => {
   updateTeamStats.updateQ2Builds();
 })
 
-const updateQ3Builds = schedule.scheduleJob("8 14 * * *", () => {
+const updateQ3Builds = schedule.scheduleJob("18 6 * * *", () => {
   updateTeamStats.updateQ3Builds();
 })
 
-const updateQ4Builds = schedule.scheduleJob("9 14 * * *", () => {
+const updateQ4Builds = schedule.scheduleJob("19 6 * * *", () => {
   updateTeamStats.updateQ4Builds();
 })
 
-const updateFullPlayersBuild = schedule.scheduleJob("10 14 * * *", () => {
+const updateFullPlayersBuild = schedule.scheduleJob("20 6 * * *", () => {
   updatePlayerStats.updatePlayerStatBuilds();
 })
 
-const updateSchedule = schedule.scheduleJob("11 14 * * *", () => {
+const updateSchedule = schedule.scheduleJob("21 6 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapTeamNetRatings = schedule.scheduleJob("12 14 * * *", () => {
+const mapTeamNetRatings = schedule.scheduleJob("22 6 * * *", () => {
   dbMappers.mapTeamNetRatings();
 })
 
-const mapTeamPace = schedule.scheduleJob("13 14 * * *", () => {
+const mapTeamPace = schedule.scheduleJob("23 6 * * *", () => {
   dbMappers.mapTeamPace();
 })
 
-const mapFullPlayerData = schedule.scheduleJob("14 14 * * *", () => {
+const mapFullPlayerData = schedule.scheduleJob("24 6 * * *", () => {
   dbMappers.mapFullPlayerData();
 })
 
-const mapSegmentedPlayerData = schedule.scheduleJob("15 14 * * *", () => {
+const mapSegmentedPlayerData = schedule.scheduleJob("25 6 * * *", () => {
   dbMappers.mapSegmentedPlayerData();
 })
 

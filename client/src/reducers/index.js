@@ -6,6 +6,8 @@ import todaysGamesReducer from './todaysGamesReducer';
 import activeDayReducer from './activeDayReducer';
 import hColorReducer from './hColorReducer';
 import vColorReducer from './vColorReducer';
+import hPlayersReducer from './hPlayersReducer';
+import vPlayersReducer from './vPlayersReducer';
 
 export default combineReducers ({
   netRatings: netRatingsReducer,
@@ -14,5 +16,7 @@ export default combineReducers ({
   todaysGames: todaysGamesReducer,
   activeDay: activeDayReducer,
   hColors: hColorReducer,
-  vColors: vColorReducer
+  vColors: vColorReducer,
+  hPlayers: hPlayersReducer,
+  vPlayers: vPlayersReducer
 })
