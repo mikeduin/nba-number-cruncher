@@ -2,7 +2,7 @@ import React from "react";
 import moment from 'moment';
 import { connect } from "react-redux";
 import { changeTeamColor } from "../../actions";
-import { Button } from 'semantic-ui-react';
+import { Button, Icon } from 'semantic-ui-react';
 
 class InfoTable extends React.Component {
   componentDidMount() {
@@ -10,15 +10,20 @@ class InfoTable extends React.Component {
     console.log('in comp did mount ', this.props.game);
   };
 
-  toggleColor = (e) => {
-    console.log(e.target.value);
+  toggleColor = (hv) => {
+    let teamColors = this.props[`${hv}Colors`];
+    let current = teamColors.active;
+    let colorObj = {}
 
-    // if (teamInfo.color === teamInfo.color_active) {
-    //   let color = teamInfo.color_2;
-    // } else {
-    //   let color = teamInfo.color;
-    // };
-    this.props.changeTeamColor();
+    if (current === teamColors.color_one) {
+      colorObj.active = teamColors.color_two;
+      colorObj.secondary = teamColors.color_one;
+    } else {
+      colorObj.active = teamColors.color_one;
+      colorObj.secondary = teamColors.color_two;
+    }
+
+    this.props.changeTeamColor(hv, colorObj);
   };
 
   dateResult = (hv, date) => {
@@ -66,7 +71,6 @@ class InfoTable extends React.Component {
   }
 
   render() {
-    console.log(this.props.game);
     let game = this.props.game;
     return (
       <div>
@@ -91,14 +95,16 @@ class InfoTable extends React.Component {
               <td> A </td>
               <td
                 style={{
-                  backgroundColor: game.vObj.info.color_active,
+                  backgroundColor: this.props.vColors.active,
                   color: "white"
                 }}
               >
                 {game.info.v[0].tc} {game.info.v[0].tn}
-                <button className="ui button" value={'vObj'} onClick={this.toggleColor}>
-                  <i className="sync alternate icon" />
-                </button>
+                <Button style={{backgroundColor: this.props.vColors.secondary}}
+
+                onClick={() => this.toggleColor('v')}>
+                  <Icon name="sync" inverted />
+                </Button>
               </td>
               <td>
                 {this.dateResult('v', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
@@ -133,9 +139,16 @@ class InfoTable extends React.Component {
             </tr>
             <tr>
               <td> H </td>
-              <td> {game.info.h[0].tc} {game.info.h[0].tn}
-                <Button value={'vObj'} onClick={this.toggleColor}>
-                  <i className="sync alternate icon" />
+              <td
+              style={{
+                backgroundColor: this.props.hColors.active,
+                color: "white"
+              }}
+              > {game.info.h[0].tc} {game.info.h[0].tn}
+                <Button style={{backgroundColor: this.props.hColors.secondary}}
+
+                onClick={() => this.toggleColor('h')}>
+                  <Icon inverted name="sync" />
                 </Button>
               </td>
               <td>
@@ -178,7 +191,9 @@ class InfoTable extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    game: state.game
+    game: state.game,
+    hColors: state.hColors,
+    vColors: state.vColors
   };
 }
 

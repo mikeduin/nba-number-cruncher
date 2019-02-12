@@ -115,7 +115,9 @@ class GameSheet extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    game: state.game
+    game: state.game,
+    hColors: state.hColors,
+    vColors: state.vColors
   }
 }
 

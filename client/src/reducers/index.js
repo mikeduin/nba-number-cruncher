@@ -4,8 +4,8 @@ import gameWeekReducer from './gameWeekReducer';
 import gameReducer from './gameReducer';
 import todaysGamesReducer from './todaysGamesReducer';
 import activeDayReducer from './activeDayReducer';
-import homeColorReducer from './homeColorReducer';
-import visColorReducer from './visColorReducer';
+import hColorReducer from './hColorReducer';
+import vColorReducer from './vColorReducer';
 
 export default combineReducers ({
   netRatings: netRatingsReducer,
@@ -13,6 +13,6 @@ export default combineReducers ({
   game: gameReducer,
   todaysGames: todaysGamesReducer,
   activeDay: activeDayReducer,
-  homeColors: homeColorReducer,
-  visColors: visColorReducer
+  hColors: hColorReducer,
+  vColors: vColorReducer
 })
