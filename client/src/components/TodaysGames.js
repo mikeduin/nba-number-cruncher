@@ -8,12 +8,7 @@ import { fetchGame } from "../actions";
 class TodaysGames extends React.Component {
   state = { visible: true };
 
-  componentDidMount() {
-    console.log(this.props);
-  }
-
   hideSidebar = () => {
-    console.log('gets here');
     this.setState({ visible: false });
   };
 
@@ -28,9 +23,11 @@ class TodaysGames extends React.Component {
           to={`/gamesheet/${game.gid}`}
           style={{ display: "inline" }}
           onClick={this.props.fetchGame(game.gid)}
+          fitted='vertically'
         >
           <Item.Image size="mini" src={`/images/logos/${game.v[0].ta}.svg`} />
           {game.v[0].ta}
+          <br />
           <Item.Image size="mini" src={`/images/logos/${game.h[0].ta}.svg`} />
           {game.h[0].ta}
         </Menu.Item>
@@ -42,7 +39,7 @@ class TodaysGames extends React.Component {
     return (
       <div>
         <Sidebar animation={"push"} direction={"bottom"} visible={this.state.visible}>
-          <Menu inverted={true}>
+          <Menu fluid widths={10} inverted={true}>
             <Menu.Item
               style={{ textAlign: "center" }}
               onClick={this.hideSidebar}

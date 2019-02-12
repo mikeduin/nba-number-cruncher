@@ -30,6 +30,9 @@ export const fetchGame = ({gid}) => async dispatch => {
   let response = await fetch(`/api/fetchGame/${gid}`);
   let data = await response.json();
   // both Obj and Arr data types ideal for custom component injection
+
+  console.log('data is ', data);
+
   let conv = {
     info: data.info,
     netRatingsArr: [data.visNetRtg, data.homeNetRtg],
@@ -44,6 +47,7 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.visObj.netRatings = data.visNetRtg;
   conv.visObj.pace = data.visPace;
   conv.visObj.info = data.visInfo;
+
 
   dispatch({ type: 'FETCH_GAME', payload: conv});
 }
