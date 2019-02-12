@@ -7,6 +7,7 @@ const moment = require("moment");
 const cheerio = require('cheerio');
 
 const updateTeamStats = require("../modules/updateTeamStats");
+const updatePlayerStats = require("../modules/updatePlayerStats");
 const dbBuilders = require("../modules/dbBuilders");
 const dbMappers = require("../modules/dbMappers");
 const dateFilters = require("../modules/dateFilters");
@@ -15,18 +16,25 @@ const oddsLoaders = require("../modules/oddsLoaders");
 
 let now = moment().format('YYYY-MM-DD');
 
-setInterval(()=>{
-  oddsLoaders.sportsbookFull();
-  oddsLoaders.sportsbookFirstH();
-  oddsLoaders.sportsbookFirstQ();
-}, 120000);
-setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+// setInterval(()=>{
+//   oddsLoaders.sportsbookFull();
+//   oddsLoaders.sportsbookFirstH();
+//   oddsLoaders.sportsbookFirstQ();
+// }, 120000);
+// setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+// setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+
+setTimeout(()=>{
+  console.log('timeout fn reached');
+  updatePlayerStats.updatePlayerStatBuilds()}, 5000)
+
+// updatePlayerStats.updatePlayerStatBuilds();
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
+  console.log('hello');
 
 
   res.send({ Hi: "there" });
