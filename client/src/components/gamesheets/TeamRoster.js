@@ -14,12 +14,12 @@ class TeamRoster extends React.Component {
     return team.map(player => {
       return (
         <Table.Row key={player.id}>
-          <Table.HeaderCell> {player.player_name} </Table.HeaderCell>
-          <Table.HeaderCell> {player.min_full} </Table.HeaderCell>
-          <Table.HeaderCell> {player.net_rtg_full} </Table.HeaderCell>
-          <Table.HeaderCell> {player.off_rtg_full} </Table.HeaderCell>
-          <Table.HeaderCell> {player.def_rtg_full} </Table.HeaderCell>
-          <Table.HeaderCell> {player.pace_full} </Table.HeaderCell>
+          <Table.Cell> {player.player_name} </Table.Cell>
+          <Table.Cell> {player.min_full} </Table.Cell>
+          <Table.Cell> {player.net_rtg_full} </Table.Cell>
+          <Table.Cell> {player.off_rtg_full} </Table.Cell>
+          <Table.Cell> {player.def_rtg_full} </Table.Cell>
+          <Table.Cell> {player.pace_full} </Table.Cell>
         </Table.Row>
       )
     })
@@ -33,7 +33,7 @@ class TeamRoster extends React.Component {
       return <div> Loading ... </div>
     } else {
       return (
-        <Table>
+        <Table compact style={{fontSize: 10}}>
           <Table.Header>
             <Table.Row textAlign='center'>
               <Table.HeaderCell

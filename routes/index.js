@@ -60,22 +60,23 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
   let gid = req.params.gid;
   knex("schedule").where({gid: gid}).then(game => {
     knex("odds_sportsbook").where({gcode: game[0].gcode}).then(odds => {
+
       let h = game[0].h[0].tid;
       let v = game[0].v[0].tid;
       let hAbb = game[0].h[0].ta;
       let vAbb = game[0].v[0].ta;
 
-      let sevenAgo = moment().subtract(6, 'days').format('YYYY-MM-DD');
-      let threeAhead = moment().add(3, 'days').format('YYYY-MM-DD');
+      let nineAgo = moment().subtract(8, 'days').format('YYYY-MM-DD');
+      let oneAhead = moment().add(1, 'days').format('YYYY-MM-DD');
 
       knex("schedule")
       .where('gcode', 'like', `%${hAbb}%`)
-      .whereBetween('gdte', [sevenAgo, threeAhead])
+      .whereBetween('gdte', [nineAgo, oneAhead])
       .orderBy('gdte')
       .then(hSched => {
         knex("schedule")
         .where('gcode', 'like', `%${vAbb}%`)
-        .whereBetween('gdte', [sevenAgo, threeAhead])
+        .whereBetween('gdte', [nineAgo, oneAhead])
         .orderBy('gdte')
         .then(vSched => {
           knex("team_net_ratings").where({team_id: h}).then(hNetRtg => {

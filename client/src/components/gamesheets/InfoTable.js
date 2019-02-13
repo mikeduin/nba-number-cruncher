@@ -41,7 +41,7 @@ class InfoTable extends React.Component {
     let game = this.props.game;
     if (!hv) {
       return (
-        <div key={res.gcode}>
+        <div key={res.gcode} style={{fontSize: 10}}>
           {moment(res.gdte).format('M/D')}:
           <a target='blank' href={`https://www.nba.com/games/${res.gcode}#/matchup`}>
             <div> {res.v[0].ta} {res.v[0].s} @  </div>
@@ -123,6 +123,8 @@ class InfoTable extends React.Component {
               <Table.HeaderCell> Game <br /> {this.totalFormat(game.odds.total_full)} </Table.HeaderCell>
               <Table.HeaderCell> 1H <br /> {this.totalFormat(game.odds.total_1h)} </Table.HeaderCell>
               <Table.HeaderCell> 1Q <br /> {this.totalFormat(game.odds.total_1q)} </Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(8, 'days').format('M/D')}</Table.HeaderCell>
+              <Table.HeaderCell> {moment().subtract(7, 'days').format('M/D')}</Table.HeaderCell>
               <Table.HeaderCell> {moment().subtract(6, 'days').format('M/D')}</Table.HeaderCell>
               <Table.HeaderCell> {moment().subtract(5, 'days').format('M/D')}</Table.HeaderCell>
               <Table.HeaderCell> {moment().subtract(4, 'days').format('M/D')}</Table.HeaderCell>
@@ -131,11 +133,9 @@ class InfoTable extends React.Component {
               <Table.HeaderCell> {moment().subtract(1, 'days').format('M/D')}</Table.HeaderCell>
               <Table.HeaderCell> {moment().format('M/D')} </Table.HeaderCell>
               <Table.HeaderCell> {moment().add(1, 'days').format('M/D')}</Table.HeaderCell>
-              <Table.HeaderCell> {moment().add(2, 'days').format('M/D')}</Table.HeaderCell>
-              <Table.HeaderCell> {moment().add(3, 'days').format('M/D')}</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
-          <Table.Body>
+          <Table.Body style={{fontSize: 11}}>
             <Table.Row>
               <Table.Cell style={{fontWeight: 700, backgroundColor: 'rgb(0,0,0,.03)'}}> A </Table.Cell>
               <Table.Cell
@@ -156,6 +156,12 @@ class InfoTable extends React.Component {
               <Table.Cell> {this.oddsFormat(game.odds.away_spread_full)} <br /> {this.oddsFormat(game.odds.away_money_full)}</Table.Cell>
               <Table.Cell> {this.oddsFormat(game.odds.away_spread_1h)} <br /> {this.oddsFormat(game.odds.away_money_1h)}</Table.Cell>
               <Table.Cell> {this.oddsFormat(game.odds.away_spread_1q)} <br /> {this.oddsFormat(game.odds.away_money_1q)}</Table.Cell>
+              <Table.Cell>
+                {this.dateResult('v', (moment().subtract(8, 'days').format('YYYY-MM-DD')))}
+              </Table.Cell>
+              <Table.Cell>
+                {this.dateResult('v', (moment().subtract(7, 'days').format('YYYY-MM-DD')))}
+              </Table.Cell>
               <Table.Cell>
                 {this.dateResult('v', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
               </Table.Cell>
@@ -180,12 +186,6 @@ class InfoTable extends React.Component {
               <Table.Cell>
                 {this.dateResult('v', (moment().add(1, 'days').format('YYYY-MM-DD')))}
               </Table.Cell>
-              <Table.Cell>
-                {this.dateResult('v', (moment().add(2, 'days').format('YYYY-MM-DD')))}
-              </Table.Cell>
-              <Table.Cell>
-                {this.dateResult('v', (moment().add(3, 'days').format('YYYY-MM-DD')))}
-              </Table.Cell>
             </Table.Row>
             <Table.Row>
               <Table.Cell style={{fontWeight: 700, backgroundColor: 'rgb(0,0,0,.03)'}}> H </Table.Cell>
@@ -207,6 +207,12 @@ class InfoTable extends React.Component {
               <Table.Cell> {this.oddsFormat(game.odds.home_spread_full)} <br /> {this.oddsFormat(game.odds.home_money_full)}</Table.Cell>
               <Table.Cell> {this.oddsFormat(game.odds.home_spread_1h)} <br /> {this.oddsFormat(game.odds.home_money_1h)}</Table.Cell>
               <Table.Cell> {this.oddsFormat(game.odds.home_spread_1q)} <br /> {this.oddsFormat(game.odds.home_money_1q)}</Table.Cell>
+              <Table.Cell>
+                {this.dateResult('h', (moment().subtract(8, 'days').format('YYYY-MM-DD')))}
+              </Table.Cell>
+              <Table.Cell>
+                {this.dateResult('h', (moment().subtract(7, 'days').format('YYYY-MM-DD')))}
+              </Table.Cell>
               <Table.Cell>
                 {this.dateResult('h', (moment().subtract(6, 'days').format('YYYY-MM-DD')))}
               </Table.Cell>
@@ -230,12 +236,6 @@ class InfoTable extends React.Component {
               </Table.Cell>
               <Table.Cell>
                 {this.dateResult('h', (moment().add(1, 'days').format('YYYY-MM-DD')))}
-              </Table.Cell>
-              <Table.Cell>
-                {this.dateResult('h', (moment().add(2, 'days').format('YYYY-MM-DD')))}
-              </Table.Cell>
-              <Table.Cell>
-                {this.dateResult('h', (moment().add(3, 'days').format('YYYY-MM-DD')))}
               </Table.Cell>
             </Table.Row>
           </Table.Body>

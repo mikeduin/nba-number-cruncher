@@ -18,29 +18,21 @@ class ScenarioBuilder extends React.Component {
     } else {
       return (
         <div>
-          <Grid columns={3}>
-            <Grid.Row>
-              <Grid.Column>
-                { this.props.vPlayers[1] ?
-                  <TeamRoster
-                    players={this.props.vPlayers}
-                    hv={'v'}
-                    /> : null
-                }
-              </Grid.Column>
-              <Grid.Column>
 
-              </Grid.Column>
-              <Grid.Column>
+              { this.props.vPlayers[1] ?
+                <TeamRoster
+                  players={this.props.vPlayers}
+                  hv={'v'}
+                  /> : null
+              }
+
               { this.props.hPlayers[1] ?
                 <TeamRoster
                   players={this.props.hPlayers}
                   hv={'h'}
                   /> : null
               }
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
+
         </div>
       );
     }
