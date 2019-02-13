@@ -35,6 +35,31 @@ router.get("/", (req, res, next) => {
   res.send({ Hi: "there" });
 });
 
+router.get("/gameWatcher", (req, res, next) => {
+  knex("schedule").where({gdte: now}).then(todayGames => {
+    // are these box scores active in-game? otherwise how can I get this data?
+    // https://data.nba.net/prod/v1/20190212/0021800848_boxscore.json
+    console.log('watching game');
+  })
+})
+
+router.get("/parsePlayByPlay", (req, res, next) => {
+  axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json').then(pbp => {
+    pbp.data.g.pd.forEach((period, i) => {
+      let subs = period.pla.filter(play => play.etype === 8);
+      console.log('subs for quarter ', i+1, ' are ', subs);
+      // .filter(play => {
+      //   return play.etype === 8;
+      // })
+      // .then(subs => {
+      //   console.log(subs);
+      // })
+    })
+  })
+})
+
+
+
 router.get("/api/getNetRatings", (req, res, next) => {
   knex("team_net_ratings").then(netRatings => {
     res.send(netRatings);
