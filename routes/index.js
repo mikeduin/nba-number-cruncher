@@ -43,6 +43,12 @@ router.get("/gameWatcher", (req, res, next) => {
   })
 })
 
+// https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json
+// starters are listed in here
+
+// https://stats.nba.com/stats/boxscoresummaryv2?GameID=0021800848
+// inactive players, officials, easy line score noted in here
+
 router.get("/parsePlayByPlay", (req, res, next) => {
   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json').then(pbp => {
     pbp.data.g.pd.forEach((period, i) => {
@@ -55,6 +61,33 @@ router.get("/parsePlayByPlay", (req, res, next) => {
       //   console.log(subs);
       // })
     })
+  })
+})
+
+
+
+router.get("/fetchStarters", (req, res, next) => {
+  axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
+    let h = game.data.g.hls;
+    let v = game.data.g.vls;
+    let home = {
+      tid: h.tid,
+      starters: h.pstsg.slice(0,5).map(player => player.pid),
+      bench: h.pstsg.slice(5, h.pstsg.length).map(player => player.pid)
+    };
+
+    let vis = {
+      tid: v.tid,
+      starters: v.pstsg.slice(0,5).map(player => player.pid),
+      bench: v.pstsg.slice(5, v.pstsg.length).map(player => player.pid)
+    };
+
+    let rosters = {
+      h: home,
+      v: vis
+    };
+
+    console.log(rosters)
   })
 })
 
