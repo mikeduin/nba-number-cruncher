@@ -24,8 +24,8 @@ class GameSheet extends React.Component {
         <div>
         <InfoTable />
         <div className="ui grid">
-          <ScenarioBuilder  />
-          <div className="three column row">
+
+          <div className="two column row">
             <div className="column">
               <QuarterChart
                 homeData={game.hObj}

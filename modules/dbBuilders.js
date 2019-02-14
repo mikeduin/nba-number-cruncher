@@ -526,7 +526,7 @@ module.exports = {
           "*"
         )
         .then(team => {
-          console.log(team[0], " has been updated in the ", db, " db");
+          console.log(team[0].team_name, " has been updated in the ", db, " db");
         });
     });
   },

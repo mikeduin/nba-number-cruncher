@@ -20,7 +20,7 @@ setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
-}, 120000);
+}, 10000);
 setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
@@ -52,16 +52,38 @@ router.get("/gameWatcher", (req, res, next) => {
 router.get("/parsePlayByPlay", (req, res, next) => {
   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json').then(pbp => {
     pbp.data.g.pd.forEach((period, i) => {
-      let subs = period.pla.filter(play => play.etype === 8);
-      console.log('subs for quarter ', i+1, ' are ', subs);
-      // .filter(play => {
-      //   return play.etype === 8;
-      // })
-      // .then(subs => {
-      //   console.log(subs);
-      // })
+      let subEvents = period.pla.filter(play => play.etype === 8);
+      console.log(subEvents.length);
+
+      let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
+
+      starters.forEach(pid => {
+        let subIns = [0];
+        let subOuts = [];
+
+        subEvents.forEach(event => {
+          if (parseInt(event.epid) === pid) {
+            subIns.push(event.cl);
+          };
+
+          if (event.pid === pid) {
+            subOuts.push(event.cl);
+          }
+        });
+
+        console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
+      });
     })
   })
+})
+
+router.get("parseLiveBoxScore", (req, res, next) => {
+    // const stats = await axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json");
+    axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json").then(stats => {
+      console.log(stats);
+    });
+
+
 })
 
 

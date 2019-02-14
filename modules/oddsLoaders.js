@@ -14,6 +14,10 @@ module.exports = {
         if (response.status === 200) {
           let lines = webScrapeHelpers.parseSbHtml(response.data);
           lines.forEach(line => {
+            if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
+              console.log('there is no line yet for',line.id);
+              return;
+            };
             let parsed = webScrapeHelpers.sbLineParser(line);
             knex("odds_sportsbook")
               .where({ sb_id: line.id })
