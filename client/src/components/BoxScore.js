@@ -1,10 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { fetchBoxScore } from '../actions';
 import { Table } from 'semantic-ui-react';
 
 class BoxScore extends React.Component {
   componentDidMount () {
-    console.log(this.props);
+    this.props.fetchBoxScore();
   }
 
   render () {
@@ -36,4 +37,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect (mapStateToProps, { }) (BoxScore);
+export default connect (mapStateToProps, { fetchBoxScore }) (BoxScore);

@@ -1,5 +1,5 @@
 // import _ from 'lodash';
-// import axios from 'axios';
+import axios from 'axios';
 import moment from 'moment';
 
 let today = moment().format('YYYY-MM-DD');
@@ -84,4 +84,11 @@ export const getTodaysGames = () => async dispatch => {
 
 export const setActiveDay = (date) => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
+}
+
+export const fetchBoxScore = id => async dispatch => {
+  let stats = await axios.get("/fetchBoxScore");
+  let response = stats.data;
+  console.log(response);
+
 }
