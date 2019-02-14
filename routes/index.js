@@ -20,7 +20,7 @@ setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
-}, 10000);
+}, 200000);
 setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
@@ -77,12 +77,10 @@ router.get("/parsePlayByPlay", (req, res, next) => {
   })
 })
 
-router.get("parseLiveBoxScore", (req, res, next) => {
-    // const stats = await axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json");
-    axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json").then(stats => {
-      console.log(stats);
-    });
+router.get("/parseLiveBoxScore", async (req, res, next) => {
+    let stats = await axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json");
 
+    console.log(stats.data);
 
 })
 
@@ -124,8 +122,8 @@ router.get("/api/getNetRatings", (req, res, next) => {
 router.get("/api/fetchWeek/:date", (req, res, next) => {
   let week = dateFilters.fetchGmWk(req.params.date);
   let weekArray = dateFilters.fetchGmWkArrays(week);
-  knex("schedule")
-    .where({ gweek: week })
+  knex("schedule as s").innerJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
+    .where('s.gweek', week)
     .orderBy('etm')
     .then(games => {
       res.send({

@@ -14,11 +14,14 @@ class Header extends React.Component {
   render () {
     return (
       <div className="ui pointing menu">
-        <Link to="/netratings" className="item">
-          Net Ratings
-        </Link>
         <Link to="/schedule" className="item" onClick={this.setActiveDay}>
           Schedule
+        </Link>
+        <Link to="/gamblecast" className="item">
+          GambleCast
+        </Link>
+        <Link to="/netratings" className="item">
+          Net Ratings
         </Link>
       </div>
     )
