@@ -20,8 +20,20 @@ class Header extends React.Component {
         <Link to="/gamblecast" className="item">
           GambleCast
         </Link>
+        <Link to="" className="item">
+          Teams
+        </Link>
+        <Link to="" className="item">
+          Tools
+        </Link>
+        <Link to="" className="item">
+          Research
+        </Link>
         <Link to="/netratings" className="item">
           Net Ratings
+        </Link>
+        <Link to="/netratings" className="item">
+          Daily Digest
         </Link>
       </div>
     )

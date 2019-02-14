@@ -82,12 +82,13 @@ export const getTodaysGames = () => async dispatch => {
   dispatch ({type: 'DAILY_GAMES', payload: null});
 }
 
-export const setActiveDay = (date) => async dispatch => {
+export const setActiveDay = date => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
 
-export const fetchBoxScore = id => async dispatch => {
-  let stats = await axios.get("/fetchBoxScore");
+export const fetchBoxScore = (id, todayInt) => async dispatch => {
+  let todayInt = moment().format('YYYYMMDD');
+  let stats = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = stats.data;
   console.log(response);
 

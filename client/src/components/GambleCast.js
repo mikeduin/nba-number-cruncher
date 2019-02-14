@@ -6,7 +6,7 @@ class GambleCast extends React.Component {
   renderBoxScores = () => {
     return this.props.games.map(game => {
       return (
-        <BoxScore key={game.gid} game={game.gid}/>
+        <BoxScore key={game.gid} game={game}/>
       )
     })
   }

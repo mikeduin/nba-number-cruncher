@@ -77,8 +77,11 @@ router.get("/parsePlayByPlay", (req, res, next) => {
   })
 })
 
-router.get("/fetchBoxScore", async (req, res, next) => {
-  let stats = await axios.get("https://data.nba.net/prod/v1/20190213/0021800862_boxscore.json");
+router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
+  let { gid, date } = req.params;
+  let url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
+  let stats = await axios.get(url);
+
   res.send(stats.data);
 })
 
