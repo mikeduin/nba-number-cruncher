@@ -59,50 +59,58 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => {
     return player.pid;
-  })
-
+  });
   const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => {
     return player.pid;
-  })
-
+  });
   let activePlayers = hStarters.concat(vStarters);
 
   let timeObj = {};
 
   activePlayers.forEach(player => {
-    timeObj[`pid_${player}`] = [[0]]
+    timeObj[`pid_${player}`] = {
+      active: true,
+      onCourt: [[0]]
+    };
   });
 
-  console.log(timeObj);
+  let pbp = await axios.get(pbpUrl);
+
+  pbp.data.g.pd.forEach((period, i) => {
+    let subEvents = period.pla.filter(play => play.etype === 8);
+    console.log(subEvents);
+
+    subEvents.forEach(event => {
+      // seconds into quarter
+      let secs = (
+        ((11-parseInt(event.cl.slice(0, 2)))*60)
+        +
+        (60-parseInt(event.cl.slice(3, 5)))
+      );
+      console.log('clock is ', event.cl, ' and secs are ', secs);
+    })
 
 
+    // let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
+    //
+    // starters.forEach(pid => {
+    //   let subIns = [0];
+    //   let subOuts = [];
+    //
+    //   subEvents.forEach(event => {
+    //     if (parseInt(event.epid) === pid) {
+    //       subIns.push(event.cl);
+    //     };
+    //
+    //     if (event.pid === pid) {
+    //       subOuts.push(event.cl);
+    //     }
+    //   });
+    //
+    //   console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
+    // });
+  })
 
-  // axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json')
-  // .then(pbp => {
-  //   pbp.data.g.pd.forEach((period, i) => {
-  //     let subEvents = period.pla.filter(play => play.etype === 8);
-  //     console.log(subEvents.length);
-  //
-  //     let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
-  //
-  //     starters.forEach(pid => {
-  //       let subIns = [0];
-  //       let subOuts = [];
-  //
-  //       subEvents.forEach(event => {
-  //         if (parseInt(event.epid) === pid) {
-  //           subIns.push(event.cl);
-  //         };
-  //
-  //         if (event.pid === pid) {
-  //           subOuts.push(event.cl);
-  //         }
-  //       });
-  //
-  //       console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
-  //     });
-  //   })
-  // })
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
