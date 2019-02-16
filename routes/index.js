@@ -50,19 +50,32 @@ router.get("/gameWatcher", (req, res, next) => {
 // https://stats.nba.com/stats/boxscoresummaryv2?GameID=0021800848
 // inactive players, officials, easy line score noted in here
 
-router.get("/parsePlayByPlay", (req, res, next) => {
-  let gid = 0021800848;
-  let pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/00${gid}_full_pbp.json`;
-  let gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
+router.get("/parsePlayByPlay", async (req, res, next) => {
+  const gid = 0021800848;
+  const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/00${gid}_full_pbp.json`;
+  const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
 
+  const gDetail = await axios.get(gameDetailUrl);
 
-  axios.get(gameDetailUrl).then(gDetail => {
-    let hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => {
-      return player.pid;
-    })
-
-    console.log(hStarters);
+  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => {
+    return player.pid;
   })
+
+  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => {
+    return player.pid;
+  })
+
+  let activePlayers = hStarters.concat(vStarters);
+
+  let timeObj = {};
+
+  activePlayers.forEach(player => {
+    timeObj[`pid_${player}`] = [[0]]
+  });
+
+  console.log(timeObj);
+
+
 
   // axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json')
   // .then(pbp => {
