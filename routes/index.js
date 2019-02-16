@@ -57,59 +57,71 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   const gDetail = await axios.get(gameDetailUrl);
 
-  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => {
-    return player.pid;
-  });
-  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => {
-    return player.pid;
-  });
+  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => player.pid);
+  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => player.pid);
   let activePlayers = hStarters.concat(vStarters);
-
-  let timeObj = {};
+  let gameStints = {};
 
   activePlayers.forEach(player => {
-    timeObj[`pid_${player}`] = {
-      active: true,
-      onCourt: [[0]]
-    };
+    gameStints[`pid_${player}`] = [[0]];
   });
 
   let pbp = await axios.get(pbpUrl);
 
   pbp.data.g.pd.forEach((period, i) => {
     let subEvents = period.pla.filter(play => play.etype === 8);
-    console.log(subEvents);
+    // console.log(subEvents);
 
     subEvents.forEach(event => {
-      // seconds into quarter
-      let secs = (
-        ((11-parseInt(event.cl.slice(0, 2)))*60)
-        +
-        (60-parseInt(event.cl.slice(3, 5)))
-      );
-      console.log('clock is ', event.cl, ' and secs are ', secs);
+      let secs = ( (i*720) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
+      // console.log('quarter is ', i+1 ,' clock is ', event.cl, ' and secs are ', secs);
+
+      // player entering = event.epid
+      // player exiting = event.pid
+
+      // HANDLE ENTERING PLAYER
+      // first check to see if player has entered game yet by seeing if they exist in gameStints
+      if (Object.keys(gameStints).indexOf(`pid_${event.epid}`) !== -1) {
+        // then check to see if player has not been logged as exiting due to subbing between quarters
+        // do this by checking to ensure last gameStint array has length of 2
+        // if length of 1, push second value from beg of current quarter
+        if (gameStints
+          [`pid_${event.epid}`]
+          [(gameStints[`pid_${event.epid}`].length)-1].length === 1
+        ) {
+          gameStints
+          [`pid_${event.epid}`]
+          [(gameStints[`pid_${event.epid}`].length)-1].push(i*720)
+        } else {
+          // if player exists in gameStints and last exit has been logged, push new entry array
+          gameStints[`pid_${event.epid}`].push([secs]);
+        }
+      } else {
+        // if player has not entered game, create key / push first entry array
+        gameStints[`pid_${event.epid}`] = [[secs]];
+      };
+
+      // HANDLE EXITING PLAYER
+      // first check to see if player exists in gameStints; if not, they entered in between quarters
+      if (Object.keys(gameStints).indexOf(`pid_${event.pid}`) !== -1) {
+        if (gameStints
+          [`pid_${event.pid}`]
+          [(gameStints[`pid_${event.pid}`].length)-1].length === 1
+        ) {
+          gameStints
+          [`pid_${event.pid}`]
+          [(gameStints[`pid_${event.pid}`].length)-1].push(secs);
+        } else {
+          gameStints[`pid_${event.pid}`].push([i*720, secs]);
+        } 
+      } else {
+        gameStints[`pid_${event.pid}`] = [[i*720, secs]];
+      }
+
     })
-
-
-    // let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
-    //
-    // starters.forEach(pid => {
-    //   let subIns = [0];
-    //   let subOuts = [];
-    //
-    //   subEvents.forEach(event => {
-    //     if (parseInt(event.epid) === pid) {
-    //       subIns.push(event.cl);
-    //     };
-    //
-    //     if (event.pid === pid) {
-    //       subOuts.push(event.cl);
-    //     }
-    //   });
-    //
-    //   console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
-    // });
   })
+
+  console.log(gameStints);
 
 })
 
