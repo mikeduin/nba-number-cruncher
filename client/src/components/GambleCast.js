@@ -3,6 +3,10 @@ import { connect } from 'react-redux';
 import BoxScore from './BoxScore';
 
 class GambleCast extends React.Component {
+  componentDidMount () {
+    console.log(this.props);
+  }
+
   renderBoxScores = () => {
     return this.props.games.map(game => {
       return (
@@ -26,7 +30,8 @@ class GambleCast extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    games: state.todaysGames
+    games: state.todaysGames,
+    gambleCast: state.gambleCast
   }
 }
 

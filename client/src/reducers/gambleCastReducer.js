@@ -1,6 +1,6 @@
 export default (state = {}, action) => {
   switch (action.type) {
-    case 'FETCH_GAME':
+    case 'UPDATE_LIVE_SCORE':
       return action.payload;
     default:
       return state;

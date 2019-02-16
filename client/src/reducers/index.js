@@ -1,22 +1,24 @@
 import { combineReducers } from 'redux';
-import netRatingsReducer from './netRatingsReducer';
-import gameWeekReducer from './gameWeekReducer';
-import gameReducer from './gameReducer';
-import todaysGamesReducer from './todaysGamesReducer';
-import activeDayReducer from './activeDayReducer';
-import hColorReducer from './hColorReducer';
-import vColorReducer from './vColorReducer';
-import hPlayersReducer from './hPlayersReducer';
-import vPlayersReducer from './vPlayersReducer';
+import netRatings from './netRatingsReducer';
+import week from './gameWeekReducer';
+import game from './gameReducer';
+import todaysGames from './todaysGamesReducer';
+import activeDay from './activeDayReducer';
+import hColors from './hColorReducer';
+import vColors from './vColorReducer';
+import hPlayers from './hPlayersReducer';
+import vPlayers from './vPlayersReducer';
+import gambleCast from './gambleCastReducer';
 
 export default combineReducers ({
-  netRatings: netRatingsReducer,
-  week: gameWeekReducer,
-  game: gameReducer,
-  todaysGames: todaysGamesReducer,
-  activeDay: activeDayReducer,
-  hColors: hColorReducer,
-  vColors: vColorReducer,
-  hPlayers: hPlayersReducer,
-  vPlayers: vPlayersReducer
+  netRatings,
+  week,
+  game,
+  todaysGames,
+  activeDay,
+  hColors,
+  vColors,
+  hPlayers,
+  vPlayers,
+  gambleCast
 })

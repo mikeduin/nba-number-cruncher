@@ -45,44 +45,136 @@ router.get("/gameWatcher", (req, res, next) => {
 
 // https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json
 // starters are listed in here
+// hit this first and collect the first five players in vls/hls --> pstsg ... these are starters
 
 // https://stats.nba.com/stats/boxscoresummaryv2?GameID=0021800848
 // inactive players, officials, easy line score noted in here
 
 router.get("/parsePlayByPlay", (req, res, next) => {
-  axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json').then(pbp => {
-    pbp.data.g.pd.forEach((period, i) => {
-      let subEvents = period.pla.filter(play => play.etype === 8);
-      console.log(subEvents.length);
+  let gid = 0021800848;
+  let pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/00${gid}_full_pbp.json`;
+  let gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
 
-      let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
 
-      starters.forEach(pid => {
-        let subIns = [0];
-        let subOuts = [];
-
-        subEvents.forEach(event => {
-          if (parseInt(event.epid) === pid) {
-            subIns.push(event.cl);
-          };
-
-          if (event.pid === pid) {
-            subOuts.push(event.cl);
-          }
-        });
-
-        console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
-      });
+  axios.get(gameDetailUrl).then(gDetail => {
+    let hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => {
+      return player.pid;
     })
+
+    console.log(hStarters);
   })
+
+  // axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/0021800848_full_pbp.json')
+  // .then(pbp => {
+  //   pbp.data.g.pd.forEach((period, i) => {
+  //     let subEvents = period.pla.filter(play => play.etype === 8);
+  //     console.log(subEvents.length);
+  //
+  //     let starters = [ 2544, 1628398, 201580, 1627742, 203493 ];
+  //
+  //     starters.forEach(pid => {
+  //       let subIns = [0];
+  //       let subOuts = [];
+  //
+  //       subEvents.forEach(event => {
+  //         if (parseInt(event.epid) === pid) {
+  //           subIns.push(event.cl);
+  //         };
+  //
+  //         if (event.pid === pid) {
+  //           subOuts.push(event.cl);
+  //         }
+  //       });
+  //
+  //       console.log('checkins for ', pid, ' are ', subIns, ' and checkouts are ', subOuts);
+  //     });
+  //   })
+  // })
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
-  let { gid, date } = req.params;
-  let url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
-  let stats = await axios.get(url);
+  const { gid, date } = req.params;
+  const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
+  const boxScore = await axios.get(url);
 
-  res.send(stats.data);
+  let { period, clock } = boxScore.data.basicGameData;
+
+  const calcPoss = (fga, to, fta, oreb) => {
+    console.log('fga is ', fga, ' to is ', to, ' fta is ', fta, ' oreb is ', oreb);
+    return (0.96*((fga+to+(0.44*fta)-oreb)));
+  };
+
+  const calcFgPct = (fgm, fga) => {
+    return (((fgm/fga)*100).toFixed(1));
+  }
+
+  if (period.current === 0) {
+    console.log(gid, ' has not started');
+  } else {
+    let { hTeam, vTeam } = boxScore.data.stats;
+
+    // let hStats = { {fga, fgm, fta, offReb, pFouls, points, turnovers} = hTeam.totals }
+    //
+    // console.log(
+    //   'hTeam.totals.fga are ', hTeam.totals.fga, ' and hTeam.totals.fta are ', hTeam.totals.fta, ' and hTeam.totals.turnovers are ', hTeam.totals.turnovers, ' and hTeam.totals.offReb are ', hTeam.totals.offReb
+    // );
+
+    let poss = calcPoss(
+      (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
+      (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
+      (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
+      (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
+    let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+    let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+
+    let hStats = {
+      fgPct: hFgPct,
+      points: hTeam.totals.points,
+      fouls: hTeam.totals.pFouls
+    };
+
+    let vStats = {
+      fgPct: vFgPct,
+      points: vTeam.totals.points,
+      fouls: vTeam.totals.pFouls
+    };
+
+    if (period.current === 1 && period.isEndOfPeriod) {
+      knex("box_scores").where({gid: gid}).then(entry => {
+        if (!entry[0]) {
+          knex("box_scores").insert({
+            gid: gid,
+            h_pts_1q: hTeam.totals.points,
+            h_fga_1q: hTeam.totals.fga,
+            h_fgm_1q: hTeam.totals.fgm,
+            h_fg_pct_1q: hFgPct,
+            h_fta_1q: hTeam.totals.fta,
+            h_to_1q: hTeam.totals.turnovers,
+            h_off_reb_1q: hTeam.totals.offReb,
+            h_fouls_1q: hTeam.totals.pFouls,
+            v_pts_1q: vTeam.totals.points,
+            v_fga_1q: vTeam.totals.fga,
+            v_fgm_1q: vTeam.totals.fgm,
+            v_fg_pct_1q: vFgPct,
+            v_fta_1q: vTeam.totals.fta,
+            v_to_1q: vTeam.totals.turnovers,
+            v_off_reb_1q: vTeam.totals.offReb,
+            v_fouls_1q: vTeam.totals.pFouls,
+            period_updated: 1,
+            updated_at: new Date()
+          }, '*').then()
+        } else {
+          console.log('1Q period has already been entered');
+          return;
+        }
+      })
+    }
+
+    let info = { clock, period, poss, hStats, vStats };
+
+    res.send({stats: info});
+    // res.send(boxScore.data);
+  };
 })
 
 
@@ -202,55 +294,55 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 
 
 
-const updateFullTeamBuilds = schedule.scheduleJob("13 6 * * *", () => {
+const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
   updateTeamStats.updateFullTeamBuilds();
 })
 
-const updateStarterBuilds = schedule.scheduleJob("14 6 * * *", () => {
+const updateStarterBuilds = schedule.scheduleJob("17 14 * * *", () => {
   updateTeamStats.updateStarterBuilds();
 })
 
-const updateBenchBuilds = schedule.scheduleJob("15 6 * * *", () => {
+const updateBenchBuilds = schedule.scheduleJob("18 14 * * *", () => {
   updateTeamStats.updateBenchBuilds();
 })
 
-const updateQ1Builds = schedule.scheduleJob("16 6 * * *", () => {
+const updateQ1Builds = schedule.scheduleJob("19 14 * * *", () => {
   updateTeamStats.updateQ1Builds();
 })
 
-const updateQ2Builds = schedule.scheduleJob("17 6 * * *", () => {
+const updateQ2Builds = schedule.scheduleJob("20 14 * * *", () => {
   updateTeamStats.updateQ2Builds();
 })
 
-const updateQ3Builds = schedule.scheduleJob("18 6 * * *", () => {
+const updateQ3Builds = schedule.scheduleJob("21 14 * * *", () => {
   updateTeamStats.updateQ3Builds();
 })
 
-const updateQ4Builds = schedule.scheduleJob("19 6 * * *", () => {
+const updateQ4Builds = schedule.scheduleJob("22 14 * * *", () => {
   updateTeamStats.updateQ4Builds();
 })
 
-const updateFullPlayersBuild = schedule.scheduleJob("20 6 * * *", () => {
+const updateFullPlayersBuild = schedule.scheduleJob("23 14 * * *", () => {
   updatePlayerStats.updatePlayerStatBuilds();
 })
 
-const updateSchedule = schedule.scheduleJob("21 6 * * *", () => {
+const updateSchedule = schedule.scheduleJob("24 14 * * *", () => {
   dbBuilders.updateSchedule();
 })
 
-const mapTeamNetRatings = schedule.scheduleJob("22 6 * * *", () => {
+const mapTeamNetRatings = schedule.scheduleJob("25 4 * * *", () => {
   dbMappers.mapTeamNetRatings();
 })
 
-const mapTeamPace = schedule.scheduleJob("23 6 * * *", () => {
+const mapTeamPace = schedule.scheduleJob("26 14 * * *", () => {
   dbMappers.mapTeamPace();
 })
 
-const mapFullPlayerData = schedule.scheduleJob("24 6 * * *", () => {
+const mapFullPlayerData = schedule.scheduleJob("27 14 * * *", () => {
   dbMappers.mapFullPlayerData();
 })
 
-const mapSegmentedPlayerData = schedule.scheduleJob("25 6 * * *", () => {
+const mapSegmentedPlayerData = schedule.scheduleJob("28 14 * * *", () => {
   dbMappers.mapSegmentedPlayerData();
 })
 

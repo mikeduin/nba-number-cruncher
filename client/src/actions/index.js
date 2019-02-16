@@ -91,5 +91,16 @@ export const fetchBoxScore = (id, todayInt) => async dispatch => {
   let stats = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = stats.data;
   console.log(response);
+  console.log('response.period is ', response.stats.period);
+
+  let liveInfo = {
+    gid: id,
+    period: response.stats.period.current,
+    clock: response.stats.clock,
+    hStats: response.stats.hStats,
+    vStats: response.stats.vStats,
+  }
+
+  dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
 
 }

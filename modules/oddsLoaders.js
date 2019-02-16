@@ -88,6 +88,10 @@ module.exports = {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
+          if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
+            console.log('there is no 1H line yet for',line.id);
+            return;
+          };
           let parsed = webScrapeHelpers.sbLineParser(line);
           knex("odds_sportsbook")
             .where({ gcode: parsed.gcode })
@@ -123,6 +127,10 @@ module.exports = {
         } else {
           console.log("2H lines are ", lines);
           lines.forEach(line => {
+            if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
+              console.log('there is no 2H line yet for',line.id);
+              return;
+            };
             let parsed = webScrapeHelpers.sbLineParser(line);
             knex("odds_sportsbook")
               .where({ gcode: parsed.gcode })
@@ -156,6 +164,10 @@ module.exports = {
       if (response.status === 200) {
         let lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
+          if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
+            console.log('there is no 1Q line yet for',line.id);
+            return;
+          };
           let parsed = webScrapeHelpers.sbLineParser(line);
           knex("odds_sportsbook")
             .where({ gcode: parsed.gcode })
@@ -191,6 +203,10 @@ module.exports = {
         } else {
           console.log("3Q lines are ", lines);
           lines.forEach(line => {
+            if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
+              console.log('there is no 3Q line yet for',line.id);
+              return;
+            };
             let parsed = webScrapeHelpers.sbLineParser(line);
             console.log("parsed 3Q is ", parsed);
             knex("odds_sportsbook")
