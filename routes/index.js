@@ -68,13 +68,20 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   let pbp = await axios.get(pbpUrl);
 
+  console.log('activePlayers are ', activePlayers);
+  console.log('gameStints are ', gameStints);
+
   pbp.data.g.pd.forEach((period, i) => {
     let subEvents = period.pla.filter(play => play.etype === 8);
     // console.log(subEvents);
 
+
     subEvents.forEach(event => {
+    // period.pla.forEach(event => {
+
       let secs = ( (i*720) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
-      // console.log('quarter is ', i+1 ,' clock is ', event.cl, ' and secs are ', secs);
+
+      // console.log('secs is ', secs, ' event is ', event);
 
       // player entering = event.epid
       // player exiting = event.pid
@@ -84,14 +91,13 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
       if (Object.keys(gameStints).indexOf(`pid_${event.epid}`) !== -1) {
         // then check to see if player has not been logged as exiting due to subbing between quarters
         // do this by checking to ensure last gameStint array has length of 2
-        // if length of 1, push second value from beg of current quarter
-        if (gameStints
-          [`pid_${event.epid}`]
-          [(gameStints[`pid_${event.epid}`].length)-1].length === 1
+        if (
+          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].length === 1
         ) {
-          gameStints
-          [`pid_${event.epid}`]
-          [(gameStints[`pid_${event.epid}`].length)-1].push(i*720)
+          // if length of 1, push value from beg of Q to complete last entry weekArray
+          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].push(i*720);
+          // then push current second value to new array to add new entry
+          gameStints[`pid_${event.epid}`].push([secs]);
         } else {
           // if player exists in gameStints and last exit has been logged, push new entry array
           gameStints[`pid_${event.epid}`].push([secs]);
@@ -104,6 +110,7 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
       // HANDLE EXITING PLAYER
       // first check to see if player exists in gameStints; if not, they entered in between quarters
       if (Object.keys(gameStints).indexOf(`pid_${event.pid}`) !== -1) {
+        //
         if (gameStints
           [`pid_${event.pid}`]
           [(gameStints[`pid_${event.pid}`].length)-1].length === 1
@@ -113,10 +120,23 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
           [(gameStints[`pid_${event.pid}`].length)-1].push(secs);
         } else {
           gameStints[`pid_${event.pid}`].push([i*720, secs]);
-        } 
+        }
       } else {
         gameStints[`pid_${event.pid}`] = [[i*720, secs]];
-      }
+      };
+
+      // if (event.etype !== 8) {
+      //   if (event.pid !== 0 && event.pid !== event.tid) {
+      //     if (
+      //       gameStints[`pid_${event.pid}`]
+      //       [(gameStints[`pid_${event.pid}`].length)-1].length !== 1) {
+      //       console.log('event is ', event.evt, ' player is ', event.pid, ' gameStints is ', gameStints[`pid_${event.pid}`]);
+      //     } else {
+      //       console.log('player is in game');
+      //     }
+      //   }
+      // };
+
 
     })
   })
