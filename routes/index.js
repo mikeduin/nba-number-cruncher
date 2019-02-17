@@ -62,11 +62,11 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
 
-  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => player.pid);
-  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => player.pid);
-
   const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
   const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
+
+  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => player.pid);
+  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => player.pid);
 
   let activePlayers = hStarters.concat(vStarters);
   let gameStints = {};
@@ -79,15 +79,31 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   let lastPlayers = _.uniq(pbp.data.g.pd[pbp.data.g.pd.length-1].pla
     .filter(play => play.pid > 0)
-    .map(filtered => filtered.pid))
+    .map(filtered => filtered.pid));
 
   let lastPlayersAdj = _.pull(lastPlayers, hTid, vTid);
+
+  const periods = pbp.data.g.pd.length;
+
+  const startPeriodSec = (i) => {
+    if (i < 4) {
+      return (i*720);
+    } else {
+      return (2880 + ((i-4)*300));
+    };
+  };
 
   pbp.data.g.pd.forEach((period, i) => {
     let subEvents = period.pla.filter(play => play.etype === 8);
 
     subEvents.forEach(event => {
-      let secs = ( (i*720) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
+      let secs = 0;
+
+      if (i < 4) {
+        secs = ( startPeriodSec(i) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
+      } else {
+        secs = ( startPeriodSec(i) + ((4-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))) )
+      };
 
       // player entering = event.epid
       // player exiting = event.pid
@@ -102,7 +118,7 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
         ) {
           // if length of 1, push value from beg of Q to complete last entry weekArray
           // CHANGE THIS TO END OF LAST Q FOR WHICH THEY'D ENTERED
-          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].push(i*720);
+          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].push(startPeriodSec(i));
           // then push current second value to new array to add new entry
           gameStints[`pid_${event.epid}`].push([secs]);
         } else {
@@ -125,10 +141,11 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
           [`pid_${event.pid}`]
           [(gameStints[`pid_${event.pid}`].length)-1].push(secs);
         } else {
-          gameStints[`pid_${event.pid}`].push([i*720, secs]);
+          gameStints[`pid_${event.pid}`].push([startPeriodSec(i), secs]);
         }
       } else {
-        gameStints[`pid_${event.pid}`] = [[i*720, secs]];
+        // player not yet in gameStints, add entry/exit for current period
+        gameStints[`pid_${event.pid}`] = [[startPeriodSec(i), secs]];
       };
     })
   })
@@ -138,12 +155,16 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
     if (
       gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
       &&
-      gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < 2160
+      gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < startPeriodSec(periods-1)
     ) {
-      gameStints[`pid_${player}`].push([2160])
+      gameStints[`pid_${player}`].push([startPeriodSec(periods-1)])
     };
   })
 
+  // Add final checkouts at end of game for players with open last arrays
+
+
+  console.log(gameStints);
 
 })
 
