@@ -15,6 +15,9 @@ const dateFilters = require("../modules/dateFilters");
 const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
 
+// remove this after more testing
+const buildGameStints = require("../modules/buildGameStints");
+
 let now = moment().format('YYYY-MM-DD');
 
 setInterval(()=>{
@@ -25,8 +28,12 @@ setInterval(()=>{
 setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
+// setTimeout(()=>{
+//   dbBuilders.buildGameStintsDb();
+// }, 3000)
+
 setTimeout(()=>{
-  dbBuilders.buildGameStintsDb();
+  buildGameStints.buildSubData(21800063);
 }, 3000)
 
 

@@ -20,6 +20,7 @@ module.exports = {
 
     const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.min > 0).map(player => player.pid);
     const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.min > 0).map(player => player.pid);
+    const allPlayers = hPlayers.concat(vPlayers);
 
     let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
     let gameStints = {};
@@ -30,24 +31,36 @@ module.exports = {
 
     let pbp = await axios.get(pbpUrl);
 
-    let lastPlayers = _.uniq(pbp.data.g.pd[pbp.data.g.pd.length-1].pla
-      .filter(play => play.pid > 0)
-      .map(filtered => filtered.pid));
-
-    let lastPlayersAdj = _.pull(lastPlayers, hTid, vTid);
+    // Need to compile active players for each Q in case player enters early, leaves outside of Q, and never comes back
+    let periodPlayers = [];
 
     const periods = pbp.data.g.pd.length;
 
-    const startPeriodSec = (i) => {
-      if (i < 4) {
-        return (i*720);
+    const startPeriodSec = (per) => {
+      if (per < 4) {
+        return (per*720);
       } else {
-        return (2880 + ((i-4)*300));
+        return (2880 + ((per-4)*300));
       };
     };
 
+    const checkPeriodStart = (secs) => {
+      if (secs < 2880) {
+        return (Math.floor(secs/720));
+      } else {
+        return (Math.floor(secs-2880) / 300);
+      };
+    }
+
     pbp.data.g.pd.forEach((period, i) => {
       let subEvents = period.pla.filter(play => play.etype === 8);
+      let iPlayers = _.uniq(period.pla
+        // this filter removes fouls to prevent coaches being looped in as player ID's ... (!@#$@)
+        .filter(play => allPlayers.indexOf(play.pid) !== -1)
+        // .filter(play => play.pid > 0)
+        .map(filtered => filtered.pid));
+
+      periodPlayers.push(_.pull(iPlayers, hTid, vTid));
 
       subEvents.forEach(event => {
         let secs = 0;
@@ -105,53 +118,68 @@ module.exports = {
     })
 
     // Compare players in 4th (/last) Q to ensure no one entered during pre-4Q and never came out
-    lastPlayersAdj.forEach(player => {
-      if (
-        gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
-        &&
-        gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < startPeriodSec(periods-1)
-      ) {
-        gameStints[`pid_${player}`].push([startPeriodSec(periods-1)])
-      };
-    })
+      periodPlayers[periodPlayers.length-1].forEach(player => {
+        if (
+          gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
+          &&
+          gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < startPeriodSec(periods-1)
+        ) {
+          gameStints[`pid_${player}`].push([startPeriodSec(periods-1)])
+        };
+      })
 
     // Add final checkouts at end of game for players with open last arrays
-    _.forOwn(gameStints, (value, key) => {
-      if (value[value.length-1].length === 1) {
-        value[value.length-1].push(startPeriodSec(periods));
-      };
-    });
+      allPlayers.forEach(player => {
+        if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
+          for (var i = periodPlayers.length-1; i > 0; i--) {
+            if (periodPlayers[i].indexOf(player) !== -1) {
+              gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
+              break;
+            };
+          }
+        }
+      })
 
-    hPlayers.forEach(player => {
-      let stints = gameStints[`pid_${player}`];
+    console.log(gameStints);
 
-      knex("player_game_stints").insert({
-        player_id: player,
-        team_id: hTid,
-        gid: gid,
-        gcode: gcode,
-        gdte: gdte,
-        game_stints: stints,
-        updated_at: new Date()
-      }, '*').then(inserted => {
-        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-      });
-    })
+    // hPlayers.forEach(player => {
+    //   let stints = gameStints[`pid_${player}`];
+    //
+    //   knex("player_game_stints").insert({
+    //     player_id: player,
+    //     team_id: hTid,
+    //     gid: gid,
+    //     gcode: gcode,
+    //     gdte: gdte,
+    //     game_stints: stints,
+    //     updated_at: new Date()
+    //   }, '*').then(inserted => {
+    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+    //   });
+    // });
 
-    vPlayers.forEach(player => {
-      let stints = gameStints[`pid_${player}`];
-
-      knex("player_game_stints").insert({
-        player_id: player,
-        team_id: vTid,
-        gid: gid,
-        gcode: gcode,
-        gdte: gdte,
-        game_stints: stints,
-        updated_at: new Date()
-      }, '*').then(inserted => {
-        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-      });
-    })
+    // vPlayers.forEach((player, i) => {
+    //   let stints = gameStints[`pid_${player}`];
+    //
+    //   knex("player_game_stints").insert({
+    //     player_id: player,
+    //     team_id: vTid,
+    //     gid: gid,
+    //     gcode: gcode,
+    //     gdte: gdte,
+    //     game_stints: stints,
+    //     updated_at: new Date()
+    //   }, '*').then(inserted => {
+    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+    //     if (i === vPlayers.length - 1) {
+    //       knex("schedule").where({ gid: gid   }).update({
+    //         game_stints: true,
+    //         updated_at: new Date()
+    //       }).then((res) => {
+    //         console.log(gid, ' game stint updates have concluded');
+    //       })
+    //     }
+    //   });
+    // })
   }
 }

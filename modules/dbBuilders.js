@@ -10,7 +10,7 @@ const leagueScheduleUrl =
 let now = new Date();
 
 module.exports = {
-  fetchAdvancedPlayerParams: (games) => {
+  fetchAdvancedPlayerParams: games => {
     return {
       DateFrom: "",
       DateTo: "",
@@ -35,8 +35,8 @@ module.exports = {
       SeasonType: "Regular Season",
       StarterBench: "",
       VsConference: "",
-      VsDivision: "",
-    }
+      VsDivision: ""
+    };
   },
   fetchAdvancedTeamParams: (games, period) => {
     return {
@@ -85,13 +85,30 @@ module.exports = {
       StarterBench: lineup
     };
   },
-  buildGameStintsDb: async () => {
-    // This is the initial function to populate the game_stints DB from games already played during season
-    let games = await knex("schedule").pluck("gid").whereNotNull("gweek").limit(10);
-    games.forEach(game => {
-      buildGameStints.buildSubData(game);
-    })
-  },
+  // buildGameStintsDb: async () => {
+  //   // This is the initial function to populate the game_stints DB from games already played during season
+  //   let games = await knex("schedule")
+  //     .pluck("gid")
+  //     .whereNotNull("gweek")
+  //     .where({ stt: "Final" })
+  //     .limit(10);
+  //
+  //   games.forEach(game => {
+  //     buildGameStints.buildSubData(game);
+  //   });
+  // },
+  // addGameStints: async () => {
+  //   // This is the in-season function to add game stints each night after games conclude
+  //   let games = await knex("schedule")
+  //     .pluck("gid")
+  //     .whereNotNull("gweek")
+  //     .where({ stt: "Final" })
+  //     .whereNull("game_stints");
+  //
+  //   games.forEach(game => {
+  //     buildGameStints.buildSubData(game);
+  //   });
+  // },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
     axios.get(leagueScheduleUrl).then(response => {
@@ -175,93 +192,11 @@ module.exports = {
     });
   },
   buildPlayerDb: (db, arrayData) => {
-  // This function builds out the initial player DB and should only need to be run at the beginning of each season
+    // This function builds out the initial player DB and should only need to be run at the beginning of each season
     arrayData.forEach(player => {
-      knex(db).insert({
-        player_id: player[0],
-        player_name: player[1],
-        team_id: player[2],
-        team_abbreviation: player[3],
-        age: player[4],
-        gp: player[5],
-        w: player[6],
-        l: player[7],
-        w_pct: player[8],
-        min: player[9],
-        eoff_rating: player[10],
-        off_rating: player[11],
-        sp_work_off_rating: player[12],
-        edef_rating: player[13],
-        def_rating: player[14],
-        sp_work_def_rating: player[15],
-        enet_rating: player[16],
-        net_rating: player[17],
-        sp_work_net_rating: player[18],
-        ast_pct: player[19],
-        ast_to: player[20],
-        ast_ratio: player[21],
-        oreb_pct: player[22],
-        dreb_pct: player[23],
-        reb_pct: player[24],
-        tm_tov_pct: player[25],
-        efg_pct: player[26],
-        ts_pct: player[27],
-        usg_pct: player[28],
-        epace: player[29],
-        pace: player[30],
-        sp_work_pace: player[31],
-        pie: player[32],
-        fgm: player[33],
-        fga: player[34],
-        fgm_pg: player[35],
-        fga_pg: player[36],
-        fg_pct: player[37],
-        gp_rank: player[38],
-        w_rank: player[39],
-        l_rank: player[40],
-        w_pct_rank: player[41],
-        min_rank: player[42],
-        eoff_rating_rank: player[43],
-        off_rating_rank: player[44],
-        sp_work_off_rating_rank: player[45],
-        edef_rating_rank: player[46],
-        def_rating_rank: player[47],
-        sp_work_def_rating_rank: player[48],
-        enet_rating_rank: player[49],
-        net_rating_rank: player[50],
-        sp_work_net_rating_rank: player[51],
-        ast_pct_rank: player[52],
-        ast_to_rank: player[53],
-        ast_ratio_rank: player[54],
-        oreb_pct_rank: player[55],
-        dreb_pct_rank: player[56],
-        reb_pct_rank: player[57],
-        tm_tov_pct_rank: player[58],
-        efg_pct_rank: player[59],
-        ts_pct_rank: player[60],
-        usg_pct_rank: player[61],
-        epace_rank: player[62],
-        pace_rank: player[63],
-        sp_work_pace_rank: player[64],
-        pie_rank: player[65],
-        fgm_rank: player[66],
-        fga_rank: player[67],
-        fgm_pg_rank: player[68],
-        fga_pg_rank: player[69],
-        fg_pct_rank: player[70],
-        cfid: player[71],
-        cfparams: player[72],
-        updated_at: new Date()
-      }, '*').then(entered => {
-        console.log(entered.player_name, ' entered into player db');
-      })
-    })
-  },
-  updatePlayerDb: (db, arrayData) => {
-    arrayData.forEach(player => {
-      knex(db).where({player_id: player[0]}).then(res => {
-        if (!res[0]) {
-          knex(db).insert({
+      knex(db)
+        .insert(
+          {
             player_id: player[0],
             player_name: player[1],
             team_id: player[2],
@@ -336,90 +271,190 @@ module.exports = {
             cfid: player[71],
             cfparams: player[72],
             updated_at: new Date()
-          }, '*').then(entered => {
-            console.log(entered[0].player_name, ' entered into ', db);
-          })
-        } else {
-          knex(db).where({player_id: player[0]}).update({
-            team_id: player[2],
-            team_abbreviation: player[3],
-            age: player[4],
-            gp: player[5],
-            w: player[6],
-            l: player[7],
-            w_pct: player[8],
-            min: player[9],
-            eoff_rating: player[10],
-            off_rating: player[11],
-            sp_work_off_rating: player[12],
-            edef_rating: player[13],
-            def_rating: player[14],
-            sp_work_def_rating: player[15],
-            enet_rating: player[16],
-            net_rating: player[17],
-            sp_work_net_rating: player[18],
-            ast_pct: player[19],
-            ast_to: player[20],
-            ast_ratio: player[21],
-            oreb_pct: player[22],
-            dreb_pct: player[23],
-            reb_pct: player[24],
-            tm_tov_pct: player[25],
-            efg_pct: player[26],
-            ts_pct: player[27],
-            usg_pct: player[28],
-            epace: player[29],
-            pace: player[30],
-            sp_work_pace: player[31],
-            pie: player[32],
-            fgm: player[33],
-            fga: player[34],
-            fgm_pg: player[35],
-            fga_pg: player[36],
-            fg_pct: player[37],
-            gp_rank: player[38],
-            w_rank: player[39],
-            l_rank: player[40],
-            w_pct_rank: player[41],
-            min_rank: player[42],
-            eoff_rating_rank: player[43],
-            off_rating_rank: player[44],
-            sp_work_off_rating_rank: player[45],
-            edef_rating_rank: player[46],
-            def_rating_rank: player[47],
-            sp_work_def_rating_rank: player[48],
-            enet_rating_rank: player[49],
-            net_rating_rank: player[50],
-            sp_work_net_rating_rank: player[51],
-            ast_pct_rank: player[52],
-            ast_to_rank: player[53],
-            ast_ratio_rank: player[54],
-            oreb_pct_rank: player[55],
-            dreb_pct_rank: player[56],
-            reb_pct_rank: player[57],
-            tm_tov_pct_rank: player[58],
-            efg_pct_rank: player[59],
-            ts_pct_rank: player[60],
-            usg_pct_rank: player[61],
-            epace_rank: player[62],
-            pace_rank: player[63],
-            sp_work_pace_rank: player[64],
-            pie_rank: player[65],
-            fgm_rank: player[66],
-            fga_rank: player[67],
-            fgm_pg_rank: player[68],
-            fga_pg_rank: player[69],
-            fg_pct_rank: player[70],
-            updated_at: new Date()
-          }, '*').then(updated => {
-            console.log(updated[0].player_name, ' updated in ', db);
-          })
-        }
-      })
-    })
+          },
+          "*"
+        )
+        .then(entered => {
+          console.log(entered.player_name, " entered into player db");
+        });
+    });
+  },
+  updatePlayerDb: (db, arrayData) => {
+    arrayData.forEach(player => {
+      knex(db)
+        .where({ player_id: player[0] })
+        .then(res => {
+          if (!res[0]) {
+            knex(db)
+              .insert(
+                {
+                  player_id: player[0],
+                  player_name: player[1],
+                  team_id: player[2],
+                  team_abbreviation: player[3],
+                  age: player[4],
+                  gp: player[5],
+                  w: player[6],
+                  l: player[7],
+                  w_pct: player[8],
+                  min: player[9],
+                  eoff_rating: player[10],
+                  off_rating: player[11],
+                  sp_work_off_rating: player[12],
+                  edef_rating: player[13],
+                  def_rating: player[14],
+                  sp_work_def_rating: player[15],
+                  enet_rating: player[16],
+                  net_rating: player[17],
+                  sp_work_net_rating: player[18],
+                  ast_pct: player[19],
+                  ast_to: player[20],
+                  ast_ratio: player[21],
+                  oreb_pct: player[22],
+                  dreb_pct: player[23],
+                  reb_pct: player[24],
+                  tm_tov_pct: player[25],
+                  efg_pct: player[26],
+                  ts_pct: player[27],
+                  usg_pct: player[28],
+                  epace: player[29],
+                  pace: player[30],
+                  sp_work_pace: player[31],
+                  pie: player[32],
+                  fgm: player[33],
+                  fga: player[34],
+                  fgm_pg: player[35],
+                  fga_pg: player[36],
+                  fg_pct: player[37],
+                  gp_rank: player[38],
+                  w_rank: player[39],
+                  l_rank: player[40],
+                  w_pct_rank: player[41],
+                  min_rank: player[42],
+                  eoff_rating_rank: player[43],
+                  off_rating_rank: player[44],
+                  sp_work_off_rating_rank: player[45],
+                  edef_rating_rank: player[46],
+                  def_rating_rank: player[47],
+                  sp_work_def_rating_rank: player[48],
+                  enet_rating_rank: player[49],
+                  net_rating_rank: player[50],
+                  sp_work_net_rating_rank: player[51],
+                  ast_pct_rank: player[52],
+                  ast_to_rank: player[53],
+                  ast_ratio_rank: player[54],
+                  oreb_pct_rank: player[55],
+                  dreb_pct_rank: player[56],
+                  reb_pct_rank: player[57],
+                  tm_tov_pct_rank: player[58],
+                  efg_pct_rank: player[59],
+                  ts_pct_rank: player[60],
+                  usg_pct_rank: player[61],
+                  epace_rank: player[62],
+                  pace_rank: player[63],
+                  sp_work_pace_rank: player[64],
+                  pie_rank: player[65],
+                  fgm_rank: player[66],
+                  fga_rank: player[67],
+                  fgm_pg_rank: player[68],
+                  fga_pg_rank: player[69],
+                  fg_pct_rank: player[70],
+                  cfid: player[71],
+                  cfparams: player[72],
+                  updated_at: new Date()
+                },
+                "*"
+              )
+              .then(entered => {
+                console.log(entered[0].player_name, " entered into ", db);
+              });
+          } else {
+            knex(db)
+              .where({ player_id: player[0] })
+              .update(
+                {
+                  team_id: player[2],
+                  team_abbreviation: player[3],
+                  age: player[4],
+                  gp: player[5],
+                  w: player[6],
+                  l: player[7],
+                  w_pct: player[8],
+                  min: player[9],
+                  eoff_rating: player[10],
+                  off_rating: player[11],
+                  sp_work_off_rating: player[12],
+                  edef_rating: player[13],
+                  def_rating: player[14],
+                  sp_work_def_rating: player[15],
+                  enet_rating: player[16],
+                  net_rating: player[17],
+                  sp_work_net_rating: player[18],
+                  ast_pct: player[19],
+                  ast_to: player[20],
+                  ast_ratio: player[21],
+                  oreb_pct: player[22],
+                  dreb_pct: player[23],
+                  reb_pct: player[24],
+                  tm_tov_pct: player[25],
+                  efg_pct: player[26],
+                  ts_pct: player[27],
+                  usg_pct: player[28],
+                  epace: player[29],
+                  pace: player[30],
+                  sp_work_pace: player[31],
+                  pie: player[32],
+                  fgm: player[33],
+                  fga: player[34],
+                  fgm_pg: player[35],
+                  fga_pg: player[36],
+                  fg_pct: player[37],
+                  gp_rank: player[38],
+                  w_rank: player[39],
+                  l_rank: player[40],
+                  w_pct_rank: player[41],
+                  min_rank: player[42],
+                  eoff_rating_rank: player[43],
+                  off_rating_rank: player[44],
+                  sp_work_off_rating_rank: player[45],
+                  edef_rating_rank: player[46],
+                  def_rating_rank: player[47],
+                  sp_work_def_rating_rank: player[48],
+                  enet_rating_rank: player[49],
+                  net_rating_rank: player[50],
+                  sp_work_net_rating_rank: player[51],
+                  ast_pct_rank: player[52],
+                  ast_to_rank: player[53],
+                  ast_ratio_rank: player[54],
+                  oreb_pct_rank: player[55],
+                  dreb_pct_rank: player[56],
+                  reb_pct_rank: player[57],
+                  tm_tov_pct_rank: player[58],
+                  efg_pct_rank: player[59],
+                  ts_pct_rank: player[60],
+                  usg_pct_rank: player[61],
+                  epace_rank: player[62],
+                  pace_rank: player[63],
+                  sp_work_pace_rank: player[64],
+                  pie_rank: player[65],
+                  fgm_rank: player[66],
+                  fga_rank: player[67],
+                  fgm_pg_rank: player[68],
+                  fga_pg_rank: player[69],
+                  fg_pct_rank: player[70],
+                  updated_at: new Date()
+                },
+                "*"
+              )
+              .then(updated => {
+                console.log(updated[0].player_name, " updated in ", db);
+              });
+          }
+        });
+    });
   },
   buildTeamDb: (db, arrayData) => {
-  // This function builds out the initial team DB and should only need to be run at the beginning of each season
+    // This function builds out the initial team DB and should only need to be run at the beginning of each season
     arrayData.forEach(team => {
       knex(db)
         .insert(
@@ -534,7 +569,12 @@ module.exports = {
           "*"
         )
         .then(team => {
-          console.log(team[0].team_name, " has been updated in the ", db, " db");
+          console.log(
+            team[0].team_name,
+            " has been updated in the ",
+            db,
+            " db"
+          );
         });
     });
   },
