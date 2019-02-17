@@ -5,6 +5,7 @@ const knex = require("../db/knex");
 const schedule = require("node-schedule");
 const moment = require("moment");
 const cheerio = require('cheerio');
+const _ = require('lodash');
 
 const updateTeamStats = require("../modules/updateTeamStats");
 const updatePlayerStats = require("../modules/updatePlayerStats");
@@ -57,8 +58,16 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   const gDetail = await axios.get(gameDetailUrl);
 
+  const date = gDetail.data.g.gcode.slice(0, 8);
+
+  const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
+
   const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => player.pid);
   const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => player.pid);
+
+  const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
+  const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
+
   let activePlayers = hStarters.concat(vStarters);
   let gameStints = {};
 
@@ -68,20 +77,17 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   let pbp = await axios.get(pbpUrl);
 
-  console.log('activePlayers are ', activePlayers);
-  console.log('gameStints are ', gameStints);
+  let lastPlayers = _.uniq(pbp.data.g.pd[pbp.data.g.pd.length-1].pla
+    .filter(play => play.pid > 0)
+    .map(filtered => filtered.pid))
+
+  let lastPlayersAdj = _.pull(lastPlayers, hTid, vTid);
 
   pbp.data.g.pd.forEach((period, i) => {
     let subEvents = period.pla.filter(play => play.etype === 8);
-    // console.log(subEvents);
-
 
     subEvents.forEach(event => {
-    // period.pla.forEach(event => {
-
       let secs = ( (i*720) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
-
-      // console.log('secs is ', secs, ' event is ', event);
 
       // player entering = event.epid
       // player exiting = event.pid
@@ -95,6 +101,7 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
           gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].length === 1
         ) {
           // if length of 1, push value from beg of Q to complete last entry weekArray
+          // CHANGE THIS TO END OF LAST Q FOR WHICH THEY'D ENTERED
           gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].push(i*720);
           // then push current second value to new array to add new entry
           gameStints[`pid_${event.epid}`].push([secs]);
@@ -110,7 +117,6 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
       // HANDLE EXITING PLAYER
       // first check to see if player exists in gameStints; if not, they entered in between quarters
       if (Object.keys(gameStints).indexOf(`pid_${event.pid}`) !== -1) {
-        //
         if (gameStints
           [`pid_${event.pid}`]
           [(gameStints[`pid_${event.pid}`].length)-1].length === 1
@@ -124,24 +130,20 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
       } else {
         gameStints[`pid_${event.pid}`] = [[i*720, secs]];
       };
-
-      // if (event.etype !== 8) {
-      //   if (event.pid !== 0 && event.pid !== event.tid) {
-      //     if (
-      //       gameStints[`pid_${event.pid}`]
-      //       [(gameStints[`pid_${event.pid}`].length)-1].length !== 1) {
-      //       console.log('event is ', event.evt, ' player is ', event.pid, ' gameStints is ', gameStints[`pid_${event.pid}`]);
-      //     } else {
-      //       console.log('player is in game');
-      //     }
-      //   }
-      // };
-
-
     })
   })
 
-  console.log(gameStints);
+  // Compare players in 4th (/last) Q to ensure no one entered during pre-4Q and never came out
+  lastPlayersAdj.forEach(player => {
+    if (
+      gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
+      &&
+      gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < 2160
+    ) {
+      gameStints[`pid_${player}`].push([2160])
+    };
+  })
+
 
 })
 
