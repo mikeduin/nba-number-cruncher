@@ -58,20 +58,22 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
 
   const gDetail = await axios.get(gameDetailUrl);
 
-  const date = gDetail.data.g.gcode.slice(0, 8);
+  const gcode = gDetail.data.g.gcode;
+  const gdte = gDetail.data.g.gdte;
+  const date = gcode.slice(0, 8);
 
   const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
 
   const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
   const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
 
-  const hStarters = gDetail.data.g.hls.pstsg.slice(0, 5).map(player => player.pid);
-  const vStarters = gDetail.data.g.vls.pstsg.slice(0, 5).map(player => player.pid);
+  const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.min > 0).map(player => player.pid);
+  const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.min > 0).map(player => player.pid);
 
-  let activePlayers = hStarters.concat(vStarters);
+  let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
   let gameStints = {};
 
-  activePlayers.forEach(player => {
+  starters.forEach(player => {
     gameStints[`pid_${player}`] = [[0]];
   });
 
@@ -169,7 +171,29 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
     };
   });
 
-  console.log(gameStints);
+  hPlayers.forEach(player => {
+    let stints = gameStints[`pid_${player}`];
+
+    knex("player_game_stints").insert({
+      player_id: player,
+      team_id: hTid,
+      gid: gid,
+      gcode: gcode,
+      gdte: gdte,
+      game_stints: stints,
+      updated_at: new Date()
+    }, '*').then(inserted => {
+      console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+    });
+  })
+
+
+})
+
+router.get("/testGameStints", (req, res, next) => {
+  knex("player_game_stints").then(data => {
+    console.log(data);
+  })
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {

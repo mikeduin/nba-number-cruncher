@@ -1,16 +1,16 @@
 exports.up = function(knex, Promise) {
-  return knex.schema.createTable('players_sub_patterns', (t) => {
+  return knex.schema.createTable('player_game_stints', (t) => {
     t.increments();
     t.integer('player_id');
-    t.string('player_name');
     t.integer('team_id');
-    t.string('team_abbreviation');
     t.integer('gid');
     t.string('gcode');
     t.string('gdte');
+    t.specificType('game_stints', 'integer ARRAY');
+    t.timestamp('updated_at');
   })
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable('players_sub_patterns');
+  return knex.schema.dropTable('player_game_stints');
 };
