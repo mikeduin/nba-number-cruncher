@@ -120,31 +120,47 @@ module.exports = {
       })
     })
 
-    // Compare players in 4th (/last) Q to ensure no one entered during pre-4Q and never came out
+    // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
+    setTimeout(() => {
       periodPlayers[periodPlayers.length-1].forEach(player => {
+        let lastExitSecs = gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1];
+        let lastExitPer = checkPeriodStart(lastExitSecs);
         if (
+          // If they have complete checkin/checkout array ...
           gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
           &&
-          gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1] < startPeriodSec(periods-1)
+          // And their last exit time is before the start of the last period ...
+          lastExitSecs < startPeriodSec(periods-1)
         ) {
-          gameStints[`pid_${player}`].push([startPeriodSec(periods-1)])
+          // Set next entry time to next quarter they played in
+          for (var i = lastExitPer + 1; i < periodPlayers.length; i++) {
+            if (periodPlayers[i].indexOf(player)) {
+              gameStints[`pid_${player}`].push([startPeriodSec(i)]);
+              break;
+            }
+          };
         };
       })
-      
-    // Add final checkouts at end of game for players with open last arrays
-      allPlayers.forEach(player => {
-        if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
-          // console.log('player is ', player);
-          for (var i = periodPlayers.length-1; i > 0; i--) {
-            if (periodPlayers[i].indexOf(player) !== -1) {
-              gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
-              break;
-            };
-          }
-        }
-      })
+    }, 2000)
 
-    console.log(gameStints);
+    setTimeout(() => {
+      // Add final checkouts at end of game for players with open last arrays
+        allPlayers.forEach(player => {
+          if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
+            console.log('player w open array is ', gameStints[`pid_${player}`]);
+            for (var i = periodPlayers.length-1; i > -1; i--) {
+              if (periodPlayers[i].indexOf(player) !== -1) {
+                gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
+                break;
+              };
+            }
+          }
+        })
+    }, 8000)
+
+    setTimeout(() => {
+      console.log(gameStints);
+    }, 12000);
 
     // hPlayers.forEach(player => {
     //   let stints = gameStints[`pid_${player}`];

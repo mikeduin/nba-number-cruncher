@@ -16,15 +16,16 @@ class GambleCast extends React.Component {
   }
 
   render() {
-    if (!this.props.games[0]) {
-      return <div> Loading ... </div>
-    } else {
+    // if (!this.props.games[0]) {
+    //   return <div> Loading ... </div>
+    // } else {
       return (
         <div>
+          <BoxScore key={1} game={'sample'}/>
           {this.renderBoxScores()}
         </div>
       )
-    }
+    // }
   }
 }
 

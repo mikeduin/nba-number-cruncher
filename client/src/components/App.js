@@ -17,9 +17,9 @@ class App extends React.Component {
   }
 
   render () {
-    if (!this.props.todaysGames[1]) {
-      return <div> </div>
-    } else {
+    // if (!this.props.todaysGames[1]) {
+    //   return <div> </div>
+    // } else {
       return (
         <div className="ui container">
           <BrowserRouter>
@@ -35,7 +35,7 @@ class App extends React.Component {
           </BrowserRouter>
         </div>
       )
-    }
+    // }
   }
 };
 

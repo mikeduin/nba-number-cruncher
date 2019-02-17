@@ -32,9 +32,9 @@ setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 //   dbBuilders.buildGameStintsDb();
 // }, 3000)
 
-setTimeout(()=>{
-  buildGameStints.buildSubData(21800853);
-}, 3000)
+// setTimeout(()=>{
+//   buildGameStints.buildSubData(21800048);
+// }, 1000)
 
 
 // more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
@@ -57,10 +57,13 @@ router.get("/gameWatcher", (req, res, next) => {
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const { gid, date } = req.params;
-  const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
+  // const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
+  const url = '../modules/boxScoreResponse.json';
   const boxScore = await axios.get(url);
 
   let { period, clock } = boxScore.data.basicGameData;
+  let hTid = boxScore.data.basicGameData.hTeam.teamId;
+  let vTid = boxScore.data.basicGameData.vTeam.teamId;
 
   const calcPoss = (fga, to, fta, oreb) => {
     console.log('fga is ', fga, ' to is ', to, ' fta is ', fta, ' oreb is ', oreb);
@@ -74,7 +77,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   if (period.current === 0) {
     console.log(gid, ' has not started');
   } else {
-    let { hTeam, vTeam } = boxScore.data.stats;
+    let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
 
     // let hStats = { {fga, fgm, fta, offReb, pFouls, points, turnovers} = hTeam.totals }
     //
@@ -102,35 +105,55 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       fouls: vTeam.totals.pFouls
     };
 
-    if (period.current === 1 && period.isEndOfPeriod) {
-      knex("box_scores").where({gid: gid}).then(entry => {
-        if (!entry[0]) {
-          knex("box_scores").insert({
-            gid: gid,
-            h_pts_1q: hTeam.totals.points,
-            h_fga_1q: hTeam.totals.fga,
-            h_fgm_1q: hTeam.totals.fgm,
-            h_fg_pct_1q: hFgPct,
-            h_fta_1q: hTeam.totals.fta,
-            h_to_1q: hTeam.totals.turnovers,
-            h_off_reb_1q: hTeam.totals.offReb,
-            h_fouls_1q: hTeam.totals.pFouls,
-            v_pts_1q: vTeam.totals.points,
-            v_fga_1q: vTeam.totals.fga,
-            v_fgm_1q: vTeam.totals.fgm,
-            v_fg_pct_1q: vFgPct,
-            v_fta_1q: vTeam.totals.fta,
-            v_to_1q: vTeam.totals.turnovers,
-            v_off_reb_1q: vTeam.totals.offReb,
-            v_fouls_1q: vTeam.totals.pFouls,
-            period_updated: 1,
-            updated_at: new Date()
-          }, '*').then()
-        } else {
-          console.log('1Q period has already been entered');
-          return;
-        }
-      })
+    let hPlayers = activePlayers.filter(player => {
+      return (player.teamId === hTid && player.isOnCourt)
+    }).map(active => active.personId);
+
+    let vPlayers = activePlayers.filter(player => {
+      return (player.teamId === hTid && player.isOnCourt)
+    }).map(active => active.personId);
+
+    if (period.current === 1) {
+      if (!period.isEndOfPeriod) {
+        res.send({
+          info: 'Q1 ongoing',
+          stats:
+        })
+      } else {
+        knex("box_scores").where({gid: gid}).then(entry => {
+          if (!entry[0]) {
+            knex("box_scores").insert({
+              gid: gid,
+              h_pts_1q: hTeam.totals.points,
+              h_fga_1q: hTeam.totals.fga,
+              h_fgm_1q: hTeam.totals.fgm,
+              h_fg_pct_1q: hFgPct,
+              h_fta_1q: hTeam.totals.fta,
+              h_to_1q: hTeam.totals.turnovers,
+              h_off_reb_1q: hTeam.totals.offReb,
+              h_fouls_1q: hTeam.totals.pFouls,
+              v_pts_1q: vTeam.totals.points,
+              v_fga_1q: vTeam.totals.fga,
+              v_fgm_1q: vTeam.totals.fgm,
+              v_fg_pct_1q: vFgPct,
+              v_fta_1q: vTeam.totals.fta,
+              v_to_1q: vTeam.totals.turnovers,
+              v_off_reb_1q: vTeam.totals.offReb,
+              v_fouls_1q: vTeam.totals.pFouls,
+              period_updated: 1,
+              updated_at: new Date()
+            }, '*').then(inserted => {
+              res.send({
+                info: 'Q1 complete',
+                stats: inserted
+              })
+            })
+          } else {
+            console.log('1Q period has already been entered');
+            return;
+          }
+        })
+      }
     }
 
     let info = { clock, period, poss, hStats, vStats };
