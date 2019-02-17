@@ -3,6 +3,7 @@ const axios = require("axios");
 const moment = require("moment");
 
 const dateFilters = require("./dateFilters");
+const buildGameStints = require("./buildGameStints");
 
 const leagueScheduleUrl =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
@@ -83,6 +84,13 @@ module.exports = {
       Month: 0,
       StarterBench: lineup
     };
+  },
+  buildGameStintsDb: async () => {
+    // This is the initial function to populate the game_stints DB from games already played during season
+    let games = await knex("schedule").pluck("gid").whereNotNull("gweek").limit(10);
+    games.forEach(game => {
+      buildGameStints.buildSubData(game);
+    })
   },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
