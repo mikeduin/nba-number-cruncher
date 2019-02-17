@@ -18,8 +18,8 @@ module.exports = {
     const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
     const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
 
-    const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.min > 0).map(player => player.pid);
-    const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.min > 0).map(player => player.pid);
+    const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.sec > 0).map(player => player.pid);
+    const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.sec > 0).map(player => player.pid);
     const allPlayers = hPlayers.concat(vPlayers);
 
     let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
@@ -54,11 +54,14 @@ module.exports = {
 
     pbp.data.g.pd.forEach((period, i) => {
       let subEvents = period.pla.filter(play => play.etype === 8);
+
       let iPlayers = _.uniq(period.pla
-        // this filter removes fouls to prevent coaches being looped in as player ID's ... (!@#$@)
-        .filter(play => allPlayers.indexOf(play.pid) !== -1)
-        // .filter(play => play.pid > 0)
-        .map(filtered => filtered.pid));
+        .filter(play => allPlayers.includes(parseInt(play.epid)) || allPlayers.includes(parseInt(play.pid))))
+        .reduce((players, filteredPlays) => {
+          players.push(parseInt(filteredPlays.pid));
+          players.push(parseInt(filteredPlays.epid));
+          return _.uniq(players).filter(player => !isNaN(player));
+        }, []);
 
       periodPlayers.push(_.pull(iPlayers, hTid, vTid));
 
@@ -127,10 +130,11 @@ module.exports = {
           gameStints[`pid_${player}`].push([startPeriodSec(periods-1)])
         };
       })
-
+      
     // Add final checkouts at end of game for players with open last arrays
       allPlayers.forEach(player => {
         if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
+          // console.log('player is ', player);
           for (var i = periodPlayers.length-1; i > 0; i--) {
             if (periodPlayers[i].indexOf(player) !== -1) {
               gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
