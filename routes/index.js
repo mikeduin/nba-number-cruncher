@@ -15,6 +15,8 @@ const dateFilters = require("../modules/dateFilters");
 const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
 
+const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
+
 // remove this after more testing
 const buildGameStints = require("../modules/buildGameStints");
 
@@ -56,10 +58,13 @@ router.get("/gameWatcher", (req, res, next) => {
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
-  const { gid, date } = req.params;
+  // const { gid, date } = req.params;
   // const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
-  const url = '../modules/boxScoreResponse.json';
-  const boxScore = await axios.get(url);
+  // const boxScore = await axios.get(url);
+  let gid = 21800862;
+  let boxScore = {
+    data: sampleBoxScoreQ1active
+  };
 
   let { period, clock } = boxScore.data.basicGameData;
   let hTid = boxScore.data.basicGameData.hTeam.teamId;
@@ -93,18 +98,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
     let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-    let hStats = {
-      fgPct: hFgPct,
-      points: hTeam.totals.points,
-      fouls: hTeam.totals.pFouls
-    };
-
-    let vStats = {
-      fgPct: vFgPct,
-      points: vTeam.totals.points,
-      fouls: vTeam.totals.pFouls
-    };
-
     let hPlayers = activePlayers.filter(player => {
       return (player.teamId === hTid && player.isOnCourt)
     }).map(active => active.personId);
@@ -113,11 +106,30 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       return (player.teamId === hTid && player.isOnCourt)
     }).map(active => active.personId);
 
+    let hStats = {
+      fgPct: hFgPct,
+      points: hTeam.totals.points,
+      fouls: hTeam.totals.pFouls,
+      activePlayers: hPlayers,
+    };
+
+    let vStats = {
+      fgPct: vFgPct,
+      points: vTeam.totals.points,
+      fouls: vTeam.totals.pFouls,
+      stats: vPlayers
+    };
+
     if (period.current === 1) {
       if (!period.isEndOfPeriod) {
         res.send({
           info: 'Q1 ongoing',
-          stats:
+          clock: clock,
+          period: period,
+          thru_period: 0,
+          poss: poss,
+          hStats: hStats,
+          vStats: vStats
         })
       } else {
         knex("box_scores").where({gid: gid}).then(entry => {
@@ -144,7 +156,10 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               updated_at: new Date()
             }, '*').then(inserted => {
               res.send({
-                info: 'Q1 complete',
+                info: 'Q1 ongoing',
+                clock: clock,
+                period: period,
+                poss: poss,
                 stats: inserted
               })
             })
@@ -156,9 +171,9 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       }
     }
 
-    let info = { clock, period, poss, hStats, vStats };
+    // let info = { clock, period, poss, hStats, vStats };
 
-    res.send({stats: info});
+    // res.send({stats: info});
     // res.send(boxScore.data);
   };
 })

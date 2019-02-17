@@ -21,7 +21,7 @@ class GambleCast extends React.Component {
     // } else {
       return (
         <div>
-          <BoxScore key={1} game={'sample'}/>
+          <BoxScore key={1} game={{gid: 21800862}}/>
           {this.renderBoxScores()}
         </div>
       )

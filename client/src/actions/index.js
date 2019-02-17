@@ -85,21 +85,28 @@ export const setActiveDay = date => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
 
-export const fetchBoxScore = (id, todayInt) => async dispatch => {
+export const fetchBoxScore = (id) => async dispatch => {
   let todayInt = moment().format('YYYYMMDD');
-  let stats = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
-  let response = stats.data;
-  console.log(response);
-  console.log('response.period is ', response.stats.period);
+  let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
+  let response = game.data;
+  console.log('response in action is ', response);
+  // console.log('response.period is ', response.stats.period);
 
   let liveInfo = {
     gid: id,
-    period: response.stats.period.current,
-    clock: response.stats.clock,
-    hStats: response.stats.hStats,
-    vStats: response.stats.vStats,
+    period: response.period.current,
+    endOfPeriod: response.period.endOfPeriod,
+    thru: response.thru_period,
+    clock: response.clock,
+    poss: response.poss,
+    hStats: response.hStats,
+    vStats: response.vStats
   }
 
-  dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+  if (!liveInfo.endOfPeriod) {
+    dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+  }
+
+  // dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
 
 }
