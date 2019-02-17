@@ -52,7 +52,7 @@ router.get("/gameWatcher", (req, res, next) => {
 // inactive players, officials, easy line score noted in here
 
 router.get("/parsePlayByPlay", async (req, res, next) => {
-  const gid = 0021800848;
+  const gid = 0021800853;
   const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/00${gid}_full_pbp.json`;
   const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
 
@@ -105,6 +105,7 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
         secs = ( startPeriodSec(i) + ((4-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))) )
       };
 
+      // SUBSTITUTION REFERENCE IN PLAY-BY-PLAY LOGS:
       // player entering = event.epid
       // player exiting = event.pid
 
@@ -162,10 +163,13 @@ router.get("/parsePlayByPlay", async (req, res, next) => {
   })
 
   // Add final checkouts at end of game for players with open last arrays
-
+  _.forOwn(gameStints, (value, key) => {
+    if (value[value.length-1].length === 1) {
+      value[value.length-1].push(startPeriodSec(periods));
+    };
+  });
 
   console.log(gameStints);
-
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
