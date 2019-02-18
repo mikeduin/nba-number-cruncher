@@ -127,31 +127,35 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           if (!entry[0]) {
             knex("box_scores").insert({
               gid: gid,
-              h_pts_1q: hTeam.totals.points,
-              h_fga_1q: hTeam.totals.fga,
-              h_fgm_1q: hTeam.totals.fgm,
-              h_fg_pct_1q: hFgPct,
-              h_fta_1q: hTeam.totals.fta,
-              h_to_1q: hTeam.totals.turnovers,
-              h_off_reb_1q: hTeam.totals.offReb,
-              h_fouls_1q: hTeam.totals.pFouls,
-              v_pts_1q: vTeam.totals.points,
-              v_fga_1q: vTeam.totals.fga,
-              v_fgm_1q: vTeam.totals.fgm,
-              v_fg_pct_1q: vFgPct,
-              v_fta_1q: vTeam.totals.fta,
-              v_to_1q: vTeam.totals.turnovers,
-              v_off_reb_1q: vTeam.totals.offReb,
-              v_fouls_1q: vTeam.totals.pFouls,
+              h_1q_pts: hTeam.totals.points,
+              h_1q_fga: hTeam.totals.fga,
+              h_1q_fgm: hTeam.totals.fgm,
+              h_1q_fg_pct: hFgPct,
+              h_1q_fta: hTeam.totals.fta,
+              h_1q_to: hTeam.totals.turnovers,
+              h_1q_off_reb: hTeam.totals.offReb,
+              h_1q_fouls: hTeam.totals.pFouls,
+              v_1q_pts: vTeam.totals.points,
+              v_1q_fga: vTeam.totals.fga,
+              v_1q_fgm: vTeam.totals.fgm,
+              v_1q_fg_pct: vFgPct,
+              v_1q_fta: vTeam.totals.fta,
+              v_1q_to: vTeam.totals.turnovers,
+              v_1q_off_reb: vTeam.totals.offReb,
+              v_1q_fouls: vTeam.totals.pFouls,
               period_updated: 1,
               updated_at: new Date()
             }, '*').then(inserted => {
+              console.log('inserted is ', inserted);
               res.send({
                 msg: `Q1 end`,
                 clock: clock,
                 period: period,
+                thru_period: 1,
                 poss: poss,
-                stats: inserted
+                hStats: hStats,
+                vStats: vStats,
+                insertedStats: inserted
               })
             })
           } else {
@@ -162,7 +166,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       }
     } else {
       res.send({
-        msg: `Q${period} ongoing`,
+        msg: `Q${period.current} ongoing`,
         clock: clock,
         period: period,
         thru_period: 0,

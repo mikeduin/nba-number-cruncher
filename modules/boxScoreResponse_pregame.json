@@ -1,0 +1,254 @@
+{
+    "_internal": {
+        "pubDateTime": "2019-02-17 19:53:23.892",
+        "xslt": "xsl/game/boxscore/marty_boxscore.xsl",
+        "eventName": "game_schedule_update_for_gameId"
+    },
+    "basicGameData": {
+        "seasonStageId": 3,
+        "seasonYear": "2018",
+        "gameId": "0031800001",
+        "arena": {
+            "name": "Spectrum Center",
+            "isDomestic": true,
+            "city": "Charlotte",
+            "stateAbbr": "NC",
+            "country": "USA"
+        },
+        "isGameActivated": true,
+        "statusNum": 1,
+        "extendedStatusNum": 0,
+        "startTimeEastern": "8:00 PM ET",
+        "startTimeUTC": "2019-02-18T01:00:00.000Z",
+        "startDateEastern": "20190217",
+        "clock": "",
+        "isBuzzerBeater": false,
+        "isPreviewArticleAvail": false,
+        "isRecapArticleAvail": false,
+        "tickets": {
+            "mobileApp": "https://a.data.nba.com/tickets/single/2018/0031800001/APP_TIX",
+            "desktopWeb": "https://a.data.nba.com/tickets/single/2018/0031800001/TEAM_SCH",
+            "mobileWeb": "https://a.data.nba.com/tickets/single/2018/0031800001/WEB_MWEB",
+            "leagGameInfo": "https://a.data.nba.com/tickets/single/2018/0031800001/LEAG_GAMEINFO",
+            "leagTix": "https://a.data.nba.com/tickets/single/2018/0031800001/LEAG_TIX"
+        },
+        "hasGameBookPdf": false,
+        "isStartTimeTBD": false,
+        "nugget": {
+            "text": ""
+        },
+        "attendance": "",
+        "gameDuration": {
+            "hours": "",
+            "minutes": ""
+        },
+        "tags": [
+            "AWASG"
+        ],
+        "period": {
+            "current": 0,
+            "type": 0,
+            "maxRegular": 4,
+            "isHalftime": false,
+            "isEndOfPeriod": false
+        },
+        "vTeam": {
+            "teamId": "1610616834",
+            "triCode": "LBN",
+            "win": "0",
+            "loss": "0",
+            "seriesWin": "",
+            "seriesLoss": "",
+            "score": "",
+            "linescore": []
+        },
+        "hTeam": {
+            "teamId": "1610616833",
+            "triCode": "GNS",
+            "win": "0",
+            "loss": "0",
+            "seriesWin": "",
+            "seriesLoss": "",
+            "score": "",
+            "linescore": []
+        },
+        "watch": {
+            "broadcast": {
+                "broadcasters": {
+                    "national": [
+                        {
+                            "shortName": "TNT",
+                            "longName": "Turner Networks"
+                        }
+                    ],
+                    "canadian": [
+                        {
+                            "shortName": "SN1",
+                            "longName": "SN1"
+                        }
+                    ],
+                    "vTeam": [],
+                    "hTeam": [],
+                    "spanish_hTeam": [],
+                    "spanish_vTeam": [],
+                    "spanish_national": []
+                },
+                "video": {
+                    "regionalBlackoutCodes": "torr",
+                    "canPurchase": false,
+                    "isLeaguePass": true,
+                    "isNationalBlackout": true,
+                    "isTNTOT": true,
+                    "isVR": true,
+                    "tntotIsOnAir": true,
+                    "isNextVR": false,
+                    "isNBAOnTNTVR": true,
+                    "isMagicLeap": false,
+                    "isOculusVenues": false,
+                    "streams": [
+                        {
+                            "streamType": "vTeam",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "hTeam",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "espanol_vTeam",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "espanol_hTeam",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "espanol_natl",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "mobile",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        },
+                        {
+                            "streamType": "condensed",
+                            "isOnAir": false,
+                            "doesArchiveExist": false,
+                            "isArchiveAvailToWatch": false,
+                            "streamId": "",
+                            "duration": 0
+                        }
+                    ],
+                    "deepLink": [
+                        {
+                            "broadcaster": "TNT",
+                            "regionalMarketCodes": "",
+                            "iosApp": "http://www.tntdrama.com/watchtnt/",
+                            "androidApp": "http://www.tntdrama.com/watchtnt/",
+                            "desktopWeb": "http://www.tntdrama.com/watchtnt/",
+                            "mobileWeb": "http://www.tntdrama.com/watchtnt/"
+                        }
+                    ]
+                },
+                "audio": {
+                    "national": {
+                        "streams": [
+                            {
+                                "language": "English",
+                                "isOnAir": false,
+                                "streamId": ""
+                            },
+                            {
+                                "language": "Spanish",
+                                "isOnAir": false,
+                                "streamId": ""
+                            }
+                        ],
+                        "broadcasters": []
+                    },
+                    "vTeam": {
+                        "streams": [
+                            {
+                                "language": "English",
+                                "isOnAir": true,
+                                "streamId": "100318000012211"
+                            },
+                            {
+                                "language": "Spanish",
+                                "isOnAir": true,
+                                "streamId": "100318000012212"
+                            }
+                        ],
+                        "broadcasters": [
+                            {
+                                "shortName": "",
+                                "longName": ""
+                            }
+                        ]
+                    },
+                    "hTeam": {
+                        "streams": [
+                            {
+                                "language": "English",
+                                "isOnAir": true,
+                                "streamId": "100318000012111"
+                            },
+                            {
+                                "language": "Spanish",
+                                "isOnAir": true,
+                                "streamId": "100318000012112"
+                            }
+                        ],
+                        "broadcasters": [
+                            {
+                                "shortName": "",
+                                "longName": ""
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "officials": {
+            "formatted": [
+                {
+                    "firstNameLastName": "Curtis Blair"
+                },
+                {
+                    "firstNameLastName": "Scott Foster"
+                },
+                {
+                    "firstNameLastName": "David Guthrie"
+                }
+            ]
+        }
+    },
+    "previousMatchup": {
+        "gameId": "0031700001",
+        "gameDate": "20180218"
+    }
+}

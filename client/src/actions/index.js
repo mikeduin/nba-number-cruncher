@@ -124,7 +124,19 @@ export const fetchBoxScore = (id) => async dispatch => {
 
   if (liveInfo.period === 1) {
     if (liveInfo.endOfPeriod) {
-
+      liveInfo.q1 = {
+        poss: response.poss,
+        h_pts: response.hStats.points,
+        h_fgPct: response.hStats.fgPct,
+        h_fouls: response.hStats.fouls,
+        v_pts: response.vStats.points,
+        v_fgPct: response.vStats.fgPct,
+        v_fouls: response.vStats.fouls,
+        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
+        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
+        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
+      }
+      dispatch ({ type: 'SEND_SNAPSHOT', payload: liveInfo})
     } else {
       liveInfo.q1 = {
         poss: response.poss,
@@ -134,9 +146,40 @@ export const fetchBoxScore = (id) => async dispatch => {
         v_pts: response.vStats.points,
         v_fgPct: response.vStats.fgPct,
         v_fouls: response.vStats.fouls,
-        t_pts: response.hStats.points + response.vStats.points,
-        t_fgPct: calcFgPct((response.hStats.fgm + response.vStats.fgm), (response.hStats.fga + response.vStats.fga)),
-        t_fouls: response.hStats.fouls + response.vStats.fouls
+        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
+        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
+        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
+      }
+
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+    }
+  } else if (liveInfo.period === 2) {
+    if (liveInfo.endOfPeriod) {
+      liveInfo.q2 = {
+        poss: response.poss,
+        h_pts: response.hStats.points,
+        h_fgPct: response.hStats.fgPct,
+        h_fouls: response.hStats.fouls,
+        v_pts: response.vStats.points,
+        v_fgPct: response.vStats.fgPct,
+        v_fouls: response.vStats.fouls,
+        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
+        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
+        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
+      }
+      dispatch ({ type: 'SEND_SNAPSHOT', payload: liveInfo})
+    } else {
+      liveInfo.q2 = {
+        poss: response.poss,
+        h_pts: response.hStats.points,
+        h_fgPct: response.hStats.fgPct,
+        h_fouls: response.hStats.fouls,
+        v_pts: response.vStats.points,
+        v_fgPct: response.vStats.fgPct,
+        v_fouls: response.vStats.fouls,
+        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
+        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
+        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
       }
 
       dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
