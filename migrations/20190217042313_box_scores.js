@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
     t.integer('h_tid');
     t.integer('v_tid');
     t.integer('period_updated');
-    t.string('clock_last_update');
+    t.string('clock_last_updated');
     t.timestamp('updated_at');
     t.integer('h_1q_pts');
     t.integer('h_1q_fga');

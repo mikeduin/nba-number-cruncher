@@ -1,6 +1,7 @@
 const axios = require('axios');
 const knex = require('../db/knex');
 const _ = require('lodash');
+const startPeriodSec = require('./startPeriodSec');
 
 module.exports = {
   buildSubData: async (gid) => {
@@ -36,13 +37,13 @@ module.exports = {
 
     const periods = pbp.data.g.pd.length;
 
-    const startPeriodSec = (per) => {
-      if (per < 4) {
-        return (per*720);
-      } else {
-        return (2880 + ((per-4)*300));
-      };
-    };
+    // const startPeriodSec = (per) => {
+    //   if (per < 4) {
+    //     return (per*720);
+    //   } else {
+    //     return (2880 + ((per-4)*300));
+    //   };
+    // };
 
     const checkPeriodStart = (secs) => {
       if (secs < 2880) {
