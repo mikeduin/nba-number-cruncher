@@ -38,9 +38,9 @@ let now = moment().format('YYYY-MM-DD');
 //   dbBuilders.buildGameStintsDb();
 // }, 3000)
 
-// setTimeout(()=>{
-//   buildGameStints.buildSubData(21800048);
-// }, 1000)
+setTimeout(()=>{
+  buildGameStints.buildSubData(21800048);
+}, 1000)
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
@@ -346,9 +346,12 @@ router.get("/api/getNetRatings", (req, res, next) => {
 router.get("/api/fetchWeek/:date", (req, res, next) => {
   let week = dateFilters.fetchGmWk(req.params.date);
   let weekArray = dateFilters.fetchGmWkArrays(week);
-  knex("schedule as s").innerJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
+  knex("schedule as s")
+    // do a leftJoin here, not an innerJoin; otherwise if there are no odds, no games are returned
+    .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week)
-    .orderBy('etm')
+    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
+    .orderBy('s.etm')
     .then(games => {
       res.send({
         week: week,
@@ -424,57 +427,57 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 })
 
 
-
-const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
-  updateTeamStats.updateFullTeamBuilds();
-})
-
-const updateStarterBuilds = schedule.scheduleJob("17 14 * * *", () => {
-  updateTeamStats.updateStarterBuilds();
-})
-
-const updateBenchBuilds = schedule.scheduleJob("18 14 * * *", () => {
-  updateTeamStats.updateBenchBuilds();
-})
-
-const updateQ1Builds = schedule.scheduleJob("19 14 * * *", () => {
-  updateTeamStats.updateQ1Builds();
-})
-
-const updateQ2Builds = schedule.scheduleJob("20 14 * * *", () => {
-  updateTeamStats.updateQ2Builds();
-})
-
-const updateQ3Builds = schedule.scheduleJob("21 14 * * *", () => {
-  updateTeamStats.updateQ3Builds();
-})
-
-const updateQ4Builds = schedule.scheduleJob("22 14 * * *", () => {
-  updateTeamStats.updateQ4Builds();
-})
-
-const updateFullPlayersBuild = schedule.scheduleJob("23 14 * * *", () => {
-  updatePlayerStats.updatePlayerStatBuilds();
-})
-
-const updateSchedule = schedule.scheduleJob("24 14 * * *", () => {
-  dbBuilders.updateSchedule();
-})
-
-const mapTeamNetRatings = schedule.scheduleJob("25 4 * * *", () => {
-  dbMappers.mapTeamNetRatings();
-})
-
-const mapTeamPace = schedule.scheduleJob("26 14 * * *", () => {
-  dbMappers.mapTeamPace();
-})
-
-const mapFullPlayerData = schedule.scheduleJob("27 14 * * *", () => {
-  dbMappers.mapFullPlayerData();
-})
-
-const mapSegmentedPlayerData = schedule.scheduleJob("28 14 * * *", () => {
-  dbMappers.mapSegmentedPlayerData();
-})
+// 
+// const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
+//   updateTeamStats.updateFullTeamBuilds();
+// })
+//
+// const updateStarterBuilds = schedule.scheduleJob("17 14 * * *", () => {
+//   updateTeamStats.updateStarterBuilds();
+// })
+//
+// const updateBenchBuilds = schedule.scheduleJob("18 14 * * *", () => {
+//   updateTeamStats.updateBenchBuilds();
+// })
+//
+// const updateQ1Builds = schedule.scheduleJob("19 14 * * *", () => {
+//   updateTeamStats.updateQ1Builds();
+// })
+//
+// const updateQ2Builds = schedule.scheduleJob("20 14 * * *", () => {
+//   updateTeamStats.updateQ2Builds();
+// })
+//
+// const updateQ3Builds = schedule.scheduleJob("21 14 * * *", () => {
+//   updateTeamStats.updateQ3Builds();
+// })
+//
+// const updateQ4Builds = schedule.scheduleJob("22 14 * * *", () => {
+//   updateTeamStats.updateQ4Builds();
+// })
+//
+// const updateFullPlayersBuild = schedule.scheduleJob("23 14 * * *", () => {
+//   updatePlayerStats.updatePlayerStatBuilds();
+// })
+//
+// const updateSchedule = schedule.scheduleJob("24 14 * * *", () => {
+//   dbBuilders.updateSchedule();
+// })
+//
+// const mapTeamNetRatings = schedule.scheduleJob("25 14 * * *", () => {
+//   dbMappers.mapTeamNetRatings();
+// })
+//
+// const mapTeamPace = schedule.scheduleJob("26 14 * * *", () => {
+//   dbMappers.mapTeamPace();
+// })
+//
+// const mapFullPlayerData = schedule.scheduleJob("27 14 * * *", () => {
+//   dbMappers.mapFullPlayerData();
+// })
+//
+// const mapSegmentedPlayerData = schedule.scheduleJob("28 14 * * *", () => {
+//   dbMappers.mapSegmentedPlayerData();
+// })
 
 module.exports = router;

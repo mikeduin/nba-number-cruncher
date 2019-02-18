@@ -2,6 +2,7 @@ const axios = require('axios');
 const knex = require('../db/knex');
 const _ = require('lodash');
 const startPeriodSec = require('./startPeriodSec');
+const checkPeriodStart = require('./checkPeriodStart');
 const getGameSecs = require('./getGameSecs');
 
 module.exports = {
@@ -20,8 +21,8 @@ module.exports = {
     const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
     const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
 
-    const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.sec > 0).map(player => player.pid);
-    const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.sec > 0).map(player => player.pid);
+    const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
+    const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
     const allPlayers = hPlayers.concat(vPlayers);
 
     let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
@@ -38,14 +39,6 @@ module.exports = {
 
     const periods = pbp.data.g.pd.length;
 
-    const checkPeriodStart = (secs) => {
-      if (secs < 2880) {
-        return (Math.floor(secs/720));
-      } else {
-        return (Math.floor(secs-2880) / 300);
-      };
-    }
-
     pbp.data.g.pd.forEach((period, i) => {
       let subEvents = period.pla.filter(play => play.etype === 8);
 
@@ -61,13 +54,6 @@ module.exports = {
 
       subEvents.forEach(event => {
         let secs = getGameSecs(i, event.cl)
-
-        // Can delete this once confirmed that module is working
-        // if (i < 4) {
-        //   secs = ( startPeriodSec(i) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
-        // } else {
-        //   secs = ( startPeriodSec(i) + ((4-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))) )
-        // };
 
         // SUBSTITUTION REFERENCE IN PLAY-BY-PLAY LOGS:
         // player entering = event.epid
@@ -116,7 +102,6 @@ module.exports = {
     })
 
     // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
-    setTimeout(() => {
       periodPlayers[periodPlayers.length-1].forEach(player => {
         let lastExitSecs = gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1];
         let lastExitPer = checkPeriodStart(lastExitSecs);
@@ -136,26 +121,25 @@ module.exports = {
           };
         };
       })
-    }, 2000)
 
-    setTimeout(() => {
-      // Add final checkouts at end of game for players with open last arrays
-        allPlayers.forEach(player => {
-          if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
-            console.log('player w open array is ', gameStints[`pid_${player}`]);
-            for (var i = periodPlayers.length-1; i > -1; i--) {
-              if (periodPlayers[i].indexOf(player) !== -1) {
-                gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
-                break;
-              };
-            }
+    // Add final checkouts at end of game for players with open last arrays
+      allPlayers.forEach(player => {
+        // First look for players whose last time array has no check-out
+        if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
+          // Then, starting with the last period, and moving backwards through the game
+          for (var i = periodPlayers.length-1; i > -1; i--) {
+            // If that player's player ID is found in the last period
+            if (periodPlayers[i].indexOf(player) !== -1) {
+              // Push the start value of the next period in as their last exit time
+              // Note that in the case of the last period of game, this value is equivalent to end of game
+              gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
+              break;
+            };
           }
-        })
-    }, 8000)
+        }
+      })
 
-    setTimeout(() => {
       console.log(gameStints);
-    }, 12000);
 
     // hPlayers.forEach(player => {
     //   let stints = gameStints[`pid_${player}`];
