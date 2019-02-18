@@ -42,9 +42,6 @@ let now = moment().format('YYYY-MM-DD');
 //   buildGameStints.buildSubData(21800048);
 // }, 1000)
 
-
-// more bets: 'https://www.sportsbook.ag/sbk/sportsbook4/live-betting-betting/home.sbk#moreBetsX2200-1300-Laker-Pacer-020519'
-
 /* GET home page. */
 router.get("/", (req, res, next) => {
   console.log('hello');
@@ -214,13 +211,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 quarterEnd: true,
                 live: false,
                 clock: clock,
+                gameSecs: gameSecs,
                 period: period,
                 thru_period: 1,
                 poss: poss,
                 pace: calcGamePace(poss, period.current, gameSecs),
                 totals: totalsObj,
-                quarter: q1,
-                insertedStats: inserted
+                quarter: q1
               })
             })
           } else {
@@ -243,13 +240,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             quarterEnd: true,
             live: false,
             clock: clock,
+            gameSecs: gameSecs,
             period: period,
             thru_period: 2,
             poss: poss,
             pace: calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj,
-            quarter: q2,
-            insertedStats: inserted
+            quarter: q2
           })
         })
       } else if (period.current === 3) {
@@ -267,13 +264,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             quarterEnd: true,
             live: false,
             clock: clock,
+            gameSecs: gameSecs,
             period: period,
             thru_period: 3,
             poss: poss,
             pace: calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj,
-            quarter: q3,
-            insertedStats: inserted
+            quarter: q3
           })
         })
       } else if (period.current === 4 ) {
@@ -291,20 +288,17 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             quarterEnd: true,
             live: false,
             clock: clock,
+            gameSecs: gameSecs,
             period: period,
             thru_period: 4,
             poss: poss,
             pace: calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj,
-            quarter: q4,
-            insertedStats: inserted
+            quarter: q4
           })
         })
       }
     } else {
-
-      let totals = await knex("box_scores").where({gid: gid});
-
       res.send({
         quarterEnd: false,
         live: true,
@@ -317,7 +311,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         totals: totalsObj
       })
     }
-
 })
 
 
