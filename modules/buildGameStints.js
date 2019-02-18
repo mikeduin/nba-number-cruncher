@@ -36,9 +36,7 @@ module.exports = {
 
     // Need to compile active players for each Q in case player enters early, leaves outside of Q, and never comes back
     let periodPlayers = [];
-
     const periods = pbp.data.g.pd.length;
-
     pbp.data.g.pd.forEach((period, i) => {
       let subEvents = period.pla.filter(play => play.etype === 8);
 
@@ -101,8 +99,21 @@ module.exports = {
       })
     })
 
+    // errors are happening here ... theory is things are breaking for players that (a) have not been in game yet, (b) come in pre-4Q, and (c) play whole 4Q
+    // handle this by checking to see if player has been added first
+    // if not, then add beginning of array with start of last period value
+
+    let tempPlayer = 0;
+
     // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
+    try {
       periodPlayers[periodPlayers.length-1].forEach(player => {
+        tempPlayer = player;
+        // Tackle case of player entering for first time pre-last period and never leaving game
+        if (Object.keys(gameStints).indexOf(`pid_${player}`) === -1) {
+          // get second value for beginning of last period
+          gameStints[`pid_${player}`] = [[startPeriodSec(periodPlayers.length-1)]];
+        };
         let lastExitSecs = gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1];
         let lastExitPer = checkPeriodStart(lastExitSecs);
         if (
@@ -121,6 +132,10 @@ module.exports = {
           };
         };
       })
+    } catch (e) {
+      console.log(e);
+      console.log('game ID is ', gid, ' player causing error is ', tempPlayer);
+    };
 
     // Add final checkouts at end of game for players with open last arrays
       allPlayers.forEach(player => {
@@ -139,46 +154,44 @@ module.exports = {
         }
       })
 
-      console.log(gameStints);
+    hPlayers.forEach(player => {
+      let stints = gameStints[`pid_${player}`];
 
-    // hPlayers.forEach(player => {
-    //   let stints = gameStints[`pid_${player}`];
-    //
-    //   knex("player_game_stints").insert({
-    //     player_id: player,
-    //     team_id: hTid,
-    //     gid: gid,
-    //     gcode: gcode,
-    //     gdte: gdte,
-    //     game_stints: stints,
-    //     updated_at: new Date()
-    //   }, '*').then(inserted => {
-    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-    //   });
-    // });
+      knex("player_game_stints").insert({
+        player_id: player,
+        team_id: hTid,
+        gid: gid,
+        gcode: gcode,
+        gdte: gdte,
+        game_stints: stints,
+        updated_at: new Date()
+      }, '*').then(inserted => {
+        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+      });
+    });
 
-    // vPlayers.forEach((player, i) => {
-    //   let stints = gameStints[`pid_${player}`];
-    //
-    //   knex("player_game_stints").insert({
-    //     player_id: player,
-    //     team_id: vTid,
-    //     gid: gid,
-    //     gcode: gcode,
-    //     gdte: gdte,
-    //     game_stints: stints,
-    //     updated_at: new Date()
-    //   }, '*').then(inserted => {
-    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-    //     if (i === vPlayers.length - 1) {
-    //       knex("schedule").where({ gid: gid   }).update({
-    //         game_stints: true,
-    //         updated_at: new Date()
-    //       }).then((res) => {
-    //         console.log(gid, ' game stint updates have concluded');
-    //       })
-    //     }
-    //   });
-    // })
+    vPlayers.forEach((player, i) => {
+      let stints = gameStints[`pid_${player}`];
+
+      knex("player_game_stints").insert({
+        player_id: player,
+        team_id: vTid,
+        gid: gid,
+        gcode: gcode,
+        gdte: gdte,
+        game_stints: stints,
+        updated_at: new Date()
+      }, '*').then(inserted => {
+        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+        if (i === vPlayers.length - 1) {
+          knex("schedule").where({ gid: gid }).update({
+            game_stints: true,
+            updated_at: new Date()
+          }).then((res) => {
+            console.log(gid, ' game stint updates have concluded');
+          })
+        }
+      });
+    })
   }
 }

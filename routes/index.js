@@ -34,13 +34,18 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-// setTimeout(()=>{
-//   dbBuilders.buildGameStintsDb();
-// }, 3000)
-
 setTimeout(()=>{
-  buildGameStints.buildSubData(21800048);
-}, 1000)
+  dbBuilders.buildGameStintsDb();
+}, 3000)
+
+// setTimeout(()=>{
+//   buildGameStints.buildSubData(21800322);
+// }, 1000)
+
+// setTimeout(async ()=>{
+//   let gameStints = await knex("player_game_stints");
+//   console.log(gameStints);
+// }, 1000)
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
@@ -427,7 +432,7 @@ router.get("/api/fetchGame/:gid", (req, res, next) => {
 })
 
 
-// 
+//
 // const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
 //   updateTeamStats.updateFullTeamBuilds();
 // })

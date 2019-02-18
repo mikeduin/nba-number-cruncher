@@ -85,30 +85,29 @@ module.exports = {
       StarterBench: lineup
     };
   },
-  // buildGameStintsDb: async () => {
-  //   // This is the initial function to populate the game_stints DB from games already played during season
-  //   let games = await knex("schedule")
-  //     .pluck("gid")
-  //     .whereNotNull("gweek")
-  //     .where({ stt: "Final" })
-  //     .limit(10);
-  //
-  //   games.forEach(game => {
-  //     buildGameStints.buildSubData(game);
-  //   });
-  // },
-  // addGameStints: async () => {
-  //   // This is the in-season function to add game stints each night after games conclude
-  //   let games = await knex("schedule")
-  //     .pluck("gid")
-  //     .whereNotNull("gweek")
-  //     .where({ stt: "Final" })
-  //     .whereNull("game_stints");
-  //
-  //   games.forEach(game => {
-  //     buildGameStints.buildSubData(game);
-  //   });
-  // },
+  buildGameStintsDb: async () => {
+    // This is the initial function to populate the game_stints DB from games already played during season
+    let games = await knex("schedule")
+      .pluck("gid")
+      .whereNotNull("gweek")
+      .where({ stt: "Final" });
+
+    games.forEach(game => {
+      buildGameStints.buildSubData(game);
+    });
+  },
+  addGameStints: async () => {
+    // This is the in-season function to add game stints each night after games conclude
+    let games = await knex("schedule")
+      .pluck("gid")
+      .whereNotNull("gweek")
+      .where({ stt: "Final" })
+      .whereNull("game_stints");
+
+    games.forEach(game => {
+      buildGameStints.buildSubData(game);
+    });
+  },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
     axios.get(leagueScheduleUrl).then(response => {
