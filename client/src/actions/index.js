@@ -91,249 +91,102 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = game.data;
 
+  let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
+
   const calcFgPct = (fgm, fga) => {
     return (((fgm/fga)*100).toFixed(1));
-  }
+  };
+
+  const calcQuarterPace = (poss, per, clock) => {
+    let secs = 0;
+    if (per < 4) {
+      secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
+      return (((720/secs) * poss)/2)
+    } else {
+      secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
+      return (((300/secs) * poss)/2)
+    };
+  };
 
   let stateData = getState()[`live_${id}`];
+  let { prevQuarters } = stateData;
 
   let liveData = {
     gid: id,
-    period: response.period.current,
+    period: period.current,
     endOfPeriod: false,
-    thru: response.thru_period,
-    gameSecs: response.gameSecs,
-    clock: response.clock,
-    poss: response.poss,
-    pace: response.pace
-    // liveTotals: response.totals
-    // q1: {},
-    // q2: {},
-    // q3: {},
-    // q4: {},
-    // ot: {},
-    // prevQuarters: {}
-  }
+    thru: thru_period,
+    gameSecs,
+    clock,
+    poss,
+    pace,
+    totals
+  };
 
   let currentQuarter = {
     h: {
-      pts: parseInt(response.totals.h.pts) - stateData.prevQuarters.h.pts,
-      fgm: parseInt(response.totals.h.fgm) - stateData.prevQuarters.h.fgm,
-      fga: parseInt(response.totals.h.fga) - stateData.prevQuarters.h.fga,
-      fgPct: calcFgPct((parseInt(response.totals.h.fgm)-stateData.prevQuarters.h.fgm), (parseInt(response.totals.h.fga) - stateData.prevQuarters.h.fga)),
-      fta: parseInt(response.totals.h.fta) - stateData.prevQuarters.h.fta,
-      to: parseInt(response.totals.h.turnovers) - stateData.prevQuarters.h.to,
-      offReb: parseInt(response.totals.h.offReb) - stateData.prevQuarters.h.offReb,
-      fouls: parseInt(response.totals.h.pFouls) - stateData.prevQuarters.h.fouls
+      pts: parseInt(totals.h.pts) - prevQuarters.h.pts,
+      fgm: parseInt(totals.h.fgm) - prevQuarters.h.fgm,
+      fga: parseInt(totals.h.fga) - prevQuarters.h.fga,
+      fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - prevQuarters.h.fga)),
+      fta: parseInt(totals.h.fta) - prevQuarters.h.fta,
+      to: parseInt(totals.h.turnovers) - prevQuarters.h.to,
+      offReb: parseInt(totals.h.offReb) - prevQuarters.h.offReb,
+      fouls: parseInt(totals.h.pFouls) - prevQuarters.h.fouls
     },
     v: {
-      pts: parseInt(response.totals.v.pts) - stateData.prevQuarters.v.pts,
-      fgm: parseInt(response.totals.v.fgm) - stateData.prevQuarters.v.fgm,
-      fga: parseInt(response.totals.v.fga) - stateData.prevQuarters.v.fga,
-      fgPct: calcFgPct((parseInt(response.totals.v.fgm)-stateData.prevQuarters.v.fgm), (parseInt(response.totals.v.fga) - stateData.prevQuarters.v.fga)),
-      fta: parseInt(response.totals.v.fta) - stateData.prevQuarters.v.fta,
-      to: parseInt(response.totals.v.turnovers) - stateData.prevQuarters.v.to,
-      offReb: parseInt(response.totals.v.offReb) - stateData.prevQuarters.v.offReb,
-      fouls: parseInt(response.totals.v.pFouls) - stateData.prevQuarters.v.fouls
+      pts: parseInt(totals.v.pts) - prevQuarters.v.pts,
+      fgm: parseInt(totals.v.fgm) - prevQuarters.v.fgm,
+      fga: parseInt(totals.v.fga) - prevQuarters.v.fga,
+      fgPct: calcFgPct(
+        (parseInt(totals.v.fgm) - prevQuarters.v.fgm), 
+        (parseInt(totals.v.fga) - prevQuarters.v.fga)
+      ),
+      fta: parseInt(totals.v.fta) - prevQuarters.v.fta,
+      to: parseInt(totals.v.turnovers) - prevQuarters.v.to,
+      offReb: parseInt(totals.v.offReb) - prevQuarters.v.offReb,
+      fouls: parseInt(totals.v.pFouls) - prevQuarters.v.fouls
     },
     t: {
-      pts: (response.totals.h.pts + response.totals.v.pts) - stateData.prevQuarters.t.pts,
-      fgm: (response.totals.h.fgm + response.totals.v.fgm) - stateData.prevQuarters.t.fgm,
-      fga: (response.totals.h.fga + response.totals.v.fga) - stateData.prevQuarters.t.fga,
+      pts: (totals.h.pts + totals.v.pts) - prevQuarters.t.pts,
+      fgm: (totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm,
+      fga: (totals.h.fga + totals.v.fga) - prevQuarters.t.fga,
       fgPct: calcFgPct(
-        ((response.totals.h.fgm + response.totals.v.fgm) - stateData.prevQuarters.t.fgm),
-        ((response.totals.h.fga + response.totals.v.fga) - stateData.prevQuarters.t.fga)
+        ((totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm),
+        ((totals.h.fga + totals.v.fga) - prevQuarters.t.fga)
       ),
-      fta: (response.totals.h.fta + response.totals.v.fta) - stateData.prevQuarters.t.fta,
-      to: (response.totals.h.turnovers + response.totals.v.turnovers) - stateData.prevQuarters.t.to,
-      offReb: (response.totals.h.offReb + response.totals.v.offReb) - stateData.prevQuarters.t.offReb,
-      fouls: (response.totals.h.pFouls + response.totals.v.pFouls) - stateData.prevQuarters.t.fouls,
-      poss: poss - stateData.prevQuarters.poss,
-      // FIX PACE, THIS IS NOT ACCURATE
-      pace: ( ( (poss - stateData.prevQuarters.poss) * 4) / 2)
+      fta: (totals.h.fta + totals.v.fta) - prevQuarters.t.fta,
+      to: (totals.h.turnovers + totals.v.turnovers) - prevQuarters.t.to,
+      offReb: (totals.h.offReb + totals.v.offReb) - prevQuarters.t.offReb,
+      fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
+      poss: poss - prevQuarters.poss,
+      pace: calcQuarterPace(poss, period.current, clock)
     }
-  }
+  };
 
   let endOfQuarterData = response.quarter;
 
-  if (response.period.endOfPeriod) {
-    liveData.endOfPeriod = true
-  };
+  if (period.endOfPeriod) {
+    console.log('end of period in action, current period is ', period.current);
+    perToUpdate = period.current;
 
-  console.log('live data is ', liveData);
-
-  // NEED TO ADD FUNCTION TO CALCULATE PREV QUARTERS AFTER EACH QUARTER
-
-  if (response.period.endOfPeriod) {
-    console.log('end of period in action, current period is ', response.period.current);
-    perToUpdate = response.period.current;
-    let snapshot = {...endOfQuarterData, q: perToUpdate};
+    let snapshot = {
+      quarterData: endOfQuarterData,
+      prevQuarters: totals,
+      q: perToUpdate
+    };
 
     dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
   } else {
-    console.log('period ongoing, current period is ', response.period.current);
-    perToUpdate = response.period.current;
-    let inQuarter = {...liveData, ...currentQuarter, q: perToUpdate}
+    console.log('period ongoing, current period is ', period.current);
+    perToUpdate = period.current;
+
+    let inQuarter = {
+      ...liveData,
+      currentQuarter: currentQuarter,
+      q: perToUpdate
+    }
 
     dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
-  }
-
-
-
-  if (liveData.period === 1) {
-    if (liveData.endOfPeriod) {
-      let q1 = {
-        gid: id,
-        q: 1,
-        poss: response.poss,
-        pace: response.pace,
-        h_pts: response.totals.h.pts,
-        h_fgPct: response.totals.h.fgPct,
-        h_fouls: response.totals.h.fouls,
-        v_pts: response.totals.v.pts,
-        v_fgPct: response.totals.v.fgPct,
-        v_fouls: response.totals.v.fouls,
-        t_pts: response.totals.t.pts,
-        t_fgPct: response.totals.t.fgPct,
-        t_fouls: response.totals.t.fouls
-      };
-
-      dispatch ({ type: 'ADD_SNAPSHOT', payload: q1})
-    } else {
-      liveData.q1 = {
-        gid: id,
-        poss: response.poss,
-        pace: response.pace,
-        h_pts: response.totals.h.pts,
-        h_fgPct: response.totals.h.fgPct,
-        h_fouls: response.totals.h.fouls,
-        v_pts: response.totals.v.pts,
-        v_fgPct: response.totals.v.fgPct,
-        v_fouls: response.totals.v.fouls,
-        t_pts: response.totals.t.pts,
-        t_fgPct: response.totals.t.fgPct,
-        t_fouls: response.totals.t.fouls
-      };
-
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveData})
-    }
-  } else if (liveData.period === 2) {
-    if (liveData.endOfPeriod) {
-      console.log(
-        'end of period in reducer'
-      );
-      let q2 = {
-        gid: id,
-        q: 2,
-        poss: response.poss,
-        pace: response.pace,
-        h_pts: response.hStats.points,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls,
-        v_pts: response.vStats.points,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls,
-        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
-        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
-      };
-      dispatch ({ type: 'ADD_SNAPSHOT', payload: q2})
-    } else {
-      console.log('mid period in reducer');
-      liveData.q3 = {
-        gid: id,
-        poss: response.poss,
-        pace: response.pace,
-        h_pts: response.totals.h.pts,
-        h_fgPct: response.totals.h.fgPct,
-        h_fouls: response.totals.h.fouls,
-        v_pts: response.totals.v.pts,
-        v_fgPct: response.totals.v.fgPct,
-        v_fouls: response.totals.v.fouls,
-        t_pts: response.totals.t.pts,
-        t_fgPct: response.totals.t.fgPct,
-        t_fouls: response.totals.t.fouls
-      }
-
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveData})
-    }
-  } else if (liveData.period === 3) {
-    if (liveData.endOfPeriod) {
-      console.log(
-        'end of period in reducer'
-      );
-
-      let q3 = {
-        gid: id,
-        q: 3,
-        poss: response.poss,
-        h_pts: response.hStats.points - thruTwo.h_total_pts,
-        h_fgPct: calcFgPct((parseInt(response.hStats.fgm - thruTwo.h_total_fgm)), (parseInt(response.hStats.fga - thruTwo.h_total_fga))),
-        h_fouls: response.hStats.fouls - thruTwo.h_total_fouls,
-        v_pts: response.vStats.points - thruTwo.v_total_pts,
-        v_fgPct: calcFgPct((parseInt(response.vStats.fgm - thruTwo.v_total_fgm)), (parseInt(response.vStats.fga - thruTwo.v_total_fga))),
-        v_fouls: response.vStats.fouls - thruTwo.v_total_fouls,
-        t_pts: parseInt(response.hStats.points - thruTwo.h_total_pts) + parseInt(response.vStats.points - thruTwo.v_total_pts),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm - thruTwo.h_total_fgm) + parseInt(response.vStats.fgm - thruTwo.v_total_fgm)), (parseInt(response.hStats.fga - thruTwo.h_total_fga) + parseInt(response.vStats.fga - thruTwo.v_total_fga))),
-        t_fouls: parseInt(response.hStats.fouls - thruTwo.h_total_fouls) + parseInt(response.vStats.fouls - thruTwo.v_total_fouls)
-      };
-      dispatch ({ type: 'ADD_SNAPSHOT', payload: q3})
-    } else {
-      console.log('mid period in reducer');
-      liveData.q3 = {
-        poss: response.poss,
-        h_pts: response.hStats.points - liveData.totals.h_total_pts,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls - liveData.totals.h_total_fouls,
-        v_pts: response.vStats.points - liveData.totals.v_total_fouls,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls - liveData.totals.v_total_fouls,
-        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
-        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
-      }
-
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveData})
-    }
-  } else if (liveData.period === 4) {
-    if (liveData.endOfPeriod) {
-      console.log(
-        'end of period in reducer'
-      );
-      liveData.q4 = {
-        gid: id,
-        q: 4,
-        poss: response.poss,
-        h_pts: response.hStats.points,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls,
-        v_pts: response.vStats.points,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls,
-        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
-        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
-      };
-      dispatch ({ type: 'ADD_SNAPSHOT', payload: liveData})
-    } else {
-      console.log('mid period in reducer');
-      liveData.q4 = {
-        poss: response.poss,
-        h_pts: response.hStats.points - liveData.totals.h_total_pts,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls - liveData.totals.h_total_fouls,
-        v_pts: response.vStats.points - liveData.totals.v_total_pts,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls - liveData.totals.v_total_fouls,
-        t_pts: parseInt(response.hStats.points - liveData.totals.h_total_pts) + parseInt(response.vStats.points - liveData.totals.v_total_pts),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm - liveData.totals.h_total_fgm) + parseInt(response.vStats.fgm - liveData.totals.v_total_fgm)), (parseInt(response.hStats.fga - liveData.totals.h_total_fga) + parseInt(response.vStats.fga - liveData.totals.v_total_fga))),
-        t_fouls: parseInt(response.hStats.fouls - liveData.totals.h_total_fouls) + parseInt(response.vStats.fouls - liveData.totals.v_total_fouls)
-      }
-
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveData})
-    }
-  }
-
-
-
+  };
 }

@@ -104,7 +104,8 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4.t.fouls}  </Table.Cell>
               </Table.Row>
               <Table.Row>
-                <Table.Cell colSpan="4"> </Table.Cell>
+                <Table.Cell colSpan="1"> </Table.Cell>
+                <Table.Cell colSpan="3"> GAME PACE: {boxScore.q1.t.poss.toFixed(1)}  </Table.Cell>
                 <Table.Cell colSpan="3"> Q1 PACE: {boxScore.q1.t.poss.toFixed(1)}  </Table.Cell>
                 <Table.Cell colSpan="3"> Q2 PACE: {boxScore.q2.t.poss.toFixed(1)}  </Table.Cell>
                 <Table.Cell colSpan="3"> Q3 PACE: {boxScore.q3.t.poss.toFixed(1)}  </Table.Cell>

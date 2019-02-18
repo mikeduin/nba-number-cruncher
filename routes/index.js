@@ -225,7 +225,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         })
       } else if (period.current === 2) {
-        // let q1Stats = await knex("box_scores").where({gid: gid});
         let q2 = quarterObj();
         gameSecs = getGameSecs(period.current-1, clock);
         knex("box_scores").where({gid: gid}).update({
@@ -313,8 +312,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     }
 })
 
-
-
 router.get("/fetchStarters", (req, res, next) => {
   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
     let h = game.data.g.hls;
@@ -339,8 +336,6 @@ router.get("/fetchStarters", (req, res, next) => {
     console.log(rosters)
   })
 })
-
-
 
 router.get("/api/getNetRatings", (req, res, next) => {
   knex("team_net_ratings").then(netRatings => {
