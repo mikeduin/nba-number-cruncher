@@ -139,7 +139,7 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
       fgm: parseInt(totals.v.fgm) - prevQuarters.v.fgm,
       fga: parseInt(totals.v.fga) - prevQuarters.v.fga,
       fgPct: calcFgPct(
-        (parseInt(totals.v.fgm) - prevQuarters.v.fgm), 
+        (parseInt(totals.v.fgm) - prevQuarters.v.fgm),
         (parseInt(totals.v.fga) - prevQuarters.v.fga)
       ),
       fta: parseInt(totals.v.fta) - prevQuarters.v.fta,
@@ -168,7 +168,7 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
 
   if (period.endOfPeriod) {
     console.log('end of period in action, current period is ', period.current);
-    perToUpdate = period.current;
+    let perToUpdate = period.current;
 
     let snapshot = {
       quarterData: endOfQuarterData,
@@ -179,7 +179,7 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
     dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
   } else {
     console.log('period ongoing, current period is ', period.current);
-    perToUpdate = period.current;
+    let perToUpdate = period.current;
 
     let inQuarter = {
       ...liveData,

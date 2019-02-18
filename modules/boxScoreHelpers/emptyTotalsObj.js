@@ -1,5 +1,5 @@
 const emptyTotalsObj = () => {
-  return [
+  return [{
     h: {
       pts: 0,
       fgm: 0,
@@ -32,10 +32,10 @@ const emptyTotalsObj = () => {
       poss: 0,
       pace: 0
     }
-  ]
+  }]
 }
 
-modules.exports = emptyTotalsObj;
+module.exports = emptyTotalsObj;
 
 // Delete this below once functionality confirmed
 
