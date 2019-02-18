@@ -116,24 +116,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       return (player.teamId === hTid && player.isOnCourt)
     }).map(active => active.personId);
 
-    let hStats = {
-      fgm: hTeam.totals.fgm,
-      fga: hTeam.totals.fga,
-      fgPct: hFgPct,
-      points: hTeam.totals.points,
-      fouls: hTeam.totals.pFouls,
-      activePlayers: hPlayers,
-    };
-
-    let vStats = {
-      fgm: vTeam.totals.fgm,
-      fga: vTeam.totals.fga,
-      fgPct: vFgPct,
-      points: vTeam.totals.points,
-      fouls: vTeam.totals.pFouls,
-      activePlayers: vPlayers
-    };
-
     let totalsObj = {
       h: {
         pts: hTeam.totals.points,
@@ -165,7 +147,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         offReb: hTeam.totals.offReb + vTeam.totals.offReb,
         fouls: hTeam.totals.pFouls + vTeam.totals.pFouls,
         poss: poss,
-        pace: ((poss*4)/2)
+        pace: calcGamePace(poss, period.current, gameSecs)
       }
     };
 
@@ -215,7 +197,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       console.log('end of period, current period is ', period.current);
       if (period.current === 1) {
         let q1 = totalsObj();
-        gameSecs = getGameSecs(period-1, clock);
+        gameSecs = getGameSecs((period.current-1), clock);
         knex("box_scores_v2").where({gid: gid}).then(entry => {
           if (!entry[0]) {
             knex("box_scores_v2").insert({
@@ -229,13 +211,15 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               updated_at: new Date()
             }).then(inserted => {
               res.send({
-                msg: `Q1 end`,
+                quarterEnd: true,
+                live: false,
                 clock: clock,
                 period: period,
                 thru_period: 1,
                 poss: poss,
-                hStats: hStats,
-                vStats: vStats,
+                pace: calcGamePace(poss, period.current, gameSecs),
+                totals: totalsObj,
+                quarter: q1,
                 insertedStats: inserted
               })
             })
@@ -246,7 +230,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       } else if (period.current === 2) {
         // let q1Stats = await knex("box_scores").where({gid: gid});
         let q2 = quarterObj();
-        gameSecs = getGameSecs(period-1, clock);
+        gameSecs = getGameSecs(period.current-1, clock);
         knex("box_scores").where({gid: gid}).update({
           period_updated: 2,
           clock_last_updated: gameSecs,
@@ -256,19 +240,21 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         }, '*').then(inserted => {
           console.log('inserted is ', inserted);
           res.send({
-            msg: `Q2 end`,
+            quarterEnd: true,
+            live: false,
             clock: clock,
             period: period,
             thru_period: 2,
             poss: poss,
-            hStats: hStats,
-            vStats: vStats,
+            pace: calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            quarter: q2,
             insertedStats: inserted
           })
         })
       } else if (period.current === 3) {
         let q3 = quarterObj();
-        gameSecs = getGameSecs(period-1, clock);
+        gameSecs = getGameSecs(period.current-1, clock);
         knex("box_scores").where({gid: gid}).update({
           period_updated: 3,
           clock_last_updated: gameSecs,
@@ -278,20 +264,21 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         }, '*').then(inserted => {
           console.log('inserted is ', inserted);
           res.send({
-            msg: `Q3 end`,
+            quarterEnd: true,
+            live: false,
             clock: clock,
             period: period,
             thru_period: 3,
             poss: poss,
-            hStats: hStats,
-            vStats: vStats,
-            insertedStats: inserted,
-            prevStats: thruQ2[0]
+            pace: calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            quarter: q3,
+            insertedStats: inserted
           })
         })
       } else if (period.current === 4 ) {
         let q4 = quarterObj();
-        gameSecs = getGameSecs(period-1, clock);
+        gameSecs = getGameSecs(period.current-1, clock);
         knex("box_scores").where({gid: gid}).update({
           period_updated: 4,
           clock_last_updated: gameSecs,
@@ -301,15 +288,16 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         }, '*').then(inserted => {
           console.log('inserted is ', inserted);
           res.send({
-            msg: `Q4 end`,
+            quarterEnd: true,
+            live: false,
             clock: clock,
             period: period,
             thru_period: 4,
             poss: poss,
-            hStats: hStats,
-            vStats: vStats,
-            insertedStats: inserted,
-            prevStats: thruQ3[0]
+            pace: calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            quarter: q4,
+            insertedStats: inserted
           })
         })
       }
@@ -318,15 +306,15 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       let totals = await knex("box_scores").where({gid: gid});
 
       res.send({
-        msg: `Q${period.current} ongoing`,
+        quarterEnd: false,
+        live: true,
         clock: clock,
+        gameSecs: gameSecs,
         period: period,
-        thru_period: 0,
+        thru_period: period.current - 1,
         poss: poss,
         pace: calcGamePace(poss, period.current, gameSecs),
-        hStats: hStats,
-        vStats: vStats,
-        totals: totals[0]
+        totals: totalsObj
       })
     }
 

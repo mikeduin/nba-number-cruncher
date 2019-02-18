@@ -90,87 +90,72 @@ export const fetchBoxScore = (id) => async dispatch => {
   let id = 31800001;
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = game.data;
-  console.log('response in action is ', response);
 
   const calcFgPct = (fgm, fga) => {
     return (((fgm/fga)*100).toFixed(1));
   }
 
-  console.log('totals in action are ', response.totals);
-
-  let liveInfo = {
+  let liveTotals = {
     gid: id,
     period: response.period.current,
     endOfPeriod: false,
     thru: response.thru_period,
     clock: response.clock,
     poss: response.poss,
-    hStats: response.hStats,
-    vStats: response.vStats,
-    totals: response.totals,
-    q1: {
-      poss: '',
-      h_pts: '',
-      h_fgPct: '',
-      h_fouls: '',
-      v_pts: '',
-      v_fgPct: '',
-      v_fouls: '',
-      t_pts: '',
-      t_fgPct: '',
-      t_fouls: '',
-    },
-    q2: {},
-    q3: {},
-    q4: {}
+    pace: response.pace,
+    totals: response.totals
   }
 
   if (response.period.endOfPeriod) {
-    liveInfo.endOfPeriod = true;
+    liveTotals.endOfPeriod = true
   };
 
-  console.log('live info is ', liveInfo);
+  console.log('live info is ', liveTotals);
 
-  if (liveInfo.period === 1) {
-    if (liveInfo.endOfPeriod) {
+  if (liveTotals.period === 1) {
+    if (liveTotals.endOfPeriod) {
       let q1 = {
-        gid: liveInfo.gid,
+        gid: liveTotals.gid,
         q: 1,
         poss: response.poss,
-        h_pts: response.hStats.points,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls,
-        v_pts: response.vStats.points,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls,
-        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
-        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
-      }
+        pace: response.pace,
+        h_pts: response.totals.h.pts,
+        h_fgPct: response.totals.h.fgPct,
+        h_fouls: response.totals.h.fouls,
+        v_pts: response.totals.v.pts,
+        v_fgPct: response.totals.v.fgPct,
+        v_fouls: response.totals.v.fouls,
+        t_pts: response.totals.t.pts,
+        t_fgPct: response.totals.t.fgPct,
+        t_fouls: response.totals.t.fouls
+      };
+
       dispatch ({ type: 'SEND_SNAPSHOT', payload: q1})
     } else {
-      liveInfo.q1 = {
+      liveTotals.q1 = {
+        gid: gid,
         poss: response.poss,
-        h_pts: response.hStats.points,
-        h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls,
-        v_pts: response.vStats.points,
-        v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls,
-        t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
-        t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
-      }
+        pace: response.pace,
+        h_pts: response.totals.h.pts,
+        h_fgPct: response.totals.h.fgPct,
+        h_fouls: response.totals.h.fouls,
+        v_pts: response.totals.v.pts,
+        v_fgPct: response.totals.v.fgPct,
+        v_fouls: response.totals.v.fouls,
+        t_pts: response.totals.t.pts,
+        t_fgPct: response.totals.t.fgPct,
+        t_fouls: response.totals.t.fouls
+      };
 
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveTotals})
     }
-  } else if (liveInfo.period === 2) {
-    if (liveInfo.endOfPeriod) {
+  } else if (liveTotals.period === 2) {
+    if (liveTotals.endOfPeriod) {
       console.log(
         'end of period in reducer'
       );
       let q2 = {
-        gid: liveInfo.gid,
+        gid: liveTotals.gid,
         q: 2,
         poss: response.poss,
         h_pts: response.hStats.points,
@@ -186,7 +171,7 @@ export const fetchBoxScore = (id) => async dispatch => {
       dispatch ({ type: 'SEND_SNAPSHOT', payload: q2})
     } else {
       console.log('mid period in reducer');
-      liveInfo.q2 = {
+      liveTotals.q2 = {
         poss: response.poss,
         h_pts: response.hStats.points,
         h_fgPct: response.hStats.fgPct,
@@ -199,10 +184,10 @@ export const fetchBoxScore = (id) => async dispatch => {
         t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
       }
 
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveTotals})
     }
-  } else if (liveInfo.period === 3) {
-    if (liveInfo.endOfPeriod) {
+  } else if (liveTotals.period === 3) {
+    if (liveTotals.endOfPeriod) {
       console.log(
         'end of period in reducer'
       );
@@ -213,7 +198,7 @@ export const fetchBoxScore = (id) => async dispatch => {
       // NEED TO FIX POSSESSSIONS
 
       let q3 = {
-        gid: liveInfo.gid,
+        gid: liveTotals.gid,
         q: 3,
         poss: response.poss,
         h_pts: response.hStats.points - thruTwo.h_total_pts,
@@ -229,28 +214,28 @@ export const fetchBoxScore = (id) => async dispatch => {
       dispatch ({ type: 'SEND_SNAPSHOT', payload: q3})
     } else {
       console.log('mid period in reducer');
-      liveInfo.q3 = {
+      liveTotals.q3 = {
         poss: response.poss,
-        h_pts: response.hStats.points - liveInfo.totals.h_total_pts,
+        h_pts: response.hStats.points - liveTotals.totals.h_total_pts,
         h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls - liveInfo.totals.h_total_fouls,
-        v_pts: response.vStats.points - liveInfo.totals.v_total_fouls,
+        h_fouls: response.hStats.fouls - liveTotals.totals.h_total_fouls,
+        v_pts: response.vStats.points - liveTotals.totals.v_total_fouls,
         v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls - liveInfo.totals.v_total_fouls,
+        v_fouls: response.vStats.fouls - liveTotals.totals.v_total_fouls,
         t_pts: parseInt(response.hStats.points) + parseInt(response.vStats.points),
         t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
         t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
       }
 
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveTotals})
     }
-  } else if (liveInfo.period === 4) {
-    if (liveInfo.endOfPeriod) {
+  } else if (liveTotals.period === 4) {
+    if (liveTotals.endOfPeriod) {
       console.log(
         'end of period in reducer'
       );
-      liveInfo.q4 = {
-        gid: liveInfo.gid,
+      liveTotals.q4 = {
+        gid: liveTotals.gid,
         q: 4,
         poss: response.poss,
         h_pts: response.hStats.points,
@@ -263,23 +248,23 @@ export const fetchBoxScore = (id) => async dispatch => {
         t_fgPct: calcFgPct((parseInt(response.hStats.fgm) + parseInt(response.vStats.fgm)), (parseInt(response.hStats.fga) + parseInt(response.vStats.fga))),
         t_fouls: parseInt(response.hStats.fouls) + parseInt(response.vStats.fouls)
       };
-      dispatch ({ type: 'SEND_SNAPSHOT', payload: liveInfo})
+      dispatch ({ type: 'SEND_SNAPSHOT', payload: liveTotals})
     } else {
       console.log('mid period in reducer');
-      liveInfo.q4 = {
+      liveTotals.q4 = {
         poss: response.poss,
-        h_pts: response.hStats.points - liveInfo.totals.h_total_pts,
+        h_pts: response.hStats.points - liveTotals.totals.h_total_pts,
         h_fgPct: response.hStats.fgPct,
-        h_fouls: response.hStats.fouls - liveInfo.totals.h_total_fouls,
-        v_pts: response.vStats.points - liveInfo.totals.v_total_pts,
+        h_fouls: response.hStats.fouls - liveTotals.totals.h_total_fouls,
+        v_pts: response.vStats.points - liveTotals.totals.v_total_pts,
         v_fgPct: response.vStats.fgPct,
-        v_fouls: response.vStats.fouls - liveInfo.totals.v_total_fouls,
-        t_pts: parseInt(response.hStats.points - liveInfo.totals.h_total_pts) + parseInt(response.vStats.points - liveInfo.totals.v_total_pts),
-        t_fgPct: calcFgPct((parseInt(response.hStats.fgm - liveInfo.totals.h_total_fgm) + parseInt(response.vStats.fgm - liveInfo.totals.v_total_fgm)), (parseInt(response.hStats.fga - liveInfo.totals.h_total_fga) + parseInt(response.vStats.fga - liveInfo.totals.v_total_fga))),
-        t_fouls: parseInt(response.hStats.fouls - liveInfo.totals.h_total_fouls) + parseInt(response.vStats.fouls - liveInfo.totals.v_total_fouls)
+        v_fouls: response.vStats.fouls - liveTotals.totals.v_total_fouls,
+        t_pts: parseInt(response.hStats.points - liveTotals.totals.h_total_pts) + parseInt(response.vStats.points - liveTotals.totals.v_total_pts),
+        t_fgPct: calcFgPct((parseInt(response.hStats.fgm - liveTotals.totals.h_total_fgm) + parseInt(response.vStats.fgm - liveTotals.totals.v_total_fgm)), (parseInt(response.hStats.fga - liveTotals.totals.h_total_fga) + parseInt(response.vStats.fga - liveTotals.totals.v_total_fga))),
+        t_fouls: parseInt(response.hStats.fouls - liveTotals.totals.h_total_fouls) + parseInt(response.vStats.fouls - liveTotals.totals.v_total_fouls)
       }
 
-      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveTotals})
     }
   }
 
