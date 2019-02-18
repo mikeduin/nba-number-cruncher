@@ -2,6 +2,7 @@ const axios = require('axios');
 const knex = require('../db/knex');
 const _ = require('lodash');
 const startPeriodSec = require('./startPeriodSec');
+const getGameSecs = require('./getGameSecs');
 
 module.exports = {
   buildSubData: async (gid) => {
@@ -37,14 +38,6 @@ module.exports = {
 
     const periods = pbp.data.g.pd.length;
 
-    // const startPeriodSec = (per) => {
-    //   if (per < 4) {
-    //     return (per*720);
-    //   } else {
-    //     return (2880 + ((per-4)*300));
-    //   };
-    // };
-
     const checkPeriodStart = (secs) => {
       if (secs < 2880) {
         return (Math.floor(secs/720));
@@ -67,13 +60,14 @@ module.exports = {
       periodPlayers.push(_.pull(iPlayers, hTid, vTid));
 
       subEvents.forEach(event => {
-        let secs = 0;
+        let secs = getGameSecs(i, event.cl)
 
-        if (i < 4) {
-          secs = ( startPeriodSec(i) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
-        } else {
-          secs = ( startPeriodSec(i) + ((4-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))) )
-        };
+        // Can delete this once confirmed that module is working
+        // if (i < 4) {
+        //   secs = ( startPeriodSec(i) + ((11-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))));
+        // } else {
+        //   secs = ( startPeriodSec(i) + ((4-parseInt(event.cl.slice(0, 2)))*60) + (60-parseInt(event.cl.slice(3, 5))) )
+        // };
 
         // SUBSTITUTION REFERENCE IN PLAY-BY-PLAY LOGS:
         // player entering = event.epid
