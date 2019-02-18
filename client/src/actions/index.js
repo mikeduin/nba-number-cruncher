@@ -87,10 +87,14 @@ export const setActiveDay = date => async dispatch => {
 
 export const fetchBoxScore = (id) => async dispatch => {
   let todayInt = moment().format('YYYYMMDD');
+  let id = 31800001;
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = game.data;
   console.log('response in action is ', response);
-  // console.log('response.period is ', response.stats.period);
+
+  const calcFgPct = (fgm, fga) => {
+    return (((fgm/fga)*100).toFixed(1));
+  }
 
   let liveInfo = {
     gid: id,
@@ -100,13 +104,45 @@ export const fetchBoxScore = (id) => async dispatch => {
     clock: response.clock,
     poss: response.poss,
     hStats: response.hStats,
-    vStats: response.vStats
+    vStats: response.vStats,
+    q1: {
+      poss: '',
+      h_pts: '',
+      h_fgPct: '',
+      h_fouls: '',
+      v_pts: '',
+      v_fgPct: '',
+      v_fouls: '',
+      t_pts: '',
+      t_fgPct: '',
+      t_fouls: '',
+    },
+    q2: {},
+    q3: {},
+    q4: {}
   }
 
-  if (!liveInfo.endOfPeriod) {
-    dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+  if (liveInfo.period === 1) {
+    if (liveInfo.endOfPeriod) {
+
+    } else {
+      liveInfo.q1 = {
+        poss: response.poss,
+        h_pts: response.hStats.points,
+        h_fgPct: response.hStats.fgPct,
+        h_fouls: response.hStats.fouls,
+        v_pts: response.vStats.points,
+        v_fgPct: response.vStats.fgPct,
+        v_fouls: response.vStats.fouls,
+        t_pts: response.hStats.points + response.vStats.points,
+        t_fgPct: calcFgPct((response.hStats.fgm + response.vStats.fgm), (response.hStats.fga + response.vStats.fga)),
+        t_fouls: response.hStats.fouls + response.vStats.fouls
+      }
+
+      dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+    }
   }
 
-  // dispatch ({type: 'UPDATE_LIVE_SCORE', payload: liveInfo})
+
 
 }
