@@ -143,6 +143,22 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               v_1q_to: vTeam.totals.turnovers,
               v_1q_off_reb: vTeam.totals.offReb,
               v_1q_fouls: vTeam.totals.pFouls,
+              h_total_pts: hTeam.totals.points,
+              h_total_fga: hTeam.totals.fga,
+              h_total_fgm: hTeam.totals.fgm,
+              h_total_fg_pct: hFgPct,
+              h_total_fta: hTeam.totals.fta,
+              h_total_to: hTeam.totals.turnovers,
+              h_total_off_reb: hTeam.totals.offReb,
+              h_total_fouls: hTeam.totals.pFouls,
+              v_total_pts: vTeam.totals.points,
+              v_total_fga: vTeam.totals.fga,
+              v_total_fgm: vTeam.totals.fgm,
+              v_total_fg_pct: vFgPct,
+              v_total_fta: vTeam.totals.fta,
+              v_total_to: vTeam.totals.turnovers,
+              v_total_off_reb: vTeam.totals.offReb,
+              v_total_fouls: vTeam.totals.pFouls,
               period_updated: 1,
               updated_at: new Date()
             }, '*').then(inserted => {
@@ -163,8 +179,80 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             return;
           }
         })
+      } else if (period.current === 2) {
+        let q1Stats = await knex("box_scores").where({gid: gid});
+
+        let obj2q = {
+          h_pts: hTeam.totals.points - q1Stats.h_1q_pts,
+          h_fga: hTeam.totals.fga - q1Stats.h_1q_fga,
+          h_fgm: hTeam.totals.fgm - q1Stats.h_1q_fgm,
+          h_fg_pct: calcFgPct((hTeam.totals.fgm-q1Stats.h_1q_fm), (hTeam.totals.fga - q1Stats.h_1q_fa)),
+          h_fta: hTeam.totals.fta - q1Stats.h_1q_ftas,
+          h_to: hTeam.totals.turnovers - q1Stats.h_1q_to,
+          h_off_reb: hTeam.totals.offReb - q1Stats.h_1q_off_reb,
+          h_fouls: hTeam.totals.pFouls - q1Stats.h_1q_fouls,
+          v_pts: vTeam.totals.points - q1Stats.v_1q_pts,
+          v_fga: vTeam.totals.fga - q1Stats.v_1q_fga,
+          v_fgm: vTeam.totals.fgm - q1Stats.v_1q_fgm,
+          v_fg_pct: calcFgPct((vTeam.totals.fgm-q1Stats.v_1q_fm), (vTeam.totals.fga - q1Stats.v_1q_fa)),
+          v_ftas: vTeam.totals.fta - q1Stats.v_1q_ftas,
+          v_to: vTeam.totals.turnovers - q1Stats.v_1q_to,
+          v_off_reb: vTeam.totals.offReb - q1Stats.v_1q_off_reb,
+          v_fouls: vTeam.totals.pFouls - q1Stats.v_1q_fouls
+        }
+
+        knex("box_scores").where({gid: gid}).update({
+          h_2q_pts: obj2q.h_pts,
+          h_2q_fga: obj2q.h_fga,
+          h_2q_fgm: obj2q.h_fgm,
+          h_2q_fg_pct: obj2q.h_fg_pct,
+          h_2q_fta: obj2q.h_fta,
+          h_2q_to: obj2q.h_to,
+          h_2q_off_reb: obj2q.h_off_reb,
+          h_2q_fouls: obj2q.h_fouls,
+          v_2q_pts: obj2q.v_pts,
+          v_2q_fga: obj2q.v_fga,
+          v_2q_fgm: obj2q.v_fgm,
+          v_2q_fg_pct: obj2q.v_fg_pct,
+          v_2q_fta: obj2q.v_fta,
+          v_2q_to: obj2q.v_to,
+          v_2q_off_reb: obj2q.v_off_reb,
+          v_2q_fouls: obj2q.v_fouls,
+          h_total_pts: hTeam.totals.points,
+          h_total_fga: hTeam.totals.fga,
+          h_total_fgm: hTeam.totals.fgm,
+          h_total_fg_pct: hFgPct,
+          h_total_fta: hTeam.totals.fta,
+          h_total_to: hTeam.totals.turnovers,
+          h_total_off_reb: hTeam.totals.offReb,
+          h_total_fouls: hTeam.totals.pFouls,
+          v_total_pts: vTeam.totals.points,
+          v_total_fga: vTeam.totals.fga,
+          v_total_fgm: vTeam.totals.fgm,
+          v_total_fg_pct: vFgPct,
+          v_total_fta: vTeam.totals.fta,
+          v_total_to: vTeam.totals.turnovers,
+          v_total_off_reb: vTeam.totals.offReb,
+          v_total_fouls: vTeam.totals.pFouls,
+          period_updated: 2,
+          updated_at: new Date()
+        }, '*').then(inserted => {
+          console.log('inserted is ', inserted);
+          res.send({
+            msg: `Q2 end`,
+            clock: clock,
+            period: period,
+            thru_period: 2,
+            poss: poss,
+            hStats: hStats,
+            vStats: vStats,
+            insertedStats: inserted
+          })
+        })
       }
     } else {
+      // let q1Stats = await knex("box_scores").where({gid: gid});
+
       res.send({
         msg: `Q${period.current} ongoing`,
         clock: clock,

@@ -15,6 +15,7 @@ class BoxScore extends React.Component {
   render () {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
+    let snapshot = this.props.gambleCast[`live_snap_${game.gid}`]
     if (!boxScore) {
       return <div> Loading ... </div>
     } else {
