@@ -9,14 +9,18 @@ import moment from 'moment';
 class Header extends React.Component {
   componentWillMount() {
     this.resetComponent();
+    // this.source = this.props.players;
+    // console.log('source is ', source);
   }
 
   resetComponent = () => this.setState({ isLoading: false, results: [], value: ''})
 
   // Will need to change result.title !!!
-  handleResultSelect = (e, {result }) => this.setState({ value: result.title })
+  handleResultSelect = (e, {result }) => this.setState({ value: result.player_name   })
 
   handleSearchChange = (e, {value }) => {
+    let source = this.props.players;
+
     this.setState({ isLoading: true, value})
 
     setTimeout(() => {
@@ -24,7 +28,7 @@ class Header extends React.Component {
 
       const re = new RegExp(_.escapeRegExp(this.state.value), 'i');
       // Will need to change result.title !!!
-      const isMatch = result => re.test(result.title)
+      const isMatch = result => re.test(result.player_name)
 
       this.setState({
         isLoading: false,

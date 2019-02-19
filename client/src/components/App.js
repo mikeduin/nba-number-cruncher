@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 
-import { fetchWeek } from '../actions';
+import { fetchWeek, getPlayerMetadata } from '../actions';
 
 import NetRatings from './NetRatings';
 import Schedule from './Schedule';
@@ -10,21 +10,23 @@ import GameSheet from './GameSheet';
 import Header from './Header';
 import TodaysGames from './TodaysGames';
 import GambleCast from './GambleCast';
+import Player from './Player';
 
 class App extends React.Component {
   componentDidMount () {
     this.props.fetchWeek();
+    this.props.getPlayerMetadata();
   }
 
   render () {
-    // if (!this.props.todaysGames[1]) {
-    //   return <div> </div>
-    // } else {
+    if (!this.props.players[1]) {
+      return <div> Loading App ... </div>
+    } else {
       return (
         <div className="ui container">
           <BrowserRouter>
             <div>
-              <Header />
+              <Header players={this.props.players} />
               <Route path='/schedule' exact component={Schedule} />
               <Route path='/schedule/:date' component={Schedule} />
               <Route path='/netratings' exact component={NetRatings} />
@@ -36,14 +38,15 @@ class App extends React.Component {
           </BrowserRouter>
         </div>
       )
-    // }
+    }
   }
 };
 
 const mapStateToProps = state => {
   return {
-    todaysGames: state.todaysGames
+    todaysGames: state.todaysGames,
+    players: state.playerMetadata
   }
 }
 
-export default connect(mapStateToProps, { fetchWeek })(App);
+export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata })(App);
