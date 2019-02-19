@@ -34,13 +34,13 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-// setTimeout(()=>{
-//   dbBuilders.buildGameStintsDb();
-// }, 3000)
-
 setTimeout(()=>{
-  buildGameStints.buildSubData(21800480);
-}, 1000)
+  dbBuilders.buildGameStintsDb();
+}, 3000)
+
+// setTimeout(()=>{
+//   buildGameStints.buildSubData(21800480);
+// }, 1000)
 
 // setTimeout(async ()=>{
 //   let gameStints = await knex("player_game_stints");

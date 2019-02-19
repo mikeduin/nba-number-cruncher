@@ -92,7 +92,7 @@ module.exports = {
       .whereNotNull("gweek")
       .whereNull("game_stints")
       .where({ stt: "Final" })
-      .limit(30);
+      .limit(40);
 
     games.forEach(game => {
       buildGameStints.buildSubData(game);
