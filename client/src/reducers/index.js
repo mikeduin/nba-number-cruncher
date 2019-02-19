@@ -9,7 +9,8 @@ import vColors from './vColorReducer';
 import hPlayers from './hPlayersReducer';
 import vPlayers from './vPlayersReducer';
 import gambleCast from './gambleCastReducer';
-import playerMetadata from './playersReducer';
+import playersMetadata from './playersReducer';
+import playerData from './playerDataReducer';
 
 export default combineReducers ({
   netRatings,
@@ -22,5 +23,6 @@ export default combineReducers ({
   hPlayers,
   vPlayers,
   gambleCast,
-  playerMetadata
+  playersMetadata,
+  playerData
 })

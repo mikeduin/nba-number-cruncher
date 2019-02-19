@@ -25,10 +25,16 @@ export const fetchWeek = (date = today) => async dispatch => {
   dispatch({ type: 'FETCH_WEEK', payload: updated});
 }
 
+export const fetchPlayerData = (pid) => async dispatch => {
+  let playerData = await axios.get(`/api/fetchPlayerData/${pid}`);
+
+  dispatch({ type: 'FETCH_PLAYER_DATA', payload: playerData.data })
+}
+
 export const getPlayerMetadata = () => async dispatch => {
   let players = await axios.get('/api/getPlayerMetadata');
 
-  dispatch({ type: 'LOAD_PLAYER_METADATA', payload: players.data.players})
+  dispatch({ type: 'LOAD_PLAYER_METADATA', payload: players.data.players })
 }
 
 export const fetchGame = ({gid}) => async dispatch => {

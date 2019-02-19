@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Item } from 'semantic-ui-react';
+import { Menu, Search, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { setActiveDay } from '../actions';
 import _ from 'lodash';
@@ -57,9 +57,12 @@ class Header extends React.Component {
     const { isLoading, value, results } = this.state;
 
     return (
-      <div className="ui pointing menu">
+      <Menu pointing >
         <Link to="/schedule" className="item" onClick={this.setActiveDay}>
           Schedule
+        </Link>
+        <Link to="" className="item">
+          Daily Digest
         </Link>
         <Link to="/gamblecast" className="item">
           GambleCast
@@ -76,19 +79,17 @@ class Header extends React.Component {
         <Link to="/netratings" className="item">
           Net Ratings
         </Link>
-        <Link to="/netratings" className="item">
-          Daily Digest
-        </Link>
         <Search
+          floated="right"
+          position="right"
           loading={isLoading}
           onResultSelect={this.handleResultSelect}
           onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
           results={results}
           value={value}
           resultRenderer={resultRenderer}
-
         />
-      </div>
+      </Menu>
     )
   }
 

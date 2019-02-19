@@ -1,9 +1,28 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { fetchPlayerData } from '../actions';
 
-const Player = () => {
-  return (
-    <div> This is player page </div>
-  )
+class Player extends React.Component {
+  componentDidMount () {
+    this.props.fetchPlayerData(this.props.match.params.pid);
+  }
+
+  render () {
+    if (!this.props.playerData.mappedData) {
+      return <div> Loading . . . </div>
+    } else {
+      return (
+        <div> {this.props.playerData.mappedData.player_name} </div>
+      )
+    }
+  }
+
 }
 
-export default Player;
+const mapStateToProps = state => {
+  return {
+    playerData: state.playerData,
+  }
+}
+
+export default connect (mapStateToProps, {fetchPlayerData}) (Player);

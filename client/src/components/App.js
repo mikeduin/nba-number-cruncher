@@ -45,7 +45,7 @@ class App extends React.Component {
 const mapStateToProps = state => {
   return {
     todaysGames: state.todaysGames,
-    players: state.playerMetadata
+    players: state.playersMetadata
   }
 }
 

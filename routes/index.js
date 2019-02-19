@@ -41,18 +41,20 @@ router.get("/", (req, res, next) => {
   res.send({ Hi: "there" });
 });
 
-router.get("/gameStints/player/:pid", async (req, res, next) => {
+router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const pid = req.params.pid;
 
-  let gameStints = await knex("player_game_stints as pgs")
+  const mappedData = await knex("player_data").where({player_id: pid});
+
+  const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
     .where({player_id: pid})
-    .select('pgs.game_stints');
+    .orderBy('s.gid', 'desc');
 
-
-  gameStints.forEach(array => {
-    console.log(array);
-  })
+  res.send({
+    gameStints: gameStints,
+    mappedData: mappedData[0]
+  });
 })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
