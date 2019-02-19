@@ -335,7 +335,9 @@ router.get("/fetchStarters", (req, res, next) => {
 })
 
 router.get("/api/getPlayerMetadata", async (req, res, next) => {
-  let players = await knex("player_data").select('player_id', 'player_name', 'team_abbreviation', 'min_full', 'net_rtg_full');
+  let players = await knex("player_data")
+    .orderBy('min_full', 'desc')
+    .select('player_id', 'player_name', 'team_abbreviation', 'min_full', 'net_rtg_full');
 
   res.send({players});
 })
@@ -395,21 +397,21 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const hPlayers = await knex("player_data").where({team_id: h});
   const vPlayers = await knex("player_data").where({team_id: v});
 
-    res.send({
-      info: game[0],
-      odds: odds[0],
-      hTen: hSched,
-      vTen: vSched,
-      matchups: matchups,
-      hNetRtg: hNetRtg[0],
-      vNetRtg: vNetRtg[0],
-      hPace: hPace[0],
-      vPace: vPace[0],
-      hInfo: hInfo[0],
-      vInfo: vInfo[0],
-      hPlayers: hPlayers,
-      vPlayers: vPlayers
-    });
+  res.send({
+    info: game[0],
+    odds: odds[0],
+    hTen: hSched,
+    vTen: vSched,
+    matchups: matchups,
+    hNetRtg: hNetRtg[0],
+    vNetRtg: vNetRtg[0],
+    hPace: hPace[0],
+    vPace: vPace[0],
+    hInfo: hInfo[0],
+    vInfo: vInfo[0],
+    hPlayers: hPlayers,
+    vPlayers: vPlayers
+  });
 })
 
 

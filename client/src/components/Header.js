@@ -1,21 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'semantic-ui-react';
+import { Search, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { setActiveDay } from '../actions';
 import _ from 'lodash';
 import moment from 'moment';
 
+const resultRenderer = ({ player_name, player_id, team_abbreviation, min_full, net_rtg_full }) => {
+  return (
+    <Link to={`/player/${player_id}`}>
+      <Item style={{padding: 0}}>
+        <Item.Image size='medium' src={`/images/logos/${team_abbreviation}.svg`} />
+        <Item.Content style={{marginRight: 0}}>
+          <Item.Header> {player_name} </Item.Header>
+          <Item.Description> {min_full} MPG </Item.Description>
+          <Item.Description> {net_rtg_full} NET RTG </Item.Description>
+        </Item.Content>
+      </Item>
+    </Link>
+  )
+};
+
 class Header extends React.Component {
   componentWillMount() {
     this.resetComponent();
-    // this.source = this.props.players;
-    // console.log('source is ', source);
   }
 
   resetComponent = () => this.setState({ isLoading: false, results: [], value: ''})
 
-  // Will need to change result.title !!!
   handleResultSelect = (e, {result }) => this.setState({ value: result.player_name   })
 
   handleSearchChange = (e, {value }) => {
@@ -27,12 +39,10 @@ class Header extends React.Component {
       if (this.state.value.length < 1) {return this.resetComponent()}
 
       const re = new RegExp(_.escapeRegExp(this.state.value), 'i');
-      // Will need to change result.title !!!
       const isMatch = result => re.test(result.player_name)
 
       this.setState({
         isLoading: false,
-        // 'source' here references data
         results: _.filter(source, isMatch)
       })
     }, 300)
@@ -75,7 +85,8 @@ class Header extends React.Component {
           onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
           results={results}
           value={value}
-          {...this.props}
+          resultRenderer={resultRenderer}
+
         />
       </div>
     )
