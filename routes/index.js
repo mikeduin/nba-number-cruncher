@@ -334,6 +334,12 @@ router.get("/fetchStarters", (req, res, next) => {
   })
 })
 
+router.get("/api/getPlayerMetadata", async (req, res, next) => {
+  let players = await knex("player_data").select('player_id', 'player_name', 'team_abbreviation', 'min_full', 'net_rtg_full');
+
+  res.send({players});
+})
+
 router.get("/api/getNetRatings", (req, res, next) => {
   knex("team_net_ratings").then(netRatings => {
     res.send(netRatings);
