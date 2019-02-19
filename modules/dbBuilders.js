@@ -90,7 +90,9 @@ module.exports = {
     let games = await knex("schedule")
       .pluck("gid")
       .whereNotNull("gweek")
-      .where({ stt: "Final" });
+      .whereNull("game_stints")
+      .where({ stt: "Final" })
+      .limit(30);
 
     games.forEach(game => {
       buildGameStints.buildSubData(game);

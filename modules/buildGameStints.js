@@ -104,6 +104,9 @@ module.exports = {
     // if not, then add beginning of array with start of last period value
 
     let tempPlayer = 0;
+    let tempLastExitSecs = 0;
+    let tempPer = 0;
+    let tempPSLES = 0;
 
     // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
     try {
@@ -123,6 +126,9 @@ module.exports = {
           // And their last exit time is before the start of the last period ...
           lastExitSecs < startPeriodSec(periods-1)
         ) {
+          tempPSLES = startPeriodSec(periods-1);
+          tempLastExitSecs = lastExitSecs;
+          tempPer = lastExitPer + 1;
           // Set next entry time to next quarter they played in
           for (var i = lastExitPer + 1; i < periodPlayers.length; i++) {
             if (periodPlayers[i].indexOf(player)) {
@@ -135,6 +141,7 @@ module.exports = {
     } catch (e) {
       console.log(e);
       console.log('game ID is ', gid, ' player causing error is ', tempPlayer);
+      console.log('tempPer is ', tempPer, ' lastExitSecs is ', tempLastExitSecs, ' value from checkPeriodStartLastExitSecs is ', tempPSLES);
     };
 
     // Add final checkouts at end of game for players with open last arrays
@@ -152,46 +159,48 @@ module.exports = {
             };
           }
         }
-      })
-
-    hPlayers.forEach(player => {
-      let stints = gameStints[`pid_${player}`];
-
-      knex("player_game_stints").insert({
-        player_id: player,
-        team_id: hTid,
-        gid: gid,
-        gcode: gcode,
-        gdte: gdte,
-        game_stints: stints,
-        updated_at: new Date()
-      }, '*').then(inserted => {
-        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
       });
-    });
 
-    vPlayers.forEach((player, i) => {
-      let stints = gameStints[`pid_${player}`];
-
-      knex("player_game_stints").insert({
-        player_id: player,
-        team_id: vTid,
-        gid: gid,
-        gcode: gcode,
-        gdte: gdte,
-        game_stints: stints,
-        updated_at: new Date()
-      }, '*').then(inserted => {
-        console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-        if (i === vPlayers.length - 1) {
-          knex("schedule").where({ gid: gid }).update({
-            game_stints: true,
-            updated_at: new Date()
-          }).then((res) => {
-            console.log(gid, ' game stint updates have concluded');
-          })
-        }
-      });
-    })
+      console.log(gameStints);
+    //
+    // hPlayers.forEach(player => {
+    //   let stints = gameStints[`pid_${player}`];
+    //
+    //   knex("player_game_stints").insert({
+    //     player_id: player,
+    //     team_id: hTid,
+    //     gid: gid,
+    //     gcode: gcode,
+    //     gdte: gdte,
+    //     game_stints: stints,
+    //     updated_at: new Date()
+    //   }, '*').then(inserted => {
+    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+    //   });
+    // });
+    //
+    // vPlayers.forEach((player, i) => {
+    //   let stints = gameStints[`pid_${player}`];
+    //
+    //   knex("player_game_stints").insert({
+    //     player_id: player,
+    //     team_id: vTid,
+    //     gid: gid,
+    //     gcode: gcode,
+    //     gdte: gdte,
+    //     game_stints: stints,
+    //     updated_at: new Date()
+    //   }, '*').then(inserted => {
+    //     console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
+    //     if (i === vPlayers.length - 1) {
+    //       knex("schedule").where({ gid: gid }).update({
+    //         game_stints: true,
+    //         updated_at: new Date()
+    //       }).then((res) => {
+    //         console.log(gid, ' game stint updates have concluded');
+    //       })
+    //     }
+    //   });
+    // })
   }
 }
