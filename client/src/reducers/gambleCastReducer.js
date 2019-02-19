@@ -7,6 +7,7 @@ export default (state = {}, action) => {
         }
       };
     case 'ADD_SNAPSHOT':
+      // If this does not work, try the approach found in react/redux tutorial note 86
       return {...state, [`live_${action.payload.gid}`]: {
           ...state[`live_${action.payload.gid}`],
           [`q${action.payload.q}`]: action.payload.quarterData,

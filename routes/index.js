@@ -34,32 +34,24 @@ let now = moment().format('YYYY-MM-DD');
 // setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 // setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-setTimeout(()=>{
-  dbBuilders.buildGameStintsDb();
-}, 3000)
-
-// setTimeout(()=>{
-//   buildGameStints.buildSubData(21800480);
-// }, 1000)
-
-// setTimeout(async ()=>{
-//   let gameStints = await knex("player_game_stints");
-//   console.log(gameStints);
-// }, 1000)
-
 /* GET home page. */
 router.get("/", (req, res, next) => {
   console.log('hello');
 
-
   res.send({ Hi: "there" });
 });
 
-router.get("/gameWatcher", (req, res, next) => {
-  knex("schedule").where({gdte: now}).then(todayGames => {
-    // are these box scores active in-game? otherwise how can I get this data?
-    // https://data.nba.net/prod/v1/20190212/0021800848_boxscore.json
-    console.log('watching game');
+router.get("/gameStints/player/:pid", async (req, res, next) => {
+  const pid = req.params.pid;
+
+  let gameStints = await knex("player_game_stints as pgs")
+    .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
+    .where({player_id: pid})
+    .select('pgs.game_stints');
+
+
+  gameStints.forEach(array => {
+    console.log(array);
   })
 })
 
@@ -73,8 +65,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   // };
 
   let { period, clock } = boxScore.data.basicGameData;
-  let hTid = boxScore.data.basicGameData.hTeam.teamId;
-  let vTid = boxScore.data.basicGameData.vTeam.teamId;
+  const hTid = boxScore.data.basicGameData.hTeam.teamId;
+  const vTid = boxScore.data.basicGameData.vTeam.teamId;
 
   let gameSecs = getGameSecs(period-1, clock);
 
@@ -319,21 +311,21 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
 router.get("/fetchStarters", (req, res, next) => {
   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
-    let h = game.data.g.hls;
-    let v = game.data.g.vls;
-    let home = {
+    const h = game.data.g.hls;
+    const v = game.data.g.vls;
+    const home = {
       tid: h.tid,
       starters: h.pstsg.slice(0,5).map(player => player.pid),
       bench: h.pstsg.slice(5, h.pstsg.length).map(player => player.pid)
     };
 
-    let vis = {
+    const vis = {
       tid: v.tid,
       starters: v.pstsg.slice(0,5).map(player => player.pid),
       bench: v.pstsg.slice(5, v.pstsg.length).map(player => player.pid)
     };
 
-    let rosters = {
+    const rosters = {
       h: home,
       v: vis
     };
@@ -349,8 +341,8 @@ router.get("/api/getNetRatings", (req, res, next) => {
 });
 
 router.get("/api/fetchWeek/:date", (req, res, next) => {
-  let week = dateFilters.fetchGmWk(req.params.date);
-  let weekArray = dateFilters.fetchGmWkArrays(week);
+  const week = dateFilters.fetchGmWk(req.params.date);
+  const weekArray = dateFilters.fetchGmWkArrays(week);
   knex("schedule as s")
     // do a leftJoin here, not an innerJoin; otherwise if there are no odds, no games are returned
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
@@ -366,123 +358,110 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
     });
 });
 
-router.get("/api/fetchGame/:gid", (req, res, next) => {
-  let gid = req.params.gid;
-  knex("schedule").where({gid: gid}).then(game => {
-    knex("odds_sportsbook").where({gcode: game[0].gcode}).then(odds => {
+router.get("/api/fetchGame/:gid", async (req, res, next) => {
+  const gid = req.params.gid;
+  const game = await knex("schedule").where({gid: gid});
+  const odds = await knex("odds_sportsbook").where({gcode: game[0].gcode});
+  const h = game[0].h[0].tid;
+  const v = game[0].v[0].tid;
+  const hAbb = game[0].h[0].ta;
+  const vAbb = game[0].v[0].ta;
+  const nineAgo = moment().subtract(8, 'days').format('YYYY-MM-DD');
+  const oneAhead = moment().add(1, 'days').format('YYYY-MM-DD');
 
-      let h = game[0].h[0].tid;
-      let v = game[0].v[0].tid;
-      let hAbb = game[0].h[0].ta;
-      let vAbb = game[0].v[0].ta;
+  const hSched = await knex("schedule")
+    .where('gcode', 'like', `%${hAbb}%`)
+    .whereBetween('gdte', [nineAgo, oneAhead])
+    .orderBy('gdte');
+  const vSched = await knex("schedule")
+    .where('gcode', 'like', `%${vAbb}%`)
+    .whereBetween('gdte', [nineAgo, oneAhead])
+    .orderBy('gdte');
+  const hNetRtg = await knex("team_net_ratings").where({team_id: h});
+  const vNetRtg = await knex("team_net_ratings").where({team_id: v});
+  const hPace = await knex("team_pace").where({team_id: h});
+  const vPace = await knex("team_pace").where({team_id: v});
+  const hInfo = await knex("teams").where({tid: h});
+  const vInfo = await knex("teams").where({tid: v});
+  const matchups = await knex("schedule")
+    .where('gcode', 'like', `%${hAbb}${vAbb}%`)
+    .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`);
+  const hPlayers = await knex("player_data").where({team_id: h});
+  const vPlayers = await knex("player_data").where({team_id: v});
 
-      let nineAgo = moment().subtract(8, 'days').format('YYYY-MM-DD');
-      let oneAhead = moment().add(1, 'days').format('YYYY-MM-DD');
-
-      knex("schedule")
-      .where('gcode', 'like', `%${hAbb}%`)
-      .whereBetween('gdte', [nineAgo, oneAhead])
-      .orderBy('gdte')
-      .then(hSched => {
-        knex("schedule")
-        .where('gcode', 'like', `%${vAbb}%`)
-        .whereBetween('gdte', [nineAgo, oneAhead])
-        .orderBy('gdte')
-        .then(vSched => {
-          knex("team_net_ratings").where({team_id: h}).then(hNetRtg => {
-            knex("team_net_ratings").where({team_id: v}).then(vNetRtg => {
-              knex("team_pace").where({team_id: h}).then(hPace => {
-                knex("team_pace").where({team_id: v}).then(vPace => {
-                  knex("teams").where({tid: h}).then(hInfo => {
-                    knex("teams").where({tid: v}).then(vInfo => {
-                      knex("schedule")
-                      .where('gcode', 'like', `%${hAbb}${vAbb}%`)
-                      .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`)
-                      .then(matchups => {
-                        knex("player_data").where({team_id: h}).then(hPlayers => {
-                          knex("player_data").where({team_id: v}).then(vPlayers => {
-                            res.send({
-                              info: game[0],
-                              odds: odds[0],
-                              hTen: hSched,
-                              vTen: vSched,
-                              matchups: matchups,
-                              hNetRtg: hNetRtg[0],
-                              vNetRtg: vNetRtg[0],
-                              hPace: hPace[0],
-                              vPace: vPace[0],
-                              hInfo: hInfo[0],
-                              vInfo: vInfo[0],
-                              hPlayers: hPlayers,
-                              vPlayers: vPlayers
-                            });
-                          })
-                        })
-                      })
-                    })
-                  })
-                })
-              })
-            })
-          })
-        })
-      })
-    })
-  })
+    res.send({
+      info: game[0],
+      odds: odds[0],
+      hTen: hSched,
+      vTen: vSched,
+      matchups: matchups,
+      hNetRtg: hNetRtg[0],
+      vNetRtg: vNetRtg[0],
+      hPace: hPace[0],
+      vPace: vPace[0],
+      hInfo: hInfo[0],
+      vInfo: vInfo[0],
+      hPlayers: hPlayers,
+      vPlayers: vPlayers
+    });
 })
 
 
-//
-// const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
-//   updateTeamStats.updateFullTeamBuilds();
-// })
-//
-// const updateStarterBuilds = schedule.scheduleJob("17 14 * * *", () => {
-//   updateTeamStats.updateStarterBuilds();
-// })
-//
-// const updateBenchBuilds = schedule.scheduleJob("18 14 * * *", () => {
-//   updateTeamStats.updateBenchBuilds();
-// })
-//
-// const updateQ1Builds = schedule.scheduleJob("19 14 * * *", () => {
-//   updateTeamStats.updateQ1Builds();
-// })
-//
-// const updateQ2Builds = schedule.scheduleJob("20 14 * * *", () => {
-//   updateTeamStats.updateQ2Builds();
-// })
-//
-// const updateQ3Builds = schedule.scheduleJob("21 14 * * *", () => {
-//   updateTeamStats.updateQ3Builds();
-// })
-//
-// const updateQ4Builds = schedule.scheduleJob("22 14 * * *", () => {
-//   updateTeamStats.updateQ4Builds();
-// })
-//
-// const updateFullPlayersBuild = schedule.scheduleJob("23 14 * * *", () => {
-//   updatePlayerStats.updatePlayerStatBuilds();
-// })
-//
-// const updateSchedule = schedule.scheduleJob("24 14 * * *", () => {
-//   dbBuilders.updateSchedule();
-// })
-//
-// const mapTeamNetRatings = schedule.scheduleJob("25 14 * * *", () => {
-//   dbMappers.mapTeamNetRatings();
-// })
-//
-// const mapTeamPace = schedule.scheduleJob("26 14 * * *", () => {
-//   dbMappers.mapTeamPace();
-// })
-//
-// const mapFullPlayerData = schedule.scheduleJob("27 14 * * *", () => {
-//   dbMappers.mapFullPlayerData();
-// })
-//
-// const mapSegmentedPlayerData = schedule.scheduleJob("28 14 * * *", () => {
-//   dbMappers.mapSegmentedPlayerData();
-// })
+
+const updateFullTeamBuilds = schedule.scheduleJob("16 14 * * *", () => {
+  updateTeamStats.updateFullTeamBuilds();
+})
+
+const updateStarterBuilds = schedule.scheduleJob("17 14 * * *", () => {
+  updateTeamStats.updateStarterBuilds();
+})
+
+const updateBenchBuilds = schedule.scheduleJob("18 14 * * *", () => {
+  updateTeamStats.updateBenchBuilds();
+})
+
+const updateQ1Builds = schedule.scheduleJob("19 14 * * *", () => {
+  updateTeamStats.updateQ1Builds();
+})
+
+const updateQ2Builds = schedule.scheduleJob("20 14 * * *", () => {
+  updateTeamStats.updateQ2Builds();
+})
+
+const updateQ3Builds = schedule.scheduleJob("21 14 * * *", () => {
+  updateTeamStats.updateQ3Builds();
+})
+
+const updateQ4Builds = schedule.scheduleJob("22 14 * * *", () => {
+  updateTeamStats.updateQ4Builds();
+})
+
+const updateFullPlayersBuild = schedule.scheduleJob("23 14 * * *", () => {
+  updatePlayerStats.updatePlayerStatBuilds();
+})
+
+const updateSchedule = schedule.scheduleJob("24 14 * * *", () => {
+  dbBuilders.updateSchedule();
+})
+
+const mapTeamNetRatings = schedule.scheduleJob("25 14 * * *", () => {
+  dbMappers.mapTeamNetRatings();
+})
+
+const mapTeamPace = schedule.scheduleJob("26 14 * * *", () => {
+  dbMappers.mapTeamPace();
+})
+
+const mapFullPlayerData = schedule.scheduleJob("27 14 * * *", () => {
+  dbMappers.mapFullPlayerData();
+})
+
+const mapSegmentedPlayerData = schedule.scheduleJob("28 14 * * *", () => {
+  dbMappers.mapSegmentedPlayerData();
+})
+
+const addGameStints = schedule.scheduleJob("29 14 * * *", () => {
+  dbBuilders.addGameStints();
+})
 
 module.exports = router;

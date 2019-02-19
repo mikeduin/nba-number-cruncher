@@ -11,23 +11,19 @@ module.exports = {
     const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
 
     const gDetail = await axios.get(gameDetailUrl);
-
     const gcode = gDetail.data.g.gcode;
     const gdte = gDetail.data.g.gdte;
     const date = gcode.slice(0, 8);
-
+    
     const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
-
     const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
     const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
 
     const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
     const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
     const allPlayers = hPlayers.concat(vPlayers);
-
     let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
     let gameStints = {};
-
     starters.forEach(player => {
       gameStints[`pid_${player}`] = [[0]];
     });
@@ -99,15 +95,7 @@ module.exports = {
       })
     })
 
-    // errors are happening here ... theory is things are breaking for players that (a) have not been in game yet, (b) come in pre-4Q, and (c) play whole 4Q
-    // handle this by checking to see if player has been added first
-    // if not, then add beginning of array with start of last period value
-
-    // let tempPlayer = 0;
-    // let tempLastExitSecs = 0;
-    // let tempPer = 0;
-    // let tempPSLES = 0;
-
+    let tempPlayer = 0;
     // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
     try {
       periodPlayers[periodPlayers.length-1].forEach(player => {
@@ -126,9 +114,6 @@ module.exports = {
           // And their last exit time is before the start of the last period ...
           lastExitSecs < startPeriodSec(periods-1)
         ) {
-          // tempPSLES = startPeriodSec(periods-1);
-          // tempLastExitSecs = lastExitSecs;
-          // tempPer = lastExitPer + 1;
           // Set next entry time to next quarter they played in
           for (var i = lastExitPer + 1; i < periodPlayers.length; i++) {
             if (periodPlayers[i].indexOf(player)) {
@@ -141,7 +126,6 @@ module.exports = {
     } catch (e) {
       console.log(e);
       console.log('game ID is ', gid, ' player causing error is ', tempPlayer);
-      // console.log('tempPer is ', tempPer, ' lastExitSecs is ', tempLastExitSecs, ' value from checkPeriodStartLastExitSecs is ', tempPSLES);
     };
 
     // Add final checkouts at end of game for players with open last arrays

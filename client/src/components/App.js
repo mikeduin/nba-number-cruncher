@@ -30,6 +30,7 @@ class App extends React.Component {
               <Route path='/netratings' exact component={NetRatings} />
               <Route path='/gamesheet/:gid' component={GameSheet} />
               <Route path='/gamblecast' component={GambleCast} />
+              <Route path='/player/:pid' component={Player} />
               <TodaysGames />
             </div>
           </BrowserRouter>
