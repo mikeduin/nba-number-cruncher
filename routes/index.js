@@ -48,8 +48,9 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
   const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
-    .where({player_id: pid})
-    .orderBy('s.gid', 'desc');
+    .where('pgs.player_id', pid)
+    .orderBy('s.gid', 'desc')
+    .select('s.*', "pgs.game_stints");
 
   res.send({
     gameStints: gameStints,
