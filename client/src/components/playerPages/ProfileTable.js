@@ -4,11 +4,11 @@ import { Table } from 'semantic-ui-react';
 const ProfileTable = (props) => {
   let player = props.player;
   return (
-    <Table>
+    <Table definition>
       <Table.Header>
         <Table.Row>
           <Table.Cell>
-            Timeline
+
           </Table.Cell>
           <Table.Cell>
             Season

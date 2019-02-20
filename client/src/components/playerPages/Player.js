@@ -3,10 +3,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { fetchPlayerData } from '../../actions';
-import { Header, Image, Table } from 'semantic-ui-react';
+import { Header, Image, Table, Grid } from 'semantic-ui-react';
 import ProfileTable from './ProfileTable';
+import CustomLabel from './CustomLabel';
 
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel } from 'victory';
+import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, PropTypes } from 'victory';
 
 class Player extends React.Component {
   componentDidMount () {
@@ -28,11 +29,14 @@ class Player extends React.Component {
       })
 
       let data = _.flattenDeep(combData);
-      console.log('data is ', data)
+
+
 
       return (
         <VictoryLine
+          key={game.gid}
           data={data}
+          labelComponent={ <CustomLabel/> }
           style={{
             data: {
               stroke: player.mappedData.color,
@@ -51,52 +55,61 @@ class Player extends React.Component {
       let player = this.props.playerData;
       return (
         <div>
+          <Grid divided='vertically'>
+            <Grid.Row columns={2}>
+              <Grid.Column>
+                <Header as='h1'>
+                  <Image src={`/images/logos/${player.mappedData.team_abbreviation}.svg`} />
+                    <span> {player.mappedData.player_name.split(' ')[0]} </span>
+                    <span style = {{
+                      color: player.mappedData.color
+                    }}> {player.mappedData.player_name.toUpperCase().split(' ')[1]} </span>
+                </Header>
+              </Grid.Column>
+              <Grid.Column>
+                <ProfileTable player={player}/>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row columns={1}>
+            <VictoryChart
+              theme={VictoryTheme.material}
+              sortOrder="ascending"
+              >
+              {this.gameStintRenderer()}
+              <VictoryAxis
+                dependentAxis
+                invertAxis={true}
+                tickFormat={
+                  (x) => {
+                    let game = player.gameStints.filter(game => game.gdte === x);
 
-        <Header as='h1'>
-          <Image src={`/images/logos/${player.mappedData.team_abbreviation}.svg`} />
-            <span> {player.mappedData.player_name.split(' ')[0]} </span>
-            <span style = {{
-              color: player.mappedData.color
-            }}> {player.mappedData.player_name.toUpperCase().split(' ')[1]} </span>
-        </Header>
+                    return (
+                      `${moment(x).format('M/DD')}, ${game[0].v[0].ta} ${game[0].v[0].s} @ ${game[0].h[0].ta} ${game[0].h[0].s}`
+                    )
+                  }
+                }
+                style={{
+                  tickLabels: {
+                    fontSize: 3,
+                    padding: 3
+                  }
+                }}
+              />
+              <VictoryAxis crossAxis
+                tickValues={[720, 1440, 2160, 2880]}
+                tickFormat={["2Q", "3Q", "4Q", "OT"]}
+                style={{
+                  tickLabels: {
+                    fontSize: 5,
+                    padding: 2
+                  }
+                }}
+              />
+            </VictoryChart>
+            </Grid.Row>
+          </Grid>
 
-        <ProfileTable player={player}/>
 
-        <VictoryChart
-          theme={VictoryTheme.material}
-          sortOrder="ascending"
-          >
-          {this.gameStintRenderer()}
-          <VictoryAxis
-            dependentAxis
-            invertAxis={true}
-            tickFormat={
-              (x) => {
-                let game = player.gameStints.filter(game => game.gdte === x);
-
-                return (
-                  `${moment(x).format('M/DD')}, ${game[0].v[0].ta} ${game[0].v[0].s} @ ${game[0].h[0].ta} ${game[0].h[0].s}`
-                )
-              }
-            }
-            style={{
-              tickLabels: {
-                fontSize: 3,
-                padding: 3
-              }
-            }}
-          />
-          <VictoryAxis crossAxis
-            tickValues={[720, 1440, 2160, 2880]}
-            tickFormat={["2Q", "3Q", "4Q", "OT"]}
-            style={{
-              tickLabels: {
-                fontSize: 5,
-                padding: 2
-              }
-            }}
-          />
-        </VictoryChart>
         </div>
       )
     }
