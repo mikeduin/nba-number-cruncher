@@ -20,12 +20,12 @@ export const gameSecsToClockAndQuarter = secs => {
           (secs - (720*(q-1)))/60
         )
       );
-      let remSecs = (secs - ((q-1)*720) - (min*60)).toFixed(0);
+      let remSecs = (60 - (secs - ((q-1)*720) - (min*60))).toFixed(0);
 
       if (remSecs === 0) {
         return (`Q${q} ${12-min}:00`);
       } else {
-        return (`Q${q} ${11-min}:${60-remSecs}`);
+        return (`Q${q} ${11-min}:${remSecs}`);
       }
     }
   } else {
@@ -46,12 +46,12 @@ export const gameSecsToClockAndQuarter = secs => {
           ((secs-2880) - (300*(q-1)))/60
         )
       );
-      let remSecs = ((secs-2880) - ((q-1)*300) - (min*60)).toFixed(0);
+      let remSecs = (60 - ((secs-2880) - ((q-1)*300) - (min*60))).toFixed(0);
 
       if (remSecs === 0) {
         return (`OT${q} ${5-min}:00`);
       } else {
-        return (`OT${q} ${4-min}:${60-remSecs}`);
+        return (`OT${q} ${4-min}:${remSecs}`);
       }
     }
   }

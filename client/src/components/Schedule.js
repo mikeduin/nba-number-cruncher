@@ -40,6 +40,7 @@ class Schedule extends React.Component {
             }`}
           >
             <Statistic
+              style={{marginLeft: -5}}
               className={`${
                 date === this.props.activeDay ? "blue" : null
               }`}
@@ -72,7 +73,7 @@ class Schedule extends React.Component {
                     </div>
                   </div>
                 </div>
-                <img src="/images/logos/bos.svg" />
+                <img src="/images/logos/bos.svg"/>
               </div>
               <div className="content">
                 <Link className="header" to={`/gamesheet/${game.gid}`}>
@@ -104,7 +105,6 @@ class Schedule extends React.Component {
     } else {
       return (
         <div>
-          Week {this.props.week.week}
           <div className="ui grid">
             <div className={`seven column row`}>{this.renderWeekGrid()}</div>
           </div>

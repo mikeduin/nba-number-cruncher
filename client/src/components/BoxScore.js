@@ -2,9 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { fetchBoxScore } from '../actions';
 import { Table } from 'semantic-ui-react';
+import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
   componentDidMount () {
+    console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
     setInterval(() => {
       this.props.fetchBoxScore(this.props.game.gid);
@@ -17,12 +19,19 @@ class BoxScore extends React.Component {
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`]
     if (!boxScore) {
-      return <div> Loading ... </div>
+      if (!game) {
+        return <div> loading ... </div>
+      } else {
+        return <EmptyBoxScore game={game}/>
+      }
     } else {
+      console.log('main bs rendered props are ', this.props);
       console.log(this.props.gambleCast)
       return (
         <div>
-          <Table compact celled>
+          <Table compact celled
+            style={{marginBottom: 20}}
+          >
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>  </Table.HeaderCell>
@@ -53,8 +62,8 @@ class BoxScore extends React.Component {
             </Table.Header>
             <Table.Body>
               <Table.Row>
-                <Table.Cell> {game.away_team}  </Table.Cell>
-                <Table.Cell> {game.away_spread_full}  </Table.Cell>
+                  <Table.Cell> {game.away_team}  </Table.Cell>
+                  <Table.Cell> {game.away_spread_full}  </Table.Cell>
                 <Table.Cell> {boxScore.hStats.points}  </Table.Cell>
                 <Table.Cell> {boxScore.hStats.fgPct.toFixed(1)}  </Table.Cell>
                 <Table.Cell> {boxScore.q1.h.pts}  </Table.Cell>

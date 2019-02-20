@@ -31,6 +31,7 @@ class Header extends React.Component {
   handleResultSelect = (e, {result }) => {
     this.setState({ value: result.player_name   });
     this.props.fetchPlayerData(result.player_id);
+    this.setState({ value: ''});
   }
 
   handleSearchChange = (e, {value }) => {
@@ -60,7 +61,7 @@ class Header extends React.Component {
     const { isLoading, value, results } = this.state;
 
     return (
-      <Menu pointing >
+      <Menu pointing secondary>
         <Link to="/" className="item">
           Home
         </Link>
@@ -86,8 +87,7 @@ class Header extends React.Component {
           Net Ratings
         </Link>
         <Search
-          floated="right"
-          position="right"
+          style={{position: 'absolute', right: '6%'}}
           loading={isLoading}
           onResultSelect={this.handleResultSelect}
           onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}

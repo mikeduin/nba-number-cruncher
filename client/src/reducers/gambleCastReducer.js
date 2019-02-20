@@ -1,5 +1,7 @@
 export default (state = {}, action) => {
   switch (action.type) {
+    case 'ADD_TEMPLATE':
+      return {...state, [`live_${action.payload.gid}`]: }
     case 'UPDATE_LIVE_SCORE':
       return {...state, [`live_${action.payload.gid}`]: {
           ...state[`live_${action.payload.gid}`],

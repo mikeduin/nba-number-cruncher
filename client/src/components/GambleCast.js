@@ -1,38 +1,53 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import moment from 'moment';
 import BoxScore from './BoxScore';
+import { Header } from 'semantic-ui-react';
 
 class GambleCast extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeGames: {}
+    }
+  }
+
   componentDidMount () {
-    console.log(this.props);
+    console.log('props in gcast are ', this.props);
+    console.log('state in cast is ', this.state);
   }
 
   renderBoxScores = () => {
-    return this.props.games.map(game => {
-      return (
-        <BoxScore key={game.gid} game={game}/>
-      )
-    })
+    if (this.props.games[0]) {
+      return this.props.games.map(game => {
+        return (
+          <BoxScore key={game.gid} game={game}/>
+        )
+      })
+    } else {
+      return 'no games today'
+    }
   }
 
   render() {
-    // if (!this.props.games[0]) {
-    //   return <div> Loading ... </div>
-    // } else {
+    if (this.props.activeDay.length < 1) {
+      return <div> Loading ... </div>
+    } else {
       return (
-        <div>
-          <BoxScore key={1} game={{gid: 31800001}}/>
+        <div style={{marginBottom: 200}}>
+          <Header size='huge'> Games </Header>
           {this.renderBoxScores()}
         </div>
       )
-    // }
+    }
   }
 }
 
 const mapStateToProps = state => {
   return {
     games: state.todaysGames,
-    gambleCast: state.gambleCast
+    gambleCast: state.gambleCast,
+    activeDay: state.activeDay
   }
 }
 

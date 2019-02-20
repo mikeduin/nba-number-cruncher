@@ -70,6 +70,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   //   data: sampleBoxScoreQ1active
   // };
 
+  if (!boxScore.data.stats) {
+    res.send{{
+      gid: gid,
+      active: false
+    }}
+  }
+
   let { period, clock } = boxScore.data.basicGameData;
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
   const vTid = boxScore.data.basicGameData.vTeam.teamId;

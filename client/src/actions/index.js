@@ -18,7 +18,9 @@ export const fetchWeek = (date = today) => async dispatch => {
   let updated = {...data, today};
 
   let todayGames = data.weekGames.filter(game => {
-    return game.gdte === today;
+    // CHANGE THIS BACK WHEN DONE TESTING!
+    // return game.gdte === today;
+    return game.gdte === '2019-02-21';
   });
 
   dispatch({ type: 'TODAY_GAMES', payload: todayGames});
@@ -98,10 +100,23 @@ export const setActiveDay = date => async dispatch => {
 }
 
 export const fetchBoxScore = (id) => async (dispatch, getState) => {
-  let todayInt = moment().format('YYYYMMDD');
-  let id = 31800001;
+  // let todayInt = moment().format('YYYYMMDD');
+  // let id = 31800001;
+  let todayInt = '20190221';
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
   let response = game.data;
+
+  let preData = {
+    gid: id,
+    active: false,
+    period: 0,
+    endOfPeriod: false,
+    thru: thru_period
+  }
+
+  if (!game.data.active) {
+    dispatch({ type: 'ADD_TEMPLATE', payload: preData })
+  };
 
   let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
 
@@ -125,6 +140,7 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
 
   let liveData = {
     gid: id,
+    active: true,
     period: period.current,
     endOfPeriod: false,
     thru: thru_period,

@@ -21,7 +21,7 @@ module.exports = {
             (secs - (720*(q-1)))/60
           )
         );
-        let remSecs = (secs - ((q-1)*720) - (min*60));
+        let remSecs = (secs - ((q-1)*720) - (min*60)).toFixed(0);
 
         if (remSecs === 0) {
           return (`Q${q} ${12-min}:00`);
@@ -47,7 +47,7 @@ module.exports = {
             ((secs-2880) - (300*(q-1)))/60
           )
         );
-        let remSecs = ((secs-2880) - ((q-1)*300) - (min*60));
+        let remSecs = ((secs-2880) - ((q-1)*300) - (min*60)).toFixed(0);
 
         if (remSecs === 0) {
           return (`OT${q} ${5-min}:00`);

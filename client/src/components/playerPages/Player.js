@@ -7,7 +7,7 @@ import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 import { Header, Image, Table, Grid } from 'semantic-ui-react';
 import ProfileTable from './ProfileTable';
 
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer } from 'victory';
+import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer, VictoryLegend } from 'victory';
 
 class Player extends React.Component {
   componentDidMount () {
@@ -29,8 +29,6 @@ class Player extends React.Component {
       })
 
       let data = _.flattenDeep(combData);
-
-
 
       return (
         <VictoryLine
@@ -70,51 +68,64 @@ class Player extends React.Component {
                 <ProfileTable player={player}/>
               </Grid.Column>
             </Grid.Row>
-            <Grid.Row columns={1}>
-            <VictoryChart
-              theme={VictoryTheme.material}
-              sortOrder="ascending"
-              containerComponent={
-                <VictoryCursorContainer
-                  cursorLabel={
-                    (d) => {
-                      return `${gameSecsToClockAndQuarter(d.x)}`
+            <Grid.Row>
+              <Grid.Column width={5}>
+              </Grid.Column>
+              <Grid.Column width={11}>
+              <VictoryChart
+                theme={VictoryTheme.material}
+                padding={{
+                  right: 15,
+                  top: 15,
+                  left: 50,
+                  bottom: 30
+                }}
+                domainPadding={{y: 2}}
+                sortOrder="ascending"
+                containerComponent={
+                  <VictoryCursorContainer
+                    title='Title here'
+                    cursorLabelOffset={{x: -50, y: -10}}
+                    cursorLabel={
+                      (d) => {
+                        return `${gameSecsToClockAndQuarter(d.x)}`
+                      }
+                    }
+                  />
+                }
+              >
+                {this.gameStintRenderer()}
+                <VictoryAxis
+                  dependentAxis
+                  invertAxis={true}
+                  tickFormat={
+                    (x) => {
+                      let game = player.gameStints.filter(game => game.gdte === x);
+
+                      return (
+                        `${moment(x).format('M/DD')}, ${game[0].v[0].ta} ${game[0].v[0].s} @ ${game[0].h[0].ta} ${game[0].h[0].s}`
+                      )
                     }
                   }
+                  style={{
+                    tickLabels: {
+                      fontSize: 3,
+                      padding: 3
+                    }
+                  }}
                 />
-              }
-            >
-              {this.gameStintRenderer()}
-              <VictoryAxis
-                dependentAxis
-                invertAxis={true}
-                tickFormat={
-                  (x) => {
-                    let game = player.gameStints.filter(game => game.gdte === x);
-
-                    return (
-                      `${moment(x).format('M/DD')}, ${game[0].v[0].ta} ${game[0].v[0].s} @ ${game[0].h[0].ta} ${game[0].h[0].s}`
-                    )
-                  }
-                }
-                style={{
-                  tickLabels: {
-                    fontSize: 3,
-                    padding: 3
-                  }
-                }}
-              />
-              <VictoryAxis crossAxis
-                tickValues={[720, 1440, 2160, 2880]}
-                tickFormat={["2Q", "3Q", "4Q", "OT"]}
-                style={{
-                  tickLabels: {
-                    fontSize: 5,
-                    padding: 2
-                  }
-                }}
-              />
-            </VictoryChart>
+                <VictoryAxis crossAxis
+                  tickValues={[720, 1440, 2160, 2880]}
+                  tickFormat={["2Q", "3Q", "4Q", "OT"]}
+                  style={{
+                    tickLabels: {
+                      fontSize: 5,
+                      padding: 2
+                    }
+                  }}
+                />
+              </VictoryChart>
+              </Grid.Column>
             </Grid.Row>
           </Grid>
 
