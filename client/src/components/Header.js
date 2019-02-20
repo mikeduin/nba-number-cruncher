@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Search, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
-import { setActiveDay } from '../actions';
+import { setActiveDay, fetchPlayerData } from '../actions';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -28,7 +28,10 @@ class Header extends React.Component {
 
   resetComponent = () => this.setState({ isLoading: false, results: [], value: ''})
 
-  handleResultSelect = (e, {result }) => this.setState({ value: result.player_name   })
+  handleResultSelect = (e, {result }) => {
+    this.setState({ value: result.player_name   });
+    this.props.fetchPlayerData(result.player_id);
+  }
 
   handleSearchChange = (e, {value }) => {
     let source = this.props.players;
@@ -95,4 +98,4 @@ class Header extends React.Component {
 
 }
 
-export default connect(null, { setActiveDay }) (Header);
+export default connect(null, { setActiveDay, fetchPlayerData }) (Header);
