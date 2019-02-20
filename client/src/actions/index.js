@@ -23,9 +23,36 @@ export const fetchWeek = (date = today) => async dispatch => {
     return game.gdte === '2019-02-21';
   });
 
-  dispatch({ type: 'TODAY_GAMES', payload: todayGames});
-  dispatch({ type: 'FETCH_WEEK', payload: updated});
+  let activeGames = [];
+
+  todayGames.forEach(game => {
+    // if the game is within 10 minutes from now, set it to active
+    let tenMinsAhead = moment().add(10, 'm');
+    let gametime = moment(game.etm);
+    if (gametime.isBefore(tenMinsAhead)) {
+      activeGames.push(game.gid)
+    };
+  })
+
+  dispatch({ type: 'TODAY_GAMES', payload: todayGames });
+  dispatch({ type: 'FETCH_WEEK', payload: updated });
+  dispatch({ type: 'SET_ACTIVE_GAMES', payload: activeGames });
 }
+
+// export const checkActiveGames = () => async dispatch => {
+//
+//   let activeGames = [];
+//
+//   todayGames.forEach(game => {
+//     // if the game is within 10 minutes from now, set it to active
+//     let tenMinsAhead = moment().add(10, 'm');
+//     let gametime = moment(game.etm);
+//     if (gametime.isBefore(tenMinsAhead)) {
+//       activeGames.push(game.gid)
+//     };
+//   })
+//
+// }
 
 export const fetchPlayerData = (pid) => async dispatch => {
   let playerData = await axios.get(`/api/fetchPlayerData/${pid}`);
@@ -89,10 +116,6 @@ export const fetchGame = ({gid}) => async dispatch => {
 export const changeTeamColor = (hv, colorObj) => async dispatch => {
   let upper = hv.toUpperCase();
   dispatch({ type: `CHANGE_${upper}_COLOR`, payload: colorObj});
-}
-
-export const getTodaysGames = () => async dispatch => {
-  dispatch ({type: 'DAILY_GAMES', payload: null});
 }
 
 export const setActiveDay = date => async dispatch => {

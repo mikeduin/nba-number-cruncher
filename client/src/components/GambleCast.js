@@ -5,13 +5,6 @@ import BoxScore from './BoxScore';
 import { Header } from 'semantic-ui-react';
 
 class GambleCast extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeGames: {}
-    }
-  }
-
   componentDidMount () {
     console.log('props in gcast are ', this.props);
     console.log('state in cast is ', this.state);
@@ -47,7 +40,8 @@ const mapStateToProps = state => {
   return {
     games: state.todaysGames,
     gambleCast: state.gambleCast,
-    activeDay: state.activeDay
+    activeDay: state.activeDay,
+    activeGames: state.activeGames
   }
 }
 

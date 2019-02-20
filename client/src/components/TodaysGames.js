@@ -6,17 +6,27 @@ import { Sidebar, Menu, Item, Button, Icon } from "semantic-ui-react";
 import { fetchGame } from "../actions";
 
 class TodaysGames extends React.Component {
-  state = { visible: true };
+  state = {
+    visible: true
+  };
 
   hideSidebar = () => {
-    this.setState({ visible: false });
+    this.setState({ visible: false});
   };
 
   fetchGame = (id) => {
     this.props.fetchGame(id);
   }
 
-  showSidebar = () => this.setState({ visible: true });
+  showSidebar = () => this.setState({ visible: true});
+
+  checkVis = () => {
+    if (this.state.visible) {
+      return false
+    } else {
+      return true
+    }
+  }
 
   mapTodaysGames = () => {
     return this.props.todaysGames.map(game => {
@@ -56,12 +66,13 @@ class TodaysGames extends React.Component {
           </Menu>
         </Sidebar>
         <Button
-          size='tiny' circular secondary 
-          visible={!this.state.visible} onClick={this.showSidebar}
+          size='tiny' circular secondary
+          onClick={this.showSidebar}
           style={{
             position: 'fixed',
-            bottom: 5,
-            left: 5
+            bottom: 70,
+            left: -70,
+            transform: 'rotate(-90deg)'
           }}
         >
           SHOW TODAY'S GAMES

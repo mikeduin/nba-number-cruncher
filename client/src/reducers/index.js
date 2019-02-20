@@ -11,12 +11,14 @@ import vPlayers from './vPlayersReducer';
 import gambleCast from './gambleCastReducer';
 import playersMetadata from './playersReducer';
 import playerData from './playerDataReducer';
+import activeGames from './activeGamesReducer';
 
 export default combineReducers ({
   netRatings,
   week,
   game,
   todaysGames,
+  activeGames,
   activeDay,
   hColors,
   vColors,

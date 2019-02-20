@@ -8,10 +8,13 @@ class BoxScore extends React.Component {
   componentDidMount () {
     console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
-    setInterval(() => {
-      this.props.fetchBoxScore(this.props.game.gid);
-      console.log('checking score');
-    }, 5000)
+
+    if (this.props.active) {
+      setInterval(() => {
+        this.props.fetchBoxScore(this.props.game.gid);
+        console.log('checking score');
+      }, 5000)
+    }
   }
 
   render () {
