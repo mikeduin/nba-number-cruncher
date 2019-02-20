@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
-import { Segment, Statistic } from "semantic-ui-react";
+import ScheduleCard from './ScheduleCard';
+import { Segment, Statistic, Grid, Column, Image, Card, Button, Dimmer, Header } from "semantic-ui-react";
 
 import { connect } from "react-redux";
 import { fetchWeek, setActiveDay } from "../actions";
@@ -42,7 +43,7 @@ class Schedule extends React.Component {
             <Statistic
               style={{marginLeft: -5}}
               className={`${
-                date === this.props.activeDay ? "blue" : null
+                date === this.props.activeDay ? "inverted" : null
               }`}
             >
               <Statistic.Label>{moment(date).format("ddd")}</Statistic.Label>
@@ -62,39 +63,9 @@ class Schedule extends React.Component {
 
     return dayGames.map(game => {
       return (
-        <div className="column" key={game.gid}>
-          <div className="ui special cards">
-            <div className="card">
-              <div className="blurring dimmable image">
-                <div className="ui dimmer">
-                  <div className="content">
-                    <div className="center">
-                      <div className="ui inverted button"> View Analysis </div>
-                    </div>
-                  </div>
-                </div>
-                <img src="/images/logos/bos.svg"/>
-              </div>
-              <div className="content">
-                <Link className="header" to={`/gamesheet/${game.gid}`}>
-                  {game.v[0].tc} {game.v[0].tn} @ {game.h[0].tc} {game.h[0].tn}
-                </Link>
-                <div className="meta">
-                  <span className="date">
-                    {" "}
-                    {moment(game.etm).format("h:mm A")} EST{" "}
-                  </span>
-                </div>
-              </div>
-              <div className="extra content">
-                <div>
-                  <i className="users icon" />
-                  More data here
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Grid.Column key={game.gid}>
+          <ScheduleCard game={game} />
+        </Grid.Column>
       );
     });
   }
@@ -108,7 +79,7 @@ class Schedule extends React.Component {
           <div className="ui grid">
             <div className={`seven column row`}>{this.renderWeekGrid()}</div>
           </div>
-          <div className="ui four column grid">{this.renderGameGrid()}</div>
+          <Grid columns={4}>{this.renderGameGrid()}</Grid>
         </div>
       );
     }
