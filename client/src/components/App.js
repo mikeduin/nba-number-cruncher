@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 
-import { fetchWeek, getPlayerMetadata } from '../actions';
+import { fetchWeek, getPlayerMetadata, checkActiveGames } from '../actions';
 
 import NetRatings from './NetRatings';
 import Schedule from './Schedule';
@@ -16,6 +16,9 @@ class App extends React.Component {
   componentDidMount () {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
+    setInterval(()=>{
+      this.props.checkActiveGames()
+    }, 5000);
   }
 
   render () {
@@ -49,4 +52,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata })(App);
+export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata, checkActiveGames })(App);

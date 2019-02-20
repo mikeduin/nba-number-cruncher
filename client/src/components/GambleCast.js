@@ -11,10 +11,12 @@ class GambleCast extends React.Component {
   }
 
   renderBoxScores = () => {
+    const checkActive = (gid) => this.props.activeGames.indexOf(gid) !== -1;
+
     if (this.props.games[0]) {
       return this.props.games.map(game => {
         return (
-          <BoxScore key={game.gid} game={game}/>
+          <BoxScore key={game.gid} game={game} liveUpdates={checkActive(game.gid)}/>
         )
       })
     } else {

@@ -23,36 +23,34 @@ export const fetchWeek = (date = today) => async dispatch => {
     return game.gdte === '2019-02-21';
   });
 
-  let activeGames = [];
-
-  todayGames.forEach(game => {
+  let activeGames = todayGames.map(game => {
     // if the game is within 10 minutes from now, set it to active
     let tenMinsAhead = moment().add(10, 'm');
     let gametime = moment(game.etm);
     if (gametime.isBefore(tenMinsAhead)) {
-      activeGames.push(game.gid)
+      return(game.gid)
     };
-  })
+  });
 
   dispatch({ type: 'TODAY_GAMES', payload: todayGames });
   dispatch({ type: 'FETCH_WEEK', payload: updated });
   dispatch({ type: 'SET_ACTIVE_GAMES', payload: activeGames });
 }
 
-// export const checkActiveGames = () => async dispatch => {
-//
-//   let activeGames = [];
-//
-//   todayGames.forEach(game => {
-//     // if the game is within 10 minutes from now, set it to active
-//     let tenMinsAhead = moment().add(10, 'm');
-//     let gametime = moment(game.etm);
-//     if (gametime.isBefore(tenMinsAhead)) {
-//       activeGames.push(game.gid)
-//     };
-//   })
-//
-// }
+export const checkActiveGames = () => async (dispatch, getState) => {
+
+  let activeGames = getState().activeGames;
+
+  // todayGames.forEach(game => {
+  //   // if the game is within 10 minutes from now, set it to active
+  //   let tenMinsAhead = moment().add(10, 'm');
+  //   let gametime = moment(game.etm);
+  //   if (gametime.isBefore(tenMinsAhead)) {
+  //     activeGames.push(game.gid)
+  //   };
+  // })
+
+}
 
 export const fetchPlayerData = (pid) => async dispatch => {
   let playerData = await axios.get(`/api/fetchPlayerData/${pid}`);
