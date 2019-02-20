@@ -2,8 +2,9 @@ import React from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { fetchPlayerData } from '../actions';
-import { Header, Image } from 'semantic-ui-react';
+import { fetchPlayerData } from '../../actions';
+import { Header, Image, Table } from 'semantic-ui-react';
+import ProfileTable from './ProfileTable';
 
 import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel } from 'victory';
 
@@ -58,6 +59,8 @@ class Player extends React.Component {
               color: player.mappedData.color
             }}> {player.mappedData.player_name.toUpperCase().split(' ')[1]} </span>
         </Header>
+
+        <ProfileTable player={player}/>
 
         <VictoryChart
           theme={VictoryTheme.material}

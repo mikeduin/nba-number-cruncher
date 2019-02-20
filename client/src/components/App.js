@@ -10,7 +10,7 @@ import GameSheet from './GameSheet';
 import Header from './Header';
 import TodaysGames from './TodaysGames';
 import GambleCast from './GambleCast';
-import Player from './Player';
+import Player from './playerPages/Player';
 
 class App extends React.Component {
   componentDidMount () {
