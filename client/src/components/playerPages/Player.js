@@ -3,11 +3,11 @@ import _ from 'lodash';
 import moment from 'moment';
 import { connect } from 'react-redux';
 import { fetchPlayerData } from '../../actions';
+import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 import { Header, Image, Table, Grid } from 'semantic-ui-react';
 import ProfileTable from './ProfileTable';
-import CustomLabel from './CustomLabel';
 
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, PropTypes } from 'victory';
+import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer } from 'victory';
 
 class Player extends React.Component {
   componentDidMount () {
@@ -21,8 +21,8 @@ class Player extends React.Component {
       game.game_stints.forEach(stint => {
         combData.push(
           [
-            {x: stint[0], y: game.gdte},
-            {x: stint[1], y: game.gdte},
+            {x: stint[0], y: game.gdte, in: stint[0], out: stint[1]},
+            {x: stint[1], y: game.gdte, in: stint[0], out: stint[1]},
             {x: stint[1], y: null}
           ]
         )
@@ -36,7 +36,7 @@ class Player extends React.Component {
         <VictoryLine
           key={game.gid}
           data={data}
-          labelComponent={ <CustomLabel/> }
+
           style={{
             data: {
               stroke: player.mappedData.color,
@@ -74,7 +74,16 @@ class Player extends React.Component {
             <VictoryChart
               theme={VictoryTheme.material}
               sortOrder="ascending"
-              >
+              containerComponent={
+                <VictoryCursorContainer
+                  cursorLabel={
+                    (d) => {
+                      return `${gameSecsToClockAndQuarter(d.x)}`
+                    }
+                  }
+                />
+              }
+            >
               {this.gameStintRenderer()}
               <VictoryAxis
                 dependentAxis

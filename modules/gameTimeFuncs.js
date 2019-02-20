@@ -1,5 +1,3 @@
-
-
 module.exports = {
   gameSecsToClockAndQuarter: (secs) => {
     if (secs < 2881) {
