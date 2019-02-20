@@ -70,12 +70,12 @@ class TodaysGames extends React.Component {
           onClick={this.showSidebar}
           style={{
             position: 'fixed',
-            bottom: 70,
-            left: -70,
+            bottom: 50,
+            left: -45,
             transform: 'rotate(-90deg)'
           }}
         >
-          SHOW TODAY'S GAMES
+          TODAY'S  GAMES
         </Button>
       </div>
     );

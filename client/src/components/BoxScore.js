@@ -9,7 +9,7 @@ class BoxScore extends React.Component {
     console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
 
-    if (this.props.active) {
+    if (this.props.liveUpdates) {
       setInterval(() => {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score');
@@ -66,8 +66,8 @@ class BoxScore extends React.Component {
             </Table.Header>
             <Table.Body>
               <Table.Row>
-                  <Table.Cell> {game.away_team}  </Table.Cell>
-                  <Table.Cell> {game.away_spread_full}  </Table.Cell>
+                <Table.Cell> {game.away_team}  </Table.Cell>
+                <Table.Cell> {game.away_spread_full}  </Table.Cell>
                 <Table.Cell> {boxScore.hStats.points}  </Table.Cell>
                 <Table.Cell> {boxScore.hStats.fgPct.toFixed(1)}  </Table.Cell>
                 <Table.Cell> {boxScore.q1.h.pts}  </Table.Cell>

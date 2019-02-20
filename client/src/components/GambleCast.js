@@ -30,7 +30,7 @@ class GambleCast extends React.Component {
     } else {
       return (
         <div style={{marginBottom: 200}}>
-          <Header size='huge'> Games </Header>
+          <Header size='huge'> Today's Games </Header>
           {this.renderBoxScores()}
         </div>
       )

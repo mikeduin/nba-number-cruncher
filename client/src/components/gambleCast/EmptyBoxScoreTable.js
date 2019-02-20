@@ -15,7 +15,7 @@ const EmptyBoxScore = props => {
         >
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>  </Table.HeaderCell>
+              <Table.HeaderCell> {game.stt} </Table.HeaderCell>
               <Table.HeaderCell colSpan="3">  </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
