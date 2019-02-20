@@ -78,29 +78,6 @@ const EmptyBoxScore = props => {
             <Table.Cell> </Table.Cell>
             <Table.Cell> </Table.Cell>
             </Table.Row>
-            <Table.Row>
-              <Table.Cell colSpan="4"> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell colSpan="1"> </Table.Cell>
-              <Table.Cell colSpan="3">   </Table.Cell>
-              <Table.Cell colSpan="3">  </Table.Cell>
-              <Table.Cell colSpan="3">   </Table.Cell>
-              <Table.Cell colSpan="3">  </Table.Cell>
-              <Table.Cell colSpan="3">  </Table.Cell>
-            </Table.Row>
           </Table.Body>
         </Table>
       </div>

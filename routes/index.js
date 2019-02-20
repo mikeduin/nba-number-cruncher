@@ -78,7 +78,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     return;
   }
 
-  let { period, clock } = boxScore.data.basicGameData;
+  let { period, clock, isGameActivated } = boxScore.data.basicGameData;
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
 
@@ -309,17 +309,32 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         })
       }
     } else {
-      res.send({
-        quarterEnd: false,
-        live: true,
-        clock: clock,
-        gameSecs: gameSecs,
-        period: period,
-        thru_period: period.current - 1,
-        poss: poss,
-        pace: calcGamePace(poss, period.current, gameSecs),
-        totals: totalsObj
-      })
+      if (!isGameActivated) {
+        res.send({
+          quarterEnd: false,
+          live: false,
+          clock: clock,
+          gameSecs: gameSecs,
+          period: period,
+          thru_period: period.current,
+          poss: poss,
+          pace: calcGamePace(poss, period.current, gameSecs),
+          totals: totalsObj,
+          final: true
+        })
+      } else {
+        res.send({
+          quarterEnd: false,
+          live: true,
+          clock: clock,
+          gameSecs: gameSecs,
+          period: period,
+          thru_period: period.current - 1,
+          poss: poss,
+          pace: calcGamePace(poss, period.current, gameSecs),
+          totals: totalsObj
+        })
+      }
     }
 })
 
