@@ -110,13 +110,17 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
     gid: id,
     active: false,
     period: 0,
-    endOfPeriod: false,
-    thru: thru_period
+    endOfPeriod: false
   }
 
-  if (!game.data.active) {
-    dispatch({ type: 'ADD_TEMPLATE', payload: preData })
-  };
+  if (!game.data.active && !getState()[`live_${id}`]) {
+    dispatch({ type: 'ADD_TEMPLATE', payload: preData });
+    return;
+  }
+
+  let stateData = getState()[`live_${id}`];
+  console.log('stateData is ', stateData);
+  let { prevQuarters } = stateData;
 
   let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
 
@@ -134,9 +138,6 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
       return (((300/secs) * poss)/2)
     };
   };
-
-  let stateData = getState()[`live_${id}`];
-  let { prevQuarters } = stateData;
 
   let liveData = {
     gid: id,

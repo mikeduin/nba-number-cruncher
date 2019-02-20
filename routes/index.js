@@ -71,10 +71,11 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   // };
 
   if (!boxScore.data.stats) {
-    res.send{{
+    res.send ({
       gid: gid,
       active: false
-    }}
+    })
+    return;
   }
 
   let { period, clock } = boxScore.data.basicGameData;
