@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { Sidebar, Menu, Item, Button, Icon } from "semantic-ui-react";
+import { Sidebar, Menu, Item, Button, Icon, Transition } from "semantic-ui-react";
 
 import { fetchGame } from "../actions";
 
@@ -57,7 +57,7 @@ class TodaysGames extends React.Component {
             {this.mapTodaysGames()}
           </Menu>
         </Sidebar>
-        { this.state.visible ? null :
+        <Transition visible={!this.state.visible} animation='fly right' duration={1200}>
           <Button
             size='tiny' circular secondary
             onClick={this.showSidebar}
@@ -70,8 +70,7 @@ class TodaysGames extends React.Component {
           >
             TODAY'S  GAMES
           </Button>
-        }
-
+        </Transition>
       </div>
     );
   }
