@@ -27,6 +27,7 @@ class App extends React.Component {
           <BrowserRouter>
             <div>
               <Header players={this.props.players} />
+              <Route path='/' exact />
               <Route path='/schedule' exact component={Schedule} />
               <Route path='/schedule/:date' component={Schedule} />
               <Route path='/netratings' exact component={NetRatings} />

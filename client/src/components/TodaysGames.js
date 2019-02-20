@@ -55,8 +55,16 @@ class TodaysGames extends React.Component {
             {this.mapTodaysGames()}
           </Menu>
         </Sidebar>
-        <Button circular icon visible={!this.state.visible} onClick={this.showSidebar}>
-          <Icon name='calendar alternate' />
+        <Button
+          size='tiny' circular secondary 
+          visible={!this.state.visible} onClick={this.showSidebar}
+          style={{
+            position: 'fixed',
+            bottom: 5,
+            left: 5
+          }}
+        >
+          SHOW TODAY'S GAMES
         </Button>
       </div>
     );

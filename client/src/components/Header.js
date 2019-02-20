@@ -61,6 +61,9 @@ class Header extends React.Component {
 
     return (
       <Menu pointing >
+        <Link to="/" className="item">
+          Home
+        </Link>
         <Link to="/schedule" className="item" onClick={this.setActiveDay}>
           Schedule
         </Link>

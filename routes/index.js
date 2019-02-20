@@ -44,7 +44,10 @@ router.get("/", (req, res, next) => {
 router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const pid = req.params.pid;
 
-  const mappedData = await knex("player_data").where({player_id: pid});
+  const mappedData = await knex("player_data as pd")
+    .innerJoin("teams as t", "pd.team_id", "=", "t.tid")
+    .where({player_id: pid})
+    .select("t.color", "t.color_2", "pd.*");
 
   const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")

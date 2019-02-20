@@ -1,7 +1,9 @@
 import React from 'react';
 import _ from 'lodash';
+import moment from 'moment';
 import { connect } from 'react-redux';
 import { fetchPlayerData } from '../actions';
+import { Header, Image } from 'semantic-ui-react';
 
 import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel } from 'victory';
 
@@ -11,8 +13,8 @@ class Player extends React.Component {
   }
 
   gameStintRenderer = () => {
-    let gameStints = this.props.playerData.gameStints;
-    return gameStints.map(game => {
+    let player = this.props.playerData;
+    return player.gameStints.map(game => {
       let combData = [];
       game.game_stints.forEach(stint => {
         combData.push(
@@ -32,7 +34,7 @@ class Player extends React.Component {
           data={data}
           style={{
             data: {
-              stroke: "red",
+              stroke: player.mappedData.color,
               strokeWidth: 3.5
             }
           }}
@@ -45,9 +47,18 @@ class Player extends React.Component {
     if (!this.props.playerData.mappedData) {
       return <div> Loading . . . </div>
     } else {
+      let player = this.props.playerData;
       return (
         <div>
-        <div> {this.props.playerData.mappedData.player_name} </div>
+
+        <Header as='h1'>
+          <Image src={`/images/logos/${player.mappedData.team_abbreviation}.svg`} />
+            <span> {player.mappedData.player_name.split(' ')[0]} </span>
+            <span style = {{
+              color: player.mappedData.color
+            }}> {player.mappedData.player_name.toUpperCase().split(' ')[1]} </span>
+        </Header>
+
         <VictoryChart
           theme={VictoryTheme.material}
           sortOrder="ascending"
@@ -56,6 +67,15 @@ class Player extends React.Component {
           <VictoryAxis
             dependentAxis
             invertAxis={true}
+            tickFormat={
+              (x) => {
+                let game = player.gameStints.filter(game => game.gdte === x);
+
+                return (
+                  `${moment(x).format('M/DD')}, ${game[0].v[0].ta} ${game[0].v[0].s} @ ${game[0].h[0].ta} ${game[0].h[0].s}`
+                )
+              }
+            }
             style={{
               tickLabels: {
                 fontSize: 3,
