@@ -5,7 +5,8 @@ export default (state = {}, action) => {
     case 'SET_TO_LIVE':
       return {...state, [`live_${action.payload}`]: {
           ...state[`live_${action.payload}`],
-          active: true
+          active: true,
+          final: false
         }
       };
     case 'UPDATE_LIVE_SCORE':
@@ -20,6 +21,13 @@ export default (state = {}, action) => {
           ...state[`live_${action.payload.gid}`],
           [`q${action.payload.q}`]: action.payload.quarterData,
           prevQuarters: action.payload.prevQuarters
+        }
+      };
+    case 'SET_TO_FINAL':
+      return {...state, [`live_${action.payload}`]: {
+          ...state[`live_${action.payload}`],
+          active: false,
+          final: true
         }
       };
     default:

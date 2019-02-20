@@ -125,27 +125,31 @@ export const setActiveDay = date => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
 
-export const fetchBoxScore = (id) => async (dispatch, getState) => {
+export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   // let todayInt = moment().format('YYYYMMDD');
-  // let id = 31800001;
+  // let gid = 31800001;
   let todayInt = '20190221';
-  let game = await axios.get(`/fetchBoxScore/${todayInt}/${id}`);
+  let game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   let response = game.data;
 
   let preData = {
-    gid: id,
+    gid: gid,
     active: false,
     period: 0,
     endOfPeriod: false
   }
 
-  if (!game.data.active && !getState()[`live_${id}`]) {
+  if (game.data.final) {
+    dispatch({ type: 'SET_TO_FINAL', payload: gid });
+    return;
+  }
+
+  if (!game.data.active && !game.data.final && !getState()[`live_${gid}`]) {
     dispatch({ type: 'ADD_TEMPLATE', payload: preData });
     return;
   }
 
-  let stateData = getState()[`live_${id}`];
-  console.log('stateData is ', stateData);
+  let stateData = getState()[`live_${gid}`];
   let { prevQuarters } = stateData;
 
   let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
@@ -166,7 +170,7 @@ export const fetchBoxScore = (id) => async (dispatch, getState) => {
   };
 
   let liveData = {
-    gid: id,
+    gid: gid,
     active: true,
     period: period.current,
     endOfPeriod: false,

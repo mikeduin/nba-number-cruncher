@@ -20,14 +20,6 @@ class TodaysGames extends React.Component {
 
   showSidebar = () => this.setState({ visible: true});
 
-  checkVis = () => {
-    if (this.state.visible) {
-      return false
-    } else {
-      return true
-    }
-  }
-
   mapTodaysGames = () => {
     return this.props.todaysGames.map(game => {
       return (
@@ -65,18 +57,21 @@ class TodaysGames extends React.Component {
             {this.mapTodaysGames()}
           </Menu>
         </Sidebar>
-        <Button
-          size='tiny' circular secondary
-          onClick={this.showSidebar}
-          style={{
-            position: 'fixed',
-            bottom: 50,
-            left: -45,
-            transform: 'rotate(-90deg)'
-          }}
-        >
-          TODAY'S  GAMES
-        </Button>
+        { this.state.visible ? null :
+          <Button
+            size='tiny' circular secondary
+            onClick={this.showSidebar}
+            style={{
+              position: 'fixed',
+              bottom: 50,
+              left: -45,
+              transform: 'rotate(-90deg)'
+            }}
+          >
+            TODAY'S  GAMES
+          </Button>
+        }
+
       </div>
     );
   }
