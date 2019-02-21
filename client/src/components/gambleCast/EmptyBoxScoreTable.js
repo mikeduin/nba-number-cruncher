@@ -3,20 +3,34 @@ import { Table } from 'semantic-ui-react';
 
 
 const EmptyBoxScore = props => {
-  let game = props.game;
+  const game = props.game;
+
+  let spread = '';
+
+  if (game.home_spread_full < game.away_spread_full) {
+    spread =`${game.h[0].ta} ${game.home_spread_full}`
+  } else if (game.away_spread_full < game.home_spread_full) {
+    spread = `${game.v[0].ta} ${game.away_spread_full}`
+  } else if (game.home_spread_full == null) {
+    spread = 'NO LINE'
+  } else {
+    spread = `${game.h[0].ta} PK`;
+  }
+
 
   if (!game) {
     return <div> loading ... </div>
   } else {
+    console.log(this);
     return (
-      <div>
         <Table compact celled
           style={{marginBottom: 20}}
         >
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell> {game.stt} </Table.HeaderCell>
-              <Table.HeaderCell colSpan="3">  </Table.HeaderCell>
+              <Table.HeaderCell colSpan="3"> {spread}{game.total_full == null ? null : `, O/U ${game.total_full}`}
+              </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
@@ -80,7 +94,6 @@ const EmptyBoxScore = props => {
             </Table.Row>
           </Table.Body>
         </Table>
-      </div>
     )
   }
 }

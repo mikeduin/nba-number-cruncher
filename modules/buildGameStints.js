@@ -14,7 +14,7 @@ module.exports = {
     const gcode = gDetail.data.g.gcode;
     const gdte = gDetail.data.g.gdte;
     const date = gcode.slice(0, 8);
-    
+
     const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
     const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
     const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);

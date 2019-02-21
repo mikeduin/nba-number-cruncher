@@ -12,7 +12,7 @@ module.exports = {
     axios.get(sbFull).then(
       response => {
         if (response.status === 200) {
-          let lines = webScrapeHelpers.parseSbHtml(response.data);
+          const lines = webScrapeHelpers.parseSbHtml(response.data);
           lines.forEach(line => {
             if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
               console.log('there is no line yet for',line.id);
@@ -86,7 +86,7 @@ module.exports = {
   sportsbookFirstH: () => {
     axios.get(apiRefs.sportsbook().firstH).then(response => {
       if (response.status === 200) {
-        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        const lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
           if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
             console.log('there is no 1H line yet for',line.id);
@@ -121,7 +121,7 @@ module.exports = {
   sportsbookSecondH: () => {
     axios.get(apiRefs.sportsbook().secondH).then(response => {
       if (response.status === 200) {
-        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        const lines = webScrapeHelpers.parseSbHtml(response.data);
         if (lines.length < 1) {
           console.log("no 2H lines found");
         } else {
@@ -162,7 +162,7 @@ module.exports = {
   sportsbookFirstQ: () => {
     axios.get(apiRefs.sportsbook().firstQ).then(response => {
       if (response.status === 200) {
-        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        const lines = webScrapeHelpers.parseSbHtml(response.data);
         lines.forEach(line => {
           if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
             console.log('there is no 1Q line yet for',line.id);
@@ -197,7 +197,7 @@ module.exports = {
   sportsbookThirdQ: () => {
     axios.get(apiRefs.sportsbook().thirdQ).then(response => {
       if (response.status === 200) {
-        let lines = webScrapeHelpers.parseSbHtml(response.data);
+        const lines = webScrapeHelpers.parseSbHtml(response.data);
         if (lines.length < 1) {
           console.log("no 3Q lines found");
         } else {

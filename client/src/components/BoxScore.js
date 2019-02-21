@@ -5,8 +5,10 @@ import { Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
+  state = {};
+
   componentDidMount () {
-    console.log('props in BS are ', this.props);
+    // console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
 
     if (this.props.liveUpdates) {
@@ -15,6 +17,29 @@ class BoxScore extends React.Component {
         console.log('checking score');
       }, 5000)
     }
+  }
+
+  checkSpread = () => {
+    let game = this.props.game;
+    let spread = '';
+
+    if (game.odds.home_spread_full < game.odds.away_spread_full) {
+        this.setState({
+          spread: `${game.info.h[0].ta} ${game.odds.home_spread_full}`
+        })
+    } else if (game.odds.away_spread_full < game.odds.home_spread_full) {
+        this.setState({
+          spread: `${game.info.v[0].ta} ${game.odds.away_spread_full}`
+        })
+    } else {
+      this.setState({
+        spread: `${game.info.h[0].ta} PK`
+      })
+    }
+
+    return (
+      <div> {spread}, O/U {game.odds.total_full} </div>
+    )
   }
 
   render () {
@@ -28,8 +53,8 @@ class BoxScore extends React.Component {
         return <EmptyBoxScore game={game}/>
       }
     } else {
-      console.log('boxScore its getting to is ', boxScore);
-      console.log('main bs rendered props are ', this.props);
+      // console.log('boxScore its getting to is ', boxScore);
+      // console.log('main bs rendered props are ', this.props);
       console.log(this.props.gambleCast)
       return (
         <div>
@@ -37,6 +62,14 @@ class BoxScore extends React.Component {
             style={{marginBottom: 20}}
           >
             <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell> Q{boxScore.period}, {boxScore.clock} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> {this.checkSpread} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
+              </Table.Row>
               <Table.Row>
                 <Table.HeaderCell>  </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q{boxScore.period}, {boxScore.clock} </Table.HeaderCell>

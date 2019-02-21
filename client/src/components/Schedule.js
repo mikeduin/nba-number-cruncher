@@ -75,7 +75,7 @@ class Schedule extends React.Component {
       return <div> Loading ... </div>;
     } else {
       return (
-        <div>
+        <div style={{marginBottom: 100}}>
           <div className="ui grid">
             <div className={`seven column row`}>{this.renderWeekGrid()}</div>
           </div>

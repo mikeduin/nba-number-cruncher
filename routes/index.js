@@ -21,18 +21,30 @@ const startPeriodSec = require('../modules/startPeriodSec');
 const getGameSecs = require('../modules/getGameSecs');
 const emptyTotalsObj = require('../modules/boxScoreHelpers/emptyTotalsObj');
 
-// remove this after more testing
+// remove these after more testing
 const buildGameStints = require("../modules/buildGameStints");
+const webScrapeHelpers = require("../modules/webScrapeHelpers");
 
 let now = moment().format('YYYY-MM-DD');
 
-// setInterval(()=>{
-//   oddsLoaders.sportsbookFull();
-//   oddsLoaders.sportsbookFirstH();
-//   oddsLoaders.sportsbookFirstQ();
-// }, 200000);
-// setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-// setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+setInterval(()=>{
+  oddsLoaders.sportsbookFull();
+  oddsLoaders.sportsbookFirstH();
+  oddsLoaders.sportsbookFirstQ();
+}, 200000);
+setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
+setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+
+
+
+const bRefParser = async () => {
+  const response = await axios.get('https://www.basketball-reference.com/teams/MIL/2019/on-off/');
+  if (response.status === 200) {
+    webScrapeHelpers.parseBaskRefHtml(response.data);
+  }
+}
+
+setTimeout(()=>{bRefParser()}, 2000);
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
@@ -101,105 +113,102 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   }
 
   console.log('period is ', period);
-  // period.isEndOfPeriod = true;
 
-  // if (period.current === 0) {
-  //   console.log(gid, ' has not started');
-  // } else {
-    let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+  let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
 
-    let poss = calcPoss(
-      (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
-      (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
-      (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
-      (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
-    let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-    let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+  let poss = calcPoss(
+    (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
+    (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
+    (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
+    (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
+  let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+  let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-    let hPlayers = activePlayers.filter(player => {
-      return (player.teamId === hTid && player.isOnCourt)
-    }).map(active => active.personId);
+  let hPlayers = activePlayers.filter(player => {
+    return (player.teamId === hTid && player.isOnCourt)
+  }).map(active => active.personId);
 
-    let vPlayers = activePlayers.filter(player => {
-      return (player.teamId === hTid && player.isOnCourt)
-    }).map(active => active.personId);
+  let vPlayers = activePlayers.filter(player => {
+    return (player.teamId === hTid && player.isOnCourt)
+  }).map(active => active.personId);
 
-    let totalsObj = {
+  // this is the obj that sends back the current totals every 5 seconds when the req is sent
+  let totalsObj = {
+    h: {
+      pts: hTeam.totals.points,
+      fgm: hTeam.totals.fgm,
+      fga: hTeam.totals.fga,
+      fgPct: calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
+      fta: hTeam.totals.fta,
+      to: hTeam.totals.turnovers,
+      offReb: hTeam.totals.offReb,
+      fouls: hTeam.totals.pFouls
+    },
+    v: {
+      pts: vTeam.totals.points,
+      fgm: vTeam.totals.fgm,
+      fga: vTeam.totals.fga,
+      fgPct: calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
+      fta: vTeam.totals.fta,
+      to: vTeam.totals.turnovers,
+      offReb: vTeam.totals.offReb,
+      fouls: vTeam.totals.pFouls
+    },
+    t: {
+      pts: hTeam.totals.points + vTeam.totals.points,
+      fgm: hTeam.totals.fgm + vTeam.totals.fgm,
+      fga: hTeam.totals.fga + vTeam.totals.fga,
+      fgPct: calcFgPct((hTeam.totals.fgm + vTeam.totals.fgm), (hTeam.totals.fga + vTeam.totals.fga)),
+      fta: hTeam.totals.fta + vTeam.totals.fta,
+      to: hTeam.totals.turnovers + vTeam.totals.turnovers,
+      offReb: hTeam.totals.offReb + vTeam.totals.offReb,
+      fouls: hTeam.totals.pFouls + vTeam.totals.pFouls,
+      poss: poss,
+      pace: calcGamePace(poss, period.current, gameSecs)
+    }
+  };
+
+  // this is the fn that subtract current totals from stored prevTotals values
+  let quarterObj = async () => {
+    prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
+    return {
       h: {
-        pts: hTeam.totals.points,
-        fgm: hTeam.totals.fgm,
-        fga: hTeam.totals.fga,
-        fgPct: calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
-        fta: hTeam.totals.fta,
-        to: hTeam.totals.turnovers,
-        offReb: hTeam.totals.offReb,
-        fouls: hTeam.totals.pFouls
+        pts: parseInt(hTeam.totals.points) - prevTotals[0].h.pts,
+        fgm: parseInt(hTeam.totals.fgm) - prevTotals[0].h.fgm,
+        fga: parseInt(hTeam.totals.fga) - prevTotals[0].h.fga,
+        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
+        fta: parseInt(hTeam.totals.fta) - prevTotals[0].h.fta,
+        to: parseInt(hTeam.totals.turnovers) - prevTotals[0].h.to,
+        offReb: parseInt(hTeam.totals.offReb) - prevTotals[0].h.offReb,
+        fouls: parseInt(hTeam.totals.pFouls) - prevTotals[0].h.fouls
       },
       v: {
-        pts: vTeam.totals.points,
-        fgm: vTeam.totals.fgm,
-        fga: vTeam.totals.fga,
-        fgPct: calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
-        fta: vTeam.totals.fta,
-        to: vTeam.totals.turnovers,
-        offReb: vTeam.totals.offReb,
-        fouls: vTeam.totals.pFouls
+        pts: parseInt(vTeam.totals.points) - prevTotals[0].v.pts,
+        fgm: parseInt(vTeam.totals.fgm) - prevTotals[0].v.fgm,
+        fga: parseInt(vTeam.totals.fga) - prevTotals[0].v.fga,
+        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
+        fta: parseInt(vTeam.totals.fta) - prevTotals[0].v.fta,
+        to: parseInt(vTeam.totals.turnovers) - prevTotals[0].v.to,
+        offReb: parseInt(vTeam.totals.offReb) - prevTotals[0].v.offReb,
+        fouls: parseInt(vTeam.totals.pFouls) - prevTotals[0].v.fouls
       },
       t: {
-        pts: hTeam.totals.points + vTeam.totals.points,
-        fgm: hTeam.totals.fgm + vTeam.totals.fgm,
-        fga: hTeam.totals.fga + vTeam.totals.fga,
-        fgPct: calcFgPct((hTeam.totals.fgm + vTeam.totals.fgm), (hTeam.totals.fga + vTeam.totals.fga)),
-        fta: hTeam.totals.fta + vTeam.totals.fta,
-        to: hTeam.totals.turnovers + vTeam.totals.turnovers,
-        offReb: hTeam.totals.offReb + vTeam.totals.offReb,
-        fouls: hTeam.totals.pFouls + vTeam.totals.pFouls,
-        poss: poss,
-        pace: calcGamePace(poss, period.current, gameSecs)
-      }
-    };
-
-    let quarterObj = async () => {
-      prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
-
-      return {
-        h: {
-          pts: parseInt(hTeam.totals.points) - prevTotals[0].h.pts,
-          fgm: parseInt(hTeam.totals.fgm) - prevTotals[0].h.fgm,
-          fga: parseInt(hTeam.totals.fga) - prevTotals[0].h.fga,
-          fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
-          fta: parseInt(hTeam.totals.fta) - prevTotals[0].h.fta,
-          to: parseInt(hTeam.totals.turnovers) - prevTotals[0].h.to,
-          offReb: parseInt(hTeam.totals.offReb) - prevTotals[0].h.offReb,
-          fouls: parseInt(hTeam.totals.pFouls) - prevTotals[0].h.fouls
-        },
-        v: {
-          pts: parseInt(vTeam.totals.points) - prevTotals[0].v.pts,
-          fgm: parseInt(vTeam.totals.fgm) - prevTotals[0].v.fgm,
-          fga: parseInt(vTeam.totals.fga) - prevTotals[0].v.fga,
-          fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
-          fta: parseInt(vTeam.totals.fta) - prevTotals[0].v.fta,
-          to: parseInt(vTeam.totals.turnovers) - prevTotals[0].v.to,
-          offReb: parseInt(vTeam.totals.offReb) - prevTotals[0].v.offReb,
-          fouls: parseInt(vTeam.totals.pFouls) - prevTotals[0].v.fouls
-        },
-        t: {
-          pts: (hTeam.totals.points + vTeam.totals.points) - prevTotals[0].t.pts,
-          fgm: (hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].t.fgm,
-          fga: (hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].t.fga,
-          fgPct: calcFgPct(
-            ((hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].t.fgm),
-            ((hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].t.fga)
-          ),
-          fta: (hTeam.totals.fta + vTeam.totals.fta) - prevTotals[0].t.fta,
-          to: (hTeam.totals.turnovers + vTeam.totals.turnovers) - prevTotals[0].t.to,
-          offReb: (hTeam.totals.offReb + vTeam.totals.offReb) - prevTotals[0].t.offReb,
-          fouls: (hTeam.totals.pFouls + vTeam.totals.pFouls) - prevTotals[0].t.fouls,
-          poss: poss - prevTotals[0].poss,
-          pace: ( ( (poss - prevTotals[0].poss) * 4) / 2)
-        }
+        pts: (hTeam.totals.points + vTeam.totals.points) - prevTotals[0].t.pts,
+        fgm: (hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].t.fgm,
+        fga: (hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].t.fga,
+        fgPct: calcFgPct(
+          ((hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].t.fgm),
+          ((hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].t.fga)
+        ),
+        fta: (hTeam.totals.fta + vTeam.totals.fta) - prevTotals[0].t.fta,
+        to: (hTeam.totals.turnovers + vTeam.totals.turnovers) - prevTotals[0].t.to,
+        offReb: (hTeam.totals.offReb + vTeam.totals.offReb) - prevTotals[0].t.offReb,
+        fouls: (hTeam.totals.pFouls + vTeam.totals.pFouls) - prevTotals[0].t.fouls,
+        poss: poss - prevTotals[0].poss,
+        pace: ( ( (poss - prevTotals[0].poss) * 4) / 2)
       }
     }
+  }
 
     if (period.isEndOfPeriod) {
       console.log('end of period, current period is ', period.current);

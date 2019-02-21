@@ -30,10 +30,23 @@ const spreadChecker = (value, ml) => {
 }
 
 module.exports = {
+  parseBaskRefHtml: (html) => {
+
+    let $ = cheerio.load(html);
+    let data = [];
+
+    console.log($('head').html());
+    // $('table').each(function(i, elem) {
+    //   console.log('i is ', i);
+    //     console.log($(this));
+    // })
+
+    return 'gets to end';
+  },
   parseSbHtml: (html) => {
     const $ = cheerio.load(html);
     let lines = [];
-    // must leave cheerio fn in old ES syntax
+    // must leave cheerio fn in old ES5 syntax
     $('.eventbox').each(function(i, elem) {
       lines[i] = {
         id: $(this).attr('id'),
