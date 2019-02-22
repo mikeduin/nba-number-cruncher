@@ -97,10 +97,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
 
   if (clock.length < 1) {
-    console.log('adjusting clock');
     clock = '0:00';
   };
-  console.log('for ', gid, ' clock is ', clock);
 
   let gameSecs = getGameSecs(period.current-1, clock);
 
@@ -132,8 +130,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
   let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-
-  console.log('for ', gid, ' poss is ', poss, ' gameSecs are ', gameSecs);
 
   let hPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)

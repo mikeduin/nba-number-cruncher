@@ -80,7 +80,7 @@ class BoxScore extends React.Component {
                 padding: 0
               }}>
                 <Table.HeaderCell>  </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> {this.state.spread} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2"> {this.state.spread} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
@@ -88,7 +88,7 @@ class BoxScore extends React.Component {
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell>  </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q{boxScore.period}, {boxScore.clock} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2"> GAME PACE: {boxScore.pace.toFixed(2)} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>

@@ -143,10 +143,10 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     endOfPeriod: false
   }
 
-  if (game.data.final) {
-    dispatch({ type: 'SET_TO_FINAL', payload: gid });
-    return;
-  }
+  // if (game.data.final) {
+  //   dispatch({ type: 'SET_TO_FINAL', payload: gid });
+  //   return;
+  // }
 
   console.log('response for ', gid, ' is ', response);
 
@@ -156,7 +156,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   //   return;
   // }
 
-  if (response.live) {
+  if (response.gameSecs > 0) {
     let stateData = getState().gambleCast[`live_${gid}`];
     console.log('stateData for ', gid, ' in action is ', stateData);
     // let { prevQuarters } = stateData;
