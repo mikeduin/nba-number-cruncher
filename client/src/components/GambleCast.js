@@ -7,11 +7,12 @@ import { Header } from 'semantic-ui-react';
 class GambleCast extends React.Component {
   componentDidMount () {
     console.log('props in gcast are ', this.props);
-    console.log('state in cast is ', this.state);
   }
 
   renderBoxScores = () => {
-    const checkActive = (gid) => this.props.activeGames.indexOf(gid) !== -1;
+    const checkActive = (gid) => {
+      return this.props.activeGames.indexOf(gid) !== -1
+    };
 
     if (this.props.games[0]) {
       return this.props.games.map(game => {

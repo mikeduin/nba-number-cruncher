@@ -18,9 +18,8 @@ export const fetchWeek = (date = today) => async dispatch => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    // CHANGE THIS BACK WHEN DONE TESTING!
-    // return game.gdte === today;
-    return game.gdte === '2019-02-21';
+    return game.gdte === today;
+    // return game.gdte === '2019-02-21';
   });
 
   let activeGames = [];
@@ -48,9 +47,14 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   todaysGames.forEach(game => {
     // if the game is within 10 minutes from now, set it to active
     let tenMinsAhead = moment().add(10, 'm');
+    // add this because its pulling wrong time! need to adjust for timezone
+    let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
-    if (gametime.isBefore(tenMinsAhead) && activeGames.indexOf(game.gid) !== -1) {
+    // console.log('gamestime is ', gametime);
+    // console.log('tenMinsAhead is ', threeHourMinsAhead);
+    if (gametime.isBefore(threeHourMinsAhead) && activeGames.indexOf(game.gid) === -1) {
       activeGames.push(game.gid);
+      console.log('game is ', game.gid, ' being set to live from checkActiveGames function');
       dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
     };
   })
@@ -144,108 +148,115 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     return;
   }
 
-  if (!game.data.active && !game.data.final && !getState()[`live_${gid}`]) {
-    dispatch({ type: 'ADD_TEMPLATE', payload: preData });
-    return;
+  console.log('response for ', gid, ' is ', response);
+
+  // This was fucking things up
+  // if (!game.data.active && !game.data.final && !getState()[`live_${gid}`]) {
+  //   dispatch({ type: 'ADD_TEMPLATE', payload: preData });
+  //   return;
+  // }
+
+  if (response.live) {
+    let stateData = getState().gambleCast[`live_${gid}`];
+    console.log('stateData for ', gid, ' in action is ', stateData);
+    // let { prevQuarters } = stateData;
+
+    let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
+
+    const calcFgPct = (fgm, fga) => {
+      return (((fgm/fga)*100).toFixed(1));
+    };
+
+    const calcQuarterPace = (poss, per, clock) => {
+      let secs = 0;
+      if (per < 4) {
+        secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
+        return (((720/secs) * poss)/2)
+      } else {
+        secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
+        return (((300/secs) * poss)/2)
+      };
+    };
+
+    let liveData = {
+      gid: gid,
+      active: true,
+      period: period.current,
+      endOfPeriod: false,
+      thru: thru_period,
+      gameSecs,
+      clock,
+      poss,
+      pace,
+      totals
+    };
+
+    // let currentQuarter = {
+    //   h: {
+    //     pts: parseInt(totals.h.pts) - prevQuarters.h.pts,
+    //     fgm: parseInt(totals.h.fgm) - prevQuarters.h.fgm,
+    //     fga: parseInt(totals.h.fga) - prevQuarters.h.fga,
+    //     fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - prevQuarters.h.fga)),
+    //     fta: parseInt(totals.h.fta) - prevQuarters.h.fta,
+    //     to: parseInt(totals.h.turnovers) - prevQuarters.h.to,
+    //     offReb: parseInt(totals.h.offReb) - prevQuarters.h.offReb,
+    //     fouls: parseInt(totals.h.pFouls) - prevQuarters.h.fouls
+    //   },
+    //   v: {
+    //     pts: parseInt(totals.v.pts) - prevQuarters.v.pts,
+    //     fgm: parseInt(totals.v.fgm) - prevQuarters.v.fgm,
+    //     fga: parseInt(totals.v.fga) - prevQuarters.v.fga,
+    //     fgPct: calcFgPct(
+    //       (parseInt(totals.v.fgm) - prevQuarters.v.fgm),
+    //       (parseInt(totals.v.fga) - prevQuarters.v.fga)
+    //     ),
+    //     fta: parseInt(totals.v.fta) - prevQuarters.v.fta,
+    //     to: parseInt(totals.v.turnovers) - prevQuarters.v.to,
+    //     offReb: parseInt(totals.v.offReb) - prevQuarters.v.offReb,
+    //     fouls: parseInt(totals.v.pFouls) - prevQuarters.v.fouls
+    //   },
+    //   t: {
+    //     pts: (totals.h.pts + totals.v.pts) - prevQuarters.t.pts,
+    //     fgm: (totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm,
+    //     fga: (totals.h.fga + totals.v.fga) - prevQuarters.t.fga,
+    //     fgPct: calcFgPct(
+    //       ((totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm),
+    //       ((totals.h.fga + totals.v.fga) - prevQuarters.t.fga)
+    //     ),
+    //     fta: (totals.h.fta + totals.v.fta) - prevQuarters.t.fta,
+    //     to: (totals.h.turnovers + totals.v.turnovers) - prevQuarters.t.to,
+    //     offReb: (totals.h.offReb + totals.v.offReb) - prevQuarters.t.offReb,
+    //     fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
+    //     poss: poss - prevQuarters.poss,
+    //     pace: calcQuarterPace(poss, period.current, clock)
+    //   }
+    // };
+
+    let endOfQuarterData = response.quarter;
+
+    if (period.endOfPeriod) {
+      // console.log('end of period in action, current period is ', period.current);
+      // let perToUpdate = period.current;
+      //
+      // let snapshot = {
+      //   quarterData: endOfQuarterData,
+      //   prevQuarters: totals,
+      //   q: perToUpdate
+      // };
+      //
+      // dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+    } else {
+      console.log('period ongoing, current period is ', period.current);
+      let perToUpdate = period.current;
+
+      let inQuarter = {
+        ...liveData,
+        q: perToUpdate
+        // currentQuarter: currentQuarter,
+      }
+
+      dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
+    };
   }
 
-  let stateData = getState()[`live_${gid}`];
-  let { prevQuarters } = stateData;
-
-  let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
-
-  const calcFgPct = (fgm, fga) => {
-    return (((fgm/fga)*100).toFixed(1));
-  };
-
-  const calcQuarterPace = (poss, per, clock) => {
-    let secs = 0;
-    if (per < 4) {
-      secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
-      return (((720/secs) * poss)/2)
-    } else {
-      secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
-      return (((300/secs) * poss)/2)
-    };
-  };
-
-  let liveData = {
-    gid: gid,
-    active: true,
-    period: period.current,
-    endOfPeriod: false,
-    thru: thru_period,
-    gameSecs,
-    clock,
-    poss,
-    pace,
-    totals
-  };
-
-  let currentQuarter = {
-    h: {
-      pts: parseInt(totals.h.pts) - prevQuarters.h.pts,
-      fgm: parseInt(totals.h.fgm) - prevQuarters.h.fgm,
-      fga: parseInt(totals.h.fga) - prevQuarters.h.fga,
-      fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - prevQuarters.h.fga)),
-      fta: parseInt(totals.h.fta) - prevQuarters.h.fta,
-      to: parseInt(totals.h.turnovers) - prevQuarters.h.to,
-      offReb: parseInt(totals.h.offReb) - prevQuarters.h.offReb,
-      fouls: parseInt(totals.h.pFouls) - prevQuarters.h.fouls
-    },
-    v: {
-      pts: parseInt(totals.v.pts) - prevQuarters.v.pts,
-      fgm: parseInt(totals.v.fgm) - prevQuarters.v.fgm,
-      fga: parseInt(totals.v.fga) - prevQuarters.v.fga,
-      fgPct: calcFgPct(
-        (parseInt(totals.v.fgm) - prevQuarters.v.fgm),
-        (parseInt(totals.v.fga) - prevQuarters.v.fga)
-      ),
-      fta: parseInt(totals.v.fta) - prevQuarters.v.fta,
-      to: parseInt(totals.v.turnovers) - prevQuarters.v.to,
-      offReb: parseInt(totals.v.offReb) - prevQuarters.v.offReb,
-      fouls: parseInt(totals.v.pFouls) - prevQuarters.v.fouls
-    },
-    t: {
-      pts: (totals.h.pts + totals.v.pts) - prevQuarters.t.pts,
-      fgm: (totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm,
-      fga: (totals.h.fga + totals.v.fga) - prevQuarters.t.fga,
-      fgPct: calcFgPct(
-        ((totals.h.fgm + totals.v.fgm) - prevQuarters.t.fgm),
-        ((totals.h.fga + totals.v.fga) - prevQuarters.t.fga)
-      ),
-      fta: (totals.h.fta + totals.v.fta) - prevQuarters.t.fta,
-      to: (totals.h.turnovers + totals.v.turnovers) - prevQuarters.t.to,
-      offReb: (totals.h.offReb + totals.v.offReb) - prevQuarters.t.offReb,
-      fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
-      poss: poss - prevQuarters.poss,
-      pace: calcQuarterPace(poss, period.current, clock)
-    }
-  };
-
-  let endOfQuarterData = response.quarter;
-
-  if (period.endOfPeriod) {
-    console.log('end of period in action, current period is ', period.current);
-    let perToUpdate = period.current;
-
-    let snapshot = {
-      quarterData: endOfQuarterData,
-      prevQuarters: totals,
-      q: perToUpdate
-    };
-
-    dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
-  } else {
-    console.log('period ongoing, current period is ', period.current);
-    let perToUpdate = period.current;
-
-    let inQuarter = {
-      ...liveData,
-      currentQuarter: currentQuarter,
-      q: perToUpdate
-    }
-
-    dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
-  };
 }

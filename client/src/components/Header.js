@@ -98,7 +98,6 @@ class Header extends React.Component {
       </Menu>
     )
   }
-
 }
 
 export default connect(null, { setActiveDay, fetchPlayerData }) (Header);
