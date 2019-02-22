@@ -479,10 +479,15 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   //   .orWhere({team_id: v})
 
   // use this fn to sort by on/off court net rtg differential, which is 9th index
-  const DoubleArraySort = (a, b) => {
+  const doubleArraySort = (a, b) => {
     if (a[9] < b[9]) {return 1};
     if (b[9] < a[9]) {return -1};
     return 0;
+  }
+
+  // default numerical sort for use with Array.sort
+  const defSort = (a, b) => {
+    return a - b;
   }
 
   const impactPlayers = hPlayers.concat(vPlayers)
@@ -490,7 +495,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   .map(player => {
     return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta];
   })
-  .sort(DoubleArraySort);
+  .sort(doubleArraySort);
 
   const impPlayerArray = impactPlayers.map(player => player[0]);
 
@@ -508,30 +513,59 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
   const impPlayerObj = {};
 
+  // binary search fn to speed up sorting/median determ of significant substitution patterns
+  const findInsertionPoint = (sortedArr, val, comparator) => {
+    let low = 0, high = sortedArr.length;
+    let mid = -1, c = 0;
+    while (low < high) {
+      mid = parseInt((low + high) / 2);
+      c = comparator(sortedArr[mid], val);
+      if (c < 0) {
+        low = mid + 1;
+      } else if (c > 0) {
+        high = mid;
+      } else {
+        return mid;
+      }
+    }
+    return low;
+  }
+
+  // hate all these nested forEach, but what the hell is the alternative?!
   impPlayerArray.forEach(player => {
-    const stints = gameStints.filter(stint => stint.player_id === player);
-    const allEntries = [];
-    const allExits = [];
-    stints.forEach(game => {
-      const gameEntries = [];
-      const gameExits = [];
-      game.game_stints.forEach(stretch => {
-        gameEntries.push(parseInt(stretch[0]));
-        gameExits.push(parseInt(stretch[1]));
+    const playerStints = gameStints.filter(stint => stint.player_id === player);
+    const gameEntries = [];
+    const gameExits = [];
+    let games = 0;
+    playerStints.forEach(game => {
+      games++;
+      game.game_stints.forEach((stretch, i) => {
+        if (gameEntries[i]) {
+          let idx = findInsertionPoint(gameEntries[i], parseInt(stretch[0]), defSort)
+          gameEntries[i].splice(idx, 0, parseInt(stretch[0]));
+        } else {
+          gameEntries.push([parseInt(stretch[0])])
+        };
+
+        if (gameExits[i]) {
+          let idx = findInsertionPoint(gameExits[i], parseInt(stretch[1]), defSort);
+          gameExits[i].splice(idx, 0, parseInt(stretch[1]));
+        } else {
+          gameExits.push([parseInt(stretch[1])])
+        };
       })
-      allEntries.push(gameEntries);
-      allExits.push(gameExits);
     })
 
     // entries.sort();
     // exits.sort();
     impPlayerObj[`pid_${player}`] = {
-      entries: allEntries,
-      exits: allExits
+      entries: gameEntries,
+      exits: gameExits
     }
   })
 
   console.log(impPlayerObj['pid_201571'].entries);
+  console.log(impPlayerObj['pid_201571'].exits);
 
   res.send({
     info: game[0],
