@@ -35,6 +35,16 @@ setInterval(()=>{
 setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
+// setTimeout(async ()=>{
+//   const gameStintsA = await knex("player_game_stints")
+//     .where("gdte", ">", "2019-01-15")
+//     .andWhere((builder)=> {
+//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', impPlayerArray)
+//     });
+//
+//   console.log(gameStintsA);
+// }, 2000)
+
 /* GET home page. */
 router.get("/", (req, res, next) => {
   console.log('hello');
@@ -464,37 +474,80 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     .where("pd.team_id", "=", v)
     .orderBy("pd.min_full");
 
+  // const gameStints = await knex("player_game_stints")
+  //   .where({team_id: h})
+  //   .orWhere({team_id: v})
+
+  // use this fn to sort by on/off court net rtg differential, which is 9th index
   const DoubleArraySort = (a, b) => {
     if (a[9] < b[9]) {return 1};
     if (b[9] < a[9]) {return -1};
     return 0;
   }
 
-  let impactPlayers = hPlayers.concat(vPlayers)
+  const impactPlayers = hPlayers.concat(vPlayers)
   .filter(player => player.mp_pct > 0.2)
   .map(player => {
     return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta];
   })
   .sort(DoubleArraySort);
 
+  const impPlayerArray = impactPlayers.map(player => player[0]);
 
-    console.log(impactPlayers);
+  const monthPlusAgo = moment().subtract(45, 'days').format('YYYY-MM-DD');
 
-    res.send({
-      info: game[0],
-      odds: odds[0],
-      hTen: hSched,
-      vTen: vSched,
-      matchups: matchups,
-      hNetRtg: hNetRtg[0],
-      vNetRtg: vNetRtg[0],
-      hPace: hPace[0],
-      vPace: vPace[0],
-      hInfo: hInfo[0],
-      vInfo: vInfo[0],
-      hPlayers: hPlayers,
-      vPlayers: vPlayers
-    });
+  const gameStints = await knex("player_game_stints")
+    .where("gdte", ">", monthPlusAgo)
+    .andWhere(buildOne => {
+      buildOne.whereIn('team_id', [h, v])
+    })
+    .andWhere(buildTwo => {
+      buildTwo.whereIn('player_id', impPlayerArray)
+    })
+    .orderBy('gdte', 'desc');
+
+  const impPlayerObj = {};
+
+  impPlayerArray.forEach(player => {
+    const stints = gameStints.filter(stint => stint.player_id === player);
+    const allEntries = [];
+    const allExits = [];
+    stints.forEach(game => {
+      const gameEntries = [];
+      const gameExits = [];
+      game.game_stints.forEach(stretch => {
+        gameEntries.push(parseInt(stretch[0]));
+        gameExits.push(parseInt(stretch[1]));
+      })
+      allEntries.push(gameEntries);
+      allExits.push(gameExits);
+    })
+
+    // entries.sort();
+    // exits.sort();
+    impPlayerObj[`pid_${player}`] = {
+      entries: allEntries,
+      exits: allExits
+    }
+  })
+
+  console.log(impPlayerObj['pid_201571'].entries);
+
+  res.send({
+    info: game[0],
+    odds: odds[0],
+    hTen: hSched,
+    vTen: vSched,
+    matchups: matchups,
+    hNetRtg: hNetRtg[0],
+    vNetRtg: vNetRtg[0],
+    hPace: hPace[0],
+    vPace: vPace[0],
+    hInfo: hInfo[0],
+    vInfo: vInfo[0],
+    hPlayers: hPlayers,
+    vPlayers: vPlayers
+  });
 
 
 })
@@ -502,7 +555,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
 
 
-const timedDbUpdaters = schedule.scheduleJob("20 12 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("13 04 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
@@ -517,7 +570,6 @@ const timedDbUpdaters = schedule.scheduleJob("20 12 * * *", () => {
   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
   setTimeout(()=>{dbBuilders.addGameStints()}, 780000);
-
 })
 
 
