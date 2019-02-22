@@ -35,17 +35,6 @@ setInterval(()=>{
 setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
 setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 
-
-
-const bRefParser = async () => {
-  const response = await axios.get('https://www.basketball-reference.com/teams/MIL/2019/on-off/');
-  if (response.status === 200) {
-    webScrapeHelpers.parseBaskRefHtml(response.data);
-  }
-}
-
-setTimeout(()=>{bRefParser()}, 2000);
-
 /* GET home page. */
 router.get("/", (req, res, next) => {
   console.log('hello');
@@ -466,25 +455,52 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const matchups = await knex("schedule")
     .where('gcode', 'like', `%${hAbb}${vAbb}%`)
     .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`);
-  const hPlayers = await knex("player_data").where({team_id: h});
-  const vPlayers = await knex("player_data").where({team_id: v});
+  const hPlayers = await knex("player_data as pd")
+    .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
+    .where("pd.team_id", "=", h)
+    .orderBy("pd.min_full");
+  const vPlayers = await knex("player_data as pd")
+    .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
+    .where("pd.team_id", "=", v)
+    .orderBy("pd.min_full");
 
-  res.send({
-    info: game[0],
-    odds: odds[0],
-    hTen: hSched,
-    vTen: vSched,
-    matchups: matchups,
-    hNetRtg: hNetRtg[0],
-    vNetRtg: vNetRtg[0],
-    hPace: hPace[0],
-    vPace: vPace[0],
-    hInfo: hInfo[0],
-    vInfo: vInfo[0],
-    hPlayers: hPlayers,
-    vPlayers: vPlayers
-  });
+  const DoubleArraySort = (a, b) => {
+    if (a[9] < b[9]) {return 1};
+    if (b[9] < a[9]) {return -1};
+    return 0;
+  }
+
+  let impactPlayers = hPlayers.concat(vPlayers)
+  .filter(player => player.mp_pct > 0.2)
+  .map(player => {
+    return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta];
+  })
+  .sort(DoubleArraySort);
+
+
+    console.log(impactPlayers);
+
+    res.send({
+      info: game[0],
+      odds: odds[0],
+      hTen: hSched,
+      vTen: vSched,
+      matchups: matchups,
+      hNetRtg: hNetRtg[0],
+      vNetRtg: vNetRtg[0],
+      hPace: hPace[0],
+      vPace: vPace[0],
+      hInfo: hInfo[0],
+      vInfo: vInfo[0],
+      hPlayers: hPlayers,
+      vPlayers: vPlayers
+    });
+
+
 })
+
+
+
 
 const timedDbUpdaters = schedule.scheduleJob("20 12 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);

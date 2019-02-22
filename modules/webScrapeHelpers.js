@@ -30,19 +30,6 @@ const spreadChecker = (value, ml) => {
 }
 
 module.exports = {
-  parseBaskRefHtml: (html) => {
-
-    let $ = cheerio.load(html);
-    let data = [];
-
-    console.log($('head').html());
-    // $('table').each(function(i, elem) {
-    //   console.log('i is ', i);
-    //     console.log($(this));
-    // })
-
-    return 'gets to end';
-  },
   parseSbHtml: (html) => {
     const $ = cheerio.load(html);
     let lines = [];

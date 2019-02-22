@@ -11,12 +11,12 @@ class BoxScore extends React.Component {
     console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
 
-    // if (this.state.active) {
+    if (this.props.activeGames.indexOf(this.props.game.gid) !== -1) {
       setInterval(() => {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
       }, 5000)
-    // }
+    }
   }
 
   checkSpread = () => {
@@ -46,7 +46,6 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
-    if (game.gid === 21800872 || game.gid === 21800871) {
 
       if (!boxScore || !boxScore.active || !boxScore.totals) {
         if (!game) {
@@ -55,11 +54,9 @@ class BoxScore extends React.Component {
           return <EmptyBoxScore game={game}/>
         }
       } else {
-        if (!this.state.active) {
-          this.setState({active: true})
-        }
-        // console.log('boxScore its getting to is ', boxScore);
-        // console.log('main bs rendered props are ', this.props);
+        // if (!this.state.active) {
+        //   this.setState({active: true})
+        // }
         console.log('this.props when boxScore is rendered is ', this.props);
         console.log('boxScore for ', game.gid ,' is', boxScore);
         return (
@@ -81,7 +78,7 @@ class BoxScore extends React.Component {
                   fontSize: '10px',
                   padding: 0
                 }}>
-                  <Table.HeaderCell>  </Table.HeaderCell>
+                  <Table.HeaderCell textAlign="right"> <i>Odds -></i> </Table.HeaderCell>
                   <Table.HeaderCell colSpan="2"> {this.state.spread} </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
@@ -150,15 +147,13 @@ class BoxScore extends React.Component {
           </div>
         )
       }
-    } else {
-      return (<div> Game not live </div>)
-    }
   }
 }
 
 const mapStateToProps = state => {
   return {
-    gambleCast: state.gambleCast
+    gambleCast: state.gambleCast,
+    activeGames: state.activeGames
   }
 }
 

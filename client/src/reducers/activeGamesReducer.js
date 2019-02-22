@@ -1,7 +1,9 @@
 export default (state = [], action) => {
   switch (action.type) {
     case 'SET_ACTIVE_GAMES':
-      return action.payload;
+      // fix this when done testing
+      // return action.payload;
+      return [21800874]
     default:
       return state;
   }
