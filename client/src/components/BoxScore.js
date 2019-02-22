@@ -46,7 +46,7 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
-    if (!boxScore || !boxScore.active) {
+    if (!boxScore || !boxScore.active || !boxScore.totals) {
       if (!game) {
         return <div> loading ... </div>
       } else {
@@ -87,7 +87,7 @@ class BoxScore extends React.Component {
                 <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
               </Table.Row>
               <Table.Row>
-                <Table.HeaderCell>  </Table.HeaderCell>
+                <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="2"> GAME PACE: {boxScore.pace.toFixed(2)} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
