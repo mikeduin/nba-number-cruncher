@@ -21,21 +21,19 @@ export default (state = {}, action) => {
 
       };
     case 'ADD_SNAPSHOT':
+      const newState = {...state};
+      return newState[`live_${action.payload.gid}`] = action.payload;
       // If this does not work, try the approach found in react/redux tutorial note 86
-      return {...state, [`live_${action.payload.gid}`]: {
-          ...state[`live_${action.payload.gid}`],
-          [`q${action.payload.q}`]: action.payload.quarterData,
-          prevQuarters: action.payload.prevQuarters
-        }
-      };
+      // SET UP LIKE THIS BELOW THOUGH
+      // return {...state, [`live_${action.payload.gid}`]: {
+      //     ...state[`live_${action.payload.gid}`],
+      //     [`q${action.payload.q}`]: action.payload.quarterData,
+      //     prevQuarters: action.payload.prevQuarters
+      //   }
+      // };
     // case 'SET_TO_FINAL':
-    //   console.log('prevState is ', state.)
-    //   return {...state, [`live_${action.payload}`]: {
-    //       ...state[`live_${action.payload}`],
-    //       active: false,
-    //       final: true
-    //     }
-    //   };
+    //   const newState = {...state};
+    //   return newState[`live_${action.payload.gid}`] = action.payload;
     default:
       return state;
   }
