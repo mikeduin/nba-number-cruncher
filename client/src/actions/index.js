@@ -167,6 +167,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   console.log('response.gameSecs for gid ', gid, ' is ', response.gameSecs);
   if (response.gameSecs > 0) {
+    console.log('state data not drilled down by game is ', stateData);
     let stateData = getState().gambleCast[`live_${gid}`];
     console.log('stateData for ', gid, ' in action is ', stateData);
     // let prevQuarters = {};
@@ -302,7 +303,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
                 to: parseInt(totals.h.turnovers) - prevQuarters.h.to,
                 offReb: parseInt(totals.h.offReb) - prevQuarters.h.offReb,
                 fouls: parseInt(totals.h.fouls) - parseInt(prevQuarters.h.fouls)
-                // fouls: parseInt(totals.h.pFouls) - parseInt(prevQuarters.h.fouls)
               },
               v: {
                 pts: parseInt(totals.v.pts) - prevQuarters.v.pts,
@@ -316,7 +316,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
                 to: parseInt(totals.v.turnovers) - prevQuarters.v.to,
                 offReb: parseInt(totals.v.offReb) - prevQuarters.v.offReb,
                 fouls: parseInt(totals.v.fouls) - parseInt(prevQuarters.v.fouls)
-                // fouls: parseInt(totals.v.pFouls) - parseInt(prevQuarters.v.fouls)
               },
               t: {
                 pts: (totals.h.pts + totals.v.pts) - prevQuarters.t.pts,
@@ -330,7 +329,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
                 to: (totals.h.turnovers + totals.v.turnovers) - prevQuarters.t.to,
                 offReb: (totals.h.offReb + totals.v.offReb) - prevQuarters.t.offReb,
                 fouls: (totals.h.fouls + totals.v.fouls) - prevQuarters.t.fouls,
-                // fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
                 poss: poss - prevQuarters.poss,
                 pace: calcQuarterPace(poss, period.current, clock)
               }

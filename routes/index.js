@@ -130,14 +130,18 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
   let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
+  console.log('hTeam.totals are ', hTeam.totals);
+
 
   let hPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)
   }).map(active => active.personId);
 
+
   let vPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)
   }).map(active => active.personId);
+
 
   // this is the obj that sends back the current totals every 5 seconds when the req is sent
   let totalsObj = {
@@ -189,14 +193,11 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     q1Pull = q1DataPull[0].q1;
   }
 
-  // }
-  //
-  // let totalsObjv4 = await knex("box_scores_v2").where({gid: gid}).select('totals');
-  // console.log('totals obj for ', gid , ' is ', totalsObjv4[0]);
 
   // this is the fn that subtract current totals from stored prevTotals values
   let quarterObj = async () => {
     prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
+    console.log('prevTotals in quarterObj is ', prevTotals[0].totals);
     return {
       h: {
         pts: parseInt(hTeam.totals.points) - prevTotals[0].totals[0].h.pts,
@@ -219,22 +220,70 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         fouls: parseInt(vTeam.totals.pFouls) - prevTotals[0].totals[0].v.fouls
       },
       t: {
-        pts: (hTeam.totals.points + vTeam.totals.points) - prevTotals[0].totals[0].t.pts,
-        fgm: (hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].totals[0].t.fgm,
-        fga: (hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].totals[0].t.fga,
+        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - prevTotals[0].totals[0].t.pts,
+        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals[0].totals[0].t.fgm,
+        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals[0].totals[0].t.fga,
         fgPct: calcFgPct(
-          ((hTeam.totals.fgm + vTeam.totals.fgm) - prevTotals[0].totals[0].t.fgm),
-          ((hTeam.totals.fga + vTeam.totals.fga) - prevTotals[0].totals[0].t.fga)
+          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals[0].totals[0].t.fgm),
+          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals[0].totals[0].t.fga)
         ),
-        fta: (hTeam.totals.fta + vTeam.totals.fta) - prevTotals[0].totals[0].t.fta,
-        to: (hTeam.totals.turnovers + vTeam.totals.turnovers) - prevTotals[0].totals[0].t.to,
-        offReb: (hTeam.totals.offReb + vTeam.totals.offReb) - prevTotals[0].totals[0].t.offReb,
-        fouls: (hTeam.totals.pFouls + vTeam.totals.pFouls) - prevTotals[0].totals[0].t.fouls,
+        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - prevTotals[0].totals[0].t.fta,
+        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - prevTotals[0].totals[0].t.to,
+        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - prevTotals[0].totals[0].t.offReb,
+        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - prevTotals[0].totals[0].t.fouls,
         poss: poss - prevTotals[0].totals[0].poss,
         pace: ( ( (poss - prevTotals[0].totals[0].poss) * 4) / 2)
       }
     }
   }
+
+  let tempQ2Obj = async () => {
+    // prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
+    // console.log('prevTotals in quarterObj is ', prevTotals[0].totals);
+    q1DataPull = await knex("box_scores_v2").where({gid: gid}).select('q1');
+    q1Pull = q1DataPull[0].q1;
+    return {
+      h: {
+        pts: parseInt(hTeam.totals.points) - q1Pull[0].h.pts,
+        fgm: parseInt(hTeam.totals.fgm) - q1Pull[0].h.fgm,
+        fga: parseInt(hTeam.totals.fga) - q1Pull[0].h.fga,
+        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-q1Pull[0].h.fgm), (parseInt(hTeam.totals.fga) - q1Pull[0].h.fga)),
+        fta: parseInt(hTeam.totals.fta) - q1Pull[0].h.fta,
+        to: parseInt(hTeam.totals.turnovers) - q1Pull[0].h.to,
+        offReb: parseInt(hTeam.totals.offReb) - q1Pull[0].h.offReb,
+        fouls: parseInt(hTeam.totals.pFouls) - q1Pull[0].h.fouls
+      },
+      v: {
+        pts: parseInt(vTeam.totals.points) - q1Pull[0].v.pts,
+        fgm: parseInt(vTeam.totals.fgm) - q1Pull[0].v.fgm,
+        fga: parseInt(vTeam.totals.fga) - q1Pull[0].v.fga,
+        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-q1Pull[0].v.fgm), (parseInt(vTeam.totals.fga) - q1Pull[0].v.fga)),
+        fta: parseInt(vTeam.totals.fta) - q1Pull[0].v.fta,
+        to: parseInt(vTeam.totals.turnovers) - q1Pull[0].v.to,
+        offReb: parseInt(vTeam.totals.offReb) - q1Pull[0].v.offReb,
+        fouls: parseInt(vTeam.totals.pFouls) - q1Pull[0].v.fouls
+      },
+      t: {
+        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - q1Pull[0].t.pts,
+        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - q1Pull[0].t.fgm,
+        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - q1Pull[0].t.fga,
+        fgPct: calcFgPct(
+          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - q1Pull[0].t.fgm),
+          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - q1Pull[0].t.fga)
+        ),
+        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - q1Pull[0].t.fta,
+        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - q1Pull[0].t.to,
+        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - q1Pull[0].t.offReb,
+        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - q1Pull[0].t.fouls,
+        poss: poss - q1Pull[0].poss,
+        pace: ( ( (poss - q1Pull[0].poss) * 4) / 2)
+      }
+    }
+  }
+
+  // tempQ2Obj().then(tempQ2 => {
+  //   console.log('tempQ2 is ', tempQ2)
+  // });
 
     if (period.isEndOfPeriod) {
       console.log('end of period, current period is ', period.current);
@@ -271,8 +320,9 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         })
       } else if (period.current === 2) {
-        if (prevTotals.length > 0) {
-          let q2 = quarterObj();
+        tempQ2Obj().then(q2 => {
+          console.log('q2 obj in q2 fn is ', q2);
+          console.log('totals obj in q2 fn is ', totalsObj);
           gameSecs = getGameSecs(period.current-1, clock);
           knex("box_scores_v2").where({gid: gid}).update({
             period_updated: 2,
@@ -295,9 +345,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               quarter: q2
             })
           })
-        } else {
-          console.log(period.current, ' has ended but no prevTotals Obj found');
-        }
+        })
       } else if (period.current === 3) {
         if (prevTotals.length > 0) {
           let q3 = quarterObj();
@@ -380,7 +428,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           poss: poss,
           pace: calcGamePace(poss, period.current, gameSecs),
           totals: totalsObj,
-          q1: q1Pull
+          q1: q1Pull[0]
         })
       }
     }
