@@ -280,6 +280,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
           q: perToUpdate
           // currentQuarter: currentQuarter
         }
+        dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
       } else if (period.current === 2) {
 
           let prevQuarters = response.q1;

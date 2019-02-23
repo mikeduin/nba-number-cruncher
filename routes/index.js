@@ -184,9 +184,9 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     q1DataPull = await knex("box_scores_v2").where({gid: gid}).select('q1');
     q1Pull = q1DataPull[0].q1[0];
   }
-
-  let totalsObjv4 = await knex("box_scores_v2").where({gid: gid}).select('totals');
-  console.log('totals obj for ', gid , ' is ', totalsObjv4[0]);
+  //
+  // let totalsObjv4 = await knex("box_scores_v2").where({gid: gid}).select('totals');
+  // console.log('totals obj for ', gid , ' is ', totalsObjv4[0]);
 
   // this is the fn that subtract current totals from stored prevTotals values
   let quarterObj = async () => {
@@ -556,16 +556,16 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
     })
 
-    // entries.sort();
-    // exits.sort();
     impPlayerObj[`pid_${player}`] = {
       entries: gameEntries,
       exits: gameExits
     }
   })
 
-  console.log(impPlayerObj['pid_201571'].entries);
-  console.log(impPlayerObj['pid_201571'].exits);
+  console.log(impPlayerObj['pid_202695']);
+  //
+  // console.log(impPlayerObj['pid_201571'].entries);
+  // console.log(impPlayerObj['pid_201571'].exits);
 
   res.send({
     info: game[0],

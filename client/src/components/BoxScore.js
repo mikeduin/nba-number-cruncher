@@ -11,12 +11,12 @@ class BoxScore extends React.Component {
     console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
 
-    if (this.props.activeGames.indexOf(this.props.game.gid) !== -1) {
+    // if (this.props.activeGames.indexOf(this.props.game.gid) !== -1) {
       setInterval(() => {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
       }, 5000)
-    }
+    // }
   }
 
   checkSpread = () => {
@@ -89,7 +89,7 @@ class BoxScore extends React.Component {
                   <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
                   <Table.HeaderCell colSpan="2"> GAME PACE: {boxScore.pace.toFixed(2)} </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1.t.pace.toFixed(2)} </Table.HeaderCell>
-                  <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2.t.pace.toFixed(2)} </Table.HeaderCell>
+                  <Table.HeaderCell colSpan="3"> Q2 | PACE: </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
                 </Table.Row>
@@ -119,9 +119,9 @@ class BoxScore extends React.Component {
                   <Table.Cell> {boxScore.q1.v.pts}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.v.fgPct}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.v.fouls}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.v.pts}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.v.fgPct}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.v.fouls}  </Table.Cell>
+                  <Table.Cell> </Table.Cell>
+                  <Table.Cell>   </Table.Cell>
+                  <Table.Cell> </Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell> {game.home_team} </Table.Cell>
@@ -130,9 +130,9 @@ class BoxScore extends React.Component {
                   <Table.Cell> {boxScore.q1.h.pts}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.h.fgPct}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.h.fouls}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.h.pts}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.h.fgPct}  </Table.Cell>
-                  <Table.Cell> {boxScore.q2.h.fouls}  </Table.Cell>
+                  <Table.Cell>  </Table.Cell>
+                  <Table.Cell>  </Table.Cell>
+                  <Table.Cell>  </Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell colSpan="4"> </Table.Cell>
