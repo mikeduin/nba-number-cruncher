@@ -47,6 +47,8 @@ class BoxScore extends React.Component {
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
 
+    // FOR TESTING
+    if (game.gid = 21800881) {
       if (!boxScore || !boxScore.active || !boxScore.totals) {
         if (!game) {
           return <div> loading ... </div>
@@ -89,9 +91,9 @@ class BoxScore extends React.Component {
                   <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
                   <Table.HeaderCell colSpan="2"> GAME PACE: {boxScore.pace.toFixed(2)} </Table.HeaderCell>
                   <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1.t.pace.toFixed(2)} </Table.HeaderCell>
-                  <Table.HeaderCell colSpan="3"> Q2 | PACE: </Table.HeaderCell>
-                  <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
-                  <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
+                  <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
+                  <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 ? boxScore.q2.t.pace.toFixed(2) : null}</Table.HeaderCell>
+                  <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 ? boxScore.q2.t.pace.toFixed(2) : null}</Table.HeaderCell>
                 </Table.Row>
                 <Table.Row>
                   <Table.HeaderCell> Teams </Table.HeaderCell>
@@ -119,9 +121,15 @@ class BoxScore extends React.Component {
                   <Table.Cell> {boxScore.q1.v.pts}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.v.fgPct}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.v.fouls}  </Table.Cell>
-                  <Table.Cell> </Table.Cell>
-                  <Table.Cell>   </Table.Cell>
-                  <Table.Cell> </Table.Cell>
+                  <Table.Cell> {boxScore.q2 ? boxScore.q2.v.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q2 ? boxScore.q2.v.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q2 ? boxScore.q2.v.fouls : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q3 ? boxScore.q3.v.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q3 ? boxScore.q3.v.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q3 ? boxScore.q3.v.fouls : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q4 ? boxScore.q4.v.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q4 ? boxScore.q4.v.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fouls : null} </Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell> {game.home_team} </Table.Cell>
@@ -130,9 +138,15 @@ class BoxScore extends React.Component {
                   <Table.Cell> {boxScore.q1.h.pts}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.h.fgPct}  </Table.Cell>
                   <Table.Cell> {boxScore.q1.h.fouls}  </Table.Cell>
-                  <Table.Cell>  </Table.Cell>
-                  <Table.Cell>  </Table.Cell>
-                  <Table.Cell>  </Table.Cell>
+                  <Table.Cell> {boxScore.q2 ? boxScore.q2.h.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q2 ? boxScore.q2.h.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q2 ? boxScore.q2.h.fouls : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q3 ? boxScore.q3.h.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q3 ? boxScore.q3.h.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q3 ? boxScore.q3.h.fouls : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q4 ? boxScore.q4.h.pts : null} </Table.Cell>
+                  <Table.Cell>  {boxScore.q4 ? boxScore.q4.h.fgPct : null} </Table.Cell>
+                  <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fouls : null} </Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell colSpan="4"> </Table.Cell>
@@ -147,6 +161,7 @@ class BoxScore extends React.Component {
           </div>
         )
       }
+    }
   }
 }
 

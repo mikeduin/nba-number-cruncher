@@ -18,8 +18,9 @@ export const fetchWeek = (date = today) => async dispatch => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    return game.gdte === today;
-    // return game.gdte === '2019-02-21';
+    // FOR TESTING
+        return game.gid === 21800881;
+    // return game.gdte === today;
   });
 
   let activeGames = [];
@@ -132,6 +133,9 @@ export const setActiveDay = date => async dispatch => {
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   let todayInt = moment().format('YYYYMMDD');
   // let gid = 31800001;
+
+  // FOR TESTING
+
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   let response = game.data;
 
@@ -158,7 +162,10 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   //   dispatch({ type: 'ADD_TEMPLATE', payload: preData });
   //   return;
   // }
+  // let stateData = getState().gambleCast[`live_${gid}`];
+  // console.log('current period for ', gid, ' is ', period.current, 'and stateData is ', stateData);
 
+  console.log('response.gameSecs for gid ', gid, ' is ', response.gameSecs);
   if (response.gameSecs > 0) {
     let stateData = getState().gambleCast[`live_${gid}`];
     console.log('stateData for ', gid, ' in action is ', stateData);
@@ -337,6 +344,8 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
           q: perToUpdate
           // currentQuarter: currentQuarter
         }
+
+        dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
       } else if (period.current === 3) {
 
                   let prevQuarters = response.q1;

@@ -74,6 +74,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const { gid, date } = req.params;
+
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
   // let gid = 21800862;
@@ -180,10 +181,15 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   q1DataPull = [];
   q1Pull = [];
 
-  if (parseInt(gid) === 21800871 || parseInt(gid) === 21800872) {
+  // if (parseInt(gid) === 21800871 || parseInt(gid) === 21800872) {
+  if (period.current !== 1) {
     q1DataPull = await knex("box_scores_v2").where({gid: gid}).select('q1');
-    q1Pull = q1DataPull[0].q1[0];
+    console.log('q1DataPull pulled is ', q1DataPull[0].q1);
+    // THIS WORKS NOW
+    q1Pull = q1DataPull[0].q1;
   }
+
+  // }
   //
   // let totalsObjv4 = await knex("box_scores_v2").where({gid: gid}).select('totals');
   // console.log('totals obj for ', gid , ' is ', totalsObjv4[0]);
