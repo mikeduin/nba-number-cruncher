@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Tab } from 'semantic-ui-react';
 
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
@@ -25,6 +25,17 @@ class GameSheet extends React.Component {
       return (
         <div>
         <InfoTable />
+        <Tab menu={{ secondary: true, pointing: true }} panes={[
+          {menuItem: 'Team Ratings', render: () => <Tab.Pane> Ratings Content </Tab.Pane> },
+          {menuItem: 'Player Details', render: () =>
+            <Tab.Pane>
+              <ImpPlayerTable
+                players={game.impPlayers}
+              /> 
+            </Tab.Pane>
+          }
+        ]}/>
+
         <Grid>
           <Grid.Row columns={2}>
             <Grid.Column>
@@ -35,11 +46,7 @@ class GameSheet extends React.Component {
                 vColor={this.props.vColors.active}
               />
             </Grid.Column>
-            <Grid.Column>
-              <ImpPlayerTable
-                players={game.impPlayers}
-              />
-            </Grid.Column>
+
           </Grid.Row>
         </Grid>
 
