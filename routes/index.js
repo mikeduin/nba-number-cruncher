@@ -541,15 +541,13 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const hPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("pd.team_id", "=", h)
-    .orderBy("pd.min_full");
+    .orderBy("pd.min_full")
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'team_abb');
   const vPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("pd.team_id", "=", v)
-    .orderBy("pd.min_full");
-
-  // const gameStints = await knex("player_game_stints")
-  //   .where({team_id: h})
-  //   .orWhere({team_id: v})
+    .orderBy("pd.min_full")
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'team_abb');
 
   // use this fn to sort by on/off court net rtg differential, which is 9th index
   const doubleArraySort = (a, b) => {
@@ -564,33 +562,10 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   }
 
   const impactPlayers = hPlayers.concat(vPlayers)
-  .filter(player => player.mp_pct > 0.2)
-  .map(player => {
-    return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta, player.team_abb];
-  })
-  .sort(doubleArraySort)
+  .filter(player => player.mp_pct > 0.2);
+  // .sort(doubleArraySort)
 
-  let impPlayerObj = {};
-
-  impactPlayers.forEach(player => {
-    let id = player[0];
-    let obj = {
-      name: player[1],
-      id: player[0],
-      team_abb: player[10],
-      min_l15: player[2],
-      net_rtg_full: player[3],
-      off_rtg_full: player[4],
-      def_rtg_full: player[5],
-      pace_full: player[6],
-      team_offRtg_delta: player[7],
-      opp_offRtg_delta: player[8],
-      team_netRtg_delta: player[9]
-    };
-    impPlayerObj[`pid_${id}`] = obj;
-  })
-
-  const impPlayerIds = impactPlayers.map(player => player[0]);
+  const impPlayerIds = impactPlayers.map(player => player.id);
 
   const monthPlusAgo = moment().subtract(45, 'days').format('YYYY-MM-DD');
 
@@ -622,9 +597,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     return low;
   }
 
-  // hate all these nested forEach, but what the hell is the alternative?!
-  impPlayerIds.forEach(player => {
-    const playerStints = gameStints.filter(stint => stint.player_id === player);
+  let fullPlayerData = impactPlayers.map(player => {
+    const playerStints = gameStints.filter(stint => stint.player_id === player.id);
     const gameEntries = [];
     const gameExits = [];
     let games = 0;
@@ -689,25 +663,26 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
         return quarters;
       }, [[], [], [], []]);
 
-    impPlayerObj[`pid_${player}`].sigEntries = sigEntries;
-    impPlayerObj[`pid_${player}`].sigExits = sigExits;
+      return {...player, sigEntries, sigExits}
   })
+
+  console.log(fullPlayerData);
 
   res.send({
     info: game[0],
     odds: odds[0],
     hTen: hSched,
     vTen: vSched,
-    matchups: matchups,
+    matchups,
     hNetRtg: hNetRtg[0],
     vNetRtg: vNetRtg[0],
     hPace: hPace[0],
     vPace: vPace[0],
     hInfo: hInfo[0],
     vInfo: vInfo[0],
-    hPlayers: hPlayers,
-    vPlayers: vPlayers,
-    impPlayers: impPlayerObj
+    hPlayers,
+    vPlayers,
+    impPlayers: fullPlayerData
   });
 
 

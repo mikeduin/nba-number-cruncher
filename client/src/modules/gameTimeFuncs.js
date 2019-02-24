@@ -9,7 +9,7 @@ export const gameSecsToClockAndQuarter = secs => {
     );
 
     if (secs % 720 === 0) {
-      return (`Q${q} 0:00`);
+      return (`Q${q} 12:00`);
     } else {
       let remSecs = (60 - (secs - ((q-1)*720) - (min*60))).toFixed(0);
 
