@@ -98,6 +98,7 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.vObj.pace = data.vPace;
   conv.vObj.info = data.vInfo;
   conv.vObj.sched = data.vTen;
+  conv.impPlayers = data.impPlayers;
 
   let hPlayers = data.hPlayers;
   let vPlayers = data.vPlayers;

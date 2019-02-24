@@ -19,32 +19,34 @@ class BoxScore extends React.Component {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
       }
-    }, 5000)
+    }, 5000);
+
+    
   }
 
-  // checkSpread = () => {
-  //   let game = this.props.game;
-  //   // let spread = '';
-  //   console.log('spread fn running');
-  //
-  //   if (game.odds.home_spread_full < game.odds.away_spread_full) {
-  //       this.setState({
-  //         spread: `${game.info.h[0].ta} ${game.odds.home_spread_full}`
-  //       })
-  //   } else if (game.odds.away_spread_full < game.odds.home_spread_full) {
-  //       this.setState({
-  //         spread: `${game.info.v[0].ta} ${game.odds.away_spread_full}`
-  //       })
-  //   } else {
-  //     this.setState({
-  //       spread: `${game.info.h[0].ta} PK`
-  //     })
-  //   }
-  //   //
-  //   // return (
-  //   //   <div> {spread}, O/U {game.odds.total_full} </div>
-  //   // )
-  // }
+  checkSpread = () => {
+    let game = this.props.game;
+    // let spread = '';
+    console.log('spread fn running');
+
+    if (game.odds.home_spread_full < game.odds.away_spread_full) {
+        this.setState({
+          spread: `${game.info.h[0].ta} ${game.odds.home_spread_full}`
+        })
+    } else if (game.odds.away_spread_full < game.odds.home_spread_full) {
+        this.setState({
+          spread: `${game.info.v[0].ta} ${game.odds.away_spread_full}`
+        })
+    } else {
+      this.setState({
+        spread: `${game.info.h[0].ta} PK`
+      })
+    }
+    //
+    // return (
+    //   <div> {spread}, O/U {game.odds.total_full} </div>
+    // )
+  }
 
   render () {
     let game = this.props.game;

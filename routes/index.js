@@ -39,7 +39,7 @@ setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
 //   const gameStintsA = await knex("player_game_stints")
 //     .where("gdte", ">", "2019-01-15")
 //     .andWhere((builder)=> {
-//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', impPlayerArray)
+//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', impPlayerIds)
 //     });
 //
 //   console.log(gameStintsA);
@@ -99,7 +99,11 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   }
 
   if (clock.length < 1) {
-    clock = '12:00';
+    if (period.current > 1) {
+      clock = '0:00';
+    } else {
+      clock = '12:00';
+    }
   };
 
   let gameSecs = getGameSecs(period.current-1, clock);
@@ -562,9 +566,27 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   .map(player => {
     return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta];
   })
-  .sort(doubleArraySort);
+  .sort(doubleArraySort)
 
-  const impPlayerArray = impactPlayers.map(player => player[0]);
+  let impPlayerObj = {};
+
+  impactPlayers.forEach(player => {
+    let id = player[0];
+    let obj = {
+      name: player[1],
+      min_l15: player[2],
+      net_rtg_full: player[3],
+      off_rtg_rull: player[4],
+      def_rtg_full: player[5],
+      pace_full: player[6],
+      team_offRtg_delta: player[7],
+      opp_offRtg_delta: player[8],
+      team_netRtg_delta: player[9]
+    };
+    impPlayerObj[`pid_${id}`] = obj;
+  })
+
+  const impPlayerIds = impactPlayers.map(player => player[0]);
 
   const monthPlusAgo = moment().subtract(45, 'days').format('YYYY-MM-DD');
 
@@ -574,11 +596,9 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       buildOne.whereIn('team_id', [h, v])
     })
     .andWhere(buildTwo => {
-      buildTwo.whereIn('player_id', impPlayerArray)
+      buildTwo.whereIn('player_id', impPlayerIds)
     })
     .orderBy('gdte', 'desc');
-
-  const impPlayerObj = {};
 
   // binary search fn to speed up sorting/median determ of significant substitution patterns
   const findInsertionPoint = (sortedArr, val, comparator) => {
@@ -599,7 +619,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   }
 
   // hate all these nested forEach, but what the hell is the alternative?!
-  impPlayerArray.forEach(player => {
+  impPlayerIds.forEach(player => {
     const playerStints = gameStints.filter(stint => stint.player_id === player);
     const gameEntries = [];
     const gameExits = [];
@@ -623,13 +643,13 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
     })
 
-    impPlayerObj[`pid_${player}`] = {
-      entries: gameEntries,
-      exits: gameExits
-    }
+    impPlayerObj[`pid_${player}`].entries = gameEntries;
+    impPlayerObj[`pid_${player}`].exits = gameExits;
   })
 
-  console.log(impPlayerObj['pid_202695']);
+      console.log(impPlayerObj);
+
+  // console.log(impPlayerObj['pid_202695']);
   //
   // console.log(impPlayerObj['pid_201571'].entries);
   // console.log(impPlayerObj['pid_201571'].exits);
@@ -647,7 +667,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     hInfo: hInfo[0],
     vInfo: vInfo[0],
     hPlayers: hPlayers,
-    vPlayers: vPlayers
+    vPlayers: vPlayers,
+    impPlayers: impPlayerObj
   });
 
 

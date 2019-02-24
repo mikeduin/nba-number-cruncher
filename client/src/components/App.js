@@ -37,7 +37,7 @@ class App extends React.Component {
               <Route path='/gamesheet/:gid' component={GameSheet} />
               <Route path='/gamblecast' component={GambleCast} />
               <Route path='/player/:pid' component={Player} />
-
+              <TodaysGames />
             </div>
           </BrowserRouter>
         </div>
@@ -47,7 +47,6 @@ class App extends React.Component {
 };
 
 const mapStateToProps = state => {
-            // <TodaysGames />
   return {
     players: state.playersMetadata
   }
