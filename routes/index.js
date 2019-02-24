@@ -576,6 +576,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     let id = player[0];
     let obj = {
       name: player[1],
+      id: player[0],
       team_abb: player[10],
       min_l15: player[2],
       net_rtg_full: player[3],
@@ -655,13 +656,13 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
       .reduce((quarters, filtered) => {
         let median = filtered[Math.floor(filtered.length/2)];
-        if (median < 721) {
+        if (median < 719) {
           quarters[0].push(gameSecsToGameTime(median).slice(3))
-        } else if (median < 1441) {
+        } else if (median < 1439) {
           quarters[1].push(gameSecsToGameTime(median).slice(3))
-        } else if (median < 2161) {
+        } else if (median < 2159) {
           quarters[2].push(gameSecsToGameTime(median).slice(3))
-        } else if (median < 2881) {
+        } else if (median < 2879) {
           quarters[3].push(gameSecsToGameTime(median).slice(3))
         };
         return quarters;

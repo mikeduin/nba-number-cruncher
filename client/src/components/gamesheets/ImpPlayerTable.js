@@ -1,7 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 import { Table } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 
 const ImpPlayerTable = props => {
   console.log('props are ', props);
@@ -35,7 +36,7 @@ const ImpPlayerTable = props => {
         <Table.Row>
           <Table.HeaderCell colSpan={6}> </Table.HeaderCell>
           <Table.HeaderCell colSpan={3}> Team On/Off Court Deltas </Table.HeaderCell>
-          <Table.HeaderCell colSpan={8}> Rotation Patterns </Table.HeaderCell>
+          <Table.HeaderCell colSpan={8} textAlign="center"> Rotation Patterns, Last 45 Days </Table.HeaderCell>
         </Table.Row>
         <Table.Row>
           <Table.HeaderCell> Player </Table.HeaderCell>
@@ -47,20 +48,16 @@ const ImpPlayerTable = props => {
           <Table.HeaderCell> OffRtg </Table.HeaderCell>
           <Table.HeaderCell> DefRtg </Table.HeaderCell>
           <Table.HeaderCell> NetRtg </Table.HeaderCell>
-          <Table.HeaderCell> Q1In </Table.HeaderCell>
-          <Table.HeaderCell> Q1Out </Table.HeaderCell>
-          <Table.HeaderCell> Q2In </Table.HeaderCell>
-          <Table.HeaderCell> Q2Out </Table.HeaderCell>
-          <Table.HeaderCell> Q3In </Table.HeaderCell>
-          <Table.HeaderCell> Q3Out </Table.HeaderCell>
-          <Table.HeaderCell> Q4In </Table.HeaderCell>
-          <Table.HeaderCell> Q4Out </Table.HeaderCell>
+          <Table.HeaderCell colSpan={2} textAlign="center"> Q1 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
+          <Table.HeaderCell colSpan={2} textAlign="center"> Q2 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
+          <Table.HeaderCell colSpan={2} textAlign="center"> Q3 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
+          <Table.HeaderCell colSpan={2} textAlign="center"> Q4 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {_.map(props.players, ({ name, min_l15, net_rtg_full, off_rtg_full, def_rtg_full, pace_full, team_offRtg_delta, opp_offRtg_delta, team_netRtg_delta, sigEntries, sigExits }) => (
+        {_.map(props.players, ({ name, id, team_abb, min_l15, net_rtg_full, off_rtg_full, def_rtg_full, pace_full, team_offRtg_delta, opp_offRtg_delta, team_netRtg_delta, sigEntries, sigExits }) => (
           <Table.Row>
-            <Table.Cell> {name} </Table.Cell>
+            <Table.Cell> <Link to={`/player/${id}`}> {name} </Link> </Table.Cell>
             <Table.Cell> {min_l15} </Table.Cell>
             <Table.Cell> {net_rtg_full} </Table.Cell>
             <Table.Cell> {off_rtg_full} </Table.Cell>
