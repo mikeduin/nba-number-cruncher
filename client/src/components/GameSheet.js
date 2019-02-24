@@ -1,4 +1,5 @@
 import React from 'react';
+import { Grid } from 'semantic-ui-react';
 
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
@@ -8,6 +9,7 @@ import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
+import ImpPlayerTable from './gamesheets/ImpPlayerTable';
 import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
 class GameSheet extends React.Component {
@@ -23,19 +25,23 @@ class GameSheet extends React.Component {
       return (
         <div>
         <InfoTable />
-        <div className="ui grid">
-
-          <div className="two column row">
-            <div className="column">
+        <Grid>
+          <Grid.Row columns={2}>
+            <Grid.Column>
               <QuarterChart
                 homeData={game.hObj}
                 visData={game.vObj}
                 hColor={this.props.hColors.active}
                 vColor={this.props.vColors.active}
               />
-            </div>
-          </div>
-        </div>
+            </Grid.Column>
+            <Grid.Column>
+              <ImpPlayerTable
+                players={game.impPlayers}
+              />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
 
         <br />
         <ByRotation netRatings={this.props.game.netRatingsArr} />
