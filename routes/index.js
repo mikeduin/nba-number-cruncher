@@ -563,10 +563,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
   const impactPlayers = hPlayers.concat(vPlayers)
   .filter(player => player.mp_pct > 0.2);
-  // .sort(doubleArraySort)
 
   const impPlayerIds = impactPlayers.map(player => player.id);
-
   const monthPlusAgo = moment().subtract(45, 'days').format('YYYY-MM-DD');
 
   const gameStints = await knex("player_game_stints")
@@ -665,9 +663,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
       return {...player, sigEntries, sigExits}
   })
-
-  console.log(fullPlayerData);
-
+  
   res.send({
     info: game[0],
     odds: odds[0],
@@ -684,8 +680,6 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     vPlayers,
     impPlayers: fullPlayerData
   });
-
-
 })
 
 
