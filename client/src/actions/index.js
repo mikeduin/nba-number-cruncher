@@ -133,16 +133,8 @@ export const setActiveDay = date => async dispatch => {
 
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   let todayInt = moment().format('YYYYMMDD');
-
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   let response = game.data;
-
-  let preData = {
-    gid: gid,
-    active: false,
-    period: 0,
-    endOfPeriod: false
-  }
 
   // build something in here that, when a game is final, adds to completed games in state
   // to do this, I need a measure for if a game is completed in index
@@ -157,12 +149,15 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   console.log('response for ', gid, ' is ', response);
 
-  console.log('response.gameSecs for gid ', gid, ' is ', response.gameSecs);
   if (response.gameSecs > 0) {
     let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
 
     const calcFgPct = (fgm, fga) => {
       return (((fgm/fga)*100).toFixed(1));
+    };
+
+    const calcPoss = (fga, to, fta, oreb) => {
+      return (0.96*((fga+to+(0.44*fta)-oreb)));
     };
 
     const calcQuarterPace = (poss, per, clock) => {
@@ -216,6 +211,18 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
         let prevQuarters = getState().prevQuarters;
         let perToUpdate = period.current;
+
+        const quarterPoss = calcPoss(
+          ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
+              - prevQuarters.t.fga),
+          ( (parseInt(totals.h.turnovers) + parseInt(totals.v.turnovers))
+              - prevQuarters.t.to),
+          ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
+              - prevQuarters.t.fta),
+          ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
+              - prevQuarters.t.offReb)
+            );
+
         let currentQuarter = {
             h: {
               pts: parseInt(totals.h.pts) - prevQuarters.h.pts,
@@ -252,8 +259,8 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
               to: (totals.h.turnovers + totals.v.turnovers) - prevQuarters.t.to,
               offReb: (totals.h.offReb + totals.v.offReb) - prevQuarters.t.offReb,
               fouls: (totals.h.fouls + totals.v.fouls) - prevQuarters.t.fouls,
-              poss: poss - prevQuarters.poss,
-              pace: calcQuarterPace(poss, period.current, clock)
+              poss: quarterPoss,
+              pace: calcQuarterPace(quarterPoss, period.current, clock)
             }
         }
 
