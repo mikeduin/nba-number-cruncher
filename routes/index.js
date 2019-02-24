@@ -564,7 +564,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const impactPlayers = hPlayers.concat(vPlayers)
   .filter(player => player.mp_pct > 0.2)
   .map(player => {
-    return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta];
+    return [player.player_id, player.player_name, player.min_l15, player.net_rtg_full, player.off_rtg_full, player.def_rtg_full, player.pace_full, player.team_offRtg_delta, player.opp_offRtg_delta, player.netRtg_delta, player.team_abb];
   })
   .sort(doubleArraySort)
 
@@ -574,9 +574,10 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     let id = player[0];
     let obj = {
       name: player[1],
+      team_abb: player[10],
       min_l15: player[2],
       net_rtg_full: player[3],
-      off_rtg_rull: player[4],
+      off_rtg_full: player[4],
       def_rtg_full: player[5],
       pace_full: player[6],
       team_offRtg_delta: player[7],
