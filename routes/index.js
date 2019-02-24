@@ -99,7 +99,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   }
 
   if (clock.length < 1) {
-    clock = '0:00';
+    clock = '12:00';
   };
 
   let gameSecs = getGameSecs(period.current-1, clock);
@@ -226,10 +226,12 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     }
   }
 
+  // gameOver fn returns true if game has started but no longer activated
   const gameOver = () => {
     return (moment().utc().isAfter(startTimeUTC) && period.current >= 4 && !isGameActivated)
   };
 
+    // if End of Period is true or Game is over
     if (period.isEndOfPeriod || gameOver()) {
       if (period.current === 1) {
         let q1 = totalsObj;
@@ -351,24 +353,62 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               })
             })
           } else {
-            // you don't want to do this because, OT!
-            console.log('fourth period already entered in gid ', gid);
-            res.send({
-              quarterEnd: false,
-              live: false,
-              clock: clock,
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: period.current,
-              poss: poss,
-              pace: calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              final: true
+            if (!isGameActivated) {
+              console.log('4Q data already entered, and game is over');
+              knex("box_scores_v2").where({gid: gid}).update({
+                final: true
+              }).then(() => {
+                console.log("game has been set to final in DB")
+              })
+            } else {
+              console.log('4Q data already entered and game is still ongoing!')
+            }
+          }
+        })
+      } else {
+        // need to write this function for inserting OT stats
+        knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
+          if (qTest[0] == null) {
+            quarterUpdFn().then(qTotals => {
+              gameSecs = getGameSecs(period.current-1, clock);
+              knex("box_scores_v2").where({gid: gid}).update({
+                period_updated: period.current,
+                clock_last_updated: gameSecs,
+                totals: [totalsObj],
+                ot: [qTotals],
+                updated_at: new Date()
+              }, '*').then(inserted => {
+                res.send({
+                  quarterEnd: true,
+                  live: true,
+                  clock: clock,
+                  gameSecs: gameSecs,
+                  period: period,
+                  thru_period: period.current,
+                  poss: poss,
+                  pace: calcGamePace(poss, period.current, gameSecs),
+                  totals: totalsObj,
+                  quarter: qTotals
+                })
+              })
             })
+          } else {
+            if (!isGameActivated) {
+              console.log('OT data already entered, and game is over');
+              knex("box_scores_v2").where({gid: gid}).update({
+                final: true
+              }).then(() => {
+                console.log("game has been set to final (in OT) in DB")
+              })
+            } else {
+              console.log('OT data already entered and game is still ongoing!')
+            }
           }
         })
       }
     } else {
+      // if endOfPeriod is false && game is not activated
+      // THIS NEEDS WORK, HAVE NOT REFINED
       if (!isGameActivated) {
         res.send({
           quarterEnd: false,
