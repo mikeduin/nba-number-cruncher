@@ -92,6 +92,11 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
   // if game is over and last period state have been updated, kill function and add to finished games in state
 
+  let dbCheck = await knex("box_scores_v2").where({gid: gid}).pluck('final');
+  if (dbCheck[0]) {
+    res.send({final: true});
+    return;
+  }
 
   if (clock.length < 1) {
     clock = '0:00';
@@ -222,7 +227,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   }
 
   const gameOver = () => {
-    return (moment().utc().isAfter(startTimeUTC) && period.current === 4 && !isGameActivated)
+    return (moment().utc().isAfter(startTimeUTC) && period.current >= 4 && !isGameActivated)
   };
 
     if (period.isEndOfPeriod || gameOver()) {
