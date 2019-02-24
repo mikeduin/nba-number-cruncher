@@ -31,9 +31,9 @@ export default (state = {}, action) => {
       //     prevQuarters: action.payload.prevQuarters
       //   }
       // };
-    // case 'SET_TO_FINAL':
-    //   const newState = {...state};
-    //   return newState[`live_${action.payload.gid}`] = action.payload;
+    case 'SET_TO_FINAL':
+      newState = {...state};
+      return newState[`live_${action.payload.gid}`] = action.payload;
     default:
       return state;
   }

@@ -18,8 +18,6 @@ export const fetchWeek = (date = today) => async dispatch => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    // FOR TESTING
-        // return game.gid === 21800881;
     return game.gdte === today;
   });
 
@@ -28,10 +26,10 @@ export const fetchWeek = (date = today) => async dispatch => {
   todaysGames.forEach(game => {
     // if the game is within 10 minutes from now, set it to active
     let tenMinsAhead = moment().add(10, 'm');
+    let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
-    if (gametime.isBefore(tenMinsAhead)) {
+    if (gametime.isBefore(threeHourMinsAhead)) {
       activeGames.push(game.gid);
-      dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
     };
   });
 
@@ -46,15 +44,19 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   let activeGames = getState().activeGames;
 
   todaysGames.forEach(game => {
-    // if the game is within 10 minutes from now, set it to active
     let tenMinsAhead = moment().add(10, 'm');
-    // add this because its pulling wrong time! need to adjust for timezone
     let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
-    // console.log('gamestime is ', gametime);
-    // console.log('tenMinsAhead is ', threeHourMinsAhead);
+
+    let jsonGametime = JSON.stringify(moment(gametime));
+    let jsonNow = JSON.stringify(moment());
+
+    // jsonNow == 8 hours ahead, UTC Time
+    // jsonGametime == 11 hours ahead, eastern UTC time
+
+    // console.log('difference between start time for ', game.gid, ' of game.etm of ', game.etm, ' and now which is ', moment(), ' is a difference of ', moment().diff(gametime));
+
     if (gametime.isBefore(threeHourMinsAhead) && activeGames.indexOf(game.gid) === -1) {
-      activeGames.push(game.gid);
       console.log('game is ', game.gid, ' being set to live from checkActiveGames function');
       dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
     };
@@ -132,9 +134,6 @@ export const setActiveDay = date => async dispatch => {
 
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   let todayInt = moment().format('YYYYMMDD');
-  // let gid = 31800001;
-
-  // FOR TESTING
 
   let game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   let response = game.data;
@@ -146,8 +145,13 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     endOfPeriod: false
   }
 
-  // if (game.data.final) {
+  // build something in here that, when a game is final, adds to completed games in state
+  // to do this, I need a measure for if a game is completed in index
+  // game is over AND last period stats have been updated
+
+  // if (response.final) {
   //   const newState = getState().gambleCast[`live_${gid}`];
+  //   console.log('newState in actions is ', newState)
   //   newState.gid = gid;
   //   newState.final = true;
   //   newState.active = false;
@@ -358,65 +362,63 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       } else {
 
         // for testing
-        if (parseInt(gid) === 21800871 || parseInt(gid) === 21800872) {
-          console.log('response.q1 for ', gid,  ' is ', response.q1)
-                let prevQuarters = response.q1;
+          // console.log('response.q1 for ', gid,  ' is ', response.q1)
+          //       let prevQuarters = response.q1;
 
-                let currentQuarter = {
-                    h: {
-                      pts: parseInt(totals.h.pts) - parseInt(prevQuarters.h.pts),
-                      fgm: parseInt(totals.h.fgm) - parseInt(prevQuarters.h.fgm),
-                      fga: parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga),
-                      fgPct: calcFgPct((parseInt(totals.h.fgm)-parseInt(prevQuarters.h.fgm)), (parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga))),
-                      fta: parseInt(totals.h.fta) - parseInt(prevQuarters.h.fta),
-                      to: parseInt(totals.h.turnovers) - parseInt(prevQuarters.h.to),
-                      offReb: parseInt(totals.h.offReb) - parseInt(prevQuarters.h.offReb),
-                      fouls: parseInt(totals.h.fouls) - parseInt(prevQuarters.h.fouls)
-                      // fouls: parseInt(totals.h.pFouls) - parseInt(prevQuarters.h.fouls)
-                    },
-                    v: {
-                      pts: parseInt(totals.v.pts) - parseInt(prevQuarters.v.pts),
-                      fgm: parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm),
-                      fga: parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga),
-                      fgPct: calcFgPct(
-                        (parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm)),
-                        (parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga))
-                      ),
-                      fta: parseInt(totals.v.fta) - parseInt(prevQuarters.v.fta),
-                      to: parseInt(totals.v.turnovers) - parseInt(prevQuarters.v.to),
-                      offReb: parseInt(totals.v.offReb) - parseInt(prevQuarters.v.offReb),
-                      fouls: parseInt(totals.v.fouls) - parseInt(prevQuarters.v.fouls)
-                      // fouls: parseInt(totals.v.pFouls) - parseInt(prevQuarters.v.fouls)
-                    },
-                    t: {
-                      pts: (totals.h.pts + totals.v.pts) - parseInt(prevQuarters.t.pts),
-                      fgm: (totals.h.fgm + totals.v.fgm) - parseInt(prevQuarters.t.fgm),
-                      fga: (totals.h.fga + totals.v.fga) - parseInt(prevQuarters.t.fga),
-                      fgPct: calcFgPct(
-                        ((totals.h.fgm + totals.v.fgm) - parseInt(prevQuarters.t.fgm)),
-                        ((totals.h.fga + totals.v.fga) - parseInt(prevQuarters.t.fga))
-                      ),
-                      fta: (totals.h.fta + totals.v.fta) - parseInt(prevQuarters.t.fta),
-                      to: (totals.h.turnovers + totals.v.turnovers) - parseInt(prevQuarters.t.to),
-                      offReb: (totals.h.offReb + totals.v.offReb) - parseInt(prevQuarters.t.offReb),
-                      fouls: (totals.h.fouls + totals.v.fouls) - parseInt(prevQuarters.t.fouls),
-                      // fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
-                      poss: poss - parseInt(prevQuarters.poss),
-                      pace: calcQuarterPace(poss, period.current, clock)
-                    }
-                }
+                // let currentQuarter = {
+                //     h: {
+                //       pts: parseInt(totals.h.pts) - parseInt(prevQuarters.h.pts),
+                //       fgm: parseInt(totals.h.fgm) - parseInt(prevQuarters.h.fgm),
+                //       fga: parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga),
+                //       fgPct: calcFgPct((parseInt(totals.h.fgm)-parseInt(prevQuarters.h.fgm)), (parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga))),
+                //       fta: parseInt(totals.h.fta) - parseInt(prevQuarters.h.fta),
+                //       to: parseInt(totals.h.turnovers) - parseInt(prevQuarters.h.to),
+                //       offReb: parseInt(totals.h.offReb) - parseInt(prevQuarters.h.offReb),
+                //       fouls: parseInt(totals.h.fouls) - parseInt(prevQuarters.h.fouls)
+                //       // fouls: parseInt(totals.h.pFouls) - parseInt(prevQuarters.h.fouls)
+                //     },
+                //     v: {
+                //       pts: parseInt(totals.v.pts) - parseInt(prevQuarters.v.pts),
+                //       fgm: parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm),
+                //       fga: parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga),
+                //       fgPct: calcFgPct(
+                //         (parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm)),
+                //         (parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga))
+                //       ),
+                //       fta: parseInt(totals.v.fta) - parseInt(prevQuarters.v.fta),
+                //       to: parseInt(totals.v.turnovers) - parseInt(prevQuarters.v.to),
+                //       offReb: parseInt(totals.v.offReb) - parseInt(prevQuarters.v.offReb),
+                //       fouls: parseInt(totals.v.fouls) - parseInt(prevQuarters.v.fouls)
+                //       // fouls: parseInt(totals.v.pFouls) - parseInt(prevQuarters.v.fouls)
+                //     },
+                //     t: {
+                //       pts: (totals.h.pts + totals.v.pts) - parseInt(prevQuarters.t.pts),
+                //       fgm: (totals.h.fgm + totals.v.fgm) - parseInt(prevQuarters.t.fgm),
+                //       fga: (totals.h.fga + totals.v.fga) - parseInt(prevQuarters.t.fga),
+                //       fgPct: calcFgPct(
+                //         ((totals.h.fgm + totals.v.fgm) - parseInt(prevQuarters.t.fgm)),
+                //         ((totals.h.fga + totals.v.fga) - parseInt(prevQuarters.t.fga))
+                //       ),
+                //       fta: (totals.h.fta + totals.v.fta) - parseInt(prevQuarters.t.fta),
+                //       to: (totals.h.turnovers + totals.v.turnovers) - parseInt(prevQuarters.t.to),
+                //       offReb: (totals.h.offReb + totals.v.offReb) - parseInt(prevQuarters.t.offReb),
+                //       fouls: (totals.h.fouls + totals.v.fouls) - parseInt(prevQuarters.t.fouls),
+                //       // fouls: (totals.h.pFouls + totals.v.pFouls) - prevQuarters.t.fouls,
+                //       poss: poss - parseInt(prevQuarters.poss),
+                //       pace: calcQuarterPace(poss, period.current, clock)
+                //     }
+                // }
 
               inQuarter = {
                 ...liveData,
-                q1: response.q1,
-                q2: currentQuarter,
+                // q1: response.q1,
+                // q2: currentQuarter,
                 totals: totals,
                 q: perToUpdate
                 // currentQuarter: currentQuarter
               }
 
               dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
-        }
       }
     };
   }
