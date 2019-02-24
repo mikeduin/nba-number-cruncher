@@ -5,18 +5,21 @@ import { Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
-  state = {active: false};
+  // state = {active: false};
 
+  // if this timed function does not work ... it's because when the redux store's active games change, they're not being sent down here
   componentDidMount () {
+    const game = this.props.game;
+
     console.log('props in BS are ', this.props);
     this.props.fetchBoxScore(this.props.game.gid);
 
-    // if (this.props.activeGames.indexOf(this.props.game.gid) !== -1) {
-      setInterval(() => {
+    setInterval(() => {
+      if (this.props.activeGames.indexOf(game.gid) !== -1) {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
-      }, 5000)
-    // }
+      }
+    }, 5000)
   }
 
   // checkSpread = () => {
@@ -56,9 +59,6 @@ class BoxScore extends React.Component {
         return <EmptyBoxScore game={game}/>
       }
     } else {
-      // if (!this.state.active) {
-      //   this.setState({active: true})
-      // }
       console.log('this.props when boxScore is rendered is ', this.props);
       return (
         <div>
