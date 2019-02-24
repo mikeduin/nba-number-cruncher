@@ -646,16 +646,16 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     sigEntries = gameEntries.filter(set => {
       const median = Math.floor(set.length/2);
       return (
-        (set.length > (games*0.4)) && (set[median] !== 0))
+        (set.length > (games*0.4)) && (set[median] !== 0)
       )
-    });
+    }).map(filtered => filtered[Math.floor(filtered.length/2)]);
 
-    sigExits = gameEntries.filter(set => {
+    sigExits = gameExits.filter(set => {
       const median = Math.floor(set.length/2);
       return (
-        (set.length > (games*0.4)) && (set[median] !== 2880))
+        (set.length > (games*0.4)) && (set[median] !== 2880)
       )
-    });
+    }).map(filtered => filtered[Math.floor(filtered.length/2)]);
 
     impPlayerObj[`pid_${player}`].sigEntries = sigEntries;
     impPlayerObj[`pid_${player}`].sigExits = sigExits;
