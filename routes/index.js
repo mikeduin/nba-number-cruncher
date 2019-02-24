@@ -27,8 +27,6 @@ const webScrapeHelpers = require("../modules/webScrapeHelpers");
 
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-console.log(gameSecsToGameTime(2700));
-
 let now = moment().format('YYYY-MM-DD');
 
 setInterval(()=>{
@@ -655,7 +653,19 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
           (set.length > (games*0.4)) && (set[median] !== 0)
         )
       })
-      .map(filtered => filtered[Math.floor(filtered.length/2)]);
+      .reduce((quarters, filtered) => {
+        let median = filtered[Math.floor(filtered.length/2)];
+        if (median < 721) {
+          quarters[0].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 1441) {
+          quarters[1].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 2161) {
+          quarters[2].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 2881) {
+          quarters[3].push(gameSecsToGameTime(median).slice(3))
+        };
+        return quarters;
+      }, [[], [], [], []]);
 
     sigExits = gameExits
       .filter(set => {
@@ -664,7 +674,19 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
           (set.length > (games*0.4)) && (set[median] !== 2880)
         )
       })
-      .map(filtered => filtered[Math.floor(filtered.length/2)]);
+      .reduce((quarters, filtered) => {
+        let median = filtered[Math.floor(filtered.length/2)];
+        if (median < 721) {
+          quarters[0].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 1441) {
+          quarters[1].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 2161) {
+          quarters[2].push(gameSecsToGameTime(median).slice(3))
+        } else if (median < 2881) {
+          quarters[3].push(gameSecsToGameTime(median).slice(3))
+        };
+        return quarters;
+      }, [[], [], [], []]);
 
     impPlayerObj[`pid_${player}`].sigEntries = sigEntries;
     impPlayerObj[`pid_${player}`].sigExits = sigExits;
