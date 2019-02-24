@@ -45,7 +45,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
 
   todaysGames.forEach(game => {
     let tenMinsAhead = moment().add(10, 'm');
-    let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
+    let threeHourTenMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
 
     let jsonGametime = JSON.stringify(moment(gametime));
@@ -54,9 +54,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
     // jsonNow == 8 hours ahead, UTC Time
     // jsonGametime == 11 hours ahead, eastern UTC time
 
-    // console.log('difference between start time for ', game.gid, ' of game.etm of ', game.etm, ' and now which is ', moment(), ' is a difference of ', moment().diff(gametime));
-
-    if (gametime.isBefore(threeHourMinsAhead) && activeGames.indexOf(game.gid) === -1) {
+    if (gametime.isBefore(threeHourTenMinsAhead) && activeGames.indexOf(game.gid) === -1) {
       console.log('game is ', game.gid, ' being set to live from checkActiveGames function');
       dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
     };
@@ -161,15 +159,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   console.log('response.gameSecs for gid ', gid, ' is ', response.gameSecs);
   if (response.gameSecs > 0) {
-    // Problem here is the state date is not loading by the time it gets here ... getState returns an empty gamblecast
-    // However, this was not an issue once the 3rd period got started?
-    console.log('state data not drilled down by game is ', getState());
-    let stateData = getState().gambleCast[`live_${gid}`];
-    console.log('stateData for ', gid, ' in action is ', stateData);
-    // let prevQuarters = {};
-
     let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
-
 
     const calcFgPct = (fgm, fga) => {
       return (((fgm/fga)*100).toFixed(1));
@@ -198,8 +188,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       pace,
       totals
     };
-
-    console.log('response to action is ', response);
 
     if (response.quarterEnd) {
       let perToUpdate = response.thru_period;

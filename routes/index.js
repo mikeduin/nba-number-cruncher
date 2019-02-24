@@ -181,7 +181,19 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   };
 
   // this object calculates the stats for each quarter, using the previous totals from earlier Qs
-  let quarterObj = async (prevTotals) => {
+  const quarterObj = async (prevTotals) => {
+    const quarterPoss = calcPoss(
+      ( (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))
+          - prevTotals[0].t.fga),
+      ( (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers))
+          - prevTotals[0].t.to),
+      ( (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta))
+          - prevTotals[0].t.fta),
+      ( (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb))
+          - prevTotals[0].t.offReb)
+        );
+
+
     return {
       h: {
         pts: parseInt(hTeam.totals.points) - prevTotals[0].h.pts,
@@ -215,8 +227,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - prevTotals[0].t.to,
         offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - prevTotals[0].t.offReb,
         fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - prevTotals[0].t.fouls,
-        poss: poss - prevTotals[0].poss,
-        pace: ( ( (poss - prevTotals[0].poss) * 4) / 2)
+        poss: quarterPoss,
+        pace: calcGamePace(quarterPoss, period.current, gameSecs)
       }
     }
   }
@@ -453,30 +465,31 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     }
 })
 
-router.get("/fetchStarters", (req, res, next) => {
-  axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
-    const h = game.data.g.hls;
-    const v = game.data.g.vls;
-    const home = {
-      tid: h.tid,
-      starters: h.pstsg.slice(0,5).map(player => player.pid),
-      bench: h.pstsg.slice(5, h.pstsg.length).map(player => player.pid)
-    };
-
-    const vis = {
-      tid: v.tid,
-      starters: v.pstsg.slice(0,5).map(player => player.pid),
-      bench: v.pstsg.slice(5, v.pstsg.length).map(player => player.pid)
-    };
-
-    const rosters = {
-      h: home,
-      v: vis
-    };
-
-    console.log(rosters)
-  })
-})
+// how best to use this?
+// router.get("/fetchStarters", (req, res, next) => {
+//   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
+//     const h = game.data.g.hls;
+//     const v = game.data.g.vls;
+//     const home = {
+//       tid: h.tid,
+//       starters: h.pstsg.slice(0,5).map(player => player.pid),
+//       bench: h.pstsg.slice(5, h.pstsg.length).map(player => player.pid)
+//     };
+//
+//     const vis = {
+//       tid: v.tid,
+//       starters: v.pstsg.slice(0,5).map(player => player.pid),
+//       bench: v.pstsg.slice(5, v.pstsg.length).map(player => player.pid)
+//     };
+//
+//     const rosters = {
+//       h: home,
+//       v: vis
+//     };
+//
+//     console.log(rosters)
+//   })
+// })
 
 router.get("/api/getPlayerMetadata", async (req, res, next) => {
   let players = await knex("player_data")
@@ -496,7 +509,6 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
   const week = dateFilters.fetchGmWk(req.params.date);
   const weekArray = dateFilters.fetchGmWkArrays(week);
   knex("schedule as s")
-    // do a leftJoin here, not an innerJoin; otherwise if there are no odds, no games are returned
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week)
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
@@ -663,7 +675,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
       return {...player, sigEntries, sigExits}
   })
-  
+
   res.send({
     info: game[0],
     odds: odds[0],
@@ -683,9 +695,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 })
 
 
-
-
-const timedDbUpdaters = schedule.scheduleJob("24 14 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("55 06 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);

@@ -87,7 +87,7 @@ class Header extends React.Component {
           Net Ratings
         </Link>
         <Search
-          style={{position: 'absolute', right: '6%'}}
+          style={{position: 'absolute', right: '10%'}}
           loading={isLoading}
           onResultSelect={this.handleResultSelect}
           onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
