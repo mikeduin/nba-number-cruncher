@@ -130,18 +130,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   let hFgPct = calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
   let vFgPct = calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-  console.log('hTeam.totals are ', hTeam.totals);
-
-
   let hPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)
   }).map(active => active.personId);
 
-
   let vPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)
   }).map(active => active.personId);
-
 
   // this is the obj that sends back the current totals every 5 seconds when the req is sent
   let totalsObj = {
@@ -179,7 +174,9 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     }
   };
 
-  prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
+
+
+  prevTotals = {}
 
   // for testing
   q1DataPull = [];
@@ -195,95 +192,51 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
 
   // this is the fn that subtract current totals from stored prevTotals values
+  // only call when its after Q1, otherwise there will be no totals
+  // TRY CALLING THIS BEFORE END OF Q TO MAKE SURE ITS WORING
   let quarterObj = async () => {
-    prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
+    let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
     console.log('prevTotals in quarterObj is ', prevTotals[0].totals);
+    console.log('prevTotals are ', prevTotals[0].totals[0]);
+    let prevTotals = prevTotals[0].totals[0]
     return {
       h: {
-        pts: parseInt(hTeam.totals.points) - prevTotals[0].totals[0].h.pts,
-        fgm: parseInt(hTeam.totals.fgm) - prevTotals[0].totals[0].h.fgm,
-        fga: parseInt(hTeam.totals.fga) - prevTotals[0].totals[0].h.fga,
-        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].totals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].totals[0].h.fga)),
-        fta: parseInt(hTeam.totals.fta) - prevTotals[0].totals[0].h.fta,
-        to: parseInt(hTeam.totals.turnovers) - prevTotals[0].totals[0].h.to,
-        offReb: parseInt(hTeam.totals.offReb) - prevTotals[0].totals[0].h.offReb,
-        fouls: parseInt(hTeam.totals.pFouls) - prevTotals[0].totals[0].h.fouls
+        pts: parseInt(hTeam.totals.points) - prevTotals.h.pts,
+        fgm: parseInt(hTeam.totals.fgm) - prevTotals.h.fgm,
+        fga: parseInt(hTeam.totals.fga) - prevTotals.h.fga,
+        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals.h.fgm), (parseInt(hTeam.totals.fga) - prevTotals.h.fga)),
+        fta: parseInt(hTeam.totals.fta) - prevTotals.h.fta,
+        to: parseInt(hTeam.totals.turnovers) - prevTotals.h.to,
+        offReb: parseInt(hTeam.totals.offReb) - prevTotals.h.offReb,
+        fouls: parseInt(hTeam.totals.pFouls) - prevTotals.h.fouls
       },
       v: {
-        pts: parseInt(vTeam.totals.points) - prevTotals[0].totals[0].v.pts,
-        fgm: parseInt(vTeam.totals.fgm) - prevTotals[0].totals[0].v.fgm,
-        fga: parseInt(vTeam.totals.fga) - prevTotals[0].totals[0].v.fga,
-        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].totals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].totals[0].v.fga)),
-        fta: parseInt(vTeam.totals.fta) - prevTotals[0].totals[0].v.fta,
-        to: parseInt(vTeam.totals.turnovers) - prevTotals[0].totals[0].v.to,
-        offReb: parseInt(vTeam.totals.offReb) - prevTotals[0].totals[0].v.offReb,
-        fouls: parseInt(vTeam.totals.pFouls) - prevTotals[0].totals[0].v.fouls
+        pts: parseInt(vTeam.totals.points) - prevTotals.v.pts,
+        fgm: parseInt(vTeam.totals.fgm) - prevTotals.v.fgm,
+        fga: parseInt(vTeam.totals.fga) - prevTotals.v.fga,
+        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals.v.fgm), (parseInt(vTeam.totals.fga) - prevTotals.v.fga)),
+        fta: parseInt(vTeam.totals.fta) - prevTotals.v.fta,
+        to: parseInt(vTeam.totals.turnovers) - prevTotals.v.to,
+        offReb: parseInt(vTeam.totals.offReb) - prevTotals.v.offReb,
+        fouls: parseInt(vTeam.totals.pFouls) - prevTotals.v.fouls
       },
       t: {
-        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - prevTotals[0].totals[0].t.pts,
-        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals[0].totals[0].t.fgm,
-        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals[0].totals[0].t.fga,
+        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - prevTotals.t.pts,
+        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals.t.fgm,
+        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals.t.fga,
         fgPct: calcFgPct(
-          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals[0].totals[0].t.fgm),
-          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals[0].totals[0].t.fga)
+          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - prevTotals.t.fgm),
+          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - prevTotals.t.fga)
         ),
-        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - prevTotals[0].totals[0].t.fta,
-        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - prevTotals[0].totals[0].t.to,
-        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - prevTotals[0].totals[0].t.offReb,
-        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - prevTotals[0].totals[0].t.fouls,
-        poss: poss - prevTotals[0].totals[0].poss,
-        pace: ( ( (poss - prevTotals[0].totals[0].poss) * 4) / 2)
+        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - prevTotals.t.fta,
+        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - prevTotals.t.to,
+        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - prevTotals.t.offReb,
+        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - prevTotals.t.fouls,
+        poss: poss - prevTotals.poss,
+        pace: ( ( (poss - prevTotals.poss) * 4) / 2)
       }
     }
   }
-
-  let tempQ2Obj = async () => {
-    // prevTotals = await knex("box_scores_v2").where({gid: gid}).select('totals');
-    // console.log('prevTotals in quarterObj is ', prevTotals[0].totals);
-    q1DataPull = await knex("box_scores_v2").where({gid: gid}).select('q1');
-    q1Pull = q1DataPull[0].q1;
-    return {
-      h: {
-        pts: parseInt(hTeam.totals.points) - q1Pull[0].h.pts,
-        fgm: parseInt(hTeam.totals.fgm) - q1Pull[0].h.fgm,
-        fga: parseInt(hTeam.totals.fga) - q1Pull[0].h.fga,
-        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-q1Pull[0].h.fgm), (parseInt(hTeam.totals.fga) - q1Pull[0].h.fga)),
-        fta: parseInt(hTeam.totals.fta) - q1Pull[0].h.fta,
-        to: parseInt(hTeam.totals.turnovers) - q1Pull[0].h.to,
-        offReb: parseInt(hTeam.totals.offReb) - q1Pull[0].h.offReb,
-        fouls: parseInt(hTeam.totals.pFouls) - q1Pull[0].h.fouls
-      },
-      v: {
-        pts: parseInt(vTeam.totals.points) - q1Pull[0].v.pts,
-        fgm: parseInt(vTeam.totals.fgm) - q1Pull[0].v.fgm,
-        fga: parseInt(vTeam.totals.fga) - q1Pull[0].v.fga,
-        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-q1Pull[0].v.fgm), (parseInt(vTeam.totals.fga) - q1Pull[0].v.fga)),
-        fta: parseInt(vTeam.totals.fta) - q1Pull[0].v.fta,
-        to: parseInt(vTeam.totals.turnovers) - q1Pull[0].v.to,
-        offReb: parseInt(vTeam.totals.offReb) - q1Pull[0].v.offReb,
-        fouls: parseInt(vTeam.totals.pFouls) - q1Pull[0].v.fouls
-      },
-      t: {
-        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - q1Pull[0].t.pts,
-        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - q1Pull[0].t.fgm,
-        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - q1Pull[0].t.fga,
-        fgPct: calcFgPct(
-          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - q1Pull[0].t.fgm),
-          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - q1Pull[0].t.fga)
-        ),
-        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - q1Pull[0].t.fta,
-        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - q1Pull[0].t.to,
-        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - q1Pull[0].t.offReb,
-        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - q1Pull[0].t.fouls,
-        poss: poss - q1Pull[0].poss,
-        pace: ( ( (poss - q1Pull[0].poss) * 4) / 2)
-      }
-    }
-  }
-
-  // tempQ2Obj().then(tempQ2 => {
-  //   console.log('tempQ2 is ', tempQ2)
-  // });
 
     if (period.isEndOfPeriod) {
       console.log('end of period, current period is ', period.current);
@@ -320,7 +273,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         })
       } else if (period.current === 2) {
-        tempQ2Obj().then(q2 => {
+        quarterObj().then(q2 => {
           console.log('q2 obj in q2 fn is ', q2);
           console.log('totals obj in q2 fn is ', totalsObj);
           gameSecs = getGameSecs(period.current-1, clock);
@@ -347,8 +300,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           })
         })
       } else if (period.current === 3) {
-        if (prevTotals.length > 0) {
-          let q3 = quarterObj();
+        quarterObj().then(q3 => {
           gameSecs = getGameSecs(period.current-1, clock);
           knex("box_scores_v2").where({gid: gid}).update({
             period_updated: 3,
@@ -371,37 +323,32 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               quarter: q3
             })
           })
-        } else {
-          console.log(period.current, ' has ended but no prevTotals Obj found');
-        }
+        })
       } else if (period.current === 4 ) {
-        if (prevTotals.length > 0) {
-          let q4 = quarterObj();
-          gameSecs = getGameSecs(period.current-1, clock);
-          knex("box_scores_v2").where({gid: gid}).update({
-            period_updated: 4,
-            clock_last_updated: gameSecs,
-            totals: [totalsObj],
-            q3: [q4],
-            updated_at: new Date()
-          }, '*').then(inserted => {
-            console.log('inserted is ', inserted);
-            res.send({
-              quarterEnd: true,
-              live: true,
-              clock: clock,
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: 4,
-              poss: poss,
-              pace: calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              quarter: q4
+          quarterObj().then(q4 => {
+            gameSecs = getGameSecs(period.current-1, clock);
+            knex("box_scores_v2").where({gid: gid}).update({
+              period_updated: 4,
+              clock_last_updated: gameSecs,
+              totals: [totalsObj],
+              q3: [q4],
+              updated_at: new Date()
+            }, '*').then(inserted => {
+              console.log('inserted is ', inserted);
+              res.send({
+                quarterEnd: true,
+                live: true,
+                clock: clock,
+                gameSecs: gameSecs,
+                period: period,
+                thru_period: 4,
+                poss: poss,
+                pace: calcGamePace(poss, period.current, gameSecs),
+                totals: totalsObj,
+                quarter: q4
+              })
             })
           })
-        } else {
-          console.log(period.current, ' has ended but no prevTotals Obj found');
-        }
       }
     } else {
       if (!isGameActivated) {
@@ -643,7 +590,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 
 
 
-const timedDbUpdaters = schedule.scheduleJob("13 04 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("24 14 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
