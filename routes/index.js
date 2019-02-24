@@ -643,16 +643,23 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
     })
 
-    impPlayerObj[`pid_${player}`].entries = gameEntries;
-    impPlayerObj[`pid_${player}`].exits = gameExits;
+    sigEntries = gameEntries.filter(set => {
+      const median = Math.floor(set.length/2);
+      return (
+        (set.length > (games*0.4)) && (set[median] !== 0))
+      )
+    });
+
+    sigExits = gameEntries.filter(set => {
+      const median = Math.floor(set.length/2);
+      return (
+        (set.length > (games*0.4)) && (set[median] !== 2880))
+      )
+    });
+
+    impPlayerObj[`pid_${player}`].sigEntries = sigEntries;
+    impPlayerObj[`pid_${player}`].sigExits = sigExits;
   })
-
-      console.log(impPlayerObj);
-
-  // console.log(impPlayerObj['pid_202695']);
-  //
-  // console.log(impPlayerObj['pid_201571'].entries);
-  // console.log(impPlayerObj['pid_201571'].exits);
 
   res.send({
     info: game[0],
