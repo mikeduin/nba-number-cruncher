@@ -26,12 +26,15 @@ class GameSheet extends React.Component {
         <div>
         <InfoTable />
         <Tab menu={{ secondary: true, pointing: true }} panes={[
-          {menuItem: 'Team Ratings', render: () => <Tab.Pane> Ratings Content </Tab.Pane> },
+          {menuItem: 'Team Ratings', render: () =>
+            <Tab.Pane> Ratings Content
+            </Tab.Pane> 
+          },
           {menuItem: 'Player Details', render: () =>
             <Tab.Pane>
               <ImpPlayerTable
                 players={game.impPlayers}
-              /> 
+              />
             </Tab.Pane>
           }
         ]}/>

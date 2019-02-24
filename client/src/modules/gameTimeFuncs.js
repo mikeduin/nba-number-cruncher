@@ -22,7 +22,7 @@ export const gameSecsToClockAndQuarter = secs => {
       );
       let remSecs = (60 - (secs - ((q-1)*720) - (min*60))).toFixed(0);
 
-      if (remSecs === 0) {
+      if (remSecs === 0 || remSecs == 60) {
         return (`Q${q} ${12-min}:00`);
       } else {
         return (`Q${q} ${11-min}:${remSecs}`);

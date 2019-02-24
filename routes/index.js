@@ -25,6 +25,10 @@ const emptyTotalsObj = require('../modules/boxScoreHelpers/emptyTotalsObj');
 const buildGameStints = require("../modules/buildGameStints");
 const webScrapeHelpers = require("../modules/webScrapeHelpers");
 
+const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
+
+console.log(gameSecsToGameTime(2700));
+
 let now = moment().format('YYYY-MM-DD');
 
 setInterval(()=>{
@@ -644,19 +648,23 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
     })
 
-    sigEntries = gameEntries.filter(set => {
-      const median = Math.floor(set.length/2);
-      return (
-        (set.length > (games*0.4)) && (set[median] !== 0)
-      )
-    }).map(filtered => filtered[Math.floor(filtered.length/2)]);
+    sigEntries = gameEntries
+      .filter(set => {
+        const median = Math.floor(set.length/2);
+        return (
+          (set.length > (games*0.4)) && (set[median] !== 0)
+        )
+      })
+      .map(filtered => filtered[Math.floor(filtered.length/2)]);
 
-    sigExits = gameExits.filter(set => {
-      const median = Math.floor(set.length/2);
-      return (
-        (set.length > (games*0.4)) && (set[median] !== 2880)
-      )
-    }).map(filtered => filtered[Math.floor(filtered.length/2)]);
+    sigExits = gameExits
+      .filter(set => {
+        const median = Math.floor(set.length/2);
+        return (
+          (set.length > (games*0.4)) && (set[median] !== 2880)
+        )
+      })
+      .map(filtered => filtered[Math.floor(filtered.length/2)]);
 
     impPlayerObj[`pid_${player}`].sigEntries = sigEntries;
     impPlayerObj[`pid_${player}`].sigExits = sigExits;

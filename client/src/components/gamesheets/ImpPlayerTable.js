@@ -12,6 +12,7 @@ const ImpPlayerTable = props => {
         <Table.Row>
           <Table.HeaderCell colSpan={6}> </Table.HeaderCell>
           <Table.HeaderCell colSpan={3}> Team On/Off Court Deltas </Table.HeaderCell>
+          <Table.HeaderCell colSpan={8}> Rotation Patterns </Table.HeaderCell>
         </Table.Row>
         <Table.Row>
           <Table.HeaderCell> Player </Table.HeaderCell>
@@ -23,6 +24,14 @@ const ImpPlayerTable = props => {
           <Table.HeaderCell> OffRtg </Table.HeaderCell>
           <Table.HeaderCell> DefRtg </Table.HeaderCell>
           <Table.HeaderCell> NetRtg </Table.HeaderCell>
+          <Table.HeaderCell> Q1In </Table.HeaderCell>
+          <Table.HeaderCell> Q1Out </Table.HeaderCell>
+          <Table.HeaderCell> Q2In </Table.HeaderCell>
+          <Table.HeaderCell> Q2Out </Table.HeaderCell>
+          <Table.HeaderCell> Q3In </Table.HeaderCell>
+          <Table.HeaderCell> Q3Out </Table.HeaderCell>
+          <Table.HeaderCell> Q4In </Table.HeaderCell>
+          <Table.HeaderCell> Q4Out </Table.HeaderCell>
         </Table.Row>
       </Table.Header>
       <Table.Body>
