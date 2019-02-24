@@ -1,7 +1,5 @@
 export default (state = {}, action) => {
   switch (action.type) {
-    case 'ADD_TEMPLATE':
-      return {...state, [`live_${action.payload.gid}`]: action.payload };
     case 'SET_TO_LIVE':
       console.log('state being included is ', state[`live_${action.payload}`]);
       return {...state, [`live_${action.payload}`]: {
@@ -11,29 +9,33 @@ export default (state = {}, action) => {
         }
       };
     case 'UPDATE_LIVE_SCORE':
-      return {...state, [`live_${action.payload.gid}`]:
-          action.payload
-          // ...state[`live_${action.payload.gid}`],
-          // changing currentQuarter to totals for testing
-          // [`q${action.payload.q}`]: action.payload.currentQuarter
-          // totals: action.payload.totals
-
-
-      };
+      let gameState = state[`live_${action.payload.gid}`];
+      gameState.totals = action.payload.totals;
+      gameState[`q${action.payload.perToUpdate}`] = action.payload.quarterData;
+      return {...state, gameState};
     case 'ADD_SNAPSHOT':
-      const newState = {...state};
-      return newState[`live_${action.payload.gid}`] = action.payload;
-      // If this does not work, try the approach found in react/redux tutorial note 86
-      // SET UP LIKE THIS BELOW THOUGH
-      // return {...state, [`live_${action.payload.gid}`]: {
-      //     ...state[`live_${action.payload.gid}`],
-      //     [`q${action.payload.q}`]: action.payload.quarterData,
-      //     prevQuarters: action.payload.prevQuarters
-      //   }
-      // };
+      // Hiding this in hopes other method works, delete once confirmed
+      // newState = state;
+      // newState[`live_${action.payload.gid}`].totals = action.payload.totals;
+      // newState[`live_${action.payload.gid}`][`q${action.payload.perToUpdate}`]: action.payload.endOfQuarterData;
+      // newState[`live_${action.payload.gid}`].prevQuarters: action.payload.prevQuarters;
+      // console.log('end of quarter-updated state return for ', action.payload.gid);
+      // return newState;
+      gameState = state[`live_${action.payload.gid}`];
+      gameState.totals = action.payload.totals;
+      gameState[`q${action.payload.perToUpdate}`] = action.payload.endOfQuarterData;
+      gameState.prevQuarters = action.payload.prevQuarters;
+      console.log('end of quarter-updated state return for ', action.payload.gid);
+      return {...state, gameState};
     case 'SET_TO_FINAL':
-      newState = {...state};
-      return newState[`live_${action.payload.gid}`] = action.payload;
+      let newState = state;
+      if (newState[`live_${action.payload}`]) {
+        newState[`live_${action.payload}`].final = true;
+        return newState;
+      } else {
+        console.log('game not found in state, cannot set to final');
+        return state;
+      }
     default:
       return state;
   }

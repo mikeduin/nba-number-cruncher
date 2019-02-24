@@ -220,7 +220,10 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     try {
       let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
       let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
-      return quarterTotals;
+      return {
+        currentQuarter: quarterTotals,
+        prevQuarters: prevTotalsPull[0].totals[0]
+      }
     } catch (e) {
       console.log('error spit out in quarterUpd for ', gid)
     }
@@ -258,6 +261,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 poss: poss,
                 pace: calcGamePace(poss, period.current, gameSecs),
                 totals: totalsObj,
+                prevQuarters: totalsObj,
                 quarter: q1
               })
             })
@@ -274,7 +278,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 period_updated: 2,
                 clock_last_updated: gameSecs,
                 totals: [totalsObj],
-                q2: [qTotals],
+                q2: [qTotals.currentQuarter],
                 updated_at: new Date()
               }, '*').then(inserted => {
                 console.log('inserted is ', inserted);
@@ -288,7 +292,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   poss: poss,
                   pace: calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
-                  quarter: qTotals
+                  prevQuarters: qTotals.prevQuarters,
+                  quarter: qTotals.currentQuarter
                 })
               })
             })
@@ -318,7 +323,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   poss: poss,
                   pace: calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
-                  quarter: qTotals
+                  prevQuarters: qTotals.prevQuarters,
+                  quarter: qTotals.currentQuarter
                 })
               })
             })
@@ -348,7 +354,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   poss: poss,
                   pace: calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
-                  quarter: qTotals
+                  prevQuarters: qTotals.prevQuarters,
+                  quarter: qTotals.currentQuarter
                 })
               })
             })
@@ -366,8 +373,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         })
       } else {
-        // need to write this function for inserting OT stats
         knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
+          // NEED TO FIX THIS IN EVENT OF MULTIPLE OTs!!!
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
               gameSecs = getGameSecs(period.current-1, clock);
@@ -388,7 +395,8 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   poss: poss,
                   pace: calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
-                  quarter: qTotals
+                  prevQuarters: qTotals.prevQuarters,
+                  quarter: qTotals.currentQuarter
                 })
               })
             })
@@ -423,8 +431,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           final: true
         })
       } else {
-        // removed quarter pull here so it is no longer sending back Qs
-        console.log('should be responding here');
+        console.log('this is the live, ongoing, in-quarter game response');
         res.send({
           quarterEnd: false,
           live: true,
