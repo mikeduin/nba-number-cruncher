@@ -131,6 +131,23 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       return pace
     };
   }
+  
+  const calcQuarterPace = (quarterPoss, per, gameSecs) => {
+    let pace = 0;
+    let quarterSecs = 0;
+    if (per < 5) {
+      quarterSecs = gameSecs - (720*(per-1));
+      pace = (((720/quarterSecs)*poss)/2)
+    } else {
+      quarterSecs = gameSecs - (2880) - (300*(per-4));
+      pace = (((300/quarterSecs)*poss)/2)
+    };
+    if (pace == null) {
+      return 0
+    } else {
+      return pace
+    };
+  }
 
   const calcFgPct = (fgm, fga) => {
     return (((fgm/fga)*100).toFixed(1));
@@ -237,7 +254,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
         fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
         poss: quarterPoss,
-        pace: calcGamePace(quarterPoss, period.current, gameSecs)
+        pace: calcQuarterPace(quarterPoss, period.current, gameSecs)
       }
     }
   }

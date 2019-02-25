@@ -162,18 +162,35 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       return (0.96*((fga+to+(0.44*fta)-oreb)));
     };
 
-    const calcQuarterPace = (poss, per, clock) => {
-      console.log('poss is ', poss, ' per is ', per, 'clock is ', clock);
-      let secs = getGameSecs(0, clock);
-      console.log('secs in calcQPace are ', secs);
-      if (per < 4) {
-        // secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
-        return (((720/secs) * poss)*4)
+    const calcQuarterPace = (quarterPoss, per, gameSecs) => {
+      let pace = 0;
+      let quarterSecs = 0;
+      if (per < 5) {
+        quarterSecs = gameSecs - (720*(per-1));
+        pace = (((720/quarterSecs)*poss)/2)
       } else {
-        // secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
-        return (((300/secs) * poss)/2)
+        quarterSecs = gameSecs - (2880) - (300*(per-4));
+        pace = (((300/quarterSecs)*poss)/2)
       };
-    };
+      if (pace == null) {
+        return 0
+      } else {
+        return pace
+      };
+    }
+
+    // const calcQuarterPace = (poss, per, clock) => {
+    //   console.log('poss is ', poss, ' per is ', per, 'clock is ', clock);
+    //   let secs = getGameSecs(0, clock);
+    //   console.log('secs in calcQPace are ', secs);
+    //   if (per < 4) {
+    //     // secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
+    //     return (((720/secs) * poss)*4)
+    //   } else {
+    //     // secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
+    //     return (((300/secs) * poss)/2)
+    //   };
+    // };
 
     let liveData = {
       gid: gid,
