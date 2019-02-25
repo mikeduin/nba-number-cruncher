@@ -13,7 +13,7 @@ export default (state = {}, action) => {
         let gameState = state[`live_${action.payload.gid}`];
         gameState.totals = action.payload.totals;
         gameState.clock = action.payload.clock;
-        gameState.period = action.payload.period.current;
+        gameState.period = action.payload.period;
         gameState.poss = action.payload.poss;
         gameState[`q${action.payload.perToUpdate}`] = action.payload.quarterData;
         return {...state, [`live_${action.payload.gid}`]: gameState};

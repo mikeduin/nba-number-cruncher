@@ -131,16 +131,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       return pace
     };
   }
-  
+
   const calcQuarterPace = (quarterPoss, per, gameSecs) => {
     let pace = 0;
-    let quarterSecs = 0;
     if (per < 5) {
-      quarterSecs = gameSecs - (720*(per-1));
-      pace = (((720/quarterSecs)*poss)/2)
+      pace = (((2880/gameSecs)*poss)/2)
     } else {
-      quarterSecs = gameSecs - (2880) - (300*(per-4));
-      pace = (((300/quarterSecs)*poss)/2)
+      pace = ((2880+((300*(per-4))/gameSecs)*poss)/2)
     };
     if (pace == null) {
       return 0
@@ -743,7 +740,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 })
 
 
-const timedDbUpdaters = schedule.scheduleJob("55 06 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("26 04 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
@@ -759,7 +756,5 @@ const timedDbUpdaters = schedule.scheduleJob("55 06 * * *", () => {
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
   setTimeout(()=>{dbBuilders.addGameStints()}, 780000);
 })
-
-
 
 module.exports = router;

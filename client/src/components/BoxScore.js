@@ -20,8 +20,6 @@ class BoxScore extends React.Component {
         console.log('checking score for ', this.props.game.gid);
       }
     }, 5000);
-
-
   }
 
   checkSpread = () => {
