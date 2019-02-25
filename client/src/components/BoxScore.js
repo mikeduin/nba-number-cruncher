@@ -21,7 +21,7 @@ class BoxScore extends React.Component {
       }
     }, 5000);
 
-    
+
   }
 
   checkSpread = () => {
@@ -52,9 +52,9 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
-      console.log('boxScore for ', game.gid ,' is', boxScore);
+    console.log('boxScore for ', game.gid ,' is', boxScore);
 
-    if (!boxScore || !boxScore.active || !boxScore.totals) {
+    if (!boxScore || !boxScore.active || !boxScore.totals || boxScore.poss == 0) {
       if (!game) {
         return <div> loading ... </div>
       } else {
@@ -82,7 +82,7 @@ class BoxScore extends React.Component {
                 padding: 0
               }}>
                 <Table.HeaderCell textAlign="right"> <i>Odds -></i> </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2"> {this.state.spread} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2">  </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
@@ -90,7 +90,7 @@ class BoxScore extends React.Component {
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2"> GAME PACE: {boxScore.pace.toFixed(2)} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? boxScore.totals.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 ? boxScore.q1.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 ? boxScore.q3.t.pace.toFixed(2) : null}</Table.HeaderCell>

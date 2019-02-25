@@ -61,7 +61,7 @@ class ImpPlayerTable extends React.Component {
           <Table.Row>
             <Table.HeaderCell colSpan={6}> </Table.HeaderCell>
             <Table.HeaderCell colSpan={3}> Team On/Off Court Deltas </Table.HeaderCell>
-            <Table.HeaderCell colSpan={8} textAlign="center"> Rotation Patterns, Last 45 Days </Table.HeaderCell>
+            <Table.HeaderCell colSpan={8} textAlign="center"> Median Significant Rotation Entries/Exits, Last 45 Days </Table.HeaderCell>
           </Table.Row>
           <Table.Row>
             <Table.HeaderCell

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import moment from 'moment';
+import { getGameSecs } from '../modules/gameTimeFuncs';
 
 let today = moment().format('YYYY-MM-DD');
 
@@ -10,7 +11,7 @@ export const fetchNetRatings = () => async dispatch => {
   dispatch({ type: 'FETCH_NET_RATINGS', payload: data});
 }
 
-export const fetchWeek = (date = today) => async dispatch => {
+export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let digitDate = moment(date).format('YYYYMMDD');
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
@@ -21,7 +22,8 @@ export const fetchWeek = (date = today) => async dispatch => {
     return game.gdte === today;
   });
 
-  let activeGames = [];
+  let activeGames = getState().activeGames;
+  console.log('activeGames in fetchWeek are ', activeGames);
 
   todaysGames.forEach(game => {
     // if the game is within 10 minutes from now, set it to active
@@ -44,7 +46,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   let activeGames = getState().activeGames;
 
   todaysGames.forEach(game => {
-    let tenMinsAhead = moment().add(10, 'm');
+    let tenMinsAhead = moment().add(20, 'm');
     let threeHourTenMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
 
@@ -149,7 +151,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   console.log('response for ', gid, ' is ', response);
 
-  if (response.gameSecs > 0) {
+  if (response.live) {
     let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
 
     const calcFgPct = (fgm, fga) => {
@@ -161,12 +163,14 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     };
 
     const calcQuarterPace = (poss, per, clock) => {
-      let secs = 0;
+      console.log('poss is ', poss, ' per is ', per, 'clock is ', clock);
+      let secs = getGameSecs(0, clock);
+      console.log('secs in calcQPace are ', secs);
       if (per < 4) {
-        secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
-        return (((720/secs) * poss)/2)
+        // secs = (((11-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) );
+        return (((720/secs) * poss)*4)
       } else {
-        secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
+        // secs = (((4-parseInt(clock.slice(0, 2)))*60) + (60-parseInt(clock.slice(3, 5))) )
         return (((300/secs) * poss)/2)
       };
     };
@@ -189,7 +193,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       let endOfQuarterData = response.quarter;
       let prevQuarters = response.prevQuarters;
 
-        // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
+      // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
 
       let snapshot = { gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
 
@@ -203,48 +207,64 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
         inQuarter = {
           ...liveData,
           perToUpdate,
+          clock,
           quarterData: totals
         };
         dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
 
       } else {
 
-        let prevQuarters = getState().prevQuarters;
+        let prevQuarters = response.prevQuarters;
+        // let prevQuarters = getState().prevQuarters;
         let perToUpdate = period.current;
 
         const quarterPoss = calcPoss(
           ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
-              - prevQuarters.t.fga),
-          ( (parseInt(totals.h.turnovers) + parseInt(totals.v.turnovers))
-              - prevQuarters.t.to),
+              - parseInt(prevQuarters.t.fga)),
+          ( (parseInt(totals.h.to) + parseInt(totals.v.to))
+              - parseInt(prevQuarters.t.to)),
           ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
-              - prevQuarters.t.fta),
+              - parseInt(prevQuarters.t.fta)),
           ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
-              - prevQuarters.t.offReb)
+              - parseInt(prevQuarters.t.offReb))
             );
+
+        let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
+            - parseInt(prevQuarters.t.fga));
+        let perTO = ( (parseInt(totals.h.to) + parseInt(totals.v.to))
+            - parseInt(prevQuarters.t.to));
+        let perFta = ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
+            - parseInt(prevQuarters.t.fta));
+        let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
+            - parseInt(prevQuarters.t.offReb));
+
+        console.log('quarterPoss is ', quarterPoss);
+
+        console.log('perFgs are ', perFgs, ' and perTO are ', perTO, 'and perFta are ', perFta, 'and perOffReb are ', perOffReb);
+
 
         let currentQuarter = {
             h: {
-              pts: parseInt(totals.h.pts) - prevQuarters.h.pts,
-              fgm: parseInt(totals.h.fgm) - prevQuarters.h.fgm,
-              fga: parseInt(totals.h.fga) - prevQuarters.h.fga,
-              fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - prevQuarters.h.fga)),
-              fta: parseInt(totals.h.fta) - prevQuarters.h.fta,
-              to: parseInt(totals.h.turnovers) - prevQuarters.h.to,
-              offReb: parseInt(totals.h.offReb) - prevQuarters.h.offReb,
+              pts: parseInt(totals.h.pts) - parseInt(prevQuarters.h.pts),
+              fgm: parseInt(totals.h.fgm) - parseInt(prevQuarters.h.fgm),
+              fga: parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga),
+              fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga))),
+              fta: parseInt(totals.h.fta) - parseInt(prevQuarters.h.fta),
+              to: parseInt(totals.h.turnovers) - parseInt(prevQuarters.h.to),
+              offReb: parseInt(totals.h.offReb) - parseInt(prevQuarters.h.offReb),
               fouls: parseInt(totals.h.fouls) - parseInt(prevQuarters.h.fouls)
             },
             v: {
-              pts: parseInt(totals.v.pts) - prevQuarters.v.pts,
-              fgm: parseInt(totals.v.fgm) - prevQuarters.v.fgm,
-              fga: parseInt(totals.v.fga) - prevQuarters.v.fga,
+              pts: parseInt(totals.v.pts) - parseInt(prevQuarters.v.pts),
+              fgm: parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm),
+              fga: parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga),
               fgPct: calcFgPct(
-                (parseInt(totals.v.fgm) - prevQuarters.v.fgm),
-                (parseInt(totals.v.fga) - prevQuarters.v.fga)
+                (parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm)),
+                (parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga))
               ),
-              fta: parseInt(totals.v.fta) - prevQuarters.v.fta,
-              to: parseInt(totals.v.turnovers) - prevQuarters.v.to,
-              offReb: parseInt(totals.v.offReb) - prevQuarters.v.offReb,
+              fta: parseInt(totals.v.fta) - parseInt(prevQuarters.v.fta),
+              to: parseInt(totals.v.turnovers) - parseInt(prevQuarters.v.to),
+              offReb: parseInt(totals.v.offReb) - parseInt(prevQuarters.v.offReb),
               fouls: parseInt(totals.v.fouls) - parseInt(prevQuarters.v.fouls)
             },
             t: {
