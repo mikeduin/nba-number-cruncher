@@ -13,12 +13,7 @@ class ScheduleCard extends React.Component {
     const { active } = this.state
     const content = (
       <div>
-        <Header as='h2' inverted>
-          Title
-        </Header>
-
-        <Button primary>Add</Button>
-        <Button>View</Button>
+        (content will go here)
       </div>
     )
 

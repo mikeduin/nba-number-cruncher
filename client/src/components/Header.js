@@ -66,12 +66,12 @@ class Header extends React.Component {
           Home
         </Link>
         <Link to="/schedule" className="item" onClick={this.setActiveDay}>
-          Schedule
+          <b>Schedule</b>
         </Link>
         <Link to="" className="item">
           Daily Digest
         </Link>
-        <Link to="/gamblecast" className="item">
+        <Link to="" className="item">
           GambleCast
         </Link>
         <Link to="" className="item">
@@ -84,7 +84,7 @@ class Header extends React.Component {
           Research
         </Link>
         <Link to="/netratings" className="item">
-          Net Ratings
+          <b>Net Ratings</b>
         </Link>
         <Search
           style={{position: 'absolute', right: '10%'}}

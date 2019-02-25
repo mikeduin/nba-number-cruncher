@@ -34,8 +34,15 @@ setInterval(()=>{
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
 }, 200000);
-setInterval(()=>{oddsLoaders.sportsbookThirdQ()}, 30000);
-setInterval(()=>{oddsLoaders.sportsbookSecondH()}, 30000);
+
+setInterval(()=>{
+  const hour = new Date().getHours();
+  if (hour >= 9 && hour <= 24) {
+    oddsLoaders.sportsbookSecondH();
+    oddsLoaders.sportsbookThirdQ();
+  }
+}, 60000);
+
 
 // setTimeout(async ()=>{
 //   const gameStintsA = await knex("player_game_stints")
