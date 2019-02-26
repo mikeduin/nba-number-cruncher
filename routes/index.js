@@ -139,12 +139,12 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     };
   }
 
-  const calcQuarterPace = (quarterPoss, per, gameSecs) => {
+  const calcEndOfQuarterPace = (quarterPoss, per, gameSecs) => {
     let pace = 0;
     if (per < 5) {
-      pace = (((2880/gameSecs)*poss)/2)
+      pace = ((quarterPoss*4)/2)
     } else {
-      pace = ((2880+((300*(per-4))/gameSecs)*poss)/2)
+      pace = (((quarterPoss*(720/300))*4)/2)
     };
     if (pace == null) {
       return 0
@@ -258,7 +258,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
         fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
         poss: quarterPoss,
-        pace: calcQuarterPace(quarterPoss, period.current, gameSecs)
+        pace: calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
       }
     }
   }

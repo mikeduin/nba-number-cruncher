@@ -26,31 +26,8 @@ class GameSheet extends React.Component {
         <div>
         <InfoTable />
         <Tab menu={{ secondary: true, pointing: true }} panes={[
-          {menuItem: 'Ratings Tables', render: () =>
-            <Tab.Pane>
-              <br />
-              <ByRotation netRatings={this.props.game.netRatingsArr} />
-              <br />
-              <NetRtgByQuarter netRatings={this.props.game.netRatingsArr} />
-              <br />
-              <PaceByQuarter pace={this.props.game.paceArr} />
-              <br />
-            </Tab.Pane>
-          },
-          {menuItem: 'Ratings Charts', render: () =>
-            <Tab.Pane>
-              <Grid>
-                <Grid.Row columns={2}>
-                  <Grid.Column>
-                    <QuarterChart
-                      homeData={game.hObj}
-                      visData={game.vObj}
-                      hColor={this.props.hColors.active}
-                      vColor={this.props.vColors.active}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
+          {menuItem: 'Team Ratings', render: () =>
+            <Tab.Pane> Ratings Content
             </Tab.Pane>
           },
           {menuItem: 'Player Details', render: () =>
@@ -61,6 +38,28 @@ class GameSheet extends React.Component {
             </Tab.Pane>
           }
         ]}/>
+
+        <Grid>
+          <Grid.Row columns={2}>
+            <Grid.Column>
+              <QuarterChart
+                homeData={game.hObj}
+                visData={game.vObj}
+                hColor={this.props.hColors.active}
+                vColor={this.props.vColors.active}
+              />
+            </Grid.Column>
+
+          </Grid.Row>
+        </Grid>
+
+        <br />
+        <ByRotation netRatings={this.props.game.netRatingsArr} />
+        <br />
+        <NetRtgByQuarter netRatings={this.props.game.netRatingsArr} />
+        <br />
+        <PaceByQuarter pace={this.props.game.paceArr} />
+        <br />
         </div>
       )
     }

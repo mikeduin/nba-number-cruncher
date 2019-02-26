@@ -50,7 +50,9 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
-    console.log('boxScore for ', game.gid ,' is', boxScore);
+    if (game.gid === 21800907) {
+      console.log('boxScore for ', game.gid ,' is', boxScore);
+    }
 
     if (!boxScore || !boxScore.active || !boxScore.totals || boxScore.poss == 0) {
       if (!game) {

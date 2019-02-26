@@ -170,19 +170,19 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       return (0.96*((fga+to+(0.44*fta)-oreb)));
     };
 
-    const calcQuarterPace = (possInput, per, gameSecs) => {
+    const calcQuarterPace = (quarterPoss, per, gameSecs) => {
       // console.log('quarterPoss are ', quarterPoss);
 
-      console.log('possInput in quarter pace are ', possInput);
+      console.log('quarterPoss in quarter pace are ', quarterPoss);
       let pace = 0;
       if (per < 5) {
         let quarterSecs = (parseInt(gameSecs) - (720*parseInt(per-1)));
         console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
-        pace = (((720/quarterSecs)*poss)/2);
+        pace = ((((720/quarterSecs)*quarterPoss)*4)/2);
       } else {
         let quarterSecs = (parseInt(gameSecs) - 2880 - (300*parseInt(per-4)));
         console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
-        pace = (((300/quarterSecs)*poss)/2)
+        pace = ((((300/quarterSecs)*quarterPoss)*4)/2)
       };
 
       console.log('pace in calcQuarterPace is ', pace);
@@ -194,7 +194,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     }
 
     const calcGamePace = (poss, per, gameSecs) => {
-      // console.log('quarterPoss are ', quarterPoss);
       console.log('possInput in game pace are ', poss);
       let pace = 0;
       if (per < 5) {
@@ -208,7 +207,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
         return pace
       };
     }
-
 
     let liveData = {
       gid: gid,
