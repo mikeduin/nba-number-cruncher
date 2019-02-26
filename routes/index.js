@@ -93,14 +93,14 @@ router.get("/checkGameStatus/:date/:gid", async (req, res, next) => {
   const nowUTC = moment().utc();
 
   if (moment(startTimeUTC).isBefore(nowUTC)) {
-    // console.log('game ', gid, ' between', hTid, ' and ', vTid, ' has already started');
     const inDb = await knex("box_scores_v2").where({gid: gid});
     if (inDb[0].final === true) {
       // send response back that clarifies game is final, includes stats to complete box score
       console.log(inDb[0]);
       res.send({
         gid: gid,
-        setToFinal: true,
+        // don't think I need this setToFinal? keep in case
+        // setToFinal: true,
         final: true,
         totals: inDb[0].totals[0],
         q1: inDb[0].q1[0],
@@ -219,7 +219,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       pts: parseInt(hTeam.totals.points),
       fgm: parseInt(hTeam.totals.fgm),
       fga: parseInt(hTeam.totals.fga),
-      fgPct: calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga))),
+      fgPct: calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
       fta: parseInt(hTeam.totals.fta),
       to: parseInt(hTeam.totals.turnovers),
       offReb: parseInt(hTeam.totals.offReb),

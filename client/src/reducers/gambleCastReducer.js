@@ -8,6 +8,8 @@ export default (state = {}, action) => {
           final: false
         }
       };
+    case 'SET_FINAL_NUMBERS':
+      return {...state, [`live_${action.payload.gid}`]: action.payload};
     case 'UPDATE_LIVE_SCORE':
       if (state[`live_${action.payload.gid}`]) {
         let gameState = state[`live_${action.payload.gid}`];

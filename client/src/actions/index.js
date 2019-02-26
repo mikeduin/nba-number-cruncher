@@ -144,6 +144,25 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   const statusRes = statusCheck.data;
   console.log('statusRes is ', statusRes);
 
+  if (statusRes.final) {
+    const ot = statusRes.ot == null ? null : statusRes.ot[0];
+
+    const finalData = {
+      gid: gid,
+      totals: statusRes.totals,
+      q1: statusRes.q1,
+      q2: statusRes.q2,
+      q3: statusRes.q3,
+      q4: statusRes.q4,
+      ot: ot,
+      final: true,
+      active: true,
+      poss: statusRes.totals.t.poss
+    };
+
+    dispatch({ type: 'SET_FINAL_NUMBERS', payload: finalData });
+  }
+
 
 
 
