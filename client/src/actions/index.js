@@ -19,7 +19,9 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    return game.gdte === today;
+    // For testing
+    return game.gdte === '2019-02-25';
+    // return game.gdte === today;
   });
 
   let activeGames = getState().activeGames;
@@ -134,9 +136,19 @@ export const setActiveDay = date => async dispatch => {
 }
 
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
-  let todayInt = moment().format('YYYYMMDD');
-  let game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
-  let response = game.data;
+  // For testing
+  let todayInt = '20190225';
+  // let todayInt = moment().format('YYYYMMDD');
+
+  const statusCheck = await axios.get(`/checkGameStatus/${todayInt}/${gid}`);
+  const statusRes = statusCheck.data;
+  console.log('statusRes is ', statusRes);
+
+
+
+
+  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
+  const response = game.data;
 
   // build something in here that, when a game is final, adds to completed games in state
   // to do this, I need a measure for if a game is completed in index
