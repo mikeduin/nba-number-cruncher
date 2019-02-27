@@ -1,5 +1,6 @@
 import axios from 'axios';
 import moment from 'moment';
+import _ from 'lodash';
 import { getGameSecs } from '../modules/gameTimeFuncs';
 
 let today = moment().format('YYYY-MM-DD');
@@ -123,7 +124,7 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.hBetOver = hBetOver;
   conv.hBetUnder = hBetUnder;
   conv.vBetOver = vBetOver;
-  conv.vBetUnder = vBetUnder;  
+  conv.vBetUnder = vBetUnder;
 
   let hColors = {
     color_one: data.hInfo.color,

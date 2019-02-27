@@ -30,53 +30,26 @@ class ImpactTable extends React.Component {
     })
   }
 
-  breakUp (arr) {
-    if (arr.length === 1) {
-      return arr
-    } else if (arr.length == 2) {
-      return (
-        <div>
-          <div> {arr[0]} </div>
-          <div> {arr[1]} </div>
-        </div>
-      )
-    } else if (arr.length == 3) {
-      return (
-        <div>
-          <div> {arr[0]} </div>
-          <div> {arr[1]} </div>
-          <div> {arr[2]} </div>
-        </div>
-      )
-    } else {
-      return arr
-    }
-  }
-
   render () {
     const { column, data, direction } = this.state;
 
     return (
       <div>
-          <Table sortable>
+          <Table sortable attached={this.props.attached}>
             <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell colSpan={1}> </Table.HeaderCell>
-                <Table.HeaderCell colSpan={4} textAlign="center"> Team On/Off Court Deltas </Table.HeaderCell>
-              </Table.Row>
               <Table.Row>
                 <Table.HeaderCell
                   sorted={column === 'name' ? direction : null}
                   onClick={this.handleSort('name')}
-                > Player </Table.HeaderCell>
+                > {this.props.title} </Table.HeaderCell>
                 <Table.HeaderCell
                   sorted={column === 'diff_pace_delta' ? direction : null}
                   onClick={this.handleSort('diff_pace_delta', 'desc')}
-                > Pace </Table.HeaderCell>
+                > Team <br /> Pace </Table.HeaderCell>
                 <Table.HeaderCell
                   sorted={column === 'team_offRtg_delta' ? direction : null}
                   onClick={this.handleSort('team_offRtg_delta', 'desc')}
-                > Off <br />Rtg </Table.HeaderCell>
+                > Team <br /> Off Rtg </Table.HeaderCell>
                 <Table.HeaderCell
                   sorted={column === 'opp_offRtg_delta' ? direction : null}
                   onClick={this.handleSort('opp_offRtg_delta', 'desc')}
@@ -85,11 +58,11 @@ class ImpactTable extends React.Component {
                 <Table.HeaderCell
                   sorted={column === 'netRtg_delta' ? direction : null}
                   onClick={this.handleSort('netRtg_delta', 'desc')}
-                > Net <br />Rtg </Table.HeaderCell>
+                > Team <br /> Net Rtg </Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {_.map(data, ({ name, id, team_abb, min_l15, net_rtg_full, off_rtg_full, def_rtg_full, pace_full, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, sigEntries, sigExits }) => (
+              {_.map(data, ({ name, id, team_abb, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta }) => (
                 <Table.Row
                   key={id}
                 >

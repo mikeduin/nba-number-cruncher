@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Tab } from 'semantic-ui-react';
+import { Grid, Tab, Segment } from 'semantic-ui-react';
 
 import { connect } from 'react-redux';
 import { fetchGame } from '../actions';
@@ -56,12 +56,28 @@ class GameSheet extends React.Component {
           {menuItem: 'Impact Players', render: () =>
             <Tab.Pane>
               <Grid columns={2}>
-                <Grid.Column>
-                  <ImpactTable players={game.vImpact}/>
-                </Grid.Column>
-                <Grid.Column>
-                  <ImpactTable players={game.hImpact}/>
-                </Grid.Column>
+                <Grid.Row>
+                  <Grid.Column>
+                    <Segment raised textAlign="center"
+                      style={{backgroundColor: this.props.vColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.vColors.secondary}`}}
+                    > <b>{game.info.v[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
+                    <ImpactTable players={game.vBetOn} title={'Net Rating: BET ON'}/>
+                  </Grid.Column>
+                  <Grid.Column>
+                    <Segment raised textAlign="center"
+                      style={{backgroundColor: this.props.hColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.hColors.secondary}`}}
+                    > <b>{game.info.h[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
+                    <ImpactTable players={game.hBetOn} title={'Net Rating: BET ON'}/>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <ImpactTable players={game.vBetOff} title={'Net Rating: BET OFF'}/>
+                  </Grid.Column>
+                  <Grid.Column>
+                    <ImpactTable players={game.hBetOff} title={'Net Rating: BET OFF'}/>
+                  </Grid.Column>
+                </Grid.Row>
               </Grid>
             </Tab.Pane>
           },
