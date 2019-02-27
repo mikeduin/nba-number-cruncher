@@ -9,7 +9,7 @@ import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
-import ImpPlayerTable from './gamesheets/ImpPlayerTable';
+import RotationTable from './gamesheets/RotationTable';
 import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
 class GameSheet extends React.Component {
@@ -59,8 +59,8 @@ class GameSheet extends React.Component {
           },
           {menuItem: 'Rotation Players', render: () =>
             <Tab.Pane>
-              <ImpPlayerTable
-                players={game.impPlayers}
+              <RotationTable
+                players={game.rotPlayers}
 
               />
             </Tab.Pane>

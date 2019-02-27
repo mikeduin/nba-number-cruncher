@@ -52,7 +52,7 @@ setInterval(()=>{
 //   const gameStintsA = await knex("player_game_stints")
 //     .where("gdte", ">", "2019-01-15")
 //     .andWhere((builder)=> {
-//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', impPlayerIds)
+//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', rotPlayerIds)
 //     });
 //
 //   console.log(gameStintsA);
@@ -645,12 +645,12 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const hPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("po.team_id", "=", h)
-    .orderBy("pd.min_full")
+    .orderBy("po.netRtg_delta", "desc")
     .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
   const vPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("po.team_id", "=", v)
-    .orderBy("pd.min_full")
+    .orderBy("po.netRtg_delta", "desc")
     .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
 
   // use this fn to sort by on/off court net rtg differential, which is 9th index
@@ -664,11 +664,16 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const defSort = (a, b) => {
     return a - b;
   }
+  //
+  // const hImpact = hPlayers.slice(0, 3).concat(hPlayers.slice(-3));
+  // const vImpact = vPlayers.slice(0, 3).concat(vPlayers.slice(-3));
 
-  const impactPlayers = hPlayers.concat(vPlayers)
+  const rotationPlayers = hPlayers.concat(vPlayers)
   .filter(player => player.mp_pct > 0.2);
 
-  const impPlayerIds = impactPlayers.map(player => player.id);
+  const sortedRotPlayers = _.orderBy(rotationPlayers, ['netRtg_delta'], ['desc']);
+
+  const rotPlayerIds = sortedRotPlayers.map(player => player.id);
   const monthPlusAgo = moment().subtract(45, 'days').format('YYYY-MM-DD');
 
   const gameStints = await knex("player_game_stints")
@@ -677,7 +682,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       buildOne.whereIn('team_id', [h, v])
     })
     .andWhere(buildTwo => {
-      buildTwo.whereIn('player_id', impPlayerIds)
+      buildTwo.whereIn('player_id', rotPlayerIds)
     })
     .orderBy('gdte', 'desc');
 
@@ -699,7 +704,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     return low;
   }
 
-  let fullPlayerData = impactPlayers.map(player => {
+  let fullPlayerData = sortedRotPlayers.map(player => {
     const playerStints = gameStints.filter(stint => stint.player_id === player.id);
     const gameEntries = [];
     const gameExits = [];
@@ -780,9 +785,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     vPace: vPace[0],
     hInfo: hInfo[0],
     vInfo: vInfo[0],
-    hPlayers,
-    vPlayers,
-    impPlayers: fullPlayerData
+    rotPlayers: fullPlayerData
   });
 })
 

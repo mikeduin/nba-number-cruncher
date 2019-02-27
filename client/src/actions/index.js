@@ -94,6 +94,12 @@ export const fetchGame = ({gid}) => async dispatch => {
     vObj: {}
   };
 
+  const hPlayers = data.rotPlayers.filter(player => player.team_abb === data.info.h[0].ta);
+  const vPlayers = data.rotPlayers.filter(player => player.team_abb === data.info.v[0].ta);
+
+  const hImpact = hPlayers.slice(0, 3).concat(hPlayers.slice(-3));
+  const vImpact = vPlayers.slice(0, 3).concat(hPlayers.slice(-3));
+
   conv.hObj.netRatings = data.hNetRtg;
   conv.hObj.pace = data.hPace;
   conv.hObj.info = data.hInfo;
@@ -102,10 +108,13 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.vObj.pace = data.vPace;
   conv.vObj.info = data.vInfo;
   conv.vObj.sched = data.vTen;
-  conv.impPlayers = data.impPlayers;
+  conv.rotPlayers = data.rotPlayers;
+  conv.hImpact = hImpact;
+  conv.vImpact = vImpact;
 
-  let hPlayers = data.hPlayers;
-  let vPlayers = data.vPlayers;
+  // even using this anymore?
+  // let hPlayers = data.hPlayers;
+  // let vPlayers = data.vPlayers;
 
   let hColors = {
     color_one: data.hInfo.color,

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 
-class ImpPlayerTable extends React.Component {
+class RotationTable extends React.Component {
   state = {
     column: null,
     data: this.props.players,
@@ -118,7 +118,7 @@ class ImpPlayerTable extends React.Component {
               key={id}
             >
               <Table.Cell style={ team_abb === this.props.game.info.h[0].ta ? {backgroundColor: this.props.hColors.active} : {backgroundColor: this.props.vColors.active} }>
-                <Link to={`/player/${id}`} style={{color: '#E9E9E9'}}> {name} </Link> 
+                <Link to={`/player/${id}`} style={{color: '#E9E9E9'}}> {name} </Link>
               </Table.Cell>
               <Table.Cell> {min_l15} </Table.Cell>
               <Table.Cell> {net_rtg_full} </Table.Cell>
@@ -153,4 +153,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps) (ImpPlayerTable);
+export default connect(mapStateToProps) (RotationTable);
