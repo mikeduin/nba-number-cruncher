@@ -61,21 +61,75 @@ class GameSheet extends React.Component {
                     <Segment raised textAlign="center"
                       style={{backgroundColor: this.props.vColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.vColors.secondary}`}}
                     > <b>{game.info.v[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
-                    <ImpactTable players={game.vBetOn} title={'Net Rating: BET ON'}/>
+                    <ImpactTable
+                      players={game.vBetOn}
+                      sortedBy={'netRtgDelta'}
+                      title={'Net Rating: BET ON'}
+                    />
                   </Grid.Column>
                   <Grid.Column>
                     <Segment raised textAlign="center"
                       style={{backgroundColor: this.props.hColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.hColors.secondary}`}}
                     > <b>{game.info.h[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
-                    <ImpactTable players={game.hBetOn} title={'Net Rating: BET ON'}/>
+                    <ImpactTable
+                      players={game.hBetOn}
+                      sortedBy={'netRtgDelta'}
+                      title={'Net Rating: BET ON'}
+                    />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column>
-                    <ImpactTable players={game.vBetOff} title={'Net Rating: BET OFF'}/>
+                    <ImpactTable
+                      players={game.vBetOff}
+                      sortedBy={'netRtgDelta'}
+                      title={'Net Rating: BET OFF'}
+                    />
                   </Grid.Column>
                   <Grid.Column>
-                    <ImpactTable players={game.hBetOff} title={'Net Rating: BET OFF'}/>
+                    <ImpactTable
+                      players={game.hBetOff}
+                      sortedBy={'netRtgDelta'}
+                      title={'Net Rating: BET OFF'}
+                    />
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <Segment raised textAlign="center"
+                      style={{backgroundColor: this.props.vColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.vColors.secondary}`}}
+                    > <b>{game.info.v[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
+                    <ImpactTable
+                      players={game.vBetOver}
+                      sortedBy={'total_rating'}
+                      title={'Total: BET OVER'}
+                    />
+                  </Grid.Column>
+                  <Grid.Column>
+                    <Segment raised textAlign="center"
+                      style={{backgroundColor: this.props.hColors.active, color: '#E9E9E9', border: `solid 3px ${this.props.hColors.secondary}`}}
+                    > <b>{game.info.h[0].tc.toUpperCase()}</b> On/Off Court Deltas </Segment>
+                    <ImpactTable
+                      players={game.hBetOver}
+                      sortedBy={'total_rating'}
+                      title={'Total: BET OVER'}
+                    />
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <ImpactTable
+                      players={game.vBetUnder}
+                      sortedBy={'total_rating'}
+                      title={'Total: BET UNDER'}
+                    />
+                  </Grid.Column>
+                  <Grid.Column>
+                    <ImpactTable
+                      players={game.hBetUnder}
+                      sortedBy={'total_rating'}
+                      title={'Total: BET UNDER'}
+                    />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>

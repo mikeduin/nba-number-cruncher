@@ -58,12 +58,11 @@ class ImpactTable extends React.Component {
                 <Table.HeaderCell
                   sorted={column === 'netRtg_delta' ? direction : null}
                   onClick={this.handleSort('netRtg_delta', 'desc')}
-                > {this.props.sortedBy == 'netRtgDelta' ? <div>Team<br/>Net Rtg </div> : <div>Total<br/> Rating </div>}
-                </Table.HeaderCell>
+                > Team <br /> Total Rating </Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {_.map(data, ({ name, id, team_abb, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, total_rating }) => (
+              {_.map(data, ({ name, id, team_abb, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, total_rating }) => (
                 <Table.Row
                   key={id}
                 >
@@ -73,7 +72,7 @@ class ImpactTable extends React.Component {
                   <Table.Cell> {diff_pace_delta} </Table.Cell>
                   <Table.Cell> {team_offRtg_delta} </Table.Cell>
                   <Table.Cell> {opp_offRtg_delta} </Table.Cell>
-                  <Table.Cell> {this.props.sortedBy == 'netRtgDelta' ? netRtg_delta : total_rating.toFixed(2)} </Table.Cell>
+                  <Table.Cell> {total_rating} </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
