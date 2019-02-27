@@ -15,7 +15,9 @@ class BoxScore extends React.Component {
     this.props.fetchBoxScore(this.props.game.gid);
 
     setInterval(() => {
-      if (this.props.activeGames.indexOf(game.gid) !== -1) {
+      if (this.props.activeGames.indexOf(game.gid) !== -1
+        && this.props.completedGames.indexOf(game.gid) !== -1)
+      {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
       }
@@ -68,7 +70,7 @@ class BoxScore extends React.Component {
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3">  </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2">  </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
@@ -121,13 +123,13 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.v.fgPct : null}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.v.fouls : null}  </Table.Cell>
                 <Table.Cell> {boxScore.q2 ? boxScore.q2.v.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q2 ? boxScore.q2.v.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.v.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q2 ? boxScore.q2.v.fouls : null} </Table.Cell>
                 <Table.Cell> {boxScore.q3 ? boxScore.q3.v.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q3 ? boxScore.q3.v.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.v.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q3 ? boxScore.q3.v.fouls : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q4 ? boxScore.q4.v.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
@@ -138,13 +140,13 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.h.fgPct : null}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.h.fouls : null}  </Table.Cell>
                 <Table.Cell> {boxScore.q2 ? boxScore.q2.h.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q2 ? boxScore.q2.h.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.h.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q2 ? boxScore.q2.h.fouls : null} </Table.Cell>
                 <Table.Cell> {boxScore.q3 ? boxScore.q3.h.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q3 ? boxScore.q3.h.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.h.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q3 ? boxScore.q3.h.fouls : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h.pts : null} </Table.Cell>
-                <Table.Cell>  {boxScore.q4 ? boxScore.q4.h.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
@@ -166,7 +168,8 @@ class BoxScore extends React.Component {
 const mapStateToProps = state => {
   return {
     gambleCast: state.gambleCast,
-    activeGames: state.activeGames
+    activeGames: state.activeGames,
+    completedGames: state.completedGames
   }
 }
 

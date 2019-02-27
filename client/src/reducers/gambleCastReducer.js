@@ -8,7 +8,7 @@ export default (state = {}, action) => {
           final: false
         }
       };
-    case 'SET_FINAL_NUMBERS':
+    case 'INIT_DATA_LOAD':
       return {...state, [`live_${action.payload.gid}`]: action.payload};
     case 'UPDATE_LIVE_SCORE':
       if (state[`live_${action.payload.gid}`]) {
@@ -21,7 +21,7 @@ export default (state = {}, action) => {
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
         return {...state, [`live_${action.payload.gid}`]: action.payload}
-      }
+      };
 
 
     case 'ADD_SNAPSHOT':

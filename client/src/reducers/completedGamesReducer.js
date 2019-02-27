@@ -1,10 +1,9 @@
-// export default (state = [], action) => {
-//   switch (action.type) {
-//     case 'SET_COMPLETED_GAMES':
-//       // fix this when done testing
-//       return action.payload;
-//       // return [21800894]
-//     default:
-//       return state;
-//   }
-// }
+export default (state = [], action) => {
+  switch (action.type) {
+    case 'SET_COMPLETED_GAME':
+      let newState = [...state, action.payload];
+      return newState;
+    default:
+      return state;
+  }
+}

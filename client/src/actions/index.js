@@ -25,6 +25,7 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   });
 
   let activeGames = getState().activeGames;
+  let completedGames = getState().completedGames;
   console.log('activeGames in fetchWeek are ', activeGames);
 
   todaysGames.forEach(game => {
@@ -32,7 +33,7 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
     let tenMinsAhead = moment().add(10, 'm');
     let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
     let gametime = moment(game.etm);
-    if (gametime.isBefore(threeHourMinsAhead)) {
+    if (gametime.isBefore(threeHourMinsAhead) && completedGames.indexOf(game.gid) === -1) {
       activeGames.push(game.gid);
     };
   });
@@ -46,6 +47,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
 
   let todaysGames = getState().todaysGames;
   let activeGames = getState().activeGames;
+  let completedGames = getState().completedGames;
 
   todaysGames.forEach(game => {
     let tenMinsAhead = moment().add(20, 'm');
@@ -58,7 +60,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
     // jsonNow == 8 hours ahead, UTC Time
     // jsonGametime == 11 hours ahead, eastern UTC time
 
-    if (gametime.isBefore(threeHourTenMinsAhead) && activeGames.indexOf(game.gid) === -1) {
+    if (gametime.isBefore(threeHourTenMinsAhead) && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       console.log('game is ', game.gid, ' being set to live from checkActiveGames function');
       dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
     };
@@ -137,54 +139,59 @@ export const setActiveDay = date => async dispatch => {
 
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   // For testing
-  let todayInt = '20190225';
-  // let todayInt = moment().format('YYYYMMDD');
+  // let todayInt = '20190225';
+  let todayInt = moment().format('YYYYMMDD');
 
-  const statusCheck = await axios.get(`/checkGameStatus/${todayInt}/${gid}`);
-  const statusRes = statusCheck.data;
-  console.log('statusRes is ', statusRes);
+  let gameFinal = false;
 
-  if (statusRes.final) {
-    const ot = statusRes.ot == null ? null : statusRes.ot[0];
+  // if (!getState().gambleCast[`live_${gid}`]) {
+  //   console.log('game is not in state! Loading initial data');
+  //   const initLoad = await axios.get(`/initDataLoad/${todayInt}/${gid}`);
+  //   const initData = initLoad.data;
+  //   console.log('initData is ', initData);
+  //
+  //   const q1 = initData.q1 == null ? null : initData.q1[0];
+  //   const q2 = initData.q2 == null ? null : initData.q2[0];
+  //   const q3 = initData.q3 == null ? null : initData.q3[0];
+  //   const q4 = initData.q4 == null ? null : initData.q4[0];
+  //   const ot = initData.ot == null ? null : initData.ot[0];
+  //   gameFinal = initData.final == null ? null : initData.final[0];
+  //
+  //   const initDataLoad = {
+  //     gid: gid,
+  //     prevTotals: initData.prevTotals,
+  //     q1: q1,
+  //     q2: q2,
+  //     q3: q3,
+  //     q4: q4,
+  //     ot: ot,
+  //     final: gameFinal,
+  //     active: true,
+  //     poss: initData.totals.t.poss
+  //   };
+  //
+  //   dispatch({ type: 'INIT_DATA_LOAD', payload: initDataLoad });
+  // }
 
-    const finalData = {
-      gid: gid,
-      totals: statusRes.totals,
-      q1: statusRes.q1,
-      q2: statusRes.q2,
-      q3: statusRes.q3,
-      q4: statusRes.q4,
-      ot: ot,
-      final: true,
-      active: true,
-      poss: statusRes.totals.t.poss
-    };
-
-    dispatch({ type: 'SET_FINAL_NUMBERS', payload: finalData });
-  }
-
-
-
+  // if (gameFinal) {
+  //   // build something in here that, when a game is final, adds to completed games in state
+  //   // to do this, I need a measure for if a game is completed in index
+  //   // game is over AND last period stats have been updated
+  //
+  //   let activeGames = getState().activeGames;
+  //   let completedGames = getState().completedGames;
+  //   if (activeGames.indexOf(gid) !== -1 && completedGames.indexOf(gid) !== -1) {
+  //     // remove active game
+  //     dispatch({ type: 'SET_TO_FINAL', payload: gid });
+  //     // add completed game
+  //     dispatch({ type: 'SET_COMPLETED_GAME', payload: gid });
+  //
+  //   }
+  //   return;
+  // }
 
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   const response = game.data;
-
-  // build something in here that, when a game is final, adds to completed games in state
-  // to do this, I need a measure for if a game is completed in index
-  // game is over AND last period stats have been updated
-
-  console.log('state is ', getState());
-
-  if (!getState().gambleCast[`live_${gid}`]) {
-    console.log('game is not in state!')
-  }
-
-  if (response.final) {
-    let activeGames = getState().activeGames;
-    if (activeGames.indexOf(gid) !== -1) {
-      dispatch({ type: 'SET_TO_FINAL', payload: gid });
-    }
-  }
 
   console.log('response for ', gid, ' is ', response);
 
@@ -197,26 +204,24 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     };
 
     const calcPoss = (fga, to, fta, oreb) => {
-      console.log('in calcPoss, fga are ', fga, ' and to are ', to, ' and fta are ', fta, ' and oreb are ', oreb);
+      // console.log('in calcPoss, fga are ', fga, ' and to are ', to, ' and fta are ', fta, ' and oreb are ', oreb);
       return (0.96*((fga+to+(0.44*fta)-oreb)));
     };
 
     const calcQuarterPace = (quarterPoss, per, gameSecs) => {
-      // console.log('quarterPoss are ', quarterPoss);
-
-      console.log('quarterPoss in quarter pace are ', quarterPoss);
+      // console.log('quarterPoss in quarter pace are ', quarterPoss);
       let pace = 0;
       if (per < 5) {
         let quarterSecs = (parseInt(gameSecs) - (720*parseInt(per-1)));
-        console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
+        // console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
         pace = ((((720/quarterSecs)*quarterPoss)*4)/2);
       } else {
         let quarterSecs = (parseInt(gameSecs) - 2880 - (300*parseInt(per-4)));
-        console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
+        // console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
         pace = ((((300/quarterSecs)*quarterPoss)*4)/2)
       };
 
-      console.log('pace in calcQuarterPace is ', pace);
+      // console.log('pace in calcQuarterPace is ', pace);
       if (pace == null) {
         return 0
       } else {
@@ -225,7 +230,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     }
 
     const calcGamePace = (poss, per, gameSecs) => {
-      console.log('possInput in game pace are ', poss);
+      // console.log('possInput in game pace are ', poss);
       let pace = 0;
       if (per < 5) {
         pace = (((2880/gameSecs)*poss)/2)
@@ -263,11 +268,11 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
       dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
     } else {
-      console.log('period ongoing, current period is ', period.current);
+      // console.log('period ongoing, current period is ', period.current);
       let perToUpdate = period.current;
       let inQuarter = {};
 
-      console.log('calcGamePace is ', calcGamePace(poss, period.current, gameSecs));
+      // console.log('calcGamePace is ', calcGamePace(poss, period.current, gameSecs));
 
       if (period.current === 1) {
         inQuarter = {
@@ -304,7 +309,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
         let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
             - parseInt(prevQuarters.t.offReb));
 
-        console.log('perFgs are ', perFgs, ' and perTO are ', perTO, ' and perFta are ', perFta, ' and perOffReb are ', perOffReb);
+        // console.log('perFgs are ', perFgs, ' and perTO are ', perTO, ' and perFta are ', perFta, ' and perOffReb are ', perOffReb);
 
         let currentQuarter = {
             h: {
