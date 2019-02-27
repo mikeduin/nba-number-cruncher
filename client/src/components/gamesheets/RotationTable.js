@@ -92,20 +92,20 @@ class RotationTable extends React.Component {
             <Table.HeaderCell
               sorted={column === 'diff_pace_delta' ? direction : null}
               onClick={this.handleSort('diff_pace_delta', 'desc')}
-            > Pace </Table.HeaderCell>
+            > Team <br /> Pace </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'team_offRtg_delta' ? direction : null}
               onClick={this.handleSort('team_offRtg_delta', 'desc')}
-            > Off <br />Rtg </Table.HeaderCell>
+            > Team <br />Off Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'opp_offRtg_delta' ? direction : null}
               onClick={this.handleSort('opp_offRtg_delta', 'desc')}
             > Opp <br />
-              OffRtg </Table.HeaderCell>
+              Off Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'netRtg_delta' ? direction : null}
               onClick={this.handleSort('netRtg_delta', 'desc')}
-            > Net <br />Rtg </Table.HeaderCell>
+            > Team <br />Net Rtg </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q1 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q2 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q3 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>

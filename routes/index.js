@@ -646,31 +646,22 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("po.team_id", "=", h)
     .orderBy("po.netRtg_delta", "desc")
-    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb', 'total_rating');
   const vPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
     .where("po.team_id", "=", v)
     .orderBy("po.netRtg_delta", "desc")
-    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
-
-  // use this fn to sort by on/off court net rtg differential, which is 9th index
-  const doubleArraySort = (a, b) => {
-    if (a[9] < b[9]) {return 1};
-    if (b[9] < a[9]) {return -1};
-    return 0;
-  }
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb', 'total_rating');
 
   // default numerical sort for use with Array.sort
   const defSort = (a, b) => {
     return a - b;
   }
-  //
-  // const hImpact = hPlayers.slice(0, 3).concat(hPlayers.slice(-3));
-  // const vImpact = vPlayers.slice(0, 3).concat(vPlayers.slice(-3));
 
   const rotationPlayers = hPlayers.concat(vPlayers)
   .filter(player => player.mp_pct > 0.2);
 
+  // Do not modify this sort w/o also modifying impactPlayers pull on client side
   const sortedRotPlayers = _.orderBy(rotationPlayers, ['netRtg_delta'], ['desc']);
 
   const rotPlayerIds = sortedRotPlayers.map(player => player.id);
@@ -788,7 +779,6 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     rotPlayers: fullPlayerData
   });
 })
-
 
 const timedDbUpdaters = schedule.scheduleJob("15 03 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);

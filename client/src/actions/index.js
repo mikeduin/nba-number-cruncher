@@ -94,11 +94,18 @@ export const fetchGame = ({gid}) => async dispatch => {
     vObj: {}
   };
 
+  // These are already ordered by netRtg, from the serverside pull
   const hPlayers = data.rotPlayers.filter(player => player.team_abb === data.info.h[0].ta);
   const vPlayers = data.rotPlayers.filter(player => player.team_abb === data.info.v[0].ta);
 
-  const hImpact = hPlayers.slice(0, 3).concat(hPlayers.slice(-3));
-  const vImpact = vPlayers.slice(0, 3).concat(hPlayers.slice(-3));
+  const hBetOn = hPlayers.slice(0, 3);
+  const hBetOff = hPlayers.slice(-3);
+  const vBetOn = vPlayers.slice(0, 3);
+  const vBetOff = vPlayers.slice(-3);
+  const hBetOver = _.orderBy(hPlayers, ['total_rating'], ['desc']).slice(0, 3);
+  const hBetUnder = _.orderBy(hPlayers, ['total_rating'], ['desc']).slice(-3);
+  const vBetOver = _.orderBy(vPlayers, ['total_rating'], ['desc']).slice(0, 3);
+  const vBetUnder = _.orderBy(vPlayers, ['total_rating'], ['desc']).slice(-3);
 
   conv.hObj.netRatings = data.hNetRtg;
   conv.hObj.pace = data.hPace;
@@ -109,12 +116,14 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.vObj.info = data.vInfo;
   conv.vObj.sched = data.vTen;
   conv.rotPlayers = data.rotPlayers;
-  conv.hImpact = hImpact;
-  conv.vImpact = vImpact;
-
-  // even using this anymore?
-  // let hPlayers = data.hPlayers;
-  // let vPlayers = data.vPlayers;
+  conv.hBetOn = hBetOn;
+  conv.hBetOff = hBetOff;
+  conv.vBetOn = vBetOn;
+  conv.vBetOff = vBetOff;
+  conv.hBetOver = hBetOver;
+  conv.hBetUnder = hBetUnder;
+  conv.vBetOver = vBetOver;
+  conv.vBetUnder = vBetUnder;  
 
   let hColors = {
     color_one: data.hInfo.color,

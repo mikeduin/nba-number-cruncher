@@ -9,6 +9,7 @@ import ByRotation from './netRatingGrids/ByRotation';
 import PaceByQuarter from './paceGrids/PaceByQuarter';
 import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
+import ImpactTable from './gamesheets/ImpactTable';
 import RotationTable from './gamesheets/RotationTable';
 import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
@@ -54,14 +55,20 @@ class GameSheet extends React.Component {
           },
           {menuItem: 'Impact Players', render: () =>
             <Tab.Pane>
-
+              <Grid columns={2}>
+                <Grid.Column>
+                  <ImpactTable players={game.vImpact}/>
+                </Grid.Column>
+                <Grid.Column>
+                  <ImpactTable players={game.hImpact}/>
+                </Grid.Column>
+              </Grid>
             </Tab.Pane>
           },
           {menuItem: 'Rotation Players', render: () =>
             <Tab.Pane>
               <RotationTable
                 players={game.rotPlayers}
-
               />
             </Tab.Pane>
           }
