@@ -20,8 +20,8 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
 
   let todaysGames = data.weekGames.filter(game => {
     // For testing
-    return game.gdte === '2019-02-25';
-    // return game.gdte === today;
+    // return game.gdte === '2019-02-25';
+    return game.gdte === today;
   });
 
   let activeGames = getState().activeGames;

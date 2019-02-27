@@ -15,7 +15,7 @@ class InfoTable extends React.Component {
 
   totalFormat = value => {
     if (value) {
-      return `[${value}]`;
+      return `[O/U ${value}]`;
     } else {
       return '';
     }

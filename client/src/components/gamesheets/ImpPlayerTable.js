@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { Table } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
 
 class ImpPlayerTable extends React.Component {
@@ -60,7 +61,7 @@ class ImpPlayerTable extends React.Component {
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell colSpan={6}> </Table.HeaderCell>
-            <Table.HeaderCell colSpan={3}> Team On/Off Court Deltas </Table.HeaderCell>
+            <Table.HeaderCell colSpan={4} textAlign="center"> Team On/Off Court Deltas </Table.HeaderCell>
             <Table.HeaderCell colSpan={8} textAlign="center"> Median Significant Rotation Entries/Exits, Last 45 Days </Table.HeaderCell>
           </Table.Row>
           <Table.Row>
@@ -71,35 +72,40 @@ class ImpPlayerTable extends React.Component {
             <Table.HeaderCell
               sorted={column === 'min_l15' ? direction : null}
               onClick={this.handleSort('min_l15', 'desc')}
-            > MPG (L15) </Table.HeaderCell>
+            > MPG <br /> (L15) </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'net_rtg_full' ? direction : null}
               onClick={this.handleSort('net_rtg_full', 'desc')}
-            > NetRtg </Table.HeaderCell>
+            > Net <br /> Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'off_rtg_full' ? direction : null}
               onClick={this.handleSort('off_rtg_full', 'desc')}
-            > OffRtg </Table.HeaderCell>
+            > Off <br />Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'def_rtg_full' ? direction : null}
               onClick={this.handleSort('def_rtg_full', 'desc')}
-            > DefRtg </Table.HeaderCell>
+            > Def <br />Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'pace_full' ? direction : null}
               onClick={this.handleSort('pace_full', 'desc')}
             > Pace </Table.HeaderCell>
             <Table.HeaderCell
+              sorted={column === 'diff_pace_delta' ? direction : null}
+              onClick={this.handleSort('diff_pace_delta', 'desc')}
+            > Pace </Table.HeaderCell>
+            <Table.HeaderCell
               sorted={column === 'team_offRtg_delta' ? direction : null}
               onClick={this.handleSort('team_offRtg_delta', 'desc')}
-            > OffRtg </Table.HeaderCell>
+            > Off <br />Rtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'opp_offRtg_delta' ? direction : null}
               onClick={this.handleSort('opp_offRtg_delta', 'desc')}
-            > DefRtg </Table.HeaderCell>
+            > Opp <br />
+              OffRtg </Table.HeaderCell>
             <Table.HeaderCell
               sorted={column === 'netRtg_delta' ? direction : null}
               onClick={this.handleSort('netRtg_delta', 'desc')}
-            > NetRtg </Table.HeaderCell>
+            > Net <br />Rtg </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q1 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q2 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
             <Table.HeaderCell colSpan={2} textAlign="center"> Q3 <div><i> in {`\u00A0`} {`\u00A0`} {`\u00A0`} {`\u00A0`}  {`\u00A0`} {`\u00A0`} out </i></div> </Table.HeaderCell>
@@ -107,14 +113,19 @@ class ImpPlayerTable extends React.Component {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {_.map(data, ({ name, id, team_abb, min_l15, net_rtg_full, off_rtg_full, def_rtg_full, pace_full, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, sigEntries, sigExits }) => (
-            <Table.Row key={id}>
-              <Table.Cell> <Link to={`/player/${id}`}> {name} </Link> </Table.Cell>
+          {_.map(data, ({ name, id, team_abb, min_l15, net_rtg_full, off_rtg_full, def_rtg_full, pace_full, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, sigEntries, sigExits }) => (
+            <Table.Row
+              key={id}
+            >
+              <Table.Cell style={ team_abb === this.props.game.info.h[0].ta ? {backgroundColor: this.props.hColors.active} : {backgroundColor: this.props.vColors.active} }>
+                <Link to={`/player/${id}`} style={{color: '#E9E9E9'}}> {name} </Link> 
+              </Table.Cell>
               <Table.Cell> {min_l15} </Table.Cell>
               <Table.Cell> {net_rtg_full} </Table.Cell>
               <Table.Cell> {off_rtg_full} </Table.Cell>
               <Table.Cell> {def_rtg_full} </Table.Cell>
               <Table.Cell> {pace_full} </Table.Cell>
+              <Table.Cell> {diff_pace_delta} </Table.Cell>
               <Table.Cell> {team_offRtg_delta} </Table.Cell>
               <Table.Cell> {opp_offRtg_delta} </Table.Cell>
               <Table.Cell> {netRtg_delta} </Table.Cell>
@@ -134,4 +145,12 @@ class ImpPlayerTable extends React.Component {
   }
 }
 
-export default ImpPlayerTable;
+const mapStateToProps = state => {
+  return {
+    game: state.game,
+    hColors: state.hColors,
+    vColors: state.vColors
+  }
+}
+
+export default connect(mapStateToProps) (ImpPlayerTable);

@@ -23,42 +23,50 @@ class GameSheet extends React.Component {
       return <div> Loading ... </div>
     } else {
       return (
-        <div>
+        <div style={{marginBottom: 50}}>
         <InfoTable />
         <Tab menu={{ secondary: true, pointing: true }} panes={[
-          {menuItem: 'Team Ratings', render: () =>
-            <Tab.Pane> Ratings Content
+          {menuItem: 'Ratings Tables', render: () =>
+            <Tab.Pane>
+              <ByRotation netRatings={this.props.game.netRatingsArr} />
+              <br />
+              <NetRtgByQuarter netRatings={this.props.game.netRatingsArr} />
+              <br />
+              <PaceByQuarter pace={this.props.game.paceArr} />
+              <br />
             </Tab.Pane>
           },
-          {menuItem: 'Player Details', render: () =>
+          {menuItem: 'Ratings Charts', render: () =>
+            <Tab.Pane>
+              <Grid>
+                <Grid.Row columns={2}>
+                  <Grid.Column>
+                    <QuarterChart
+                      homeData={game.hObj}
+                      visData={game.vObj}
+                      hColor={this.props.hColors.active}
+                      vColor={this.props.vColors.active}
+                    />
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
+            </Tab.Pane>
+          },
+          {menuItem: 'Impact Players', render: () =>
+            <Tab.Pane>
+
+            </Tab.Pane>
+          },
+          {menuItem: 'Rotation Players', render: () =>
             <Tab.Pane>
               <ImpPlayerTable
                 players={game.impPlayers}
+
               />
             </Tab.Pane>
           }
         ]}/>
 
-        <Grid>
-          <Grid.Row columns={2}>
-            <Grid.Column>
-              <QuarterChart
-                homeData={game.hObj}
-                visData={game.vObj}
-                hColor={this.props.hColors.active}
-                vColor={this.props.vColors.active}
-              />
-            </Grid.Column>
-
-          </Grid.Row>
-        </Grid>
-
-        <br />
-        <ByRotation netRatings={this.props.game.netRatingsArr} />
-        <br />
-        <NetRtgByQuarter netRatings={this.props.game.netRatingsArr} />
-        <br />
-        <PaceByQuarter pace={this.props.game.paceArr} />
         <br />
         </div>
       )

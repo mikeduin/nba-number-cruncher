@@ -29,6 +29,10 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 
 let now = moment().format('YYYY-MM-DD');
 
+// setInterval(() => {
+//   // dbBuilders.buildGameStintsDb()
+// }, 10000)
+
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
@@ -640,14 +644,14 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     .orWhere('gcode', 'like', `%${vAbb}${hAbb}%`);
   const hPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
-    .where("pd.team_id", "=", h)
+    .where("po.team_id", "=", h)
     .orderBy("pd.min_full")
-    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'team_abb');
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
   const vPlayers = await knex("player_data as pd")
     .leftJoin("players_on_off as po", "pd.player_id", "=", "po.player_id")
-    .where("pd.team_id", "=", v)
+    .where("po.team_id", "=", v)
     .orderBy("pd.min_full")
-    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'team_abb');
+    .select('pd.player_id as id', 'pd.player_name as name', 'mp_pct', 'min_l15', 'net_rtg_full', 'off_rtg_full', 'def_rtg_full', 'pace_full', 'team_offRtg_delta', 'opp_offRtg_delta', 'netRtg_delta', 'diff_pace_delta', 'team_abb');
 
   // use this fn to sort by on/off court net rtg differential, which is 9th index
   const doubleArraySort = (a, b) => {
@@ -783,7 +787,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 })
 
 
-const timedDbUpdaters = schedule.scheduleJob("07 15 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("15 03 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
