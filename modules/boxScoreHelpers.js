@@ -1,0 +1,74 @@
+module.exports = {
+  calcFgPct: (fgm, fga) => {
+    return (((fgm/fga)*100).toFixed(1));
+  },
+  calcPoss: (fga, to, fta, oreb) => {
+    return (0.96*((fga+to+(0.44*fta)-oreb)));
+  },
+  calcGamePace: (poss, per, gameSecs) => {
+    // period is nba-based (1st period = 1), not index-based (1st period = 0)
+    let pace = 0;
+    if (per < 5) {
+      pace = (((2880/gameSecs)*poss)/2)
+    } else {
+      pace = ( ( ((2880 + (300*(per-4)))/gameSecs) * poss)/2)
+    };
+
+    if (pace == null) {
+      return 0
+    } else {
+      return pace
+    };
+  },
+  calcEndOfQuarterPace: (quarterPoss, per, gameSecs) => {
+    // period is nba-based (1st period = 1), not index-based (1st period = 0)
+    let pace = 0;
+    if (per < 5) {
+      pace = ((quarterPoss*4)/2)
+    } else {
+      pace = (((quarterPoss*(720/300))*4)/2)
+    };
+    if (pace == null) {
+      return 0
+    } else {
+      return pace
+    };
+  }
+}
+
+
+// const calcPoss = (fga, to, fta, oreb) => {
+//   return (0.96*((fga+to+(0.44*fta)-oreb)));
+// };
+
+// const calcGamePace = (poss, per, gameSecs) => {
+//   let pace = 0;
+//   if (per < 5) {
+//     pace = (((2880/gameSecs)*poss)/2)
+//   } else {
+//     pace = (((2880 + (300*(per-4)))*poss)/2)
+//   };
+//   if (pace == null) {
+//     return 0
+//   } else {
+//     return pace
+//   };
+// }
+
+// const calcEndOfQuarterPace = (quarterPoss, per, gameSecs) => {
+//   let pace = 0;
+//   if (per < 5) {
+//     pace = ((quarterPoss*4)/2)
+//   } else {
+//     pace = (((quarterPoss*(720/300))*4)/2)
+//   };
+//   if (pace == null) {
+//     return 0
+//   } else {
+//     return pace
+//   };
+// }
+
+// const calcFgPct = (fgm, fga) => {
+//   return (((fgm/fga)*100).toFixed(1));
+// }

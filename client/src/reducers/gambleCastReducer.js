@@ -11,7 +11,9 @@ export default (state = {}, action) => {
     case 'INIT_DATA_LOAD':
       return {...state, [`live_${action.payload.gid}`]: action.payload};
     case 'UPDATE_LIVE_SCORE':
+      console.log('state in update live score fn is ', state);
       if (state[`live_${action.payload.gid}`]) {
+        console.log('state for game found, it is ', state[`live_${action.payload.gid}`]);
         let gameState = state[`live_${action.payload.gid}`];
         gameState.totals = action.payload.totals;
         gameState.clock = action.payload.clock;
@@ -20,6 +22,7 @@ export default (state = {}, action) => {
         gameState[`q${action.payload.perToUpdate}`] = action.payload.quarterData;
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
+        console.log('state for game NOT found, state is ', state);
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       };
 
@@ -32,12 +35,17 @@ export default (state = {}, action) => {
       // newState[`live_${action.payload.gid}`].prevQuarters: action.payload.prevQuarters;
       // console.log('end of quarter-updated state return for ', action.payload.gid);
       // return newState;
-      let gameState = state[`live_${action.payload.gid}`];
-      gameState.totals = action.payload.totals;
-      gameState[`q${action.payload.perToUpdate}`] = action.payload.endOfQuarterData;
-      gameState.prevQuarters = action.payload.prevQuarters;
-      console.log('end of quarter-updated state return for ', action.payload.gid);
-      return {...state, [`live_${action.payload.gid}`]: gameState};
+      if (state[`live_${action.payload.gid}`]) {
+        let gameState = state[`live_${action.payload.gid}`];
+        gameState.totals = action.payload.totals;
+        gameState[`q${action.payload.perToUpdate}`] = action.payload.endOfQuarterData;
+        gameState.prevQuarters = action.payload.prevQuarters;
+        console.log('end of quarter-updated state return for ', action.payload.gid);
+        return {...state, [`live_${action.payload.gid}`]: gameState};
+      } else {
+        return {...state, [`live_${action.payload.gid}`]: action.payload}
+      }
+
     case 'SET_TO_FINAL':
       let newState = state;
       if (newState[`live_${action.payload}`]) {

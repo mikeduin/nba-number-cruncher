@@ -15,12 +15,12 @@ class BoxScore extends React.Component {
     this.props.fetchBoxScore(this.props.game.gid);
 
     setInterval(() => {
-      if (this.props.activeGames.indexOf(game.gid) !== -1
-        && this.props.completedGames.indexOf(game.gid) !== -1)
-      {
+      // if (this.props.activeGames.indexOf(game.gid) !== -1
+      //   && this.props.completedGames.indexOf(game.gid) !== -1)
+      // {
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
-      }
+      // }
     }, 5000);
   }
 
@@ -54,7 +54,7 @@ class BoxScore extends React.Component {
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
     console.log('boxScore for ', game.gid ,' is', boxScore);
 
-    if (!boxScore || !boxScore.active || !boxScore.totals || boxScore.poss == 0) {
+    if (!boxScore || !boxScore.totals || boxScore.poss == 0) {
       if (!game) {
         return <div> loading ... </div>
       } else {
@@ -91,10 +91,10 @@ class BoxScore extends React.Component {
               <Table.Row>
                 <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? boxScore.totals.t.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1.t.pace != null ? boxScore.q1.t.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2.t.pace != null ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3.t.pace != null ? boxScore.q3.t.pace.toFixed(2) : null}</Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4.t.pace != null ? boxScore.q4.t.pace.toFixed(2) : null}</Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? boxScore.q1.t.pace.toFixed(2) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 != null ? boxScore.q3.t.pace.toFixed(2) : null}</Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 != null ? boxScore.q4.t.pace.toFixed(2) : null}</Table.HeaderCell>
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> Teams </Table.HeaderCell>

@@ -18,6 +18,7 @@ class App extends React.Component {
     this.props.getPlayerMetadata();
     setInterval(()=>{
       this.props.checkActiveGames()
+      console.log('checking for active games in app wrapper')
     }, 5000);
   }
 

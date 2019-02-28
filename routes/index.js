@@ -14,12 +14,12 @@ const dbMappers = require("../modules/dbMappers");
 const dateFilters = require("../modules/dateFilters");
 const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
+const boxScoreHelpers = require("../modules/boxScoreHelpers");
 
 const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
 
 const startPeriodSec = require('../modules/startPeriodSec');
 const getGameSecs = require('../modules/getGameSecs');
-const emptyTotalsObj = require('../modules/boxScoreHelpers/emptyTotalsObj');
 
 // remove these after more testing
 const buildGameStints = require("../modules/buildGameStints");
@@ -89,46 +89,48 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 // Then if it's final, you don't go to check box score route ... you just load stats, set to completed game, and you're done ...
 // If it's not final, then you move on to fetch current box score
 
-// router.get("/initDataLoad/:date/:gid", async (req, res, next) => {
-//   const { gid, date } = req.params;
-//   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
-//   const boxScore = await axios.get(url);
-//   const { startTimeUTC } = boxScore.data.basicGameData;
-//   const nowUTC = moment().utc();
-//
-//   if (moment(startTimeUTC).isBefore(nowUTC)) {
-//     const inDb = await knex("box_scores_v2").where({gid: gid});
-//     if (inDb.length > 0) {
-//         // send response back that clarifies game is final, includes stats to complete box score
-//         res.send({
-//           gid: gid,
-//           // don't think I need this setToFinal? keep in case
-//           // setToFinal: true,
-//           final: inDb[0].final,
-//           prevTotals: inDb[0].totals,
-//           // currTotals:
-//           q1: inDb[0].q1,
-//           q2: inDb[0].q2,
-//           q3: inDb[0].q3,
-//           q4: inDb[0].q4,
-//           ot: inDb[0].ot
-//         })
-//     } else {
-//       console.log('game ', gid, ' has nothing in DB')
-//     }
-//   }
-//
-// })
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const { gid, date } = req.params;
-
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
+  const nowUTC = moment().utc();
 
   let { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
+
+  // beg revised load process
+
+  if (moment(startTimeUTC).isBefore(nowUTC)) {
+    const inDb = await knex("box_scores_v2").where({gid: gid});
+    if (inDb.length > 0) {
+      if (inDb[0].final == true) {
+        console.log('sending response for game ', gid, ' as final');
+        res.send({
+          gid: gid,
+          final: true,
+          totals: inDb[0].totals,
+          q1: inDb[0].q1,
+          q2: inDb[0].q2,
+          q3: inDb[0].q3,
+          q4: inDb[0].q4,
+          ot: inDb[0].ot
+        })
+      } else {
+
+
+
+
+      }
+    } else {
+      console.log('game ', gid, ' has nothing in DB')
+    }
+  }
+
+  // end revised load process
+
+
 
   // If game has not started -- this is as far as the function should get
   if (!boxScore.data.stats) {
@@ -140,71 +142,35 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     return;
   }
 
-  console.log('response gets past stats conditional');
-
   // if game is over and last period state have been updated, kill function and add to finished games in state
 
-  let dbCheck = await knex("box_scores_v2").where({gid: gid}).pluck('final');
-  if (dbCheck[0]) {
-    res.send({final: true});
-    return;
-  }
+  // let dbCheck = await knex("box_scores_v2").where({gid: gid}).pluck('final');
+  // if (dbCheck[0]) {
+  //   res.send({final: true});
+  //   return;
+  // }
 
-  if (clock.length < 1) {
-    if (period.current > 1) {
-      clock = '0:00';
-    } else {
-      clock = '12:00';
-    }
-  };
+  // this is what's breaking things ...
+  // if (clock.length < 1) {
+  //   if (period.current > 1) {
+  //     clock = '0:00';
+  //   } else {
+  //     clock = '12:00';
+  //   }
+  // };
 
   let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
-
-  const calcPoss = (fga, to, fta, oreb) => {
-    return (0.96*((fga+to+(0.44*fta)-oreb)));
-  };
-
-  const calcGamePace = (poss, per, gameSecs) => {
-    let pace = 0;
-    if (per < 5) {
-      pace = (((2880/gameSecs)*poss)/2)
-    } else {
-      pace = (((2880 + (300*(per-4)))*poss)/2)
-    };
-    if (pace == null) {
-      return 0
-    } else {
-      return pace
-    };
-  }
-
-  const calcEndOfQuarterPace = (quarterPoss, per, gameSecs) => {
-    let pace = 0;
-    if (per < 5) {
-      pace = ((quarterPoss*4)/2)
-    } else {
-      pace = (((quarterPoss*(720/300))*4)/2)
-    };
-    if (pace == null) {
-      return 0
-    } else {
-      return pace
-    };
-  }
-
-  const calcFgPct = (fgm, fga) => {
-    return (((fgm/fga)*100).toFixed(1));
-  }
+  console.log('in index, gid is ', gid, ' period is ', period.current, ' clock is ', clock, ' gameSecs are ', gameSecs);
 
   const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
 
-  let poss = calcPoss(
+  let poss = boxScoreHelpers.calcPoss(
     (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
     (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
     (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
     (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
-  let hFgPct = calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga));
-  let vFgPct = calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga));
+  let hFgPct = boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga));
+  let vFgPct = boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga));
 
   const hPlayers = activePlayers.filter(player => {
     return (player.teamId === hTid && player.isOnCourt)
@@ -220,7 +186,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       pts: parseInt(hTeam.totals.points),
       fgm: parseInt(hTeam.totals.fgm),
       fga: parseInt(hTeam.totals.fga),
-      fgPct: calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
+      fgPct: boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
       fta: parseInt(hTeam.totals.fta),
       to: parseInt(hTeam.totals.turnovers),
       offReb: parseInt(hTeam.totals.offReb),
@@ -230,7 +196,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       pts: parseInt(vTeam.totals.points),
       fgm: parseInt(vTeam.totals.fgm),
       fga: parseInt(vTeam.totals.fga),
-      fgPct: calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga)),
+      fgPct: boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga)),
       fta: parseInt(vTeam.totals.fta),
       to: parseInt(vTeam.totals.turnovers),
       offReb: parseInt(vTeam.totals.offReb),
@@ -240,19 +206,19 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
       fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
       fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
-      fgPct: calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
+      fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
       fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
       to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
       offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
       fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
       poss: poss,
-      pace: calcGamePace(poss, parseInt(period.current), gameSecs)
+      pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
     }
   };
 
   // this object calculates the stats for each quarter, using the previous totals from earlier Qs
   const quarterObj = async (prevTotals) => {
-    const quarterPoss = calcPoss(
+    const quarterPoss = boxScoreHelpers.calcPoss(
       ( (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))
           - prevTotals[0].t.fga),
       ( (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers))
@@ -269,7 +235,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
         fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
         fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
-        fgPct: calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
+        fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
         fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
         to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
         offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
@@ -279,7 +245,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
         fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
         fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
-        fgPct: calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
+        fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
         fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
         to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
         offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
@@ -289,7 +255,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
         fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
         fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
-        fgPct: calcFgPct(
+        fgPct: boxScoreHelpers.calcFgPct(
           ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
           ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
         ),
@@ -298,7 +264,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
         fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
         poss: quarterPoss,
-        pace: calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
+        pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
       }
     }
   }
@@ -308,6 +274,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     try {
       let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
       let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+      console.log('prevTotalsPull[0] in q fn is ', prevTotalsPull[0]);
       return {
         currentQuarter: quarterTotals,
         prevQuarters: prevTotalsPull[0].totals[0]
@@ -326,6 +293,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     if (period.isEndOfPeriod || gameOver()) {
       if (period.current === 1) {
         let q1 = totalsObj;
+        console.log('end of period 1, clock is ', clock, ' and period.current is ', period.current, ' so being spit into gameSecs fn is period ', (period.current - 1));
         gameSecs = getGameSecs((period.current-1), clock);
         knex("box_scores_v2").where({gid: gid}).then(entry => {
           if (!entry[0]) {
@@ -339,6 +307,21 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               q1: [q1],
               updated_at: new Date()
             }).then(inserted => {
+              console.log('end of q1, response being sent to server is ',
+              {
+                quarterEnd: true,
+                live: true,
+                clock: clock,
+                gameSecs: gameSecs,
+                period: period,
+                thru_period: 1,
+                poss: poss,
+                pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                totals: totalsObj,
+                prevQuarters: totalsObj,
+                quarter: q1
+              }
+            );
               res.send({
                 quarterEnd: true,
                 live: true,
@@ -347,7 +330,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 period: period,
                 thru_period: 1,
                 poss: poss,
-                pace: calcGamePace(poss, period.current, gameSecs),
+                pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
                 totals: totalsObj,
                 prevQuarters: totalsObj,
                 quarter: q1
@@ -379,7 +362,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   period: period,
                   thru_period: 2,
                   poss: poss,
-                  pace: calcGamePace(poss, period.current, gameSecs),
+                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
                   prevQuarters: qTotals.prevQuarters,
                   quarter: qTotals.currentQuarter
@@ -411,7 +394,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   period: period,
                   thru_period: 3,
                   poss: poss,
-                  pace: calcGamePace(poss, period.current, gameSecs),
+                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
                   prevQuarters: qTotals.prevQuarters,
                   quarter: qTotals.currentQuarter
@@ -442,7 +425,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   period: period,
                   thru_period: 4,
                   poss: poss,
-                  pace: calcGamePace(poss, period.current, gameSecs),
+                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
                   prevQuarters: qTotals.prevQuarters,
                   quarter: qTotals.currentQuarter
@@ -483,7 +466,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                   period: period,
                   thru_period: period.current,
                   poss: poss,
-                  pace: calcGamePace(poss, period.current, gameSecs),
+                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
                   totals: totalsObj,
                   prevQuarters: qTotals.prevQuarters,
                   quarter: qTotals.currentQuarter
@@ -518,14 +501,14 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           period: period,
           thru_period: period.current,
           poss: poss,
-          pace: calcGamePace(poss, period.current, gameSecs),
+          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
           totals: totalsObj
           // final: true
         })
       } else {
-        console.log('this is the live, ongoing, in-quarter game response');
         let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-        console.log('prevTotals are ', prevTotalsPull);
+        console.log('prevTotals for ', gid, ' are ', prevTotalsPull);
+        console.log('prevTotals[0] for ', gid, ' are ', prevTotalsPull[0]);
         // period.current === 1 just for testing prevTotalsPull; remove once corrected
         if (period.current === 1) {
           res.send({
@@ -536,7 +519,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             period: period,
             thru_period: period.current - 1,
             poss: poss,
-            pace: calcGamePace(poss, period.current, gameSecs),
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj
           })
         } else {
@@ -548,7 +531,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             period: period,
             thru_period: period.current - 1,
             poss: poss,
-            pace: calcGamePace(poss, period.current, gameSecs),
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj,
             prevQuarters: prevTotalsPull[0].totals[0]
           })
