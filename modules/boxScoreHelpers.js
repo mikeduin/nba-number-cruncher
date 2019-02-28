@@ -1,9 +1,20 @@
 module.exports = {
+  calcEndOfQuarterPace: (quarterPoss, per, gameSecs) => {
+    // period is nba-based (1st period = 1), not index-based (1st period = 0)
+    let pace = 0;
+    if (per < 5) {
+      pace = ((quarterPoss*4)/2)
+    } else {
+      pace = (((quarterPoss*(720/300))*4)/2)
+    };
+    if (pace == null) {
+      return 0
+    } else {
+      return pace
+    };
+  },
   calcFgPct: (fgm, fga) => {
     return (((fgm/fga)*100).toFixed(1));
-  },
-  calcPoss: (fga, to, fta, oreb) => {
-    return (0.96*((fga+to+(0.44*fta)-oreb)));
   },
   calcGamePace: (poss, per, gameSecs) => {
     // period is nba-based (1st period = 1), not index-based (1st period = 0)
@@ -20,22 +31,23 @@ module.exports = {
       return pace
     };
   },
-  calcEndOfQuarterPace: (quarterPoss, per, gameSecs) => {
-    // period is nba-based (1st period = 1), not index-based (1st period = 0)
-    let pace = 0;
-    if (per < 5) {
-      pace = ((quarterPoss*4)/2)
-    } else {
-      pace = (((quarterPoss*(720/300))*4)/2)
+  calcPoss: (fga, to, fta, oreb) => {
+    return (0.96*((fga+to+(0.44*fta)-oreb)));
+  },
+  clockReturner: (clock) => {
+    if (clock.length < 1) {
+      if (period.current > 1) {
+        clock = '0:00';
+      } else {
+        clock = '12:00';
+      }
     };
-    if (pace == null) {
-      return 0
-    } else {
-      return pace
-    };
+
+    return clock;
   }
 }
 
+// Delete these below once confirmed fns above are working
 
 // const calcPoss = (fga, to, fta, oreb) => {
 //   return (0.96*((fga+to+(0.44*fta)-oreb)));

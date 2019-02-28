@@ -96,125 +96,113 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const boxScore = await axios.get(url);
   const nowUTC = moment().utc();
 
-  let { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
+  const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
+  const hAbb = boxScore.data.basicGameData.hTeam.triCode;
+  const vAbb = boxScore.data.basicGameData.vTeam.triCode;
+  const gameSecs = getGameSecs((parseInt(period.current)-1), clock);
 
-  // beg revised load process
+  // beg revised load process - only want called on initial load!
+  // Maybe only run if game is not already in state?
+    // This will only work if games that are completed are in state as live_gid, but set to final, and including quarter data
 
   if (moment(startTimeUTC).isBefore(nowUTC)) {
-    const inDb = await knex("box_scores_v2").where({gid: gid});
-    if (inDb.length > 0) {
-      if (inDb[0].final == true) {
-        console.log('sending response for game ', gid, ' as final');
-        res.send({
-          gid: gid,
-          final: true,
-          totals: inDb[0].totals,
-          q1: inDb[0].q1,
-          q2: inDb[0].q2,
-          q3: inDb[0].q3,
-          q4: inDb[0].q4,
-          ot: inDb[0].ot
-        })
-      } else {
-
-
-
-
-      }
+    // No stats means game has not started
+    if (!boxScore.data.stats) {
+      console.log(gid, ' has not started, sending back gid ref and active: false');
+      res.send ({
+        gid: gid,
+        active: false
+      })
+      return;
     } else {
-      console.log('game ', gid, ' has nothing in DB')
+      // There are stats in nba.com box score, so game has begun
+      const inDb = await knex("box_scores_v2").where({gid: gid});
+      if (inDb.length > 0) {
+        // Game is past Q1, since first DB insert occurs at end of Q1
+        if (inDb[0].final == true) {
+          // Game is final
+          console.log('sending response for game ', gid, ' as final');
+          res.send({
+            gid: gid,
+            final: true,
+            totals: inDb[0].totals,
+            q1: inDb[0].q1,
+            q2: inDb[0].q2,
+            q3: inDb[0].q3,
+            q4: inDb[0].q4,
+            ot: inDb[0].ot
+          })
+        } else {
+          // Game is in progress
+          const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+
+          const poss = boxScoreHelpers.calcPoss(
+            (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
+            (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
+            (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
+            (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
+          const hFgPct = boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga));
+          const vFgPct = boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga));
+
+          const hPlayers = activePlayers.filter(player => {
+            return (player.teamId === hTid && player.isOnCourt)
+          }).map(active => active.personId);
+
+          const vPlayers = activePlayers.filter(player => {
+            return (player.teamId === hTid && player.isOnCourt)
+          }).map(active => active.personId);
+
+          // this is the obj that sends back the live in-game totals every 5 seconds while game is in progress
+          const totalsObj = {
+            h: {
+              pts: parseInt(hTeam.totals.points),
+              fgm: parseInt(hTeam.totals.fgm),
+              fga: parseInt(hTeam.totals.fga),
+              fgPct: boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
+              fta: parseInt(hTeam.totals.fta),
+              to: parseInt(hTeam.totals.turnovers),
+              offReb: parseInt(hTeam.totals.offReb),
+              fouls: parseInt(hTeam.totals.pFouls)
+            },
+            v: {
+              pts: parseInt(vTeam.totals.points),
+              fgm: parseInt(vTeam.totals.fgm),
+              fga: parseInt(vTeam.totals.fga),
+              fgPct: boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga)),
+              fta: parseInt(vTeam.totals.fta),
+              to: parseInt(vTeam.totals.turnovers),
+              offReb: parseInt(vTeam.totals.offReb),
+              fouls: parseInt(vTeam.totals.pFouls)
+            },
+            t: {
+              pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
+              fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
+              fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
+              fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
+              fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
+              to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
+              offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
+              fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
+            }
+          };
+
+
+
+
+
+        }
+      } else {
+        // Game has started, but there are no stats store in DB -- so still in 1Q
+        console.log('game ', gid, ' has nothing in DB')
+      }
     }
   }
 
   // end revised load process
-
-
-
-  // If game has not started -- this is as far as the function should get
-  if (!boxScore.data.stats) {
-    console.log(gid, ' has not started, sending back gid ref and active: false');
-    res.send ({
-      gid: gid,
-      active: false
-    })
-    return;
-  }
-
-  // if game is over and last period state have been updated, kill function and add to finished games in state
-
-  // let dbCheck = await knex("box_scores_v2").where({gid: gid}).pluck('final');
-  // if (dbCheck[0]) {
-  //   res.send({final: true});
-  //   return;
-  // }
-
-  // this is what's breaking things ...
-  // if (clock.length < 1) {
-  //   if (period.current > 1) {
-  //     clock = '0:00';
-  //   } else {
-  //     clock = '12:00';
-  //   }
-  // };
-
-  let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
-  console.log('in index, gid is ', gid, ' period is ', period.current, ' clock is ', clock, ' gameSecs are ', gameSecs);
-
-  const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-
-  let poss = boxScoreHelpers.calcPoss(
-    (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
-    (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
-    (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
-    (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
-  let hFgPct = boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga));
-  let vFgPct = boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga));
-
-  const hPlayers = activePlayers.filter(player => {
-    return (player.teamId === hTid && player.isOnCourt)
-  }).map(active => active.personId);
-
-  const vPlayers = activePlayers.filter(player => {
-    return (player.teamId === hTid && player.isOnCourt)
-  }).map(active => active.personId);
-
-  // this is the obj that sends back the current totals every 5 seconds when the req is sent
-  let totalsObj = {
-    h: {
-      pts: parseInt(hTeam.totals.points),
-      fgm: parseInt(hTeam.totals.fgm),
-      fga: parseInt(hTeam.totals.fga),
-      fgPct: boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
-      fta: parseInt(hTeam.totals.fta),
-      to: parseInt(hTeam.totals.turnovers),
-      offReb: parseInt(hTeam.totals.offReb),
-      fouls: parseInt(hTeam.totals.pFouls)
-    },
-    v: {
-      pts: parseInt(vTeam.totals.points),
-      fgm: parseInt(vTeam.totals.fgm),
-      fga: parseInt(vTeam.totals.fga),
-      fgPct: boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga)),
-      fta: parseInt(vTeam.totals.fta),
-      to: parseInt(vTeam.totals.turnovers),
-      offReb: parseInt(vTeam.totals.offReb),
-      fouls: parseInt(vTeam.totals.pFouls)
-    },
-    t: {
-      pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
-      fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
-      fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
-      fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
-      fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
-      to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
-      offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
-      fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
-      poss: poss,
-      pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
-    }
-  };
 
   // this object calculates the stats for each quarter, using the previous totals from earlier Qs
   const quarterObj = async (prevTotals) => {
@@ -311,7 +299,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               {
                 quarterEnd: true,
                 live: true,
-                clock: clock,
+                clock: boxScoreHelpers.clockReturner(clock),
                 gameSecs: gameSecs,
                 period: period,
                 thru_period: 1,
@@ -325,7 +313,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
               res.send({
                 quarterEnd: true,
                 live: true,
-                clock: clock,
+                clock: boxScoreHelpers.clockReturner(clock),
                 gameSecs: gameSecs,
                 period: period,
                 thru_period: 1,
@@ -357,7 +345,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 res.send({
                   quarterEnd: true,
                   live: true,
-                  clock: clock,
+                  clock: boxScoreHelpers.clockReturner(clock),
                   gameSecs: gameSecs,
                   period: period,
                   thru_period: 2,
@@ -389,7 +377,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 res.send({
                   quarterEnd: true,
                   live: true,
-                  clock: clock,
+                  clock: boxScoreHelpers.clockReturner(clock),
                   gameSecs: gameSecs,
                   period: period,
                   thru_period: 3,
@@ -420,7 +408,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 res.send({
                   quarterEnd: true,
                   live: true,
-                  clock: clock,
+                  clock: boxScoreHelpers.clockReturner(clock),
                   gameSecs: gameSecs,
                   period: period,
                   thru_period: 4,
@@ -461,7 +449,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
                 res.send({
                   quarterEnd: true,
                   live: true,
-                  clock: clock,
+                  clock: boxScoreHelpers.clockReturner(clock),
                   gameSecs: gameSecs,
                   period: period,
                   thru_period: period.current,
@@ -496,7 +484,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         res.send({
           quarterEnd: false,
           live: false,
-          clock: clock,
+          clock: boxScoreHelpers.clockReturner(clock),
           gameSecs: gameSecs,
           period: period,
           thru_period: period.current,
@@ -514,7 +502,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           res.send({
             quarterEnd: false,
             live: true,
-            clock: clock,
+            clock: boxScoreHelpers.clockReturner(clock),
             gameSecs: gameSecs,
             period: period,
             thru_period: period.current - 1,
@@ -526,7 +514,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           res.send({
             quarterEnd: false,
             live: true,
-            clock: clock,
+            clock: boxScoreHelpers.clockReturner(clock),
             gameSecs: gameSecs,
             period: period,
             thru_period: period.current - 1,
