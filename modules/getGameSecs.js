@@ -35,7 +35,7 @@ const getGameSecs = (i, clock) => {
     }
   }
 
-  console.log('in getGameSecs period is ', i, ' clock is ', clock, ' secs are ', secs);
+  // console.log('in getGameSecs period is ', i, ' clock is ', clock, ' secs are ', secs);
 
   return secs;
 }

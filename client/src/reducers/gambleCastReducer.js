@@ -40,7 +40,8 @@ export default (state = {}, action) => {
         gameState.totals = action.payload.totals;
         gameState[`q${action.payload.perToUpdate}`] = action.payload.endOfQuarterData;
         gameState.prevQuarters = action.payload.prevQuarters;
-        console.log('end of quarter-updated state return for ', action.payload.gid);
+        gameState.clock = action.payload.clock;
+        console.log('end of quarter-updated state return for ', action.payload.gid, ' is ', action.payload);
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
         return {...state, [`live_${action.payload.gid}`]: action.payload}

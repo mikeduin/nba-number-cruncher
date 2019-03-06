@@ -12,16 +12,19 @@ class BoxScore extends React.Component {
     const game = this.props.game;
 
     console.log('props in BS are ', this.props);
-    this.props.fetchBoxScore(this.props.game.gid);
+    // this.props.fetchBoxScore(this.props.game.gid);
+
+    // if (game.gid === 21800926) {
 
     setInterval(() => {
       // if (this.props.activeGames.indexOf(game.gid) !== -1
       //   && this.props.completedGames.indexOf(game.gid) !== -1)
-      // {
+      //
         this.props.fetchBoxScore(this.props.game.gid);
         console.log('checking score for ', this.props.game.gid);
       // }
     }, 5000);
+    // }
   }
 
   checkSpread = () => {
@@ -54,7 +57,7 @@ class BoxScore extends React.Component {
     let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
     console.log('boxScore for ', game.gid ,' is', boxScore);
 
-    if (!boxScore || !boxScore.totals || boxScore.poss == 0) {
+    if (!boxScore || !boxScore.totals ) {
       if (!game) {
         return <div> loading ... </div>
       } else {

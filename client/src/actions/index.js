@@ -85,6 +85,8 @@ export const fetchGame = ({gid}) => async dispatch => {
   let response = await fetch(`/api/fetchGame/${gid}`);
   let data = await response.json();
   // both Obj and Arr data types ideal for custom component injection
+  console.log('data in response is ', data);
+
   let conv = {
     info: data.info,
     odds: data.odds || {},
@@ -165,10 +167,10 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   if (!getState().gambleCast[`live_${gid}`]) {
     console.log('game is not in state! Loading initial data');
-    const initLoad = await axios.get(`/initDataLoad/${todayInt}/${gid}`);
+    const initLoad = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
     const initData = initLoad.data;
     console.log('initData is ', initData);
-  
+
     const q1 = initData.q1 == null ? null : initData.q1[0];
     const q2 = initData.q2 == null ? null : initData.q2[0];
     const q3 = initData.q3 == null ? null : initData.q3[0];
@@ -178,18 +180,19 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
     const initDataLoad = {
       gid: gid,
-      prevTotals: initData.prevTotals,
       q1: q1,
       q2: q2,
       q3: q3,
       q4: q4,
       ot: ot,
+      prevTotals: initData.prevTotals,
+      totals: initData.totals[0],
       final: gameFinal,
-      active: true,
-      poss: initData.totals.t.poss
+      active: true
     };
 
     dispatch({ type: 'INIT_DATA_LOAD', payload: initDataLoad });
+    return;
   }
 
   if (gameFinal) {
@@ -223,24 +226,19 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     };
 
     const calcPoss = (fga, to, fta, oreb) => {
-      // console.log('in calcPoss, fga are ', fga, ' and to are ', to, ' and fta are ', fta, ' and oreb are ', oreb);
       return (0.96*((fga+to+(0.44*fta)-oreb)));
     };
 
     const calcQuarterPace = (quarterPoss, per, gameSecs) => {
-      // console.log('quarterPoss in quarter pace are ', quarterPoss);
       let pace = 0;
       if (per < 5) {
         let quarterSecs = (parseInt(gameSecs) - (720*parseInt(per-1)));
-        // console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
         pace = ((((720/quarterSecs)*quarterPoss)*4)/2);
       } else {
         let quarterSecs = (parseInt(gameSecs) - 2880 - (300*parseInt(per-4)));
-        // console.log('gameSecs are ', gameSecs, ' and quarterSecs are ', quarterSecs);
         pace = ((((300/quarterSecs)*quarterPoss)*4)/2)
       };
 
-      // console.log('pace in calcQuarterPace is ', pace);
       if (pace == null) {
         return 0
       } else {
@@ -249,7 +247,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
     }
 
     const calcGamePace = (poss, per, gameSecs) => {
-      // console.log('possInput in game pace are ', poss);
       let pace = 0;
       if (per < 5) {
         pace = (((2880/gameSecs)*poss)/2)
@@ -282,16 +279,12 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       let prevQuarters = response.prevQuarters;
 
       // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-
       let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
 
       dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
     } else {
-      // console.log('period ongoing, current period is ', period.current);
       let perToUpdate = period.current;
       let inQuarter = {};
-
-      // console.log('calcGamePace is ', calcGamePace(poss, period.current, gameSecs));
 
       if (period.current === 1) {
         inQuarter = {
@@ -306,7 +299,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       } else {
 
         let prevQuarters = response.prevQuarters;
-        // let prevQuarters = getState().prevQuarters;
         let perToUpdate = period.current;
 
         const quarterPoss = calcPoss(
@@ -328,8 +320,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
             - parseInt(prevQuarters.t.fta));
         let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
             - parseInt(prevQuarters.t.offReb));
-
-        // console.log('perFgs are ', perFgs, ' and perTO are ', perTO, ' and perFta are ', perFta, ' and perOffReb are ', perOffReb);
 
         let currentQuarter = {
             h: {

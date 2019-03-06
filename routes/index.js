@@ -47,17 +47,6 @@ setInterval(()=>{
   }
 }, 60000);
 
-
-// setTimeout(async ()=>{
-//   const gameStintsA = await knex("player_game_stints")
-//     .where("gdte", ">", "2019-01-15")
-//     .andWhere((builder)=> {
-//       builder.whereIn('team_id', [1610612740, 1610612754]).whereIn('player_id', rotPlayerIds)
-//     });
-//
-//   console.log(gameStintsA);
-// }, 2000)
-
 /* GET home page. */
 router.get("/", (req, res, next) => {
   console.log('hello');
@@ -101,15 +90,17 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
   const hAbb = boxScore.data.basicGameData.hTeam.triCode;
   const vAbb = boxScore.data.basicGameData.vTeam.triCode;
-  const gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+  let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
 
-  // beg revised load process - only want called on initial load!
+  // beg revised load process - ONLY WANT CALLED ON INITIAL LOAD!
+  // Maybe add extra param to request to incl indicator whether its initial load?
   // Maybe only run if game is not already in state?
     // This will only work if games that are completed are in state as live_gid, but set to final, and including quarter data
 
   if (moment(startTimeUTC).isBefore(nowUTC)) {
     // No stats means game has not started
     if (!boxScore.data.stats) {
+      // FIX THIS!!!
       console.log(gid, ' has not started, sending back gid ref and active: false');
       res.send ({
         gid: gid,
@@ -137,6 +128,17 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         } else {
           // Game is in progress
           const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+          let thru_period = 1;
+
+          let q2 = null;
+          let q3 = null;
+          let q4 = null;
+          let ot = null;
+
+          if (inDb[0].q2 != null) { q2 = inDb[0].q2; thru_period = 2 };
+          if (inDb[0].q3 != null) { q3 = inDb[0].q3; thru_period = 3 };
+          if (inDb[0].q4 != null) { q4 = inDb[0].q4; thru_period = 4 };
+          if (inDb[0].ot != null) { ot = inDb[0].ot; thru_period = 4 };
 
           const poss = boxScoreHelpers.calcPoss(
             (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
@@ -154,7 +156,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             return (player.teamId === hTid && player.isOnCourt)
           }).map(active => active.personId);
 
-          // this is the obj that sends back the live in-game totals every 5 seconds while game is in progress
+          // rename this to liveTotals
           const totalsObj = {
             h: {
               pts: parseInt(hTeam.totals.points),
@@ -190,10 +192,86 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
             }
           };
 
+          // this object calculates the stats for each quarter, using the previous totals from earlier Qs
+          const quarterObj = async (prevTotals) => {
+            const quarterPoss = boxScoreHelpers.calcPoss(
+              ( (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))
+                  - prevTotals[0].t.fga),
+              ( (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers))
+                  - prevTotals[0].t.to),
+              ( (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta))
+                  - prevTotals[0].t.fta),
+              ( (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb))
+                  - prevTotals[0].t.offReb)
+                );
 
+            // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
+            return {
+              h: {
+                pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
+                fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
+                fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
+                fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
+                fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
+                to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
+                offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
+                fouls: parseInt(hTeam.totals.pFouls) - parseInt(prevTotals[0].h.fouls)
+              },
+              v: {
+                pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
+                fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
+                fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
+                fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
+                fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
+                to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
+                offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
+                fouls: parseInt(vTeam.totals.pFouls) - parseInt(prevTotals[0].v.fouls)
+              },
+              t: {
+                pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
+                fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
+                fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
+                fgPct: boxScoreHelpers.calcFgPct(
+                  ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
+                  ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
+                ),
+                fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - parseInt(prevTotals[0].t.fta),
+                to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - parseInt(prevTotals[0].t.to),
+                offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
+                fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
+                poss: quarterPoss,
+                pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
+              }
+            }
+          }
 
+          // this is the function that combines the two above
+          const quarterUpdFn = async () => {
+            try {
+              let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+              let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+              console.log('prevTotalsPull[0] in q fn is ', prevTotalsPull[0]);
+              return {
+                currentQuarter: quarterTotals,
+                prevQuarters: prevTotalsPull[0].totals[0]
+              }
+            } catch (e) {
+              console.log('error spit out in quarterUpd for ', gid)
+            }
+          }
 
-
+          res.send({
+            gid: gid,
+            final: false,
+            prevTotals: inDb[0].totals,
+            totals: totalsObj,
+            q1: inDb[0].q1,
+            q2: q2,
+            q3: q3,
+            q4: q4,
+            ot: ot,
+            period: period.current
+          })
         }
       } else {
         // Game has started, but there are no stats store in DB -- so still in 1Q
@@ -204,328 +282,370 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
   // end revised load process
 
-  // this object calculates the stats for each quarter, using the previous totals from earlier Qs
-  const quarterObj = async (prevTotals) => {
-    const quarterPoss = boxScoreHelpers.calcPoss(
-      ( (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))
-          - prevTotals[0].t.fga),
-      ( (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers))
-          - prevTotals[0].t.to),
-      ( (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta))
-          - prevTotals[0].t.fta),
-      ( (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb))
-          - prevTotals[0].t.offReb)
-        );
 
-    // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
-    return {
+  // you NEED this if, or some conditional like it, otherwise an error gets spit out when trying to destructure hTeam, vTeam, etc
+  if (boxScore.data.stats) {
+    let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+
+      const poss = boxScoreHelpers.calcPoss(
+        (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
+        (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
+        (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
+        (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
+      const hFgPct = boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga));
+      const vFgPct = boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga));
+
+      const hPlayers = activePlayers.filter(player => {
+        return (player.teamId === hTid && player.isOnCourt)
+      }).map(active => active.personId);
+
+      const vPlayers = activePlayers.filter(player => {
+        return (player.teamId === hTid && player.isOnCourt)
+      }).map(active => active.personId);
+
+    const totalsObj = {
       h: {
-        pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
-        fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
-        fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
-        fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
-        fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
-        to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
-        offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
-        fouls: parseInt(hTeam.totals.pFouls) - parseInt(prevTotals[0].h.fouls)
+        pts: parseInt(hTeam.totals.points),
+        fgm: parseInt(hTeam.totals.fgm),
+        fga: parseInt(hTeam.totals.fga),
+        fgPct: boxScoreHelpers.calcFgPct(parseInt(hTeam.totals.fgm), parseInt(hTeam.totals.fga)),
+        fta: parseInt(hTeam.totals.fta),
+        to: parseInt(hTeam.totals.turnovers),
+        offReb: parseInt(hTeam.totals.offReb),
+        fouls: parseInt(hTeam.totals.pFouls)
       },
       v: {
-        pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
-        fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
-        fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
-        fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
-        fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
-        to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
-        offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
-        fouls: parseInt(vTeam.totals.pFouls) - parseInt(prevTotals[0].v.fouls)
+        pts: parseInt(vTeam.totals.points),
+        fgm: parseInt(vTeam.totals.fgm),
+        fga: parseInt(vTeam.totals.fga),
+        fgPct: boxScoreHelpers.calcFgPct(parseInt(vTeam.totals.fgm), parseInt(vTeam.totals.fga)),
+        fta: parseInt(vTeam.totals.fta),
+        to: parseInt(vTeam.totals.turnovers),
+        offReb: parseInt(vTeam.totals.offReb),
+        fouls: parseInt(vTeam.totals.pFouls)
       },
       t: {
-        pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
-        fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
-        fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
-        fgPct: boxScoreHelpers.calcFgPct(
-          ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
-          ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
-        ),
-        fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - parseInt(prevTotals[0].t.fta),
-        to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - parseInt(prevTotals[0].t.to),
-        offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
-        fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
-        poss: quarterPoss,
-        pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
+        pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
+        fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
+        fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
+        fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
+        fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
+        to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
+        offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
+        fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
+        poss: poss,
+        pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
       }
-    }
-  }
+    };
 
-  // this is the function that combines the two above
-  const quarterUpdFn = async () => {
-    try {
-      let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-      let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
-      console.log('prevTotalsPull[0] in q fn is ', prevTotalsPull[0]);
+    // this object calculates the stats for each quarter, using the previous totals from earlier Qs
+    const quarterObj = async (prevTotals) => {
+      const quarterPoss = boxScoreHelpers.calcPoss(
+        ( (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))
+            - prevTotals[0].t.fga),
+        ( (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers))
+            - prevTotals[0].t.to),
+        ( (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta))
+            - prevTotals[0].t.fta),
+        ( (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb))
+            - prevTotals[0].t.offReb)
+          );
+
+      // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
       return {
-        currentQuarter: quarterTotals,
-        prevQuarters: prevTotalsPull[0].totals[0]
-      }
-    } catch (e) {
-      console.log('error spit out in quarterUpd for ', gid)
-    }
-  }
-
-  // gameOver fn returns true if game has started but no longer activated
-  const gameOver = () => {
-    return (moment().utc().isAfter(startTimeUTC) && period.current >= 4 && !isGameActivated)
-  };
-
-    // if End of Period is true or Game is over
-    if (period.isEndOfPeriod || gameOver()) {
-      if (period.current === 1) {
-        let q1 = totalsObj;
-        console.log('end of period 1, clock is ', clock, ' and period.current is ', period.current, ' so being spit into gameSecs fn is period ', (period.current - 1));
-        gameSecs = getGameSecs((period.current-1), clock);
-        knex("box_scores_v2").where({gid: gid}).then(entry => {
-          if (!entry[0]) {
-            knex("box_scores_v2").insert({
-              gid: gid,
-              h_tid: hTid,
-              v_tid: vTid,
-              period_updated: 1,
-              clock_last_updated: gameSecs,
-              totals: [q1],
-              q1: [q1],
-              updated_at: new Date()
-            }).then(inserted => {
-              console.log('end of q1, response being sent to server is ',
-              {
-                quarterEnd: true,
-                live: true,
-                clock: boxScoreHelpers.clockReturner(clock),
-                gameSecs: gameSecs,
-                period: period,
-                thru_period: 1,
-                poss: poss,
-                pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                totals: totalsObj,
-                prevQuarters: totalsObj,
-                quarter: q1
-              }
-            );
-              res.send({
-                quarterEnd: true,
-                live: true,
-                clock: boxScoreHelpers.clockReturner(clock),
-                gameSecs: gameSecs,
-                period: period,
-                thru_period: 1,
-                poss: poss,
-                pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                totals: totalsObj,
-                prevQuarters: totalsObj,
-                quarter: q1
-              })
-            })
-          } else {
-            console.log('first period already entered in gid ', gid);
-          }
-        })
-      } else if (period.current === 2) {
-        knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
-          if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              console.log('quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
-              gameSecs = getGameSecs(period.current-1, clock);
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 2,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q2: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }, '*').then(inserted => {
-                console.log('inserted is ', inserted);
-                res.send({
-                  quarterEnd: true,
-                  live: true,
-                  clock: boxScoreHelpers.clockReturner(clock),
-                  gameSecs: gameSecs,
-                  period: period,
-                  thru_period: 2,
-                  poss: poss,
-                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                  totals: totalsObj,
-                  prevQuarters: qTotals.prevQuarters,
-                  quarter: qTotals.currentQuarter
-                })
-              })
-            })
-          } else {
-            console.log('second period already entered in gid ', gid);
-          }
-        })
-      } else if (period.current === 3) {
-        knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
-          if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              console.log('quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
-              gameSecs = getGameSecs(period.current-1, clock);
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 3,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q3: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }, '*').then(inserted => {
-                res.send({
-                  quarterEnd: true,
-                  live: true,
-                  clock: boxScoreHelpers.clockReturner(clock),
-                  gameSecs: gameSecs,
-                  period: period,
-                  thru_period: 3,
-                  poss: poss,
-                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                  totals: totalsObj,
-                  prevQuarters: qTotals.prevQuarters,
-                  quarter: qTotals.currentQuarter
-                })
-              })
-            })
-          } else {
-            console.log('third period already entered in gid ', gid);
-          }
-        })
-      } else if (period.current === 4 ) {
-        knex("box_scores_v2").where({gid: gid}).pluck('q4').then(qTest => {
-          if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              gameSecs = getGameSecs(period.current-1, clock);
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 4,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q4: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }, '*').then(inserted => {
-                res.send({
-                  quarterEnd: true,
-                  live: true,
-                  clock: boxScoreHelpers.clockReturner(clock),
-                  gameSecs: gameSecs,
-                  period: period,
-                  thru_period: 4,
-                  poss: poss,
-                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                  totals: totalsObj,
-                  prevQuarters: qTotals.prevQuarters,
-                  quarter: qTotals.currentQuarter
-                })
-              })
-            })
-          } else {
-            if (!isGameActivated) {
-              console.log('4Q data already entered, and game is over');
-              knex("box_scores_v2").where({gid: gid}).update({
-                final: true
-              }).then(() => {
-                console.log("game has been set to final in DB")
-              })
-            } else {
-              console.log('4Q data already entered and game is still ongoing!')
-            }
-          }
-        })
-      } else {
-        knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
-          // NEED TO FIX THIS IN EVENT OF MULTIPLE OTs!!!
-          if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              gameSecs = getGameSecs(period.current-1, clock);
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period.current,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                ot: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }, '*').then(inserted => {
-                res.send({
-                  quarterEnd: true,
-                  live: true,
-                  clock: boxScoreHelpers.clockReturner(clock),
-                  gameSecs: gameSecs,
-                  period: period,
-                  thru_period: period.current,
-                  poss: poss,
-                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                  totals: totalsObj,
-                  prevQuarters: qTotals.prevQuarters,
-                  quarter: qTotals.currentQuarter
-                })
-              })
-            })
-          } else {
-            if (!isGameActivated) {
-              console.log('OT data already entered, and game is over');
-              knex("box_scores_v2").where({gid: gid}).update({
-                final: true
-              }).then(() => {
-                console.log("game has been set to final (in OT) in DB")
-              })
-            } else {
-              console.log('OT data already entered and game is still ongoing!')
-            }
-          }
-        })
-      }
-    } else {
-      // if endOfPeriod is false && game is not activated ... does it get here if game has started?
-      // THIS NEEDS WORK, HAVE NOT REFINED
-      if (!isGameActivated) {
-        // THIS IS BEING REACHED IN FIRST PREGAME CHECK
-        console.log('server has reached unrefined game inactive fn');
-        res.send({
-          quarterEnd: false,
-          live: false,
-          clock: boxScoreHelpers.clockReturner(clock),
-          gameSecs: gameSecs,
-          period: period,
-          thru_period: period.current,
-          poss: poss,
-          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-          totals: totalsObj
-          // final: true
-        })
-      } else {
-        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-        console.log('prevTotals for ', gid, ' are ', prevTotalsPull);
-        console.log('prevTotals[0] for ', gid, ' are ', prevTotalsPull[0]);
-        // period.current === 1 just for testing prevTotalsPull; remove once corrected
-        if (period.current === 1) {
-          res.send({
-            quarterEnd: false,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: period.current - 1,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj
-          })
-        } else {
-          res.send({
-            quarterEnd: false,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: period.current - 1,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: prevTotalsPull[0].totals[0]
-          })
+        h: {
+          pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
+          fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
+          fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
+          fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
+          fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
+          to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
+          offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
+          fouls: parseInt(hTeam.totals.pFouls) - parseInt(prevTotals[0].h.fouls)
+        },
+        v: {
+          pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
+          fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
+          fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
+          fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
+          fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
+          to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
+          offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
+          fouls: parseInt(vTeam.totals.pFouls) - parseInt(prevTotals[0].v.fouls)
+        },
+        t: {
+          pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
+          fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
+          fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
+          fgPct: boxScoreHelpers.calcFgPct(
+            ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
+            ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
+          ),
+          fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - parseInt(prevTotals[0].t.fta),
+          to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - parseInt(prevTotals[0].t.to),
+          offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
+          fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
+          poss: quarterPoss,
+          pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
         }
       }
     }
+
+    // this is the function that combines the two above
+    const quarterUpdFn = async () => {
+      try {
+        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+        let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+        console.log('prevTotalsPull[0] in q fn is ', prevTotalsPull[0]);
+        return {
+          currentQuarter: quarterTotals,
+          prevQuarters: prevTotalsPull[0].totals[0]
+        }
+      } catch (e) {
+        console.log('error spit out in quarterUpd for ', gid)
+      }
+    }
+
+    // gameOver fn returns true if game has started but no longer activated
+    const gameOver = () => {
+      return (moment().utc().isAfter(startTimeUTC) && period.current >= 4 && !isGameActivated)
+    };
+
+      // if End of Period is true or Game is over
+      if (period.isEndOfPeriod || gameOver()) {
+        if (period.current === 1) {
+          gameSecs = getGameSecs((period.current-1), clock);
+          knex("box_scores_v2").where({gid: gid}).then(entry => {
+            if (!entry[0]) {
+              knex("box_scores_v2").insert({
+                gid: gid,
+                h_tid: hTid,
+                v_tid: vTid,
+                period_updated: 1,
+                clock_last_updated: gameSecs,
+                totals: [totalsObj],
+                q1: [totalsObj],
+                updated_at: new Date()
+              }).then(inserted => {
+                res.send({
+                  quarterEnd: true,
+                  live: true,
+                  clock: boxScoreHelpers.clockReturner(clock, period.current),
+                  gameSecs: gameSecs,
+                  period: period,
+                  thru_period: 1,
+                  poss: poss,
+                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                  totals: totalsObj,
+                  prevQuarters: totalsObj,
+                  quarter: totalsObj
+                })
+              })
+            } else {
+              console.log('first period already entered in gid ', gid);
+            }
+          })
+        } else if (period.current === 2) {
+          knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
+            if (qTest[0] == null) {
+              quarterUpdFn().then(qTotals => {
+                console.log('quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
+                gameSecs = getGameSecs(period.current-1, clock);
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: 2,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  q2: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }, '*').then(inserted => {
+                  console.log('inserted is ', inserted);
+                  res.send({
+                    quarterEnd: true,
+                    live: true,
+                    clock: boxScoreHelpers.clockReturner(clock, period.current),
+                    gameSecs: gameSecs,
+                    period: period,
+                    thru_period: 2,
+                    poss: poss,
+                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                    totals: totalsObj,
+                    prevQuarters: qTotals.prevQuarters,
+                    quarter: qTotals.currentQuarter
+                  })
+                })
+              })
+            } else {
+              console.log('second period already entered in gid ', gid);
+            }
+          })
+        } else if (period.current === 3) {
+          knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
+            if (qTest[0] == null) {
+              quarterUpdFn().then(qTotals => {
+                console.log('quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
+                gameSecs = getGameSecs(period.current-1, clock);
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: 3,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  q3: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }, '*').then(inserted => {
+                  res.send({
+                    quarterEnd: true,
+                    live: true,
+                    clock: boxScoreHelpers.clockReturner(clock, period.current),
+                    gameSecs: gameSecs,
+                    period: period,
+                    thru_period: 3,
+                    poss: poss,
+                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                    totals: totalsObj,
+                    prevQuarters: qTotals.prevQuarters,
+                    quarter: qTotals.currentQuarter
+                  })
+                })
+              })
+            } else {
+              console.log('third period already entered in gid ', gid);
+            }
+          })
+        } else if (period.current === 4 ) {
+          knex("box_scores_v2").where({gid: gid}).pluck('q4').then(qTest => {
+            if (qTest[0] == null) {
+              quarterUpdFn().then(qTotals => {
+                gameSecs = getGameSecs(period.current-1, clock);
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: 4,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  q4: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }, '*').then(inserted => {
+                  res.send({
+                    quarterEnd: true,
+                    live: true,
+                    clock: boxScoreHelpers.clockReturner(clock, period.current),
+                    gameSecs: gameSecs,
+                    period: period,
+                    thru_period: 4,
+                    poss: poss,
+                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                    totals: totalsObj,
+                    prevQuarters: qTotals.prevQuarters,
+                    quarter: qTotals.currentQuarter
+                  })
+                })
+              })
+            } else {
+              if (!isGameActivated) {
+                console.log('4Q data already entered, and game is over');
+                knex("box_scores_v2").where({gid: gid}).update({
+                  final: true
+                }).then(() => {
+                  console.log("game has been set to final in DB")
+                })
+              } else {
+                console.log('4Q data already entered and game is still ongoing!')
+              }
+            }
+          })
+        } else {
+          knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
+            // NEED TO FIX THIS IN EVENT OF MULTIPLE OTs!!!
+            if (qTest[0] == null) {
+              quarterUpdFn().then(qTotals => {
+                gameSecs = getGameSecs(period.current-1, clock);
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: period.current,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  ot: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }, '*').then(inserted => {
+                  res.send({
+                    quarterEnd: true,
+                    live: true,
+                    clock: boxScoreHelpers.clockReturner(clock, period.current),
+                    gameSecs: gameSecs,
+                    period: period,
+                    thru_period: period.current,
+                    poss: poss,
+                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+                    totals: totalsObj,
+                    prevQuarters: qTotals.prevQuarters,
+                    quarter: qTotals.currentQuarter
+                  })
+                })
+              })
+            } else {
+              if (!isGameActivated) {
+                console.log('OT data already entered, and game is over');
+                knex("box_scores_v2").where({gid: gid}).update({
+                  final: true
+                }).then(() => {
+                  console.log("game has been set to final (in OT) in DB")
+                })
+              } else {
+                console.log('OT data already entered and game is still ongoing!')
+              }
+            }
+          })
+        }
+      } else {
+        // if endOfPeriod is false && game is not activated ... does it get here if game has started?
+        // THIS NEEDS WORK, HAVE NOT REFINED
+        if (!isGameActivated) {
+          // THIS IS BEING REACHED IN FIRST PREGAME CHECK
+          console.log('server has reached unrefined game inactive fn');
+          res.send({
+            quarterEnd: false,
+            live: false,
+            clock: boxScoreHelpers.clockReturner(clock, period.current),
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: period.current,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj
+            // final: true
+          })
+        } else {
+          let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+          console.log('prevTotals for ', gid, ' are ', prevTotalsPull);
+          console.log('prevTotals[0] for ', gid, ' are ', prevTotalsPull[0]);
+          // period.current === 1 just for testing prevTotalsPull; remove once corrected
+          if (period.current === 1) {
+            res.send({
+              quarterEnd: false,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: period.current - 1,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj
+            })
+          } else {
+            res.send({
+              quarterEnd: false,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: period.current - 1,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: prevTotalsPull[0].totals[0]
+            })
+          }
+        }
+      }
+  }
+
+
 })
 
 // how best to use this?
@@ -751,8 +871,9 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("15 03 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("16 02 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
@@ -765,7 +886,6 @@ const timedDbUpdaters = schedule.scheduleJob("15 03 * * *", () => {
   setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 780000);
 })
 
 module.exports = router;

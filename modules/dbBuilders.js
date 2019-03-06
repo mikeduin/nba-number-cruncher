@@ -106,6 +106,8 @@ module.exports = {
       .where({ stt: "Final" })
       .whereNull("game_stints");
 
+    console.log('games are ', games);
+
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
