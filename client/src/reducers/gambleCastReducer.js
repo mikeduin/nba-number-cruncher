@@ -25,16 +25,7 @@ export default (state = {}, action) => {
         console.log('state for game NOT found, state is ', state);
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       };
-
-
     case 'ADD_SNAPSHOT':
-      // Hiding this in hopes other method works, delete once confirmed
-      // newState = state;
-      // newState[`live_${action.payload.gid}`].totals = action.payload.totals;
-      // newState[`live_${action.payload.gid}`][`q${action.payload.perToUpdate}`]: action.payload.endOfQuarterData;
-      // newState[`live_${action.payload.gid}`].prevQuarters: action.payload.prevQuarters;
-      // console.log('end of quarter-updated state return for ', action.payload.gid);
-      // return newState;
       if (state[`live_${action.payload.gid}`]) {
         let gameState = state[`live_${action.payload.gid}`];
         gameState.totals = action.payload.totals;

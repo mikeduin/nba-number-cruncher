@@ -34,20 +34,16 @@ module.exports = {
   calcPoss: (fga, to, fta, oreb) => {
     return (0.96*((fga+to+(0.44*fta)-oreb)));
   },
-  clockReturner: (clock, period) => {
+  clockReturner: (clock, period, gameSecs) => {
     if (clock.length < 1) {
-      // if (period.current > 1) {
-      //   clock = '0:00';
-      // } else {
-      //   clock = '12:00';
-      // }
-      return `END Q${period}`;
+      if (gameSecs > 0) {
+        return `END Q${period}`;
+      } else {
+        return 'Q1 12:00';
+      }
     } else {
       return clock;
-    };
-
-
-    // return clock;
+    }
   }
 }
 

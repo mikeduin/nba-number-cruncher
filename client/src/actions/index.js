@@ -165,57 +165,13 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
 
   let gameFinal = false;
 
-  if (!getState().gambleCast[`live_${gid}`]) {
-    console.log('game is not in state! Loading initial data');
-    const initLoad = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
-    const initData = initLoad.data;
-    console.log('initData is ', initData);
-
-    const q1 = initData.q1 == null ? null : initData.q1[0];
-    const q2 = initData.q2 == null ? null : initData.q2[0];
-    const q3 = initData.q3 == null ? null : initData.q3[0];
-    const q4 = initData.q4 == null ? null : initData.q4[0];
-    const ot = initData.ot == null ? null : initData.ot[0];
-    gameFinal = initData.final == null ? null : initData.final[0];
-
-    const initDataLoad = {
-      gid: gid,
-      q1: q1,
-      q2: q2,
-      q3: q3,
-      q4: q4,
-      ot: ot,
-      prevTotals: initData.prevTotals,
-      totals: initData.totals[0],
-      final: gameFinal,
-      active: true
-    };
-
-    dispatch({ type: 'INIT_DATA_LOAD', payload: initDataLoad });
-    return;
-  }
-
-  if (gameFinal) {
-    // build something in here that, when a game is final, adds to completed games in state
-    // to do this, I need a measure for if a game is completed in index
-    // game is over AND last period stats have been updated
-
-    let activeGames = getState().activeGames;
-    let completedGames = getState().completedGames;
-    if (activeGames.indexOf(gid) !== -1 && completedGames.indexOf(gid) !== -1) {
-      // remove active game
-      dispatch({ type: 'SET_TO_FINAL', payload: gid });
-      // add completed game
-      dispatch({ type: 'SET_COMPLETED_GAME', payload: gid });
-
-    }
-    return;
-  }
+  console.log('gets to action ... ');
 
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   const response = game.data;
 
   console.log('response for ', gid, ' is ', response);
+  console.log('response should have been sent');
 
   // are things not showing up because it's not live in response?
   if (response.live) {
@@ -310,7 +266,7 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
               - parseInt(prevQuarters.t.fta)),
           ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
               - parseInt(prevQuarters.t.offReb))
-            );
+        );
 
         let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
             - parseInt(prevQuarters.t.fga));
