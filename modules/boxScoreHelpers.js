@@ -14,7 +14,7 @@ module.exports = {
     };
   },
   calcFgPct: (fgm, fga) => {
-    return (((fgm/fga)*100).toFixed(1));
+    return (((parseInt(fgm)/parseInt(fga))*100).toFixed(1));
   },
   calcGamePace: (poss, per, gameSecs) => {
     // period is nba-based (1st period = 1), not index-based (1st period = 0)
@@ -31,8 +31,21 @@ module.exports = {
       return pace
     };
   },
-  calcPoss: (fga, to, fta, oreb) => {
-    return (0.96*((fga+to+(0.44*fta)-oreb)));
+  calcGamePoss: (hTotals, vTotals) => {
+    const fga = parseInt(hTotals.fga) + parseInt(vTotals.fga);
+    const to = parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers);
+    const fta = parseInt(hTotals.fta) + parseInt(vTotals.fta);
+    const offReb = parseInt(hTotals.offReb) + parseInt(vTotals.offReb);
+
+    return (0.96*((fga+to+(0.44*fta)-offReb)));
+  },
+  calcQuarterPoss: (hTotals, vTotals, prevTotals) => {
+    const fga = ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - prevTotals.fga);
+    const to = ((parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - prevTotals.to);
+    const fta = ((parseInt(hTotals.fta) + parseInt(vTotals.fta)) - prevTotals.fta);
+    const offReb = ((parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - prevTotals.offReb);
+
+    return (0.96*((fga+to+(0.44*fta)-offReb)));
   },
   clockReturner: (clock, period, gameSecs) => {
     if (clock.length < 1) {

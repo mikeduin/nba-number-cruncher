@@ -21,7 +21,7 @@ class BoxScore extends React.Component {
       //   && this.props.completedGames.indexOf(game.gid) !== -1)
       //
         this.props.fetchBoxScore(this.props.game.gid);
-        console.log('checking score for ', this.props.game.gid);
+        // console.log('checking score for ', this.props.game.gid);
       // }
     }, 5000);
     // }
