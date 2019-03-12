@@ -9,6 +9,8 @@ const leagueScheduleUrl =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
 let now = new Date();
 
+// NOTE: For future season builds, will have to change hard-coded season values in params below
+
 module.exports = {
   fetchAdvancedPlayerParams: games => {
     return {
@@ -36,6 +38,38 @@ module.exports = {
       StarterBench: "",
       VsConference: "",
       VsDivision: ""
+    };
+  },
+  fetchBaseTeamParams: (games, period) => {
+    return {
+      Conference: "",
+      Division: "",
+      GameScope: "",
+      PlayerExperience: "",
+      PlayerNull: "",
+      MeasureType: "Base",
+      LeagueID: "00",
+      PerMode: "PerGame",
+      PlusMinus: "N",
+      PaceAdjust: "N",
+      Rank: "N",
+      Season: "2018-19",
+      SeasonType: "Regular Season",
+      Outcome: "",
+      SeasonSegment: "",
+      DateFrom: "",
+      DateTo: "",
+      OpponentTeamID: 0,
+      VsConference: "",
+      VsDivision: "",
+      LastNGames: games,
+      Location: "",
+      Period: period,
+      GameSegment: "",
+      Month: 0,
+      PORound: 0,
+      TeamID: 0,
+      TwoWay: 0
     };
   },
   fetchAdvancedTeamParams: (games, period) => {
