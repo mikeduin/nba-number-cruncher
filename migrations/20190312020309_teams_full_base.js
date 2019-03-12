@@ -12,6 +12,7 @@ exports.up = function(knex, Promise) {
     t.float('fg3_pct');
     t.float('ftm');
     t.float('fta');
+    t.float('ft_pct');
     t.float('oreb');
     t.float('dreb');
     t.float('reb');
@@ -27,11 +28,17 @@ exports.up = function(knex, Promise) {
     t.integer('gp_rank');
     t.integer('w_rank');
     t.integer('l_rank');
-    t.integer('win_pct_rank');
+    t.integer('w_pct_rank');
     t.integer('min_rank');
     t.integer('fgm_rank');
     t.integer('fga_rank');
     t.integer('fg_pct_rank');
+    t.integer('fg3m_rank');
+    t.integer('fg3a_rank');
+    t.integer('fg3_pct_rank');
+    t.integer('ftm_rank');
+    t.integer('fta_rank');
+    t.integer('ft_pct_rank');
     t.integer('oreb_rank');
     t.integer('dreb_rank');
     t.integer('reb_rank');
@@ -46,6 +53,7 @@ exports.up = function(knex, Promise) {
     t.integer('plus_minus_rank');
     t.integer('cfid');
     t.string('cfparams');
+    t.timestamp('updated_at');
   })
 };
 

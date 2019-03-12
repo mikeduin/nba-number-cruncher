@@ -1,6 +1,6 @@
 const knex = require('../db/knex');
 const axios = require('axios');
-const advancedTeamStats = 'https://stats.nba.com/stats/leaguedashteamstats';
+const teamStatsUrl = 'https://stats.nba.com/stats/leaguedashteamstats';
 const dbBuilders = require("../modules/dbBuilders");
 
 // const headers = {
@@ -16,23 +16,34 @@ const dbBuilders = require("../modules/dbBuilders");
 //   "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Mobile Safari/537.36"
 // }
 
+const updateBaseTeamBuild = (games, db, period) => {
+  axios.get(teamStatsUrl, {params: dbBuilders.fetchBaseTeamParams(games, period)})
+    .then(response => {
+      let teamData = response.data.resultSets[0].rowSet;
+      // Change this to .buildBaseTeamDb for initial builds
+      dbBuilders.buildBaseTeamDb(db, teamData);
+      // dbBuilders.updateBaseTeamDb(db, teamData);
+    });
+};
+
+
 const updateFullTeamBuild = (games, db, period) => {
-  axios.get(advancedTeamStats, {params: dbBuilders.fetchAdvancedTeamParams(games, period)})
+  axios.get(teamStatsUrl, {params: dbBuilders.fetchAdvancedTeamParams(games, period)})
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildTeamDb(db, teamData);
-      dbBuilders.updateTeamDb(db, teamData);
+      // dbBuilders.buildAdvancedTeamDb(db, teamData);
+      dbBuilders.updateAdvancedTeamDb(db, teamData);
     });
 };
 
 const updatePartialTeamBuild = (games, db, lineup) => {
-  axios.get(advancedTeamStats, {params: dbBuilders.fetchLineupParams(games, lineup)})
+  axios.get(teamStatsUrl, {params: dbBuilders.fetchLineupParams(games, lineup)})
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildTeamDb(db, teamData);
-      dbBuilders.updateTeamDb(db, teamData);
+      // dbBuilders.buildAdvancedTeamDb(db, teamData);
+      dbBuilders.updateAdvancedTeamDb(db, teamData);
     })
 };
 
