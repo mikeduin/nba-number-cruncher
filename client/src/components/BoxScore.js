@@ -5,14 +5,22 @@ import { Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
-  // state = {active: false};
+  state = {final: false};
 
   componentDidMount () {
     const game = this.props.game;
 
     setInterval(() => {
-      console.log('activeGames as found in BoxScore are ', this.props.activeGames);
-      this.props.fetchBoxScore(this.props.game.gid);
+      if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
+        console.log('fetching box score for ', this.props.game.gid);
+        this.props.fetchBoxScore(this.props.game.gid);
+
+        if (this.props.gambleCast[`live_${game.gid}`]) {
+          if (this.props.gambleCast[`live_${game.gid}`].final == true) {
+            this.setState({final: true})
+          }
+        }
+      }
     }, 5000);
   }
 

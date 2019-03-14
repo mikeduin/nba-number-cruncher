@@ -39,12 +39,12 @@ setInterval(async () => {
   const todayGids = todayGames.map(game => game.gid);
   let now = moment().utc();
 
-  const finalGames = await knex("box_scores_v2")
+  const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
     .where({final: true})
     .pluck('gid');
 
-  completedGames = finalGames;
+  completedGames = finalBoxScores;
 
   todayGames.forEach(game => {
     let start = momentTz(game.etm).subtract(180, 'minutes').tz("America/Toronto").format();
@@ -61,8 +61,14 @@ setInterval(async () => {
 setTimeout(() => {
   console.log('activeGames are ', activeGames);
   console.log('pushing active game');
-  activeGames.push(12345);
-}, 35000);
+  activeGames.push(21801017);
+}, 30000);
+
+setTimeout(() => {
+  console.log('completedGames are ', completedGames);
+  console.log('pushing completed game');
+  completedGames.push(21801017);
+}, 45000);
 
 // setTimeout() => {
 //   // dbBuilders.buildGameStintsDb()
