@@ -72,10 +72,10 @@ setInterval(async () => {
 //   completedGames.push(21801017);
 // }, 45000);
 
-setTimeout(() => {
-  // dbBuilders.buildGameStintsDb()
-  // updateTeamStats.updateFullTeamBuilds()
-}, 1000)
+// setTimeout(() => {
+//   // dbBuilders.buildGameStintsDb()
+//   // updateTeamStats.updateFullTeamBuilds()
+// }, 1000)
 
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
@@ -145,63 +145,44 @@ setInterval(async () => {
 
 }, 2000)
 
-// setInterval(() => {
-//   let todayInt = moment().format('YYYYMMDD');
-//   activeGames.forEach(async (game) => {
-//     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
-//     const boxScore = await axios.get(url);
-//     const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
-//
-//     let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
-//
-//     if (boxScore.data.stats) {
-//       let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-//       const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
-//       const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-//       const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
-//
-//       const totalsObj = {
-//         h: {
-//           pts: parseInt(hTeam.totals.points),
-//           fgm: parseInt(hTeam.totals.fgm),
-//           fga: parseInt(hTeam.totals.fga),
-//           fgPct: boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
-//           fta: parseInt(hTeam.totals.fta),
-//           to: parseInt(hTeam.totals.turnovers),
-//           offReb: parseInt(hTeam.totals.offReb),
-//           fouls: parseInt(hTeam.totals.pFouls)
-//         },
-//         v: {
-//           pts: parseInt(vTeam.totals.points),
-//           fgm: parseInt(vTeam.totals.fgm),
-//           fga: parseInt(vTeam.totals.fga),
-//           fgPct: boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
-//           fta: parseInt(vTeam.totals.fta),
-//           to: parseInt(vTeam.totals.turnovers),
-//           offReb: parseInt(vTeam.totals.offReb),
-//           fouls: parseInt(vTeam.totals.pFouls)
-//         },
-//         t: {
-//           pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
-//           fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
-//           fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
-//           fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
-//           fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
-//           to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
-//           offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
-//           fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
-//           poss: poss,
-//           pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
-//         }
-//       };
-//
-//
-//     } else {
-//       console.log('no stats yet for game ', game, ' game has not tipped off');
-//     }
-//
-//   })
-// }, 3000)
+setInterval(() => {
+  let todayInt = moment().format('YYYYMMDD');
+  activeGames.forEach(async (game) => {
+    const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
+    const boxScore = await axios.get(url);
+    const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
+
+    let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+
+    if (boxScore.data.stats) {
+      let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+      const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
+      const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+      const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+
+      const totalsObj = boxScoreHelpers.getTotalsObj(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+
+      const quarterObj = prevTotals => {
+        return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.Totals, prevTotals[0], period.current, gameSecs);
+      }
+
+      const quarterUpdFn = async () => {
+        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+        let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+        return {
+          currentQuarter: quarterTotals,
+          prevQuarters: prevTotalsPull[0].totals[0]
+        }
+      }
+
+
+
+    } else {
+      console.log('no stats yet for game ', game, ' game has not tipped off');
+    }
+
+  })
+}, 3000)
 
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
@@ -226,13 +207,9 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
-
-  console.log('boxscore for ', gid, ' ')
-
   const momentNow = moment().format();
 
   const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
-
 
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
   const vTid = boxScore.data.basicGameData.vTeam.teamId;
@@ -375,9 +352,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   // you NEED this if, or some conditional like it, otherwise an error gets spit out when trying to destructure hTeam, vTeam, etc
   if (boxScore.data.stats) {
     let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-
     const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
-
     const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
     const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
@@ -389,83 +364,11 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       return (player.teamId === hTid && player.isOnCourt)
     }).map(active => active.personId);
 
-    const totalsObj = {
-      h: {
-        pts: parseInt(hTeam.totals.points),
-        fgm: parseInt(hTeam.totals.fgm),
-        fga: parseInt(hTeam.totals.fga),
-        fgPct: boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
-        fta: parseInt(hTeam.totals.fta),
-        to: parseInt(hTeam.totals.turnovers),
-        offReb: parseInt(hTeam.totals.offReb),
-        fouls: parseInt(hTeam.totals.pFouls)
-      },
-      v: {
-        pts: parseInt(vTeam.totals.points),
-        fgm: parseInt(vTeam.totals.fgm),
-        fga: parseInt(vTeam.totals.fga),
-        fgPct: boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
-        fta: parseInt(vTeam.totals.fta),
-        to: parseInt(vTeam.totals.turnovers),
-        offReb: parseInt(vTeam.totals.offReb),
-        fouls: parseInt(vTeam.totals.pFouls)
-      },
-      t: {
-        pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
-        fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
-        fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
-        fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
-        fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
-        to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
-        offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
-        fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
-        poss: poss,
-        pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
-      }
-    };
+    const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 
     // this object calculates the stats for each quarter, using the previous totals from earlier Qs
-    const quarterObj = async (prevTotals) => {
-      const quarterPoss = boxScoreHelpers.calcQuarterPoss(hTeam.totals, vTeam.totals, prevTotals[0].t);
-
-      // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
-      return {
-        h: {
-          pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
-          fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
-          fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
-          fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
-          fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
-          to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
-          offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
-          fouls: parseInt(hTeam.totals.pFouls) - parseInt(prevTotals[0].h.fouls)
-        },
-        v: {
-          pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
-          fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
-          fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
-          fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
-          fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
-          to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
-          offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
-          fouls: parseInt(vTeam.totals.pFouls) - parseInt(prevTotals[0].v.fouls)
-        },
-        t: {
-          pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
-          fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
-          fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
-          fgPct: boxScoreHelpers.calcFgPct(
-            ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
-            ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
-          ),
-          fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - parseInt(prevTotals[0].t.fta),
-          to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - parseInt(prevTotals[0].t.to),
-          offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
-          fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
-          poss: quarterPoss,
-          pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
-        }
-      }
+    const quarterObj = prevTotals => {
+      return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.Totals, prevTotals[0], period.current, gameSecs);
     }
 
     // this is the function that combines the two above
