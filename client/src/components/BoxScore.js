@@ -5,24 +5,23 @@ import { Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
-  state = {final: false, gameSpread: null};
+  state = {final: false, gameSpread: null, q1Spread: null, q2Spread: null, q3Spread: null, q4Spread: null};
 
-  checkSpread = () => {
+  checkSpread = (period, home, away, total) => {
     let game = this.props.game;
-
     console.log('game is ', game);
 
-    if (game.home_spread_full < game.away_spread_full) {
+    if (home < away) {
         this.setState({
-          gameSpread: `${game.h[0].ta} ${game.home_spread_full}`
+          [`${period}`]: `${game.h[0].ta} ${home}, O/U ${total}`
         })
-    } else if (game.away_spread_full < game.home_spread_full) {
+    } else if (away < home) {
         this.setState({
-          gameSpread: `${game.v[0].ta} ${game.away_spread_full}`
+          [`${period}`]: `${game.v[0].ta} ${away}, O/U ${total}`
         })
     } else {
       this.setState({
-        gameSpread: `${game.h[0].ta} PK`
+        [`${period}`]: `${game.h[0].ta} PK, O/U ${total}`
       })
     }
 
@@ -30,16 +29,18 @@ class BoxScore extends React.Component {
 
   componentDidMount () {
     const game = this.props.game;
-    this.checkSpread();
+    this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
+    this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
     setInterval(() => {
       if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
         console.log('fetching box score for ', this.props.game.gid);
         this.props.fetchBoxScore(this.props.game.gid);
 
-        if (!this.state.gameSpread) {
-          this.checkSpread();
-        };
+        // if (!this.state.gameSpread) {
+        //   this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
+        //   this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q);
+        // };
 
         if (this.props.gambleCast[`live_${game.gid}`]) {
           if (this.props.gambleCast[`live_${game.gid}`].final == true) {
@@ -80,11 +81,11 @@ class BoxScore extends React.Component {
                 fontSize: '10px',
                 padding: 0
               }}>
-                <Table.HeaderCell textAlign="right">
-                  <i>Odds -> {this.state.gameSpread}, O/U {game.total_full} </i>
+                <Table.HeaderCell textAlign="right"> <i>Odds -> </i> </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2">
+                  {this.state.gameSpread}
                 </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2">  </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> {this.state.q1Spread} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
