@@ -17,7 +17,7 @@ class GambleCast extends React.Component {
     if (this.props.games[0]) {
       return this.props.games.map(game => {
         return (
-          <BoxScore key={game.gid} game={game} liveUpdates={checkActive(game.gid)}/>
+          <BoxScore key={game.gid} game={game}/>
         )
       })
     } else {
