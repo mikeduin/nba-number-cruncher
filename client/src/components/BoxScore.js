@@ -7,24 +7,12 @@ import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 class BoxScore extends React.Component {
   // state = {active: false};
 
-  // if this timed function does not work ... it's because when the redux store's active games change, they're not being sent down here
   componentDidMount () {
     const game = this.props.game;
 
-    console.log('props in BS are ', this.props);
-    // this.props.fetchBoxScore(this.props.game.gid);
-
-    // if (game.gid === 21800926) {
-
     setInterval(() => {
-      // if (this.props.activeGames.indexOf(game.gid) !== -1
-      //   && this.props.completedGames.indexOf(game.gid) !== -1)
-      //
         this.props.fetchBoxScore(this.props.game.gid);
-        // console.log('checking score for ', this.props.game.gid);
-      // }
     }, 5000);
-    // }
   }
 
   checkSpread = () => {
@@ -54,8 +42,7 @@ class BoxScore extends React.Component {
   render () {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
-    let snapshot = this.props.gambleCast[`live_snap_${game.gid}`];
-    console.log('boxScore for ', game.gid ,' is', boxScore);
+    // console.log('boxScore for ', game.gid ,' is', boxScore);
 
     if (!boxScore || !boxScore.totals ) {
       if (!game) {
@@ -64,7 +51,7 @@ class BoxScore extends React.Component {
         return <EmptyBoxScore game={game}/>
       }
     } else {
-      console.log('this.props when boxScore is rendered is ', this.props);
+      // console.log('this.props when boxScore is rendered is ', this.props);
       return (
         <div>
           <Table compact celled

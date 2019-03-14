@@ -164,17 +164,10 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190225';
   let todayInt = moment().format('YYYYMMDD');
-  let momentNow = moment().format();
-
   let gameFinal = false;
-
-  console.log('should be fetching box score for ', gid, ' at ', momentNow);
 
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   const response = game.data;
-
-  console.log('response for ', gid, ' at ', momentNow,  ' is ', response);
-  console.log('response should have been sent');
 
   // are things not showing up because it's not live in response?
   if (response.live) {

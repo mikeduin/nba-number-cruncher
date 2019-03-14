@@ -4,6 +4,7 @@ const axios = require("axios");
 const knex = require("../db/knex");
 const schedule = require("node-schedule");
 const moment = require("moment");
+const momentTz = require("moment-timezone");
 const cheerio = require('cheerio');
 const _ = require('lodash');
 
@@ -27,7 +28,34 @@ const webScrapeHelpers = require("../modules/webScrapeHelpers");
 
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-let now = moment().format('YYYY-MM-DD');
+// let today = moment().utcOffset(420).format('YYYY-MM-DD');
+let today = '2019-03-13';
+
+let activeGames = [];
+let completedGames = [];
+
+setInterval(async () => {
+  const todayGames = await knex("schedule").where({gdte: today});
+  const todayGids = todayGames.map(game => game.gid);
+  let now = moment().utc();
+
+  const finalGames = await knex("box_scores_v2")
+    .whereIn('gid', todayGids)
+    .where({final: true})
+    .pluck('gid');
+
+  completedGames = finalGames;
+
+  todayGames.forEach(game => {
+    let start = momentTz(game.etm).subtract(180, 'minutes').tz("America/Toronto").format();
+    let mins = now.diff(start, 'minutes');
+
+    if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
+      activeGames.push(game.gid)
+    };
+  })
+  
+}, 5000)
 
 // setTimeout() => {
 //   // dbBuilders.buildGameStintsDb()
