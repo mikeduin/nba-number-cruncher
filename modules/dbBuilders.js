@@ -557,6 +557,70 @@ module.exports = {
         });
     });
   },
+  updateBaseTeamDb: (db, arrayData) => {
+    // This function builds out the initial advanced team DB and should only need to be run at the beginning of each season
+    arrayData.forEach(team => {
+      knex(db)
+        .where({ team_id: team[0] })
+        .update(
+          {
+            min: team[6],
+            fgm: team[7],
+            fga: team[8],
+            fg_pct: team[9],
+            fg3m: team[10],
+            fg3a: team[11],
+            fg3_pct: team[12],
+            ftm: team[13],
+            fta: team[14],
+            ft_pct: team[15],
+            oreb: team[16],
+            dreb: team[17],
+            reb: team[18],
+            ast: team[19],
+            tov: team[20],
+            stl: team[21],
+            blk: team[22],
+            blka: team[23],
+            pf: team[24],
+            pfd: team[25],
+            pts: team[26],
+            plus_minus: team[27],
+            gp_rank: team[28],
+            w_rank: team[29],
+            l_rank: team[30],
+            w_pct_rank: team[31],
+            min_rank: team[32],
+            fgm_rank: team[33],
+            fga_rank: team[34],
+            fg_pct_rank: team[35],
+            fg3m_rank: team[36],
+            fg3a_rank: team[37],
+            fg3_pct_rank: team[38],
+            ftm_rank: team[39],
+            fta_rank: team[40],
+            ft_pct_rank: team[41],
+            oreb_rank: team[42],
+            dreb_rank: team[43],
+            reb_rank: team[44],
+            ast_rank: team[45],
+            tov_rank: team[46],
+            stl_rank: team[47],
+            blk_rank: team[48],
+            blka_rank: team[49],
+            pf_rank: team[50],
+            pfd_rank: team[51],
+            pts_rank: team[52],
+            plus_minus_rank: team[53],
+            updated_at: new Date()
+          },
+          "*"
+        )
+        .then(team => {
+          console.log(team[0].team_name, " has been updated in base db");
+        });
+    });
+  },
   buildAdvancedTeamDb: (db, arrayData) => {
     // This function builds out the initial advanced team DB and should only need to be run at the beginning of each season
     arrayData.forEach(team => {

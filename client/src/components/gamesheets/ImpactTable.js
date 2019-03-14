@@ -45,7 +45,7 @@ class ImpactTable extends React.Component {
                 <Table.HeaderCell
                   sorted={column === 'diff_pace_delta' ? direction : null}
                   onClick={this.handleSort('diff_pace_delta', 'desc')}
-                > Team <br /> Pace </Table.HeaderCell>
+                > {this.props.sortedBy == 'netRtgDelta' ? <div>Net <br/> Rtg </div> : <div>Team <br /> Pace </div>}  </Table.HeaderCell>
                 <Table.HeaderCell
                   sorted={column === 'team_offRtg_delta' ? direction : null}
                   onClick={this.handleSort('team_offRtg_delta', 'desc')}
@@ -63,14 +63,14 @@ class ImpactTable extends React.Component {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {_.map(data, ({ name, id, team_abb, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, total_rating }) => (
+              {_.map(data, ({ name, id, team_abb, net_rtg_full, diff_pace_delta, team_offRtg_delta, opp_offRtg_delta, netRtg_delta, total_rating }) => (
                 <Table.Row
                   key={id}
                 >
                   <Table.Cell>
                     <Link to={`/player/${id}`}> {name} </Link>
                   </Table.Cell>
-                  <Table.Cell> {diff_pace_delta} </Table.Cell>
+                  <Table.Cell> {this.props.sortedBy == 'netRtgDelta' ? net_rtg_full : diff_pace_delta} </Table.Cell>
                   <Table.Cell> {team_offRtg_delta} </Table.Cell>
                   <Table.Cell> {opp_offRtg_delta} </Table.Cell>
                   <Table.Cell> {this.props.sortedBy == 'netRtgDelta' ? netRtg_delta : total_rating.toFixed(2)} </Table.Cell>

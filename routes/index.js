@@ -29,9 +29,10 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 
 let now = moment().format('YYYY-MM-DD');
 
-// setInterval(() => {
+// setTimeout() => {
 //   // dbBuilders.buildGameStintsDb()
-// }, 10000)
+//   updateTeamStats.updateFullTeamBuilds()
+// }, 1000)
 
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
@@ -575,6 +576,12 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         }
       }
+  } else {
+    console.log(gid, ' has not started, sending back gid ref and active: false');
+    res.send({
+      gid: gid,
+      active: false
+    })
   }
 
 
@@ -803,9 +810,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("18 11 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("04 13 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
@@ -814,6 +820,7 @@ const timedDbUpdaters = schedule.scheduleJob("18 11 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
   setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
   setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
   setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
