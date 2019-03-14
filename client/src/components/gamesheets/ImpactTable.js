@@ -45,7 +45,7 @@ class ImpactTable extends React.Component {
                 <Table.HeaderCell
                   sorted={column === 'diff_pace_delta' ? direction : null}
                   onClick={this.handleSort('diff_pace_delta', 'desc')}
-                > {this.props.sortedBy == 'netRtgDelta' ? <div>Net <br/> Rtg </div> : <div>Team <br /> Pace </div>}  </Table.HeaderCell>
+                > Team <br /> Pace </Table.HeaderCell>
                 <Table.HeaderCell
                   sorted={column === 'team_offRtg_delta' ? direction : null}
                   onClick={this.handleSort('team_offRtg_delta', 'desc')}
@@ -60,6 +60,11 @@ class ImpactTable extends React.Component {
                   onClick={this.handleSort('netRtg_delta', 'desc')}
                 > {this.props.sortedBy == 'netRtgDelta' ? <div>Team<br/>Net Rtg </div> : <div>Total<br/> Rating </div>}
                 </Table.HeaderCell>
+                <Table.HeaderCell
+                  sorted={column === 'net_rtg_full' ? direction : null}
+                  onClick={this.handleSort('net_rtg_full', 'desc')}
+                > Player<br/>Net Rtg
+                </Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -70,10 +75,11 @@ class ImpactTable extends React.Component {
                   <Table.Cell>
                     <Link to={`/player/${id}`}> {name} </Link>
                   </Table.Cell>
-                  <Table.Cell> {this.props.sortedBy == 'netRtgDelta' ? net_rtg_full : diff_pace_delta} </Table.Cell>
+                  <Table.Cell> {diff_pace_delta} </Table.Cell>
                   <Table.Cell> {team_offRtg_delta} </Table.Cell>
                   <Table.Cell> {opp_offRtg_delta} </Table.Cell>
                   <Table.Cell> {this.props.sortedBy == 'netRtgDelta' ? netRtg_delta : total_rating.toFixed(2)} </Table.Cell>
+                  <Table.Cell> {net_rtg_full} </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>

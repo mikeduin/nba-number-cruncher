@@ -11,6 +11,7 @@ import QuarterChart from './QuarterChart';
 import InfoTable from './gamesheets/InfoTable';
 import ImpactTable from './gamesheets/ImpactTable';
 import RotationTable from './gamesheets/RotationTable';
+import StatTable from './gamesheets/StatTable';
 import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
 class GameSheet extends React.Component {
@@ -139,6 +140,13 @@ class GameSheet extends React.Component {
             <Tab.Pane>
               <RotationTable
                 players={game.rotPlayers}
+              />
+            </Tab.Pane>
+          },
+          {menuItem: 'Traditional Stats', render: () =>
+            <Tab.Pane>
+              <StatTable
+                
               />
             </Tab.Pane>
           }

@@ -667,6 +667,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const vNetRtg = await knex("team_net_ratings").where({team_id: v});
   const hPace = await knex("team_pace").where({team_id: h});
   const vPace = await knex("team_pace").where({team_id: v});
+  const hTradStats = await knex("teams_full_base").where({team_id: h});
+  const vTradStats = await knex("teams_full_base").where({team_id: v});
   const hInfo = await knex("teams").where({tid: h});
   const vInfo = await knex("teams").where({tid: v});
   const matchups = await knex("schedule")
@@ -802,6 +804,8 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     matchups,
     hNetRtg: hNetRtg[0],
     vNetRtg: vNetRtg[0],
+    hTradStats: hTradStats[0],
+    vTradStats: vTradStats[0],
     hPace: hPace[0],
     vPace: vPace[0],
     hInfo: hInfo[0],
