@@ -11,7 +11,8 @@ class BoxScore extends React.Component {
     const game = this.props.game;
 
     setInterval(() => {
-        this.props.fetchBoxScore(this.props.game.gid);
+      console.log('activeGames as found in BoxScore are ', this.props.activeGames);
+      this.props.fetchBoxScore(this.props.game.gid);
     }, 5000);
   }
 

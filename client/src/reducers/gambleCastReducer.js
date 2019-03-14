@@ -10,6 +10,8 @@ export default (state = {}, action) => {
       };
     case 'INIT_DATA_LOAD':
       return {...state, [`live_${action.payload.gid}`]: action.payload};
+    case 'SET_FINAL_BOX_SCORE':
+      return {...state, [`live_${action.payload.gid}`]: action.payload};
     case 'UPDATE_LIVE_SCORE':
       console.log('state in update live score fn is ', state);
       if (state[`live_${action.payload.gid}`]) {

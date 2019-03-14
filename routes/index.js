@@ -54,8 +54,15 @@ setInterval(async () => {
       activeGames.push(game.gid)
     };
   })
-  
+
 }, 5000)
+
+// Delete this once confirmed process is working otherwise
+setTimeout(() => {
+  console.log('activeGames are ', activeGames);
+  console.log('pushing active game');
+  activeGames.push(12345);
+}, 35000);
 
 // setTimeout() => {
 //   // dbBuilders.buildGameStintsDb()
@@ -82,6 +89,13 @@ router.get("/", (req, res, next) => {
 
   res.send({ Hi: "there" });
 });
+
+router.get("/todayGameStatus", (req, res, next) => {
+  res.send({
+    activeGames: activeGames,
+    completedGames: completedGames
+  })
+})
 
 router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const pid = req.params.pid;
@@ -110,6 +124,24 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const { gid, date } = req.params;
+
+  if (completedGames.indexOf(parseInt(gid)) !== -1) {
+    const finalScores = await knex("box_scores_v2").where({gid: gid});
+    let ot = null;
+    if (finalScores[0].ot != null) { ot = finalScores[0].ot[0] };
+    res.send({
+      gid: gid,
+      q1: finalScores[0].q1[0],
+      q2: finalScores[0].q2[0],
+      q3: finalScores[0].q3[0],
+      q4: finalScores[0].q4[0],
+      ot: ot,
+      totals: finalScores[0].totals[0],
+      final: true
+    })
+    return;
+  };
+
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
 
