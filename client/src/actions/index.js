@@ -119,6 +119,8 @@ export const fetchGame = ({gid}) => async dispatch => {
   conv.vObj.info = data.vInfo;
   conv.vObj.sched = data.vTen;
   conv.rotPlayers = data.rotPlayers;
+  conv.hTradStats = data.hTradStats;
+  conv.vTradStats = data.vTradStats;
   conv.hBetOn = hBetOn;
   conv.hBetOff = hBetOff;
   conv.vBetOn = vBetOn;

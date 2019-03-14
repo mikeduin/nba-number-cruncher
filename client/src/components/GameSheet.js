@@ -146,7 +146,7 @@ class GameSheet extends React.Component {
           {menuItem: 'Traditional Stats', render: () =>
             <Tab.Pane>
               <StatTable
-                
+                game={game}
               />
             </Tab.Pane>
           }
