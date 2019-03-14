@@ -34,6 +34,7 @@ let today = '2019-03-13';
 let activeGames = [];
 let completedGames = [];
 
+// this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
   const todayGames = await knex("schedule").where({gdte: today});
   const todayGids = todayGames.map(game => game.gid);
@@ -57,23 +58,24 @@ setInterval(async () => {
 
 }, 5000)
 
+
 // Delete this once confirmed process is working otherwise
-setTimeout(() => {
-  console.log('activeGames are ', activeGames);
-  console.log('pushing active game');
-  activeGames.push(21801017);
-}, 30000);
+// setTimeout(() => {
+//   console.log('activeGames are ', activeGames);
+//   console.log('pushing active game');
+//   activeGames.push(21801017);
+// }, 30000);
+//
+// setTimeout(() => {
+//   console.log('completedGames are ', completedGames);
+//   console.log('pushing completed game');
+//   completedGames.push(21801017);
+// }, 45000);
 
 setTimeout(() => {
-  console.log('completedGames are ', completedGames);
-  console.log('pushing completed game');
-  completedGames.push(21801017);
-}, 45000);
-
-// setTimeout() => {
-//   // dbBuilders.buildGameStintsDb()
-//   updateTeamStats.updateFullTeamBuilds()
-// }, 1000)
+  // dbBuilders.buildGameStintsDb()
+  // updateTeamStats.updateFullTeamBuilds()
+}, 1000)
 
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
@@ -91,7 +93,6 @@ setInterval(()=>{
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
-  console.log('hello');
 
   res.send({ Hi: "there" });
 });
@@ -123,9 +124,84 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   });
 })
 
-// What if you first check game status on load ...
-// Then if it's final, you don't go to check box score route ... you just load stats, set to completed game, and you're done ...
-// If it's not final, then you move on to fetch current box score
+
+// TEST FUNCTION
+setInterval(async () => {
+  const boxScore = await axios.get(`https://data.nba.net/prod/v1/20190313/0021801019_boxscore.json`);
+  const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
+
+  let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+
+  if (boxScore.data.stats) {
+    let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+    const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
+    const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+    const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+
+    const totalsObj = boxScoreHelpers.getTotalsObj(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+
+    console.log('totalsObj is ', totalsObj);
+  }
+
+}, 2000)
+
+// setInterval(() => {
+//   let todayInt = moment().format('YYYYMMDD');
+//   activeGames.forEach(async (game) => {
+//     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
+//     const boxScore = await axios.get(url);
+//     const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
+//
+//     let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+//
+//     if (boxScore.data.stats) {
+//       let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+//       const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
+//       const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+//       const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+//
+//       const totalsObj = {
+//         h: {
+//           pts: parseInt(hTeam.totals.points),
+//           fgm: parseInt(hTeam.totals.fgm),
+//           fga: parseInt(hTeam.totals.fga),
+//           fgPct: boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
+//           fta: parseInt(hTeam.totals.fta),
+//           to: parseInt(hTeam.totals.turnovers),
+//           offReb: parseInt(hTeam.totals.offReb),
+//           fouls: parseInt(hTeam.totals.pFouls)
+//         },
+//         v: {
+//           pts: parseInt(vTeam.totals.points),
+//           fgm: parseInt(vTeam.totals.fgm),
+//           fga: parseInt(vTeam.totals.fga),
+//           fgPct: boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
+//           fta: parseInt(vTeam.totals.fta),
+//           to: parseInt(vTeam.totals.turnovers),
+//           offReb: parseInt(vTeam.totals.offReb),
+//           fouls: parseInt(vTeam.totals.pFouls)
+//         },
+//         t: {
+//           pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
+//           fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
+//           fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
+//           fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
+//           fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
+//           to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
+//           offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
+//           fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
+//           poss: poss,
+//           pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
+//         }
+//       };
+//
+//
+//     } else {
+//       console.log('no stats yet for game ', game, ' game has not tipped off');
+//     }
+//
+//   })
+// }, 3000)
 
 
 router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {

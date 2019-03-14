@@ -57,5 +57,44 @@ module.exports = {
     } else {
       return clock;
     }
+  },
+  getTotalsObj: (hTotals, vTotals, poss, period, gameSecs) => {
+    return {
+      h: {
+        pts: parseInt(hTotals.points),
+        fgm: parseInt(hTotals.fgm),
+        fga: parseInt(hTotals.fga),
+        fgPct: module.exports.calcFgPct(hTotals.fgm, hTotals.fga),
+        fta: parseInt(hTotals.fta),
+        to: parseInt(hTotals.turnovers),
+        offReb: parseInt(hTotals.offReb),
+        fouls: parseInt(hTotals.pFouls)
+      },
+      v: {
+        pts: parseInt(vTotals.points),
+        fgm: parseInt(vTotals.fgm),
+        fga: parseInt(vTotals.fga),
+        fgPct: module.exports.calcFgPct(vTotals.fgm, vTotals.fga),
+        fta: parseInt(vTotals.fta),
+        to: parseInt(vTotals.turnovers),
+        offReb: parseInt(vTotals.offReb),
+        fouls: parseInt(vTotals.pFouls)
+      },
+      t: {
+        pts: parseInt(hTotals.points) + parseInt(vTotals.points),
+        fgm: parseInt(hTotals.fgm) + parseInt(vTotals.fgm),
+        fga: parseInt(hTotals.fga) + parseInt(vTotals.fga),
+        fgPct: module.exports.calcFgPct((parseInt(hTotals.fgm) + parseInt(vTotals.fgm)), (parseInt(hTotals.fga) + parseInt(vTotals.fga))),
+        fta: parseInt(hTotals.fta) + parseInt(vTotals.fta),
+        to: parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers),
+        offReb: parseInt(hTotals.offReb) + parseInt(vTotals.offReb),
+        fouls: parseInt(hTotals.pFouls) + parseInt(vTotals.pFouls),
+        poss: poss,
+        pace: module.exports.calcGamePace(poss, parseInt(period), gameSecs)
+        // pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
+      }
+    }
+
+
   }
 }
