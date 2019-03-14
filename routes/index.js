@@ -329,8 +329,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const vAbb = boxScore.data.basicGameData.vTeam.triCode;
   let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
 
-  console.log('box score being fetched for ', gid, ' at ', momentNow);
-
   // const liveTotals = (hTotals, vTotals) => {
   //   return {
   //
@@ -506,177 +504,87 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
       // if End of Period is true or Game is over
       if (period.isEndOfPeriod || gameOver()) {
         if (period.current === 1) {
-          knex("box_scores_v2").where({gid: gid}).then(entry => {
-            if (!entry[0]) {
-              knex("box_scores_v2").insert({
-                gid: gid,
-                h_tid: hTid,
-                v_tid: vTid,
-                period_updated: 1,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q1: [totalsObj],
-                updated_at: new Date()
-              }).then(inserted => {
-                res.send({
-                  quarterEnd: true,
-                  live: true,
-                  clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-                  gameSecs: gameSecs,
-                  period: period,
-                  thru_period: 1,
-                  poss: poss,
-                  pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                  totals: totalsObj,
-                  prevQuarters: totalsObj,
-                  quarter: totalsObj
-                })
-              })
-            } else {
-              console.log('first period already entered in gid ', gid);
-            }
+          res.send({
+            quarterEnd: true,
+            live: true,
+            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: 1,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            prevQuarters: totalsObj,
+            quarter: totalsObj
           })
         } else if (period.current === 2) {
-          knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
-            if (qTest[0] == null) {
-              quarterUpdFn().then(qTotals => {
-                console.log('quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
-                knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: 2,
-                  clock_last_updated: gameSecs,
-                  totals: [totalsObj],
-                  q2: [qTotals.currentQuarter],
-                  updated_at: new Date()
-                }, '*').then(inserted => {
-                  console.log('inserted is ', inserted);
-                  res.send({
-                    quarterEnd: true,
-                    live: true,
-                    clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-                    gameSecs: gameSecs,
-                    period: period,
-                    thru_period: 2,
-                    poss: poss,
-                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                    totals: totalsObj,
-                    prevQuarters: qTotals.prevQuarters,
-                    quarter: qTotals.currentQuarter
-                  })
-                })
-              })
-            } else {
-              console.log('second period already entered in gid ', gid);
-            }
+          quarterUpdFn().then(qTotals => {
+            console.log('live/client quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
+            res.send({
+              quarterEnd: true,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: 2,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: qTotals.prevQuarters,
+              quarter: qTotals.currentQuarter
+            })
           })
         } else if (period.current === 3) {
-          knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
-            if (qTest[0] == null) {
-              quarterUpdFn().then(qTotals => {
-                console.log('quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
-                knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: 3,
-                  clock_last_updated: gameSecs,
-                  totals: [totalsObj],
-                  q3: [qTotals.currentQuarter],
-                  updated_at: new Date()
-                }, '*').then(inserted => {
-                  res.send({
-                    quarterEnd: true,
-                    live: true,
-                    clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-                    gameSecs: gameSecs,
-                    period: period,
-                    thru_period: 3,
-                    poss: poss,
-                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                    totals: totalsObj,
-                    prevQuarters: qTotals.prevQuarters,
-                    quarter: qTotals.currentQuarter
-                  })
-                })
-              })
-            } else {
-              console.log('third period already entered in gid ', gid);
-            }
+          quarterUpdFn().then(qTotals => {
+            console.log('live/client quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
+            res.send({
+              quarterEnd: true,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: 3,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: qTotals.prevQuarters,
+              quarter: qTotals.currentQuarter
+            })
           })
         } else if (period.current === 4 ) {
-          knex("box_scores_v2").where({gid: gid}).pluck('q4').then(qTest => {
-            if (qTest[0] == null) {
-              quarterUpdFn().then(qTotals => {
-                knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: 4,
-                  clock_last_updated: gameSecs,
-                  totals: [totalsObj],
-                  q4: [qTotals.currentQuarter],
-                  updated_at: new Date()
-                }, '*').then(inserted => {
-                  res.send({
-                    quarterEnd: true,
-                    live: true,
-                    clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-                    gameSecs: gameSecs,
-                    period: period,
-                    thru_period: 4,
-                    poss: poss,
-                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                    totals: totalsObj,
-                    prevQuarters: qTotals.prevQuarters,
-                    quarter: qTotals.currentQuarter
-                  })
-                })
-              })
-            } else {
-              if (!isGameActivated) {
-                console.log('4Q data already entered, and game is over');
-                knex("box_scores_v2").where({gid: gid}).update({
-                  final: true
-                }).then(() => {
-                  console.log("game has been set to final in DB")
-                })
-              } else {
-                console.log('4Q data already entered and game is still ongoing!')
-              }
-            }
+          quarterUpdFn().then(qTotals => {
+            console.log('live/client quarterUpdFn for q4 reached, prevQuarters are ', qTotals.prevQuarters);
+            res.send({
+              quarterEnd: true,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: 4,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: qTotals.prevQuarters,
+              quarter: qTotals.currentQuarter
+            })
           })
         } else {
-          knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
-            // NEED TO FIX THIS IN EVENT OF MULTIPLE OTs!!!
-            if (qTest[0] == null) {
-              quarterUpdFn().then(qTotals => {
-                knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: period.current,
-                  clock_last_updated: gameSecs,
-                  totals: [totalsObj],
-                  ot: [qTotals.currentQuarter],
-                  updated_at: new Date()
-                }, '*').then(inserted => {
-                  res.send({
-                    quarterEnd: true,
-                    live: true,
-                    clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-                    gameSecs: gameSecs,
-                    period: period,
-                    thru_period: period.current,
-                    poss: poss,
-                    pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-                    totals: totalsObj,
-                    prevQuarters: qTotals.prevQuarters,
-                    quarter: qTotals.currentQuarter
-                  })
-                })
-              })
-            } else {
-              if (!isGameActivated) {
-                console.log('OT data already entered, and game is over');
-                knex("box_scores_v2").where({gid: gid}).update({
-                  final: true
-                }).then(() => {
-                  console.log("game has been set to final (in OT) in DB")
-                })
-              } else {
-                console.log('OT data already entered and game is still ongoing!')
-              }
-            }
+          // I don't think this needs any addl adjusting for mult OTs ... does it?
+          quarterUpdFn().then(qTotals => {
+            console.log('live/client quarterUpdFn for Q', period.current, ' reached, prevQuarters are ', qTotals.prevQuarters);
+            res.send({
+              quarterEnd: true,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              gameSecs: gameSecs,
+              period: period,
+              thru_period: period.current,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: qTotals.prevQuarters,
+              quarter: qTotals.currentQuarter
+            })
           })
         }
       } else {
