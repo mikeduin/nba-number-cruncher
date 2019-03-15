@@ -159,11 +159,11 @@ module.exports = {
       }
     });
   },
-  sportsbookFirstQ: async () => {
+  sportsbookFirstQ: () => {
     axios.get(apiRefs.sportsbook().firstQ).then(response => {
       if (response.status === 200) {
         const lines = webScrapeHelpers.parseSbHtml(response.data);
-        lines.forEach(line => {
+        lines.forEach(async (line) => {
           if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
             console.log('there is no 1Q line yet for',line.id);
             return;
@@ -208,7 +208,7 @@ module.exports = {
       }
     });
   },
-  sportsbookThirdQ: async () => {
+  sportsbookThirdQ: () => {
     axios.get(apiRefs.sportsbook().thirdQ).then(response => {
       if (response.status === 200) {
         const lines = webScrapeHelpers.parseSbHtml(response.data);
@@ -216,7 +216,7 @@ module.exports = {
           console.log("no 3Q lines found");
         } else {
           console.log("3Q lines are ", lines);
-          lines.forEach(line => {
+          lines.forEach(async (line) => {
             if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
               console.log('there is no 3Q line yet for',line.id);
               return;
