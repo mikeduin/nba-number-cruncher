@@ -18,19 +18,12 @@ const oddsLoaders = require("../modules/oddsLoaders");
 const boxScoreHelpers = require("../modules/boxScoreHelpers");
 
 const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
-
-const startPeriodSec = require('../modules/startPeriodSec');
 const getGameSecs = require('../modules/getGameSecs');
-
-// remove these after more testing
-const buildGameStints = require("../modules/buildGameStints");
-const webScrapeHelpers = require("../modules/webScrapeHelpers");
-
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-let today = moment().format('YYYY-MM-DD');
-console.log('today is ', today);
-// let today = '2019-03-13';
+// let today = moment().format('YYYY-MM-DD');
+// console.log('today is ', today);
+let today = '2019-03-14';
 
 let activeGames = [];
 let completedGames = [];
@@ -74,30 +67,6 @@ setInterval(()=>{
   }
 }, 60000);
 
-setTimeout(async () => {
-  let box = await knex("box_scores_v2").where({gid: 21801020});
-
-  console.log(box[0].q2);
-}, 1000)
-
-// setTimeout(()=> {
-//   let totalsObj = {
-//     "h": {"to": 4, "fga": 20, "fgm": 7, "fta": 7, "pts": 22, "fgPct": "35.0", "fouls": 4, "offReb": 1}, "t": {"to": 9, "fga": 43, "fgm": 18, "fta": 13, "pts": 51, "pace": 101.2224, "poss": 50.6112, "fgPct": "41.9", "fouls": 9, "offReb": 5}, "v": {"to": 5, "fga": 23, "fgm": 11, "fta": 6, "pts": 29, "fgPct": "47.8", "fouls": 5, "offReb": 4}
-//   };
-//   knex("box_scores_v2").insert({
-//     gid: 21801021,
-//     h_tid: 1610612753,
-//     v_tid: 1610612739,
-//     period_updated: 1,
-//     clock_last_updated: 720,
-//     totals: [totalsObj],
-//     q1: [totalsObj],
-//     updated_at: new Date()
-//   }).then(()=> {
-//     console.log('game inserted into db')
-//   })
-// }, 10000)
-
 /* GET home page. */
 router.get("/", (req, res, next) => {
 
@@ -130,27 +99,6 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
     mappedData: mappedData[0]
   });
 })
-
-
-// TEST FUNCTION
-// setInterval(async () => {
-//   const boxScore = await axios.get(`https://data.nba.net/prod/v1/20190313/0021801019_boxscore.json`);
-//   const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
-//
-//   let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
-//
-//   if (boxScore.data.stats) {
-//     let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-//     const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
-//     const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-//     const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
-//
-//     const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
-//
-//     console.log('totalsObj is ', totalsObj);
-//   }
-//
-// }, 2000)
 
 setInterval(() => {
   let todayInt = moment().format('YYYYMMDD');
@@ -275,7 +223,7 @@ setInterval(() => {
         })
       } else {
         knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
-          // NEED TO FIX THIS IN EVENT OF MULTIPLE OTs!!!
+          // <-- If No OT in DB and Game is Over --> //
           if (qTest[0] == null && !isGameActivated) {
             quarterUpdFn().then(qTotals => {
               knex("box_scores_v2").where({gid: gid}).update({
@@ -290,16 +238,16 @@ setInterval(() => {
               })
             })
           } else {
+            // <-- If OT but Not Over, Keep Rolling Stats Over (OT stats not differentiated in DB) --> //
             console.log('Game still activated or ongoing!')
           }
         })
       }
     } else {
-      console.log(gid, ' is active but has not yet reached end of period');
+      console.log(gid, ' is active in-period, no DB insertion necessary');
     }
   })
 }, 3000)
-
 
 router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
   const { gid, date, init } = req.params;
@@ -351,7 +299,7 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
 
   // <-- If Game Has Begun --> //
   if (boxScore.data.stats) {
-    let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+    const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
     const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
     const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
     const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
@@ -373,8 +321,8 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
 
     // this is the function that combines the two above
     const quarterUpdFn = async () => {
-      let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-      let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+      const prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+      const quarterTotals = await quarterObj(prevTotalsPull[0].totals);
       return {
         currentQuarter: quarterTotals,
         prevQuarters: prevTotalsPull[0].totals[0]
@@ -779,7 +727,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("32 08 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("56 00 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);

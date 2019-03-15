@@ -558,8 +558,11 @@ module.exports = {
     });
   },
   updateBaseTeamDb: (db, arrayData) => {
-    // This function builds out the initial advanced team DB and should only need to be run at the beginning of each season
     arrayData.forEach(team => {
+      const fg2m = parseFloat(team[7]) - parseFloat(team[10]);
+      const fg2a = parseFloat(team[8]) - parseFloat(team[11]);
+      const fg2_pct = fg2m/fg2a;
+
       knex(db)
         .where({ team_id: team[0] })
         .update(
@@ -568,6 +571,9 @@ module.exports = {
             fgm: team[7],
             fga: team[8],
             fg_pct: team[9],
+            fg2m: fg2m,
+            fg2a: fg2a,
+            fg2_pct: fg2_pct,
             fg3m: team[10],
             fg3a: team[11],
             fg3_pct: team[12],
