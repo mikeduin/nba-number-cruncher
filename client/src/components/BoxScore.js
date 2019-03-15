@@ -24,7 +24,6 @@ class BoxScore extends React.Component {
         [`${period}`]: `${game.h[0].ta} PK, O/U ${total}`
       })
     }
-
   }
 
   componentDidMount () {
@@ -32,7 +31,8 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
-    this.props.fetchBoxScore(this.props.game.gid);
+    let init = true;
+    this.props.fetchBoxScore(this.props.game.gid, init);
 
     setInterval(() => {
       if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {

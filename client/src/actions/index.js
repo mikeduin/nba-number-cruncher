@@ -138,21 +138,22 @@ export const setActiveDay = date => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
 
-export const fetchBoxScore = (gid) => async (dispatch, getState) => {
+export const fetchBoxScore = (gid, init = false) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190313';
   let todayInt = moment().format('YYYYMMDD');
-  // let gameFinal = false;
-
-  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
+  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}`);
   const response = game.data;
 
-
   if (response.final) {
-    let { totals, q1, q2, q3, q4, ot, final, gid } = response;
-    let payload = { totals, q1, q2, q3, q4, ot, final, gid };
+    // let { totals, q1, q2, q3, q4, ot, final, gid } = response;
+    // let payload = { totals, q1, q2, q3, q4, ot, final, gid };
+    dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });
+    return;
+  }
 
-    dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload });
+  if (response.init) {
+    dispatch ({ type: 'INITIALIZE_BOX_SCORE', payload: response });
     return;
   }
 

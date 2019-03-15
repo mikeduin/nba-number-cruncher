@@ -60,25 +60,6 @@ setInterval(async () => {
   })
 }, 10000)
 
-
-// Delete this once confirmed process is working otherwise
-// setTimeout(() => {
-//   console.log('activeGames are ', activeGames);
-//   console.log('pushing active game');
-//   activeGames.push(21801017);
-// }, 30000);
-//
-// setTimeout(() => {
-//   console.log('completedGames are ', completedGames);
-//   console.log('pushing completed game');
-//   completedGames.push(21801017);
-// }, 45000);
-
-// setTimeout(() => {
-//   // dbBuilders.buildGameStintsDb()
-//   // updateTeamStats.updateFullTeamBuilds()
-// }, 1000)
-
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
@@ -93,6 +74,11 @@ setInterval(()=>{
   }
 }, 60000);
 
+setTimeout(async () => {
+  let box = await knex("box_scores_v2").where({gid: 21801020});
+
+  console.log(box[0].q2);
+}, 1000)
 
 // setTimeout(()=> {
 //   let totalsObj = {
@@ -193,8 +179,6 @@ setInterval(() => {
       const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 
       const quarterObj = prevTotals => {
-        // console.log('prevTotals[0] in quarterObj is ', prevTotals[0]);
-        console.log('vTeam.totals in quarterObj are ', vTeam.totals);
         return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
       }
 
@@ -230,7 +214,6 @@ setInterval(() => {
         knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
-              console.log('quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
               knex("box_scores_v2").where({gid: gid}).update({
                 period_updated: 2,
                 clock_last_updated: gameSecs,
@@ -249,7 +232,6 @@ setInterval(() => {
         knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
-              console.log('quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
               knex("box_scores_v2").where({gid: gid}).update({
                 period_updated: 3,
                 clock_last_updated: gameSecs,
@@ -319,35 +301,46 @@ setInterval(() => {
 }, 3000)
 
 
-router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
-  const { gid, date } = req.params;
+router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
+  const { gid, date, init } = req.params;
+  const inDb = await knex("box_scores_v2").where({gid: gid});
 
+  // <-- If Game Is Final --> //
   if (completedGames.indexOf(parseInt(gid)) !== -1) {
-    const finalScores = await knex("box_scores_v2").where({gid: gid});
     let ot = null;
-    if (finalScores[0].ot != null) { ot = finalScores[0].ot[0] };
+    if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
     res.send({
       gid: gid,
-      q1: finalScores[0].q1[0],
-      q2: finalScores[0].q2[0],
-      q3: finalScores[0].q3[0],
-      q4: finalScores[0].q4[0],
+      q1: inDb[0].q1[0],
+      q2: inDb[0].q2[0],
+      q3: inDb[0].q3[0],
+      q4: inDb[0].q4[0],
       ot: ot,
-      totals: finalScores[0].totals[0],
+      totals: inDb[0].totals[0],
       final: true
     })
     return;
   };
 
-  // const inDb = await knex("box_scores_v2").where({gid: gid});
+  let q1 = null;
+  let q2 = null;
+  let q3 = null;
+  let q4 = null;
+  let ot = null;
+  let thru_period = 0;
 
-
+  // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
+  if (inDb.length > 0) {
+    thru_period = inDb[0].period_updated;
+    if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
+    if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
+    if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
+    if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
+  }
 
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
-  const momentNow = moment().format();
-
   const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
 
   const hTid = boxScore.data.basicGameData.hTeam.teamId;
@@ -356,135 +349,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
   const vAbb = boxScore.data.basicGameData.vTeam.triCode;
   let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
 
-  // const liveTotals = (hTotals, vTotals) => {
-  //   return {
-  //
-  //   }
-  // }
-
-  // beg revised load process - ONLY WANT CALLED ON INITIAL LOAD!
-  // Maybe add extra param to request to incl indicator whether its initial load?
-  // Maybe only run if game is not already in state?
-    // This will only work if games that are completed are in state as live_gid, but set to final, and including quarter data
-
-  // if (moment(startTimeUTC).isBefore(nowUTC)) {
-  //   // No stats means game has not started
-  //   if (!boxScore.data.stats) {
-  //     // FIX THIS!!!
-  //     console.log(gid, ' has not started, sending back gid ref and active: false');
-  //     res.send ({
-  //       gid: gid,
-  //       active: false
-  //     })
-  //     return;
-  //   } else {
-  //     // There are stats in nba.com box score, so game has begun
-  //     const inDb = await knex("box_scores_v2").where({gid: gid});
-  //     if (inDb.length > 0) {
-  //       // Game is past Q1, since first DB insert occurs at end of Q1
-  //       if (inDb[0].final == true) {
-  //         // Game is final
-  //         console.log('sending response for game ', gid, ' as final');
-  //         res.send({
-  //           gid: gid,
-  //           final: true,
-  //           totals: inDb[0].totals,
-  //           q1: inDb[0].q1,
-  //           q2: inDb[0].q2,
-  //           q3: inDb[0].q3,
-  //           q4: inDb[0].q4,
-  //           ot: inDb[0].ot
-  //         })
-  //       } else {
-  //         // Game is in progress
-  //         const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-  //         let thru_period = 1;
-  //
-  //         let q2 = null;
-  //         let q3 = null;
-  //         let q4 = null;
-  //         let ot = null;
-  //
-  //         if (inDb[0].q2 != null) { q2 = inDb[0].q2; thru_period = 2 };
-  //         if (inDb[0].q3 != null) { q3 = inDb[0].q3; thru_period = 3 };
-  //         if (inDb[0].q4 != null) { q4 = inDb[0].q4; thru_period = 4 };
-  //         if (inDb[0].ot != null) { ot = inDb[0].ot; thru_period = 4 };
-  //
-  //         const poss = boxScoreHelpers.calcPoss(
-  //           (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)),
-  //           (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)),
-  //           (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)),
-  //           (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)));
-  //         const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-  //         const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
-  //
-  //         const hPlayers = activePlayers.filter(player => {
-  //           return (player.teamId === hTid && player.isOnCourt)
-  //         }).map(active => active.personId);
-  //
-  //         const vPlayers = activePlayers.filter(player => {
-  //           return (player.teamId === hTid && player.isOnCourt)
-  //         }).map(active => active.personId);
-  //
-  //         // rename this to liveTotals
-  //         const totalsObj = {
-  //           h: {
-  //             pts: parseInt(hTeam.totals.points),
-  //             fgm: parseInt(hTeam.totals.fgm),
-  //             fga: parseInt(hTeam.totals.fga),
-  //             fgPct: boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga),
-  //             fta: parseInt(hTeam.totals.fta),
-  //             to: parseInt(hTeam.totals.turnovers),
-  //             offReb: parseInt(hTeam.totals.offReb),
-  //             fouls: parseInt(hTeam.totals.pFouls)
-  //           },
-  //           v: {
-  //             pts: parseInt(vTeam.totals.points),
-  //             fgm: parseInt(vTeam.totals.fgm),
-  //             fga: parseInt(vTeam.totals.fga),
-  //             fgPct: boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga),
-  //             fta: parseInt(vTeam.totals.fta),
-  //             to: parseInt(vTeam.totals.turnovers),
-  //             offReb: parseInt(vTeam.totals.offReb),
-  //             fouls: parseInt(vTeam.totals.pFouls)
-  //           },
-  //           t: {
-  //             pts: parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points),
-  //             fgm: parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm),
-  //             fga: parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga),
-  //             fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)), (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga))),
-  //             fta: parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta),
-  //             to: parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers),
-  //             offReb: parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb),
-  //             fouls: parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls),
-  //             poss: poss,
-  //             pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
-  //           }
-  //         };
-  //
-  //         res.send({
-  //           gid: gid,
-  //           live: true,
-  //           final: false,
-  //           prevTotals: inDb[0].totals,
-  //           totals: totalsObj,
-  //           q1: inDb[0].q1,
-  //           q2: q2,
-  //           q3: q3,
-  //           q4: q4,
-  //           ot: ot,
-  //           period: period.current
-  //         })
-  //       }
-  //     } else {
-  //       // Game has started, but there are no stats store in DB -- so still in 1Q
-  //       console.log('game ', gid, ' has nothing in DB')
-  //     }
-  //   }
-  // }
-
-  // end revised load process
-
+  // <-- If Game Has Begun --> //
   if (boxScore.data.stats) {
     let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
     const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
@@ -507,161 +372,184 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     }
 
     // this is the function that combines the two above
-    // making this a try / catch does not return anything!! need to use finally ????
     const quarterUpdFn = async () => {
-      // try {
-        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-        let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
-        return {
-          currentQuarter: quarterTotals,
-          prevQuarters: prevTotalsPull[0].totals[0]
-        }
-      // } catch (e) {
-      //   console.log('error spit out in quarterUpd for ', gid)
-      // }
+      let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+      let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+      return {
+        currentQuarter: quarterTotals,
+        prevQuarters: prevTotalsPull[0].totals[0]
+      }
     }
 
-    // gameOver fn returns true if game has started but no longer activated
+    // gameOver returns true if game has started but is no longer in progress
     const gameOver = () => {
       return (period.current >= 4 && !isGameActivated)
     };
 
-      // if End of Period is true or Game is over
-      if (period.isEndOfPeriod || gameOver()) {
-        if (period.current === 1) {
+    // <-- If Initial Box Score Load --> //
+    if (init && period.current !== 1) {
+      quarterUpdFn().then(qTotals => {
+
+        if (period.current == 2) q2 = qTotals.currentQuarter;
+        if (period.current == 3) q3 = qTotals.currentQuarter;
+        if (period.current == 4) q4 = qTotals.currentQuarter;
+        if (period.current > 4) ot = qTotals.currentQuarter;
+
+        res.send({
+          gid: gid,
+          init: true,
+          quarterEnd: period.isEndOfPeriod,
+          live: true,
+          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+          gameSecs: gameSecs,
+          period: period,
+          thru_period: thru_period,
+          poss: poss,
+          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+          totals: totalsObj,
+          q1: q1,
+          q2: q2,
+          q3: q3,
+          q4: q4,
+          ot: ot,
+          prevQuarters: qTotals.prevQuarters
+        })
+      })
+      return;
+    }
+
+    // <-- If at End of Period, or if Game is Over --> //
+    if (period.isEndOfPeriod || gameOver()) {
+      if (period.current === 1) {
+        res.send({
+          quarterEnd: true,
+          live: true,
+          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+          gameSecs: gameSecs,
+          period: period,
+          thru_period: 1,
+          poss: poss,
+          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+          totals: totalsObj,
+          prevQuarters: totalsObj,
+          quarter: totalsObj
+        })
+      } else if (period.current === 2) {
+        quarterUpdFn().then(qTotals => {
           res.send({
             quarterEnd: true,
             live: true,
             clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
             gameSecs: gameSecs,
             period: period,
-            thru_period: 1,
+            thru_period: 2,
             poss: poss,
             pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj,
-            prevQuarters: totalsObj,
-            quarter: totalsObj
+            prevQuarters: qTotals.prevQuarters,
+            quarter: qTotals.currentQuarter
           })
-        } else if (period.current === 2) {
-          quarterUpdFn().then(qTotals => {
-            console.log('live/client quarterUpdFn for q2 reached, prevQuarters are ', qTotals.prevQuarters);
-            res.send({
-              quarterEnd: true,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: 2,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              prevQuarters: qTotals.prevQuarters,
-              quarter: qTotals.currentQuarter
-            })
+        })
+      } else if (period.current === 3) {
+        quarterUpdFn().then(qTotals => {
+          res.send({
+            quarterEnd: true,
+            live: true,
+            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: 3,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            prevQuarters: qTotals.prevQuarters,
+            quarter: qTotals.currentQuarter
           })
-        } else if (period.current === 3) {
-          quarterUpdFn().then(qTotals => {
-            console.log('live/client quarterUpdFn for q3 reached, prevQuarters are ', qTotals.prevQuarters);
-            res.send({
-              quarterEnd: true,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: 3,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              prevQuarters: qTotals.prevQuarters,
-              quarter: qTotals.currentQuarter
-            })
+        })
+      } else if (period.current === 4 ) {
+        quarterUpdFn().then(qTotals => {
+          res.send({
+            quarterEnd: true,
+            live: true,
+            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: 4,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            prevQuarters: qTotals.prevQuarters,
+            quarter: qTotals.currentQuarter
           })
-        } else if (period.current === 4 ) {
-          quarterUpdFn().then(qTotals => {
-            console.log('live/client quarterUpdFn for q4 reached, prevQuarters are ', qTotals.prevQuarters);
-            res.send({
-              quarterEnd: true,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: 4,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              prevQuarters: qTotals.prevQuarters,
-              quarter: qTotals.currentQuarter
-            })
-          })
-        } else {
-          // I don't think this needs any addl adjusting for mult OTs ... does it?
-          quarterUpdFn().then(qTotals => {
-            console.log('live/client quarterUpdFn for Q', period.current, ' reached, prevQuarters are ', qTotals.prevQuarters);
-            res.send({
-              quarterEnd: true,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              thru_period: period.current,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              prevQuarters: qTotals.prevQuarters,
-              quarter: qTotals.currentQuarter
-            })
-          })
-        }
+        })
       } else {
-        // if endOfPeriod is false && game is not activated ... does it get here if game has started?
-        // CONFIRM THIS WORKS IN EVENT OF OT
-        if (!isGameActivated) {
-          console.log(gid, ' has not started or has finished and gameOver fn not reached');
+        // I don't think this needs any addl adjusting for mult OTs ... does it?
+        quarterUpdFn().then(qTotals => {
+          res.send({
+            quarterEnd: true,
+            live: true,
+            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: period.current,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            prevQuarters: qTotals.prevQuarters,
+            quarter: qTotals.currentQuarter
+          })
+        })
+      }
+    } else {
+      // if endOfPeriod is false && game is not activated ... does it get here if game has started?
+      // CONFIRM THIS WORKS IN EVENT OF OT
+      if (!isGameActivated) {
+        console.log(gid, ' has not started or has finished and gameOver fn not reached');
+        res.send({
+          quarterEnd: false,
+          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+          gameSecs: gameSecs,
+          period: period,
+          poss: poss,
+          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+          totals: totalsObj
+        })
+      } else {
+        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+        if (period.current === 1) {
           res.send({
             quarterEnd: false,
+            live: true,
             clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
             gameSecs: gameSecs,
             period: period,
             poss: poss,
             pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj
+            totals: totalsObj,
+            thru_period: 0
           })
         } else {
-          let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-          if (period.current === 1) {
-            res.send({
-              quarterEnd: false,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              thru_period: 0
-            })
-          } else {
-            res.send({
-              quarterEnd: false,
-              live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-              gameSecs: gameSecs,
-              period: period,
-              poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj,
-              prevQuarters: prevTotalsPull[0].totals[0]
-            })
-          }
+          res.send({
+            quarterEnd: false,
+            live: true,
+            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            gameSecs: gameSecs,
+            period: period,
+            poss: poss,
+            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            totals: totalsObj,
+            prevQuarters: prevTotalsPull[0].totals[0]
+          })
         }
       }
-    } else {
-      console.log(gid, ' has not started, sending back gid ref and active: false');
-      res.send({
-        gid: gid,
-        active: false
-      })
     }
+  } else {
+    console.log(gid, ' has not started, sending back gid ref and active: false');
+    res.send({
+      gid: gid,
+      active: false
+    })
+  }
 })
 
 // how best to use this?
