@@ -40,10 +40,10 @@ module.exports = {
     return (0.96*((fga+to+(0.44*fta)-offReb)));
   },
   calcQuarterPoss: (hTotals, vTotals, prevTotals) => {
-    const fga = ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - prevTotals.fga);
-    const to = ((parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - prevTotals.to);
-    const fta = ((parseInt(hTotals.fta) + parseInt(vTotals.fta)) - prevTotals.fta);
-    const offReb = ((parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - prevTotals.offReb);
+    const fga = ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - prevTotals.t.fga);
+    const to = ((parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - prevTotals.t.to);
+    const fta = ((parseInt(hTotals.fta) + parseInt(vTotals.fta)) - prevTotals.t.fta);
+    const offReb = ((parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - prevTotals.t.offReb);
 
     return (0.96*((fga+to+(0.44*fta)-offReb)));
   },
@@ -91,12 +91,11 @@ module.exports = {
         fouls: parseInt(hTotals.pFouls) + parseInt(vTotals.pFouls),
         poss: poss,
         pace: module.exports.calcGamePace(poss, parseInt(period), gameSecs)
-        // pace: boxScoreHelpers.calcGamePace(poss, parseInt(period.current), gameSecs)
       }
     }
   },
   compileQuarterStats: (hTotals, vTotals, prevTotals, period, gameSecs) => {
-    const quarterPoss = module.exports.calcQuarterPoss(hTotals, vTotals, prevTotals.t)
+    const quarterPoss = module.exports.calcQuarterPoss(hTotals, vTotals, prevTotals)
 
     // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
     return {
@@ -138,45 +137,3 @@ module.exports = {
     }
   }
 }
-
-// BELOW IS OLD QUARTER COMPILER - JUST STORING FOR REFERENCE
-
-// const quarterPoss = boxScoreHelpers.calcQuarterPoss(hTeam.totals, vTeam.totals, prevTotals[0].t);
-
-// return {
-//   h: {
-//     pts: parseInt(hTeam.totals.points) - parseInt(prevTotals[0].h.pts),
-//     fgm: parseInt(hTeam.totals.fgm) - parseInt(prevTotals[0].h.fgm),
-//     fga: parseInt(hTeam.totals.fga) - parseInt(prevTotals[0].h.fga),
-//     fgPct: boxScoreHelpers.calcFgPct((parseInt(hTeam.totals.fgm)-prevTotals[0].h.fgm), (parseInt(hTeam.totals.fga) - prevTotals[0].h.fga)),
-//     fta: parseInt(hTeam.totals.fta) - parseInt(prevTotals[0].h.fta),
-//     to: parseInt(hTeam.totals.turnovers) - parseInt(prevTotals[0].h.to),
-//     offReb: parseInt(hTeam.totals.offReb) - parseInt(prevTotals[0].h.offReb),
-//     fouls: parseInt(hTeam.totals.pFouls) - parseInt(prevTotals[0].h.fouls)
-//   },
-//   v: {
-//     pts: parseInt(vTeam.totals.points) - parseInt(prevTotals[0].v.pts),
-//     fgm: parseInt(vTeam.totals.fgm) - parseInt(prevTotals[0].v.fgm),
-//     fga: parseInt(vTeam.totals.fga) - parseInt(prevTotals[0].v.fga),
-//     fgPct: boxScoreHelpers.calcFgPct((parseInt(vTeam.totals.fgm)-prevTotals[0].v.fgm), (parseInt(vTeam.totals.fga) - prevTotals[0].v.fga)),
-//     fta: parseInt(vTeam.totals.fta) - parseInt(prevTotals[0].v.fta),
-//     to: parseInt(vTeam.totals.turnovers) - parseInt(prevTotals[0].v.to),
-//     offReb: parseInt(vTeam.totals.offReb) - parseInt(prevTotals[0].v.offReb),
-//     fouls: parseInt(vTeam.totals.pFouls) - parseInt(prevTotals[0].v.fouls)
-//   },
-//   t: {
-//     pts: (parseInt(hTeam.totals.points) + parseInt(vTeam.totals.points)) - parseInt(prevTotals[0].t.pts),
-//     fgm: (parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm),
-//     fga: (parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga),
-//     fgPct: boxScoreHelpers.calcFgPct(
-//       ((parseInt(hTeam.totals.fgm) + parseInt(vTeam.totals.fgm)) - parseInt(prevTotals[0].t.fgm)),
-//       ((parseInt(hTeam.totals.fga) + parseInt(vTeam.totals.fga)) - parseInt(prevTotals[0].t.fga))
-//     ),
-//     fta: (parseInt(hTeam.totals.fta) + parseInt(vTeam.totals.fta)) - parseInt(prevTotals[0].t.fta),
-//     to: (parseInt(hTeam.totals.turnovers) + parseInt(vTeam.totals.turnovers)) - parseInt(prevTotals[0].t.to),
-//     offReb: (parseInt(hTeam.totals.offReb) + parseInt(vTeam.totals.offReb)) - parseInt(prevTotals[0].t.offReb),
-//     fouls: (parseInt(hTeam.totals.pFouls) + parseInt(vTeam.totals.pFouls)) - parseInt(prevTotals[0].t.fouls),
-//     poss: quarterPoss,
-//     pace: boxScoreHelpers.calcEndOfQuarterPace(quarterPoss, period.current, gameSecs)
-//   }
-// }

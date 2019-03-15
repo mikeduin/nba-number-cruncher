@@ -28,8 +28,9 @@ const webScrapeHelpers = require("../modules/webScrapeHelpers");
 
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-// let today = moment().utcOffset(420).format('YYYY-MM-DD');
-let today = '2019-03-13';
+let today = moment().format('YYYY-MM-DD');
+console.log('today is ', today);
+// let today = '2019-03-13';
 
 let activeGames = [];
 let completedGames = [];
@@ -39,25 +40,25 @@ let todayGids = [];
 setInterval(async () => {
   const todayGames = await knex("schedule").where({gdte: today});
   todayGids = todayGames.map(game => game.gid);
-  let now = moment().utc();
 
+  // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
+  let nowET = moment().add(180, 'minutes');
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
     .where({final: true})
     .pluck('gid');
 
   completedGames = finalBoxScores;
-
   todayGames.forEach(game => {
-    let start = momentTz(game.etm).subtract(180, 'minutes').tz("America/Toronto").format();
-    let mins = now.diff(start, 'minutes');
+    let mins = nowET.diff(moment(game.etm), 'minutes');
+    // console.log(game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
+      console.log('pushing ', game.gid, ' to activeGames');
       activeGames.push(game.gid)
     };
   })
-
-}, 30000)
+}, 10000)
 
 
 // Delete this once confirmed process is working otherwise
@@ -91,6 +92,25 @@ setInterval(()=>{
     oddsLoaders.sportsbookThirdQ();
   }
 }, 60000);
+
+
+// setTimeout(()=> {
+//   let totalsObj = {
+//     "h": {"to": 4, "fga": 20, "fgm": 7, "fta": 7, "pts": 22, "fgPct": "35.0", "fouls": 4, "offReb": 1}, "t": {"to": 9, "fga": 43, "fgm": 18, "fta": 13, "pts": 51, "pace": 101.2224, "poss": 50.6112, "fgPct": "41.9", "fouls": 9, "offReb": 5}, "v": {"to": 5, "fga": 23, "fgm": 11, "fta": 6, "pts": 29, "fgPct": "47.8", "fouls": 5, "offReb": 4}
+//   };
+//   knex("box_scores_v2").insert({
+//     gid: 21801021,
+//     h_tid: 1610612753,
+//     v_tid: 1610612739,
+//     period_updated: 1,
+//     clock_last_updated: 720,
+//     totals: [totalsObj],
+//     q1: [totalsObj],
+//     updated_at: new Date()
+//   }).then(()=> {
+//     console.log('game inserted into db')
+//   })
+// }, 10000)
 
 /* GET home page. */
 router.get("/", (req, res, next) => {
@@ -139,7 +159,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 //     const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
 //     const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 //
-//     const totalsObj = boxScoreHelpers.getTotalsObj(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+//     const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 //
 //     console.log('totalsObj is ', totalsObj);
 //   }
@@ -170,10 +190,12 @@ setInterval(() => {
       const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
       const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-      const totalsObj = boxScoreHelpers.getTotalsObj(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+      const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 
       const quarterObj = prevTotals => {
-        return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.Totals, prevTotals[0], period.current, gameSecs);
+        // console.log('prevTotals[0] in quarterObj is ', prevTotals[0]);
+        console.log('vTeam.totals in quarterObj are ', vTeam.totals);
+        return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
       }
 
       const quarterUpdFn = async () => {
@@ -304,6 +326,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     const finalScores = await knex("box_scores_v2").where({gid: gid});
     let ot = null;
     if (finalScores[0].ot != null) { ot = finalScores[0].ot[0] };
+
     res.send({
       gid: gid,
       q1: finalScores[0].q1[0],
@@ -316,6 +339,10 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
     })
     return;
   };
+
+  // const inDb = await knex("box_scores_v2").where({gid: gid});
+
+
 
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
@@ -458,8 +485,6 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
   // end revised load process
 
-
-  // you NEED this if, or some conditional like it, otherwise an error gets spit out when trying to destructure hTeam, vTeam, etc
   if (boxScore.data.stats) {
     let { hTeam, vTeam, activePlayers } = boxScore.data.stats;
     const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
@@ -478,7 +503,7 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
 
     // this object calculates the stats for each quarter, using the previous totals from earlier Qs
     const quarterObj = prevTotals => {
-      return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.Totals, prevTotals[0], period.current, gameSecs);
+      return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
     }
 
     // this is the function that combines the two above
@@ -589,50 +614,39 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
         }
       } else {
         // if endOfPeriod is false && game is not activated ... does it get here if game has started?
-        // THIS NEEDS WORK, HAVE NOT REFINED
-        console.log('isGameActivated is ', isGameActivated);
+        // CONFIRM THIS WORKS IN EVENT OF OT
         if (!isGameActivated) {
-          // THIS IS BEING REACHED IN FIRST PREGAME CHECK
-          console.log('server has reached unrefined game inactive fn for gid ', gid);
+          console.log(gid, ' has not started or has finished and gameOver fn not reached');
           res.send({
             quarterEnd: false,
-            // live: false,
             clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
             gameSecs: gameSecs,
             period: period,
-            thru_period: period.current,
             poss: poss,
             pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
             totals: totalsObj
-            // final: true
           })
         } else {
           let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-          // console.log('prevTotals for ', gid, ' are ', prevTotalsPull);
-          // console.log('prevTotals[0] for ', gid, ' are ', prevTotalsPull[0]);
-          // period.current === 1 just for testing prevTotalsPull; remove once corrected
           if (period.current === 1) {
-            console.log('first per response being sent for ', gid);
             res.send({
               quarterEnd: false,
               live: true,
               clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
               gameSecs: gameSecs,
               period: period,
-              thru_period: period.current - 1,
               poss: poss,
               pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-              totals: totalsObj
+              totals: totalsObj,
+              thru_period: 0
             })
           } else {
-            console.log('later per response being sent for ', gid);
             res.send({
               quarterEnd: false,
               live: true,
               clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
               gameSecs: gameSecs,
               period: period,
-              thru_period: period.current - 1,
               poss: poss,
               pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
               totals: totalsObj,
@@ -641,15 +655,13 @@ router.get("/fetchBoxScore/:date/:gid", async (req, res, next) => {
           }
         }
       }
-  } else {
-    console.log(gid, ' has not started, sending back gid ref and active: false');
-    res.send({
-      gid: gid,
-      active: false
-    })
-  }
-
-
+    } else {
+      console.log(gid, ' has not started, sending back gid ref and active: false');
+      res.send({
+        gid: gid,
+        active: false
+      })
+    }
 })
 
 // how best to use this?
@@ -879,7 +891,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("04 13 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("32 08 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);

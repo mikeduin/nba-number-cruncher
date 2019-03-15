@@ -21,67 +21,30 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
 
   let todaysGames = data.weekGames.filter(game => {
     // For testing
-    return game.gdte === '2019-03-13';
-    // return game.gdte === today;
+    // return game.gdte === '2019-03-13';
+    return game.gdte === today;
   });
-
-  // let activeGames = getState().activeGames;
-  // let completedGames = getState().completedGames;
-  // console.log('activeGames in fetchWeek are ', activeGames);
-  //
-  // todaysGames.forEach(game => {
-  //   // if the game is within 10 minutes from now, set it to active
-  //   let tenMinsAhead = moment().add(10, 'm');
-  //   let threeHourMinsAhead = tenMinsAhead.add(3, 'h');
-  //   let gametime = moment(game.etm);
-  //   if (gametime.isBefore(threeHourMinsAhead) && completedGames.indexOf(game.gid) === -1) {
-  //     activeGames.push(game.gid);
-  //   };
-  // });
 
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
   dispatch({ type: 'FETCH_WEEK', payload: updated });
-  // dispatch({ type: 'SET_ACTIVE_GAMES', payload: activeGames });
 }
 
 export const checkActiveGames = () => async (dispatch, getState) => {
   const response = await axios.get('/todayGameStatus');
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
-
   const clientActive = getState().activeGames;
   const clientCompleted = getState().completedGames;
 
-  if (_.isEqual(clientActive, serverActive) == false) {
+  if (_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive)) == false) {
     console.log('modifying active games');
     dispatch({ type: 'SET_ACTIVE_GAMES', payload: serverActive });
   }
 
-  if (_.isEqual(clientCompleted, serverCompleted) == false) {
+  if (_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted)) == false) {
     console.log('modifying completed games');
     dispatch({ type: 'SET_COMPLETED_GAMES', payload: serverCompleted });
   }
-
-  // console.log('activeGames in action are ', activeGames);
-  // console.log('completedGames in action are ', completedGames);
-  //
-  // todaysGames.forEach(game => {
-  //   let tenMinsAhead = moment().add(20, 'm');
-  //   let threeHourTenMinsAhead = tenMinsAhead.add(3, 'h');
-  //   let gametime = moment(game.etm);
-  //
-  //   let jsonGametime = JSON.stringify(moment(gametime));
-  //   let jsonNow = JSON.stringify(moment());
-  //
-  //   // jsonNow == 8 hours ahead, UTC Time
-  //   // jsonGametime == 11 hours ahead, eastern UTC time
-  //
-  //   if (gametime.isBefore(threeHourTenMinsAhead) && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-  //     console.log('game is ', game.gid, ' being set to live from checkActiveGames function');
-  //     dispatch({ type: 'SET_TO_LIVE', payload: game.gid });
-  //   };
-  // })
-
 }
 
 export const fetchPlayerData = (pid) => async dispatch => {
@@ -177,12 +140,13 @@ export const setActiveDay = date => async dispatch => {
 
 export const fetchBoxScore = (gid) => async (dispatch, getState) => {
   // For testing
-  let todayInt = '20190313';
-  // let todayInt = moment().format('YYYYMMDD');
+  // let todayInt = '20190313';
+  let todayInt = moment().format('YYYYMMDD');
   // let gameFinal = false;
 
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}`);
   const response = game.data;
+
 
   if (response.final) {
     let { totals, q1, q2, q3, q4, ot, final, gid } = response;
@@ -240,7 +204,6 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       active: true,
       period: period.current,
       endOfPeriod: false,
-      thru: thru_period,
       gameSecs,
       clock,
       poss,
@@ -248,15 +211,22 @@ export const fetchBoxScore = (gid) => async (dispatch, getState) => {
       totals
     };
 
+
     if (response.quarterEnd) {
       let perToUpdate = response.thru_period;
       let endOfQuarterData = response.quarter;
       let prevQuarters = response.prevQuarters;
 
-      // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-      let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
+      const lastPerUpdated = getState().gambleCast[`live_${gid}`].thru_period;
 
-      dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+      console.log('lastPerUpdated is ', lastPerUpdated, ' and perToUpdate is ', perToUpdate);
+
+      if (perToUpdate !== lastPerUpdated) {
+        // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
+        let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
+
+        dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+      }
     } else {
       let perToUpdate = period.current;
       let inQuarter = {};

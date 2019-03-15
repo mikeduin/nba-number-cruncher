@@ -1,21 +1,19 @@
 export default (state = {}, action) => {
   switch (action.type) {
+
     case 'SET_TO_LIVE':
-      console.log('state being included is ', state[`live_${action.payload}`]);
       return {...state, [`live_${action.payload}`]: {
           ...state[`live_${action.payload}`],
           active: true,
           final: false
         }
       };
-    case 'INIT_DATA_LOAD':
-      return {...state, [`live_${action.payload.gid}`]: action.payload};
-    case 'SET_FINAL_BOX_SCORE':
-      return {...state, [`live_${action.payload.gid}`]: action.payload};
+
+    // case 'INIT_DATA_LOAD':
+    //   return {...state, [`live_${action.payload.gid}`]: action.payload};
+
     case 'UPDATE_LIVE_SCORE':
-      console.log('state in update live score fn is ', state);
       if (state[`live_${action.payload.gid}`]) {
-        console.log('state for game found, it is ', state[`live_${action.payload.gid}`]);
         let gameState = state[`live_${action.payload.gid}`];
         gameState.totals = action.payload.totals;
         gameState.clock = action.payload.clock;
@@ -27,18 +25,22 @@ export default (state = {}, action) => {
         console.log('state for game NOT found, state is ', state);
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       };
+
     case 'ADD_SNAPSHOT':
       if (state[`live_${action.payload.gid}`]) {
         let gameState = state[`live_${action.payload.gid}`];
         gameState.totals = action.payload.totals;
         gameState[`q${action.payload.perToUpdate}`] = action.payload.endOfQuarterData;
+        gameState.thru_period = action.payload.period;
         gameState.prevQuarters = action.payload.prevQuarters;
         gameState.clock = action.payload.clock;
-        console.log('end of quarter-updated state return for ', action.payload.gid, ' is ', action.payload);
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       }
+
+    case 'SET_FINAL_BOX_SCORE':
+      return {...state, [`live_${action.payload.gid}`]: action.payload};
 
     case 'SET_TO_FINAL':
       let newState = state;
