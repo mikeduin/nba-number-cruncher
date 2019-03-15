@@ -32,9 +32,10 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
+    this.props.fetchBoxScore(this.props.game.gid);
+
     setInterval(() => {
       if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
-        console.log('fetching box score for ', this.props.game.gid);
         this.props.fetchBoxScore(this.props.game.gid);
 
         if (!this.state.gameSpread) {
