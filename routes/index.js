@@ -21,9 +21,9 @@ const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.js
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-// let today = moment().format('YYYY-MM-DD');
+let today = moment().format('YYYY-MM-DD');
 // console.log('today is ', today);
-let today = '2019-03-14';
+// let today = '2019-03-14';
 
 let activeGames = [];
 let completedGames = [];

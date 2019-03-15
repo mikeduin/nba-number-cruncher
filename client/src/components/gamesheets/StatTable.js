@@ -14,6 +14,7 @@ const StatTable = props => {
           <Table.Row>
             <Table.HeaderCell> Team </Table.HeaderCell>
             <Table.HeaderCell> FG% </Table.HeaderCell>
+            <Table.HeaderCell> 2PT% </Table.HeaderCell>
             <Table.HeaderCell> 3PT% </Table.HeaderCell>
             <Table.HeaderCell> FT% </Table.HeaderCell>
             <Table.HeaderCell> OReb/gm </Table.HeaderCell>
@@ -24,6 +25,7 @@ const StatTable = props => {
           <Table.Row>
             <Table.Cell> {vInfo.name} </Table.Cell>
             <Table.Cell> {vStats.fg_pct} </Table.Cell>
+            <Table.Cell> {vStats.fg2_pct.toFixed(3)} </Table.Cell>
             <Table.Cell> {vStats.fg3_pct} </Table.Cell>
             <Table.Cell> {vStats.ft_pct} </Table.Cell>
             <Table.Cell> {vStats.oreb} </Table.Cell>
@@ -32,6 +34,7 @@ const StatTable = props => {
           <Table.Row>
             <Table.Cell> {hInfo.name} </Table.Cell>
             <Table.Cell> {hStats.fg_pct} </Table.Cell>
+            <Table.Cell> {hStats.fg2_pct.toFixed(3)} </Table.Cell>
             <Table.Cell> {hStats.fg3_pct} </Table.Cell>
             <Table.Cell> {hStats.ft_pct} </Table.Cell>
             <Table.Cell> {hStats.oreb} </Table.Cell>
