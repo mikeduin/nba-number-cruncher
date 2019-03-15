@@ -159,7 +159,7 @@ module.exports = {
       }
     });
   },
-  sportsbookFirstQ: () => {
+  sportsbookFirstQ: async () => {
     axios.get(apiRefs.sportsbook().firstQ).then(response => {
       if (response.status === 200) {
         const lines = webScrapeHelpers.parseSbHtml(response.data);
@@ -168,7 +168,19 @@ module.exports = {
             console.log('there is no 1Q line yet for',line.id);
             return;
           };
-          let parsed = webScrapeHelpers.sbLineParser(line);
+          const parsed = webScrapeHelpers.sbLineParser(line);
+          let home_spread_2q = null;
+          let away_spread_2q = null;
+
+          let currOdds = await knex("odds_sportsbook").where({ gcode: parsed.gcode });
+
+          if (currOdds[0].length > 0) {
+            if (currOdds[0].home_spread_1h != null) {
+              home_spread_2q = currOdds[0].home_spread_1h - parsed.hSpread;
+              away_spread_2q = -home_spread_2q;
+            }
+          }
+
           knex("odds_sportsbook")
             .where({ gcode: parsed.gcode })
             .update(
@@ -182,6 +194,8 @@ module.exports = {
                 total_1q: parsed.total,
                 total_1q_over_juice: parsed.overJuice,
                 total_1q_under_juice: parsed.underJuice,
+                home_spread_2q: home_spread_2q,
+                away_spread_2q: away_spread_2q,
                 last_updated: "1q",
                 updated_at: new Date()
               },
@@ -194,7 +208,7 @@ module.exports = {
       }
     });
   },
-  sportsbookThirdQ: () => {
+  sportsbookThirdQ: async () => {
     axios.get(apiRefs.sportsbook().thirdQ).then(response => {
       if (response.status === 200) {
         const lines = webScrapeHelpers.parseSbHtml(response.data);
@@ -208,7 +222,17 @@ module.exports = {
               return;
             };
             let parsed = webScrapeHelpers.sbLineParser(line);
-            console.log("parsed 3Q is ", parsed);
+
+            let home_spread_4q = null;
+            let away_spread_4q = null;
+
+            let currOdds = await knex("odds_sportsbook").where({ gcode: parsed.gcode });
+
+            if (currOdds[0].home_spread_2h != null) {
+              home_spread_4q = currOdds[0].home_spread_2h - parsed.hSpread;
+              away_spread_4q = -home_spread_2q;
+            };
+
             knex("odds_sportsbook")
               .where({ gcode: parsed.gcode })
               .orWhere({ gcode: parsed.gcodeAlt })
@@ -223,6 +247,8 @@ module.exports = {
                   total_3q: parsed.total,
                   total_3q_over_juice: parsed.overJuice,
                   total_3q_under_juice: parsed.underJuice,
+                  home_spread_4q: home_spread_4q,
+                  away_spread_4q: away_spread_4q,
                   last_updated: "3q",
                   updated_at: new Date()
                 },

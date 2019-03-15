@@ -12,6 +12,7 @@ import InfoTable from './gamesheets/InfoTable';
 import ImpactTable from './gamesheets/ImpactTable';
 import RotationTable from './gamesheets/RotationTable';
 import StatTable from './gamesheets/StatTable';
+import OddsRating from './gamesheets/OddsRating';
 import ScenarioBuilder from './gamesheets/ScenarioBuilder';
 
 class GameSheet extends React.Component {
@@ -146,6 +147,13 @@ class GameSheet extends React.Component {
           {menuItem: 'Traditional Stats', render: () =>
             <Tab.Pane>
               <StatTable
+                game={game}
+              />
+            </Tab.Pane>
+          },
+          {menuItem: 'Odds vs. Ratings', render: () =>
+            <Tab.Pane>
+              <OddsRating
                 game={game}
               />
             </Tab.Pane>
