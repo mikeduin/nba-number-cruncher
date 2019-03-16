@@ -138,12 +138,14 @@ export const setActiveDay = date => async dispatch => {
   dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
 }
 
-export const fetchBoxScore = (gid, init = false) => async (dispatch, getState) => {
+export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190314';
   let todayInt = moment().format('YYYYMMDD');
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}`);
   const response = game.data;
+
+  console.log('response is ', response);
 
   if (response.final) {
     dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });
@@ -215,15 +217,17 @@ export const fetchBoxScore = (gid, init = false) => async (dispatch, getState) =
       let endOfQuarterData = response.quarter;
       let prevQuarters = response.prevQuarters;
 
-      const lastPerUpdated = getState().gambleCast[`live_${gid}`].thru_period;
+      if (getState().gambleCast[`live_${gid}`]) {
+        const lastPerUpdated = getState().gambleCast[`live_${gid}`].thru_period;
 
-      console.log('lastPerUpdated is ', lastPerUpdated, ' and perToUpdate is ', perToUpdate);
+        console.log('lastPerUpdated is ', lastPerUpdated, ' and perToUpdate is ', perToUpdate);
 
-      if (perToUpdate !== lastPerUpdated) {
-        // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-        let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
+        if (perToUpdate !== lastPerUpdated) {
+          // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
+          let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
 
-        dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+          dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+        }
       }
     } else {
       let perToUpdate = period.current;

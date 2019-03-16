@@ -9,7 +9,7 @@ export default (state = {}, action) => {
         }
       };
 
-    case 'INITITALIZE_BOX_SCORE':
+    case 'INITIALIZE_BOX_SCORE':
       return {...state, [`live_${action.payload.gid}`]: action.payload};
 
     case 'UPDATE_LIVE_SCORE':
@@ -22,7 +22,7 @@ export default (state = {}, action) => {
         gameState[`q${action.payload.perToUpdate}`] = action.payload.quarterData;
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
-        console.log('state for game NOT found, state is ', state);
+        console.log('state for ', action.payload.gid, ' NOT found, state is ', state);
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       };
 

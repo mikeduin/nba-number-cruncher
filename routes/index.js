@@ -29,6 +29,8 @@ let activeGames = [];
 let completedGames = [];
 let todayGids = [];
 
+
+
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
   const todayGames = await knex("schedule").where({gdte: today});
@@ -251,10 +253,10 @@ setInterval(() => {
 
 router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
   const { gid, date, init } = req.params;
-  const inDb = await knex("box_scores_v2").where({gid: gid});
 
   // <-- If Game Is Final --> //
   if (completedGames.indexOf(parseInt(gid)) !== -1) {
+    let inDb = await knex("box_scores_v2").where({gid: gid});
     let ot = null;
     if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
@@ -277,15 +279,6 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
   let q4 = null;
   let ot = null;
   let thru_period = 0;
-
-  // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
-  if (inDb.length > 0) {
-    thru_period = inDb[0].period_updated;
-    if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
-    if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
-    if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
-    if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
-  }
 
   const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
   const boxScore = await axios.get(url);
@@ -335,13 +328,25 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
     };
 
     // <-- If Initial Box Score Load --> //
-    if (init && period.current !== 1) {
+    if (init == 'true' && period.current !== 1) {
+      let inDb = await knex("box_scores_v2").where({gid: gid});
+
+      // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
+      q1 = inDb[0].q1[0];
+      thru_period = inDb[0].period_updated;
+      if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
+      if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
+      if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
+      if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
+
       quarterUpdFn().then(qTotals => {
 
         if (period.current == 2) q2 = qTotals.currentQuarter;
         if (period.current == 3) q3 = qTotals.currentQuarter;
         if (period.current == 4) q4 = qTotals.currentQuarter;
         if (period.current > 4) ot = qTotals.currentQuarter;
+
+        console.log('gets to init function for ', gid);
 
         res.send({
           gid: gid,
@@ -350,7 +355,7 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
           live: true,
           clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
           gameSecs: gameSecs,
-          period: period,
+          period: period.current,
           thru_period: thru_period,
           poss: poss,
           pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),

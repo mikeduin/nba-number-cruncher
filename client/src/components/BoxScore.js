@@ -31,12 +31,12 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
-    let init = true;
-    this.props.fetchBoxScore(this.props.game.gid, init);
+    // let init = true;
+    this.props.fetchBoxScore(this.props.game.gid, 'true');
 
     setInterval(() => {
       if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
-        this.props.fetchBoxScore(this.props.game.gid);
+        this.props.fetchBoxScore(this.props.game.gid, 'false');
 
         if (!this.state.gameSpread) {
           this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
@@ -69,20 +69,13 @@ class BoxScore extends React.Component {
             style={{marginBottom: 20}}
           >
             <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2">  </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q2 </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q3 </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
-              </Table.Row>
               <Table.Row style={{
                 lineHeight: '3px',
                 fontSize: '10px',
                 padding: 0
               }}>
-                <Table.HeaderCell textAlign="right"> <i>Odds -> </i> </Table.HeaderCell>
+                <Table.HeaderCell> Game ID {game.gid}
+                </Table.HeaderCell>
                 <Table.HeaderCell colSpan="2">
                   {this.state.gameSpread}
                 </Table.HeaderCell>
@@ -92,7 +85,7 @@ class BoxScore extends React.Component {
                 <Table.HeaderCell colSpan="3"> Q4 </Table.HeaderCell>
               </Table.Row>
               <Table.Row>
-                <Table.HeaderCell> Game ID {game.gid} </Table.HeaderCell>
+                <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? boxScore.totals.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? boxScore.q1.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>

@@ -174,7 +174,7 @@ module.exports = {
 
           let currOdds = await knex("odds_sportsbook").where({ gcode: parsed.gcode });
 
-          if (currOdds[0].length > 0) {
+          if (currOdds[0]) {
             if (currOdds[0].home_spread_1h != null) {
               home_spread_2q = currOdds[0].home_spread_1h - parsed.hSpread;
               away_spread_2q = -home_spread_2q;
@@ -228,10 +228,12 @@ module.exports = {
 
             let currOdds = await knex("odds_sportsbook").where({ gcode: parsed.gcode });
 
-            if (currOdds[0].home_spread_2h != null) {
-              home_spread_4q = currOdds[0].home_spread_2h - parsed.hSpread;
-              away_spread_4q = -home_spread_2q;
-            };
+            if (currOdds[0]) {
+              if (currOdds[0].home_spread_2h != null) {
+                home_spread_4q = currOdds[0].home_spread_2h - parsed.hSpread;
+                away_spread_4q = -home_spread_4q;
+              };
+            }
 
             knex("odds_sportsbook")
               .where({ gcode: parsed.gcode })
