@@ -29,8 +29,6 @@ let activeGames = [];
 let completedGames = [];
 let todayGids = [];
 
-
-
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
   const todayGames = await knex("schedule").where({gdte: today});
@@ -55,12 +53,14 @@ setInterval(async () => {
   })
 }, 10000)
 
+// This function pulls in odds
 setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
 }, 200000);
 
+// This function attempts to retrieve 2H/3Q odds between 9am and midnight
 setInterval(()=>{
   const hour = new Date().getHours();
   if (hour >= 9 && hour <= 24) {
@@ -340,13 +340,10 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
       if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
       quarterUpdFn().then(qTotals => {
-
         if (period.current == 2) q2 = qTotals.currentQuarter;
         if (period.current == 3) q3 = qTotals.currentQuarter;
         if (period.current == 4) q4 = qTotals.currentQuarter;
         if (period.current > 4) ot = qTotals.currentQuarter;
-
-        console.log('gets to init function for ', gid);
 
         res.send({
           gid: gid,
@@ -553,14 +550,28 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
     .where('s.gweek', week)
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
     .orderBy('s.etm')
-    .then(games => {
+    .then(async (games) => {
+
+      const teamStats = await knex("teams_full_base");
+
       res.send({
         week: week,
         weekArray: weekArray,
-        weekGames: games
+        weekGames: games,
+        teamStats
       })
     });
 });
+
+// router.get("/api/fetchGameTeamStats/:v/:h", async (req, res, next) => {
+//   const v = req.params.v;
+//   const h = req.params.h
+//
+//   let vStats = await knex("teams_full_base").where({gid: v});
+//   let hStats = await knex("teams_full_base").where({gid: h});
+//
+//   res.send({ vStats, hStats });
+// })
 
 router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const gid = req.params.gid;
@@ -732,7 +743,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("56 00 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("31 08 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);

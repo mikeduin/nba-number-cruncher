@@ -20,8 +20,6 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    // For testing
-    // return game.gdte === '2019-03-14';
     return game.gdte === today;
   });
 
@@ -129,13 +127,20 @@ export const fetchGame = ({gid}) => async dispatch => {
   dispatch({ type: 'SET_V_PLAYERS', payload: vPlayers });
 }
 
+// export const fetchGameTeamStats = (v, h) => async dispatch => {
+//   const response = await axios.get(`/api/fetchGameTeamStats/${v}/${h}`);
+//   const data = response.data;
+//
+//   dispatch({ type: 'ADD_GAME_TEAM_STATS', payload: })
+// }
+
 export const changeTeamColor = (hv, colorObj) => async dispatch => {
-  let upper = hv.toUpperCase();
+  const upper = hv.toUpperCase();
   dispatch({ type: `CHANGE_${upper}_COLOR`, payload: colorObj});
 }
 
 export const setActiveDay = date => async dispatch => {
-  dispatch ({type: 'SET_ACTIVE_DAY', payload: date});
+  dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });
 }
 
 export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
@@ -218,14 +223,10 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
       let prevQuarters = response.prevQuarters;
 
       if (getState().gambleCast[`live_${gid}`]) {
-        const lastPerUpdated = getState().gambleCast[`live_${gid}`].thru_period;
-
-        console.log('lastPerUpdated is ', lastPerUpdated, ' and perToUpdate is ', perToUpdate);
-
-        if (perToUpdate !== lastPerUpdated) {
+        const perToUpdPts = endOfQuarterData.t.pts;
+        if (perToUpdPts !== 0) {
           // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
           let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
-
           dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
         }
       }

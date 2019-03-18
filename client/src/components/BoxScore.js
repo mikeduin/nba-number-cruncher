@@ -5,7 +5,16 @@ import { Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
 
 class BoxScore extends React.Component {
-  state = {final: false, gameSpread: null, q1Spread: null, q2Spread: null, q3Spread: null, q4Spread: null};
+  state = {
+    final: false,
+    gameSpread: null,
+    q1Spread: null,
+    q2Spread: null,
+    q3Spread: null,
+    q4Spread: null,
+    hNormal: null,
+    vNormal: null
+  };
 
   checkSpread = (period, home, away, total) => {
     let game = this.props.game;
@@ -35,6 +44,13 @@ class BoxScore extends React.Component {
     this.props.fetchBoxScore(this.props.game.gid, 'true');
 
     setInterval(() => {
+      if (this.props.teamStats && this.state.hNormal == null) {
+        const hNormal = this.props.teamStats.filter(team => team.team_id === game.h[0].tid)[0];
+        const vNormal = this.props.teamStats.filter(team => team.team_id === game.v[0].tid)[0];
+
+        this.setState({ hNormal, vNormal });
+      }
+
       if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
         this.props.fetchBoxScore(this.props.game.gid, 'false');
 
@@ -86,8 +102,8 @@ class BoxScore extends React.Component {
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? boxScore.totals.t.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? boxScore.q1.t.pace.toFixed(2) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? (boxScore.totals.t.pace ? boxScore.totals.t.pace.toFixed(2) : null ) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? (boxScore.q1.t.pace ? boxScore.q1.t.pace.toFixed(2) : null) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 != null ? boxScore.q3.t.pace.toFixed(2) : null}</Table.HeaderCell>
                 <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 != null ? boxScore.q4.t.pace.toFixed(2) : null}</Table.HeaderCell>
@@ -146,11 +162,16 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
-                <Table.Cell colSpan="4"> </Table.Cell>
+                <Table.Cell colSpan="4">
+                  Normalized
+                </Table.Cell>
+              </Table.Row>
+              <Table.Row>
+                <Table.Cell> {game.away_team}  </Table.Cell>
 
               </Table.Row>
               <Table.Row>
-                <Table.Cell colSpan="1"> </Table.Cell>
+                <Table.Cell> {game.home_team}  </Table.Cell>
 
               </Table.Row>
             </Table.Body>
@@ -165,7 +186,8 @@ const mapStateToProps = state => {
   return {
     gambleCast: state.gambleCast,
     activeGames: state.activeGames,
-    completedGames: state.completedGames
+    completedGames: state.completedGames,
+    teamStats: state.week.teamStats
   }
 }
 

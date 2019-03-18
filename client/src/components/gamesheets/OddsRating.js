@@ -40,15 +40,15 @@ const OddsRating = (props) => {
       ((vRatings['3q_full'] + vRatings['4q_full']) / 4)).toFixed(1),
     hDelta3q: ((hRatings['3q_full'] / 4) - (vRatings['3q_full'] / 4)).toFixed(1),
     hDelta4q: ((hRatings['4q_full'] / 4) - (vRatings['4q_full'] / 4)).toFixed(1),
-    hHcaFull: ((hRatings['team_full'] - vRatings['team_full']) + 6).toFixed(1),
-    hHca1h: ((((hRatings['1q_full'] + hRatings['2q_full']) / 4) -
-      ((vRatings['1q_full'] + vRatings['2q_full']) / 4)) + 3).toFixed(1),
-    hHca1q: (((hRatings['1q_full'] / 4) - (vRatings['1q_full'] / 4)) + 1.5).toFixed(1),
-    hHca2q: (((hRatings['2q_full'] / 4) - (vRatings['2q_full'] / 4)) + 1.5).toFixed(1),
-    hHca2h: ((((hRatings['3q_full'] + hRatings['4q_full']) / 4) -
-      ((vRatings['3q_full'] + vRatings['4q_full']) / 4)) + 3).toFixed(1),
-    hHca3q: (((hRatings['3q_full'] / 4) - (vRatings['3q_full'] / 4)) + 1.5).toFixed(1),
-    hHca4q: (((hRatings['4q_full'] / 4) - (vRatings['4q_full'] / 4)) + 1.5).toFixed(1)
+    hHcaFull: ((vRatings['team_full'] - hRatings['team_full']) + 6).toFixed(1),
+    hHca1h: ((((vRatings['1q_full'] + vRatings['2q_full']) / 4) -
+      ((hRatings['1q_full'] + hRatings['2q_full']) / 4)) + 3).toFixed(1),
+    hHca1q: (((vRatings['1q_full'] / 4) - (hRatings['1q_full'] / 4)) - 1.5).toFixed(1),
+    hHca2q: (((vRatings['2q_full'] / 4) - (hRatings['2q_full'] / 4)) - 1.5).toFixed(1),
+    hHca2h: ((((vRatings['3q_full'] + vRatings['4q_full']) / 4) -
+      ((hRatings['3q_full'] + hRatings['4q_full']) / 4)) + 3).toFixed(1),
+    hHca3q: (((vRatings['3q_full'] / 4) - (hRatings['3q_full'] / 4)) - 1.5).toFixed(1),
+    hHca4q: (((vRatings['4q_full'] / 4) - (hRatings['4q_full'] / 4)) - 1.5).toFixed(1)
   }
 
   return (
@@ -106,30 +106,6 @@ const OddsRating = (props) => {
             <Table.Cell> { oddsFormat(odds.home_spread_2h) } </Table.Cell>
             <Table.Cell> { oddsFormat(odds.home_spread_3q) } </Table.Cell>
             <Table.Cell> { oddsFormat(odds.home_spread_4q) } </Table.Cell>
-          </Table.Row>
-          <Table.Row style={{ backgroundColor: '#BCBCBC', fontWeight: 800 }}>
-            <Table.Cell> <b>(H) Advantage vs. Line </b> </Table.Cell>
-            <Table.Cell>
-
-            </Table.Cell>
-            <Table.Cell>
-
-            </Table.Cell>
-            <Table.Cell>
-              { odds.home_spread_1q ? (parseFloat(calcs.hHca1q) + parseFloat(odds.home_spread_1q)).toFixed(1) : null}
-            </Table.Cell>
-            <Table.Cell>
-              { odds.home_spread_2q ? (parseFloat(calcs.hHca2q) + parseFloat(odds.home_spread_2q)).toFixed(1) : null}
-            </Table.Cell>
-            <Table.Cell>
-              { odds.home_spread_2h ? (parseFloat(calcs.hHca2h) + parseFloat(odds.home_spread_2h)).toFixed(1) : null}
-            </Table.Cell>
-            <Table.Cell>
-              { odds.home_spread_3q ? (parseFloat(calcs.hHca3q) + parseFloat(odds.home_spread_3q)).toFixed(1) : null}
-            </Table.Cell>
-            <Table.Cell>
-              { odds.home_spread_4q ? (parseFloat(calcs.hHca4q) + parseFloat(odds.home_spread_4q)).toFixed(1) : null}
-            </Table.Cell>
           </Table.Row>
         </Table.Body>
       </Table>

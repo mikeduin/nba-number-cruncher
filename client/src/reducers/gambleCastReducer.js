@@ -22,7 +22,7 @@ export default (state = {}, action) => {
         gameState[`q${action.payload.perToUpdate}`] = action.payload.quarterData;
         return {...state, [`live_${action.payload.gid}`]: gameState};
       } else {
-        console.log('state for ', action.payload.gid, ' NOT found, state is ', state);
+        // console.log('state for ', action.payload.gid, ' NOT found, state is ', state);
         return {...state, [`live_${action.payload.gid}`]: action.payload}
       };
 
@@ -41,16 +41,6 @@ export default (state = {}, action) => {
 
     case 'SET_FINAL_BOX_SCORE':
       return {...state, [`live_${action.payload.gid}`]: action.payload};
-
-    case 'SET_TO_FINAL':
-      let newState = state;
-      if (newState[`live_${action.payload}`]) {
-        newState[`live_${action.payload}`].final = true;
-        return newState;
-      } else {
-        console.log('game not found in state, cannot set to final');
-        return state;
-      }
     default:
       return state;
   }
