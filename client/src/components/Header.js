@@ -71,7 +71,7 @@ class Header extends React.Component {
         <Link to="" className="item">
           Daily Digest
         </Link>
-        <Link to="" className="item">
+        <Link to="/gamblecast" className="item">
           GambleCast
         </Link>
         <Link to="" className="item">

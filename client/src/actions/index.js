@@ -127,13 +127,6 @@ export const fetchGame = ({gid}) => async dispatch => {
   dispatch({ type: 'SET_V_PLAYERS', payload: vPlayers });
 }
 
-// export const fetchGameTeamStats = (v, h) => async dispatch => {
-//   const response = await axios.get(`/api/fetchGameTeamStats/${v}/${h}`);
-//   const data = response.data;
-//
-//   dispatch({ type: 'ADD_GAME_TEAM_STATS', payload: })
-// }
-
 export const changeTeamColor = (hv, colorObj) => async dispatch => {
   const upper = hv.toUpperCase();
   dispatch({ type: `CHANGE_${upper}_COLOR`, payload: colorObj});

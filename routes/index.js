@@ -29,6 +29,15 @@ let activeGames = [];
 let completedGames = [];
 let todayGids = [];
 
+setTimeout(async () => {
+  // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
+  // const data = today.data;
+  // const seasonYear = data.teamSitesOnly.seasonYear;
+  // const statsStage = data.teamSitesOnly.statsStage;
+  // console.log(seasonYear)
+  dbBuilders.buildSummerSchedule();
+}, 2000)
+
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
   const todayGames = await knex("schedule").where({gdte: today});
@@ -563,16 +572,6 @@ router.get("/api/fetchWeek/:date", (req, res, next) => {
     });
 });
 
-// router.get("/api/fetchGameTeamStats/:v/:h", async (req, res, next) => {
-//   const v = req.params.v;
-//   const h = req.params.h
-//
-//   let vStats = await knex("teams_full_base").where({gid: v});
-//   let hStats = await knex("teams_full_base").where({gid: h});
-//
-//   res.send({ vStats, hStats });
-// })
-
 router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const gid = req.params.gid;
   const game = await knex("schedule").where({gid: gid});
@@ -743,7 +742,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-const timedDbUpdaters = schedule.scheduleJob("31 08 * * *", () => {
+const timedDbUpdaters = schedule.scheduleJob("36 14 * * *", () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);

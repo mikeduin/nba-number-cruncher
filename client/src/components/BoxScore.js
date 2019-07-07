@@ -161,19 +161,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fouls : null} </Table.Cell>
               </Table.Row>
-              <Table.Row>
-                <Table.Cell colSpan="4">
-                  Normalized
-                </Table.Cell>
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell> {game.away_team}  </Table.Cell>
 
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell> {game.home_team}  </Table.Cell>
-
-              </Table.Row>
             </Table.Body>
           </Table>
         </div>

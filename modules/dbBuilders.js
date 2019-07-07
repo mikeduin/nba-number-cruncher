@@ -1,12 +1,15 @@
 const knex = require("../db/knex");
 const axios = require("axios");
 const moment = require("moment");
+const _ = require('lodash');
 
 const dateFilters = require("./dateFilters");
 const buildGameStints = require("./buildGameStints");
+const teamLookup = require("../modules/teamLookup");
 
 const leagueScheduleUrl =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
+const summerScheduleUrl = "https://data.nba.net/10s/prod/v1/2019/schedule.json";
 let now = new Date();
 
 // NOTE: For future season builds, will have to change hard-coded season values in params below
@@ -145,6 +148,23 @@ module.exports = {
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
+  },
+  buildSummerSchedule: () => {
+    axios.get(summerScheduleUrl).then(response => {
+      _.forOwn(response.data.league, (schedule, league) => {
+        schedule.forEach(game => {
+          // console.log(game.gameId);
+          // let hObj = {
+          //   tid: game.hTeam.teamId,
+          //   re: `${game.hTeam.win}-${game.hTeam.loss}`,
+          // }
+          console.log(teamLookup.findById(game.hTeam.teamId));
+        })
+      })
+      // response.data.league.forEach(league => {
+      //   console.log(league);
+      // })
+    })
   },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season

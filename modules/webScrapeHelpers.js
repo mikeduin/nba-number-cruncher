@@ -55,9 +55,9 @@ module.exports = {
     parsed.year = nullChecker(line.id.slice(-2));
     parsed.date = nullChecker(line.id.slice(-6, -2));
     parsed.hSplit = nullChecker(line.homeTeam.split(' '));
-    parsed.hAbb = nullChecker(teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).a);
+    parsed.hAbb = nullChecker(teamLookup.findByName(parsed.hSplit[parsed.hSplit.length-1]).a);
     parsed.aSplit = nullChecker(line.awayTeam.split(' '));
-    parsed.aAbb = nullChecker(teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).a);
+    parsed.aAbb = nullChecker(teamLookup.findByName(parsed.aSplit[parsed.aSplit.length-1]).a);
     parsed.hMoney = nullChecker(mlChecker(line.homeMoney));
     parsed.aMoney = nullChecker(mlChecker(line.awayMoney));
     parsed.aParen = nullChecker(line.awaySpread.indexOf('('));
@@ -79,8 +79,8 @@ module.exports = {
     parsed.gcode = `20${parsed.year}${parsed.date}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gcodeAlt = `${dayPrior}/${parsed.aAbb}${parsed.hAbb}`;
     parsed.gdte = `${parsed.gcode.slice(0, 4)}-${parsed.gcode.slice(4, 6)}-${parsed.gcode.slice(6, 8)}`;
-    parsed.home_id = teamLookup.findTeam(parsed.hSplit[parsed.hSplit.length-1]).id;
-    parsed.away_id = teamLookup.findTeam(parsed.aSplit[parsed.aSplit.length-1]).id;
+    parsed.home_id = teamLookup.findByName(parsed.hSplit[parsed.hSplit.length-1]).id;
+    parsed.away_id = teamLookup.findByName(parsed.aSplit[parsed.aSplit.length-1]).id;
     return parsed;
   }
 }
