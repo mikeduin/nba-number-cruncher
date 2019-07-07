@@ -10,7 +10,11 @@ const teamLookup = require("../modules/teamLookup");
 const leagueScheduleUrl =
   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
 const summerScheduleUrl = "https://data.nba.net/10s/prod/v1/2019/schedule.json";
+const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
+
+// ONE-TIME BUILDER/UPDATE INDEX ... NO REGULAR REPETITION NEEDED
+// (*) updateTeamInfo: Used to add/update info for new teams/franchises that appear
 
 // NOTE: For future season builds, will have to change hard-coded season values in params below
 
@@ -148,6 +152,44 @@ module.exports = {
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
+  },
+  updateTeamInfo: async () => {
+    // This just needs to be run as needed to update new teams (such as international/summer teams) that might appear in the DB.
+    const response = await axios.get(teamInfoUrl);
+    _.forOwn(response.data.league, (teams, league) => {
+      teams.forEach(team => {
+        knex("teams").where({tid: team.teamId}).then(res => {
+          if (!res[0]) {
+            knex("teams").insert({
+              tid: team.teamId,
+              city: team.city,
+              name: team.nickname,
+              abb: team.tricode,
+              isNBAFranchise: team.isNBAFranchise,
+              isAllStar: team.isAllStar,
+              confName: team.confName,
+              divName: team.divName,
+              fullName: team.fullName
+            }, '*').then(returned => {
+              console.log(returned[0].city, " has been added to the DB");
+            })
+          } else {
+            // This portion of the code does not need to be regularly run and was initially built just to quickly update some new DB fields for teams that already existed
+            if (league == "standard") {
+              knex("teams").where({tid: team.teamId}).update({
+                isNBAFranchise: team.isNBAFranchise,
+                isAllStar: team.isAllStar,
+                confName: team.confName,
+                divName: team.divName,
+                fullName: team.fullName
+              }, '*').then(returned => {
+                console.log(returned[0].city, " has been updated in the DB");
+              })
+            }
+          }
+        })
+      })
+    })
   },
   buildSummerSchedule: () => {
     axios.get(summerScheduleUrl).then(response => {
