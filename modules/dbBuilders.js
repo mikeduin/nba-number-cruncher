@@ -7,14 +7,16 @@ const dateFilters = require("./dateFilters");
 const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
 
-const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
-const summerScheduleUrl = "https://data.nba.net/10s/prod/v1/2019/schedule.json";
+// const leagueScheduleUrl =
+//   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
+// const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
+// const summerScheduleUrl = "https://data.nba.net/10s/prod/v1/2019/schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
 
 // ONE-TIME BUILDER/UPDATE INDEX ... NO REGULAR REPETITION NEEDED
 // (*) updateTeamInfo: Used to add/update info for new teams/franchises that appear
+// (*) buildSchedule: Used to build initial schedule upon creation. Update leagueScheduleUrl for appropriate schedule feed (e.g. there were three separate links found for 2019 summer league, visible by visiting https://stats.nba.com/schedule/summerleague/ and looking at XHR sources)
 
 // NOTE: For future season builds, will have to change hard-coded season values in params below
 
@@ -191,25 +193,44 @@ module.exports = {
       })
     })
   },
-  buildSummerSchedule: () => {
-    axios.get(summerScheduleUrl).then(response => {
-      _.forOwn(response.data.league, (schedule, league) => {
-        schedule.forEach(game => {
-          // console.log(game.gameId);
-          // let hObj = {
-          //   tid: game.hTeam.teamId,
-          //   re: `${game.hTeam.win}-${game.hTeam.loss}`,
-          // }
-          console.log(teamLookup.findById(game.hTeam.teamId));
-        })
-      })
-      // response.data.league.forEach(league => {
-      //   console.log(league);
-      // })
-    })
-  },
+  // buildSummerSchedule: () => {
+  //   // Realized this separate function for the Summer schedule is unnecessary upon discovery of properly formatted summer league schedule analogous to previously created function. Commenting out for now.
+  //   axios.get(summerScheduleUrl).then(response => {
+  //     _.forOwn(response.data.league, (schedule, league) => {
+  //       schedule.forEach(game => {
+  //         let hObj = {
+  //           tid: game.hTeam.teamId,
+  //           re: `${game.hTeam.win}-${game.hTeam.loss}`,
+  //           ta: teamLookup.findById(game.hTeam.teamId).a,
+  //           tn: teamLookup.findById(game.hTeam.teamId).name,
+  //           tc: teamLookup.findById(game.hTeam.teamId).c,
+  //           s: game.hTeam.score
+  //         };
+  //         let vObj = {
+  //           tid: game.vTeam.teamId,
+  //           re: `${game.vTeam.win}-${game.vTeam.loss}`,
+  //           ta: teamLookup.findById(game.vTeam.teamId).a,
+  //           tn: teamLookup.findById(game.vTeam.teamId).name,
+  //           tc: teamLookup.findById(game.vTeam.teamId).c,
+  //           s: game.vTeam.score
+  //         };
+  //         knex("schedule").insert({
+  //           gid: game.gameId,
+  //           gcode: game.gameUrlCode,
+  //           gdte: `${game.startDateEastern.substring(0, 4)}-${game.startDateEastern.substring(4, 6)}-${game.startDateEastern.substring(6, 8)}`,
+  //           etm: moment(game.startTimeUTC).add(3, 'hours').format('YYYY-MM-DD HH:mm:ss'),
+  //           gweek: 'summer',
+  //           h: [hObj],
+  //           v: [vObj],
+  //           stt: ''
+  //         })
+  //       })
+  //     })
+  //   })
+  // },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
+    // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
@@ -243,6 +264,12 @@ module.exports = {
                 h: [hObj],
                 v: [vObj],
                 stt: game.stt,
+                // BEGIN HARD-CODED VALUES
+                season_year: 2019,
+                display_year: '2019-20',
+                season_name: 'summer',
+                season_stage: 2,
+                // END HARD-CODED VALUES
                 updated_at: new Date()
               },
               "*"
