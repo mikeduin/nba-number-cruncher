@@ -35,32 +35,32 @@ setTimeout(async () => {
   // const seasonYear = data.teamSitesOnly.seasonYear;
   // const statsStage = data.teamSitesOnly.statsStage;
   // console.log(seasonYear)
-  dbBuilders.buildSchedule();
+  // dbBuilders.buildSchedule();
 }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
-setInterval(async () => {
-  const todayGames = await knex("schedule").where({gdte: today});
-  todayGids = todayGames.map(game => game.gid);
-
-  // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
-  let nowET = moment().add(180, 'minutes');
-  const finalBoxScores = await knex("box_scores_v2")
-    .whereIn('gid', todayGids)
-    .where({final: true})
-    .pluck('gid');
-
-  completedGames = finalBoxScores;
-  todayGames.forEach(game => {
-    let mins = nowET.diff(moment(game.etm), 'minutes');
-    // console.log(game.etm, ' starts in ', mins, ' mins');
-
-    if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-      console.log('pushing ', game.gid, ' to activeGames');
-      activeGames.push(game.gid)
-    };
-  })
-}, 10000)
+// setInterval(async () => {
+//   const todayGames = await knex("schedule").where({gdte: today});
+//   todayGids = todayGames.map(game => game.gid);
+//
+//   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
+//   let nowET = moment().add(180, 'minutes');
+//   const finalBoxScores = await knex("box_scores_v2")
+//     .whereIn('gid', todayGids)
+//     .where({final: true})
+//     .pluck('gid');
+//
+//   completedGames = finalBoxScores;
+//   todayGames.forEach(game => {
+//     let mins = nowET.diff(moment(game.etm), 'minutes');
+//     // console.log(game.etm, ' starts in ', mins, ' mins');
+//
+//     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
+//       console.log('pushing ', game.gid, ' to activeGames');
+//       activeGames.push(game.gid)
+//     };
+//   })
+// }, 10000)
 
 // This function pulls in odds
 setInterval(()=>{
@@ -551,12 +551,17 @@ router.get("/api/getNetRatings", (req, res, next) => {
   });
 });
 
-router.get("/api/fetchWeek/:date", (req, res, next) => {
-  const week = dateFilters.fetchGmWk(req.params.date);
-  const weekArray = dateFilters.fetchGmWkArrays(week);
+router.get("/api/fetchWeek/:date", async (req, res, next) => {
+  const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
+  const seasonYear = todayInfo.data.seasonScheduleYear;
+  const seasonStage = todayInfo.data.teamSitesOnly.statsStage;
+  const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonStage);
+  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonStage);
+
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week)
+    .where('s.season_year', seasonYear)
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
     .orderBy('s.etm')
     .then(async (games) => {
@@ -743,20 +748,20 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
 })
 
 const timedDbUpdaters = schedule.scheduleJob("36 14 * * *", () => {
-  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
-  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
-  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
-  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
-  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
-  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
-  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
-  setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
-  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
-  setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
-  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
-  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
+  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
+  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
+  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
+  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
+  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
+  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
+  // setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
+  // setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
+  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
+  // setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
+  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
+  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
 })
 
 module.exports = router;

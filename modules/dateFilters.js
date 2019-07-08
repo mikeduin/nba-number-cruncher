@@ -26,66 +26,82 @@ module.exports = {
         return 8;
     }
   },
-  fetchGmWk: function(date) {
-    switch (true) {
-      case date > 20181015 && date < 20181022:
-        return 1;
-      case date > 20181021 && date < 20181029:
-        return 2;
-      case date > 20181028 && date < 20181105:
-        return 3;
-      case date > 20181104 && date < 20181112:
-        return 4;
-      case date > 20181111 && date < 20181119:
-        return 5;
-      case date > 20181118 && date < 20181126:
-        return 6;
-      case date > 20181125 && date < 20181203:
-        return 7;
-      case date > 20181202 && date < 20181210:
-        return 8;
-      case date > 20181209 && date < 20181217:
-        return 9;
-      case date > 20181216 && date < 20181224:
-        return 10;
-      case date > 20181223 && date < 20181231:
-        return 11;
-      case date > 20181230 && date < 20190107:
-        return 12;
-      case date > 20190106 && date < 20190114:
-        return 13;
-      case date > 20190113 && date < 20190121:
-        return 14;
-      case date > 20190120 && date < 20190128:
-        return 15;
-      case date > 20190127 && date < 20190204:
-        return 16;
-      case date > 20190203 && date < 20190211:
-        return 17;
-      case date > 20190210 && date < 20190218:
-        return 18;
-      case date > 20190217 && date < 20190225:
-        return 19;
-      case date > 20190224 && date < 20190304:
-        return 20;
-      case date > 20190303 && date < 20190311:
-        return 21;
-      case date > 20190310 && date < 20190318:
-        return 22;
-      case date > 20190317 && date < 20190325:
-        return 23;
-      case date > 20190324 && date < 20190401:
-        return 24;
-      case date > 20190331 && date < 20190408:
-        return 25;
-      case date > 20190407 && date < 20190411:
-        return 26;
-      default:
-        return 0;
+  fetchGmWk: function(date, season, stage) {
+    if (season == 2018) {
+      switch (true) {
+        case date > 20181015 && date < 20181022:
+          return 1;
+        case date > 20181021 && date < 20181029:
+          return 2;
+        case date > 20181028 && date < 20181105:
+          return 3;
+        case date > 20181104 && date < 20181112:
+          return 4;
+        case date > 20181111 && date < 20181119:
+          return 5;
+        case date > 20181118 && date < 20181126:
+          return 6;
+        case date > 20181125 && date < 20181203:
+          return 7;
+        case date > 20181202 && date < 20181210:
+          return 8;
+        case date > 20181209 && date < 20181217:
+          return 9;
+        case date > 20181216 && date < 20181224:
+          return 10;
+        case date > 20181223 && date < 20181231:
+          return 11;
+        case date > 20181230 && date < 20190107:
+          return 12;
+        case date > 20190106 && date < 20190114:
+          return 13;
+        case date > 20190113 && date < 20190121:
+          return 14;
+        case date > 20190120 && date < 20190128:
+          return 15;
+        case date > 20190127 && date < 20190204:
+          return 16;
+        case date > 20190203 && date < 20190211:
+          return 17;
+        case date > 20190210 && date < 20190218:
+          return 18;
+        case date > 20190217 && date < 20190225:
+          return 19;
+        case date > 20190224 && date < 20190304:
+          return 20;
+        case date > 20190303 && date < 20190311:
+          return 21;
+        case date > 20190310 && date < 20190318:
+          return 22;
+        case date > 20190317 && date < 20190325:
+          return 23;
+        case date > 20190324 && date < 20190401:
+          return 24;
+        case date > 20190331 && date < 20190408:
+          return 25;
+        case date > 20190407 && date < 20190411:
+          return 26;
+        default:
+          return 0;
+      }
+    } else if (season == 2019 && stage == 2) {
+      switch (true) {
+        case date > 20190630 && date < 20190708:
+          return 1;
+        case date > 20190707 && date < 20190715:
+          return 2;
+        default:
+          return 0;
+      }
     }
   },
-  fetchGmWkArrays: function(week) {
-    let seasonArray = [
+  fetchGmWkArrays: function(week, season, stage) {
+    const summerArray19 = [
+      [null],
+      [20190701, 20190702, 20190703, 20190704, 20190705, 20190706, 20190707],
+      [20190708, 20190709, 20190710, 20190711, 20190712, 20190713, 20190714]
+    ];
+    const seasonArray18 = [
       [null],
       [20181016, 20181017, 20181018, 20181019, 20181020, 20181021],
       [20181022, 20181023, 20181024, 20181025, 20181026, 20181027, 20181028],
@@ -115,6 +131,13 @@ module.exports = {
       [20190408, 20190409, 20190410, 20190411]
     ];
 
-    return seasonArray[week];
+    if (season == 2018) {
+      return seasonArray18[week];
+    } else if (season == 2019 && stage == 2) {
+      return summerArray19[week];
+    } else {
+      console.log('error in date filters - no applicable week found, returning null');
+      return null;
+    }
   }
 };

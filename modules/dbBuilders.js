@@ -10,7 +10,6 @@ const teamLookup = require("../modules/teamLookup");
 // const leagueScheduleUrl =
 //   "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/league/00_full_schedule_week.json";
 // const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
-// const summerScheduleUrl = "https://data.nba.net/10s/prod/v1/2019/schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
 
@@ -193,41 +192,6 @@ module.exports = {
       })
     })
   },
-  // buildSummerSchedule: () => {
-  //   // Realized this separate function for the Summer schedule is unnecessary upon discovery of properly formatted summer league schedule analogous to previously created function. Commenting out for now.
-  //   axios.get(summerScheduleUrl).then(response => {
-  //     _.forOwn(response.data.league, (schedule, league) => {
-  //       schedule.forEach(game => {
-  //         let hObj = {
-  //           tid: game.hTeam.teamId,
-  //           re: `${game.hTeam.win}-${game.hTeam.loss}`,
-  //           ta: teamLookup.findById(game.hTeam.teamId).a,
-  //           tn: teamLookup.findById(game.hTeam.teamId).name,
-  //           tc: teamLookup.findById(game.hTeam.teamId).c,
-  //           s: game.hTeam.score
-  //         };
-  //         let vObj = {
-  //           tid: game.vTeam.teamId,
-  //           re: `${game.vTeam.win}-${game.vTeam.loss}`,
-  //           ta: teamLookup.findById(game.vTeam.teamId).a,
-  //           tn: teamLookup.findById(game.vTeam.teamId).name,
-  //           tc: teamLookup.findById(game.vTeam.teamId).c,
-  //           s: game.vTeam.score
-  //         };
-  //         knex("schedule").insert({
-  //           gid: game.gameId,
-  //           gcode: game.gameUrlCode,
-  //           gdte: `${game.startDateEastern.substring(0, 4)}-${game.startDateEastern.substring(4, 6)}-${game.startDateEastern.substring(6, 8)}`,
-  //           etm: moment(game.startTimeUTC).add(3, 'hours').format('YYYY-MM-DD HH:mm:ss'),
-  //           gweek: 'summer',
-  //           h: [hObj],
-  //           v: [vObj],
-  //           stt: ''
-  //         })
-  //       })
-  //     })
-  //   })
-  // },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
     // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
