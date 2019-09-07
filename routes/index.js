@@ -62,9 +62,9 @@ setTimeout(async () => {
 
 // This function pulls in odds
 setInterval(()=>{
-  oddsLoaders.sportsbookFull();
-  oddsLoaders.sportsbookFirstH();
-  oddsLoaders.sportsbookFirstQ();
+  // oddsLoaders.sportsbookFull();
+  // oddsLoaders.sportsbookFirstH();
+  // oddsLoaders.sportsbookFirstQ();
 }, 5000);
 
 // This function attempts to retrieve 2H/3Q odds between 9am and midnight
@@ -554,7 +554,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const seasonYear = todayInfo.data.seasonScheduleYear;
   const seasonStage = todayInfo.data.teamSitesOnly.statsStage;
   const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonStage);
-  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonStage);
+  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonStage, req.params.date);
 
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")

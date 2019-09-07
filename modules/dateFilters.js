@@ -84,66 +84,87 @@ module.exports = {
         default:
           return 0;
       }
-    } else if (season == 2019) {
+    } else if (season == 2019 && date > 20191021) {
       switch (true) {
-        case date > 20181021 && date < 20181028:
+        case date > 20191021 && date < 20191028:
           return 1;
-        case date > 20181027 && date < 20181104:
+        case date > 20191027 && date < 20191104:
           return 2;
-        case date > 20181103 && date < 20181111:
+        case date > 20191103 && date < 20191111:
           return 3;
-        case date > 20181110 && date < 20181118:
+        case date > 20191110 && date < 20191118:
           return 4;
-        case date > 20181117 && date < 20181125:
+        case date > 20191117 && date < 20191125:
           return 5;
-        case date > 20181124 && date < 20181202:
+        case date > 20191124 && date < 20191202:
           return 6;
-        case date > 20181201 && date < 20181209:
+        case date > 20191201 && date < 20191209:
           return 7;
-        case date > 20181208 && date < 20181216:
+        case date > 20191208 && date < 20191216:
           return 8;
-        case date > 20181215 && date < 20181223:
+        case date > 20191215 && date < 20191223:
           return 9;
-        case date > 20181222 && date < 20181230:
+        case date > 20191222 && date < 20191230:
           return 10;
-        case date > 20181229 && date < 20190106:
+        case date > 20191229 && date < 20200106:
           return 11;
-        case date > 20190105 && date < 20190113:
+        case date > 20200105 && date < 20200113:
           return 12;
-        case date > 20190112 && date < 20190120:
+        case date > 20200112 && date < 20200120:
           return 13;
-        case date > 20190119 && date < 20190127:
+        case date > 20200119 && date < 20200127:
           return 14;
-        case date > 20190126 && date < 20190203:
+        case date > 20200126 && date < 20200203:
           return 15;
-        case date > 20190202 && date < 20190210:
+        case date > 20200202 && date < 20200210:
           return 16;
-        case date > 20190209 && date < 20190217:
+        case date > 20200209 && date < 20200217:
           return 17;
-        case date > 20190216 && date < 20190224:
+        case date > 20200216 && date < 20200224:
           return 18;
-        case date > 20190223 && date < 20190303:
+        case date > 20200223 && date < 20200303:
           return 19;
-        case date > 20190302 && date < 20190310:
+        case date > 20200302 && date < 20200310:
           return 20;
-        case date > 20190309 && date < 20190317:
+        case date > 20200309 && date < 20200317:
           return 21;
-        case date > 20190316 && date < 20190324:
+        case date > 20200316 && date < 20200324:
           return 22;
-        case date > 20190323 && date < 20190331:
+        case date > 20200323 && date < 20200331:
           return 23;
-        case date > 20190330 && date < 20190407:
+        case date > 20200330 && date < 20200407:
           return 24;
-        case date > 20190406 && date < 20190414:
+        case date > 20200406 && date < 20200414:
           return 25;
-        case date > 20190413 && date < 20190416:
+        case date > 20200413 && date < 20200416:
           return 26;
+        default:
+          return 0;
+      }
+    } else if (season == 2019 && date < 20191022) {
+      switch (true) {
+        case date > 20190901 && date < 20190909:
+          return 1;
+        case date > 20190908 && date < 20190916:
+          return 2;
+        case date > 20190915 && date < 20190923:
+          return 3;
+        case date > 20190922 && date < 20190930:
+          return 4;
+        case date > 20190929 && date < 20191007:
+          return 5;
+        case date > 20191006 && date < 20191014:
+          return 6;
+        case date > 20191013 && date < 20191021:
+          return 7;
+        case date > 20191020 && date < 20191022:
+          return 8;
         default:
           return 0;
       }
     }
   },
-  fetchGmWkArrays: function(week, season, stage) {
+  fetchGmWkArrays: function(week, season, stage, date) {
     const summerArray19 = [
       [null],
       [20190701, 20190702, 20190703, 20190704, 20190705, 20190706, 20190707],
@@ -178,7 +199,8 @@ module.exports = {
       [20190401, 20190402, 20190403, 20190404, 20190405, 20190406, 20190407],
       [20190408, 20190409, 20190410, 20190411]
     ];
-    const preseasonArray19 = [
+    const offseasonArray19 = [
+      [null],
       [20190902, 20190903, 20190904, 20190905, 20190906, 20190907, 20190908],
       [20190909, 20190910, 20190911, 20190912, 20190913, 20190914, 20190915],
       [20190916, 20190917, 20190918, 20190919, 20190920, 20190921, 20190922],
@@ -220,8 +242,10 @@ module.exports = {
 
     if (season == 2018) {
       return seasonArray18[week];
-    } else if (season == 2019 && stage == 2) {
-      return summerArray19[week];
+    } else if (season == 2019 && date < 20191022) {
+      return offseasonArray19[week];
+    } else if (season == 2019 && date > 20191021) {
+      return seasonArray19[week];
     } else {
       console.log('error in date filters - no applicable week found, returning null');
       return null;
