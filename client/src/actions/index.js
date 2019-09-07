@@ -136,6 +136,32 @@ export const setActiveDay = date => async dispatch => {
   dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });
 }
 
+export const changeSchedWeek = (week, dir) => async dispatch => {
+  console.log('week is ', week, ' and dir is ', dir);
+  let newWeek = 0;
+  let baseDay = week.weekArray[0];
+  if (dir == "inc") {
+    baseDay = moment(baseDay, 'YYYYMMDD').add(7, 'days').format('YYYYMMDD');
+  } else if (dir == "dec") {
+    baseDay = moment(baseDay, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD');
+  };
+
+
+  ///
+
+  let response = await fetch(`/api/fetchWeek/${baseDay}`);
+  let data = await response.json();
+
+  let updated = {...data, today};
+
+  // let todaysGames = data.weekGames.filter(game => {
+  //   return game.gdte === today;
+  // });
+
+  // dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
+  dispatch({ type: 'FETCH_WEEK', payload: updated });
+}
+
 export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190314';

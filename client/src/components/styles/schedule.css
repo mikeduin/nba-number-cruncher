@@ -2,11 +2,7 @@
   font-size: 3vw;
   margin-top: 10px;
   margin-bottom: 10px;
-}
-
-.schedGameTotal {
-  font-size: 1vw;
-  color: black;
+  text-align: center;
 }
 
 .schedLeftArrow {

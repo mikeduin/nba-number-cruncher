@@ -2,11 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import ScheduleCard from './ScheduleCard';
-import './styles.css';
+import './styles/schedule.css';
 import { Segment, Statistic, Grid, Column, Image, Card, Button, Dimmer, Header, Icon } from "semantic-ui-react";
 
 import { connect } from "react-redux";
-import { fetchWeek, setActiveDay } from "../actions";
+import { fetchWeek, setActiveDay, changeSchedWeek } from "../actions";
 
 class Schedule extends React.Component {
   componentDidMount() {
@@ -79,9 +79,13 @@ class Schedule extends React.Component {
         <div style={{marginBottom: 100}}>
           <div className="ui grid">
             <div className={`nine column row weeklyRow`}>
-              <Icon className="column" name='angle left' size='massive' />
+              <Icon className="column" name='angle left' size='massive'
+                onClick={() => this.props.changeSchedWeek(this.props.week, "dec")}
+              />
               {this.renderWeekGrid()}
-              <Icon className="column" name='angle right' size='massive' />
+              <Icon className="column" name='angle right' size='massive'
+                onClick={() => this.props.changeSchedWeek(this.props.week, "inc")}
+              />
             </div>
           </div>
 
@@ -103,5 +107,5 @@ const mapStateToProps = state => {
 
 export default connect(
   mapStateToProps,
-  { fetchWeek, setActiveDay }
+  { fetchWeek, setActiveDay, changeSchedWeek }
 )(Schedule);
