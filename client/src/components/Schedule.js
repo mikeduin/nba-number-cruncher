@@ -2,7 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import ScheduleCard from './ScheduleCard';
-import { Segment, Statistic, Grid, Column, Image, Card, Button, Dimmer, Header } from "semantic-ui-react";
+import './styles.css';
+import { Segment, Statistic, Grid, Column, Image, Card, Button, Dimmer, Header, Icon } from "semantic-ui-react";
 
 import { connect } from "react-redux";
 import { fetchWeek, setActiveDay } from "../actions";
@@ -14,7 +15,6 @@ class Schedule extends React.Component {
     } else {
       this.props.setActiveDay(this.props.match.params.date);
     }
-    // console.log(this.props);
   }
 
   renderWeekGrid() {
@@ -48,7 +48,7 @@ class Schedule extends React.Component {
               }`}
             >
               <Statistic.Label>{moment(date).format("ddd")}</Statistic.Label>
-              <Statistic.Value>{moment(date).format("M/D")}</Statistic.Value>
+              <div className="schedGameDate">{moment(date).format("M/D")}</div>
               <Statistic.Label>{countedDates[date]>0 ? countedDates[date] : 'NO'} Games</Statistic.Label>
             </Statistic>
           </Segment>
@@ -78,8 +78,14 @@ class Schedule extends React.Component {
       return (
         <div style={{marginBottom: 100}}>
           <div className="ui grid">
-            <div className={`seven column row`}>{this.renderWeekGrid()}</div>
+            <div className={`nine column row weeklyRow`}>
+              <Icon className="column" name='angle left' size='massive' />
+              {this.renderWeekGrid()}
+              <Icon className="column" name='angle right' size='massive' />
+            </div>
           </div>
+
+
           <Grid columns={4}>{this.renderGameGrid()}</Grid>
         </div>
       );
