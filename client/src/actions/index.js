@@ -140,11 +140,13 @@ export const changeSchedWeek = (week, dir) => async dispatch => {
   console.log('week is ', week, ' and dir is ', dir);
   let newWeek = 0;
   let baseDay = week.weekArray[0];
+  console.log('orig baseDay is ', baseDay);
   if (dir == "inc") {
     baseDay = moment(baseDay, 'YYYYMMDD').add(7, 'days').format('YYYYMMDD');
   } else if (dir == "dec") {
     baseDay = moment(baseDay, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD');
   };
+  console.log('adj baseDay is ', baseDay);
 
 
   ///
