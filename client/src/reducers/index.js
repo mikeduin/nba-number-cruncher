@@ -13,6 +13,7 @@ import playersMetadata from './playersReducer';
 import playerData from './playerDataReducer';
 import activeGames from './activeGamesReducer';
 import completedGames from './completedGamesReducer';
+import schedDayGames from './schedDayGameReducer';
 
 export default combineReducers ({
   netRatings,
@@ -28,5 +29,6 @@ export default combineReducers ({
   vPlayers,
   gambleCast,
   playersMetadata,
-  playerData
+  playerData,
+  schedDayGames
 })

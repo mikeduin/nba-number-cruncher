@@ -555,7 +555,6 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const seasonName = dateFilters.fetchSeasonName(req.params.date);
   const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonName);
   const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, req.params.date);
-  console.log('weekArray is ', weekArray);
 
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
@@ -579,32 +578,20 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
     });
 });
 
-// router.get("/api/changeWeek/:week", async (req, res, next) => {
-//   const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
-//   const seasonYear = todayInfo.data.seasonScheduleYear;
-//   const seasonStage = todayInfo.data.teamSitesOnly.statsStage;
-//   const week = req.params.week;
-//   const date = ;
-//   const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonStage, date);
-//
-//   knex("schedule as s")
-//     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
-//     .where('s.gweek', week)
-//     .where('s.season_year', seasonYear)
-//     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
-//     .orderBy('s.etm')
-//     .then(async (games) => {
-//
-//       const teamStats = await knex("teams_full_base");
-//
-//       res.send({
-//         week: week,
-//         weekArray: weekArray,
-//         weekGames: games,
-//         teamStats
-//       })
-//     });
-// })
+router.get("/api/fetchGames/:day", async (req, res, next) => {
+  console.log('params.day is ', req.params.day);
+
+  knex("schedule as s")
+    .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
+    .where('s.gdte', req.params.day)
+    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
+    .orderBy('s.etm')
+    .then(async (games) => {
+      res.send({
+        dayGames: games
+      })
+    });
+})
 
 router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const gid = req.params.gid;

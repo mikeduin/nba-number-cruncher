@@ -33,10 +33,8 @@ class ScheduleCard extends React.Component {
             {game.v[0].tc} {game.v[0].tn} @ {game.h[0].tc} {game.h[0].tn}
           </Link>
           <Card.Meta>
-            <span className="date">
-              {" "}
-              {moment(game.etm).format("h:mm A")} EST{" "}
-            </span>
+            <div className="date"> {moment(game.etm).format("M/D/YY")} </div>
+            <div className="date"> {moment(game.etm).format("h:mm A")} EST{" "} </div>
           </Card.Meta>
         </Card.Content>
         <Card.Content extra>

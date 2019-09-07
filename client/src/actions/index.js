@@ -133,35 +133,32 @@ export const changeTeamColor = (hv, colorObj) => async dispatch => {
 }
 
 export const setActiveDay = date => async dispatch => {
+  const dayGamePull = await fetch(`/api/fetchGames/${date}`);
+  const dayGameData = await dayGamePull.json();
+
   dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });
+  dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
-export const changeSchedWeek = (week, dir) => async dispatch => {
-  console.log('week is ', week, ' and dir is ', dir);
+export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
+  let urlDate = window.location.href.substr(window.location.href.length-10);
   let newWeek = 0;
   let baseDay = week.weekArray[0];
-  console.log('orig baseDay is ', baseDay);
   if (dir == "inc") {
     baseDay = moment(baseDay, 'YYYYMMDD').add(7, 'days').format('YYYYMMDD');
   } else if (dir == "dec") {
     baseDay = moment(baseDay, 'YYYYMMDD').subtract(7, 'days').format('YYYYMMDD');
   };
-  console.log('adj baseDay is ', baseDay);
 
+  let baseDayWeek = await fetch(`/api/fetchWeek/${baseDay}`);
+  let baseWeekData = await baseDayWeek.json();
 
-  ///
+  const dayGamePull = await fetch(`/api/fetchGames/${urlDate}`);
+  const dayGameData = await dayGamePull.json();
 
-  let response = await fetch(`/api/fetchWeek/${baseDay}`);
-  let data = await response.json();
-
-  let updated = {...data, today};
-
-  // let todaysGames = data.weekGames.filter(game => {
-  //   return game.gdte === today;
-  // });
-
-  // dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
-  dispatch({ type: 'FETCH_WEEK', payload: updated });
+  dispatch({ type: 'FETCH_WEEK', payload: baseWeekData });
+  dispatch({ type: 'SET_ACTIVE_DAY', payload: urlDate });
+  dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
 export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {

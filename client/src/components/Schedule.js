@@ -58,11 +58,7 @@ class Schedule extends React.Component {
   }
 
   renderGameGrid() {
-    let dayGames = this.props.week.weekGames.filter(game => {
-      return game.gdte === this.props.activeDay;
-    });
-
-    return dayGames.map(game => {
+    return this.props.dayGames.map(game => {
       return (
         <Grid.Column key={game.gid}>
           <ScheduleCard game={game} />
@@ -88,7 +84,7 @@ class Schedule extends React.Component {
               />
             </div>
           </div>
-
+          <div className="dayHeader"> - GAMES OF {moment(this.props.activeDay).format('dddd, MMMM Do').toUpperCase()} - </div>
 
           <Grid columns={4}>{this.renderGameGrid()}</Grid>
         </div>
@@ -101,7 +97,8 @@ const mapStateToProps = state => {
   return {
     week: state.week,
     weekGames: state.week.weekGames,
-    activeDay: state.activeDay
+    activeDay: state.activeDay,
+    dayGames: state.schedDayGames
   };
 };
 
