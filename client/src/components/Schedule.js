@@ -14,6 +14,7 @@ class Schedule extends React.Component {
     } else {
       this.props.setActiveDay(this.props.match.params.date);
     }
+    // console.log(this.props);
   }
 
   renderWeekGrid() {

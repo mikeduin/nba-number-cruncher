@@ -35,6 +35,7 @@ module.exports = {
     let lines = [];
     // must leave cheerio fn in old ES5 syntax
     $('.eventbox').each(function(i, elem) {
+      // console.log('i is ', i);
       lines[i] = {
         id: $(this).attr('id'),
         time: $(this).find('.hour').text(),

@@ -13,6 +13,7 @@ module.exports = {
       response => {
         if (response.status === 200) {
           const lines = webScrapeHelpers.parseSbHtml(response.data);
+          console.log('lines are ', lines);
           lines.forEach(line => {
             if (line.over === '-' && line.awaySpread === '-' && line.awayMoney === '-') {
               console.log('there is no line yet for',line.id);

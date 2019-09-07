@@ -22,8 +22,6 @@ const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
 let today = moment().format('YYYY-MM-DD');
-// console.log('today is ', today);
-// let today = '2019-03-14';
 
 let activeGames = [];
 let completedGames = [];
@@ -67,7 +65,7 @@ setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
-}, 200000);
+}, 5000);
 
 // This function attempts to retrieve 2H/3Q odds between 9am and midnight
 setInterval(()=>{
