@@ -552,17 +552,21 @@ router.get("/api/getNetRatings", (req, res, next) => {
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
   const seasonYear = todayInfo.data.seasonScheduleYear;
-  const seasonStage = todayInfo.data.teamSitesOnly.statsStage;
-  const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonStage);
-  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonStage, req.params.date);
+  const seasonName = dateFilters.fetchSeasonName(req.params.date);
+  const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonName);
+  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, req.params.date);
+  console.log('weekArray is ', weekArray);
 
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week)
     .where('s.season_year', seasonYear)
+    .where('s.season_name', seasonName)
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
     .orderBy('s.etm')
     .then(async (games) => {
+
+      // console.log('games are ', games);
 
       const teamStats = await knex("teams_full_base");
 
