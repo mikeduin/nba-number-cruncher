@@ -251,6 +251,8 @@ module.exports = {
 
     if (season == 2018) {
       return seasonArray18[week];
+    } else if (season == 2019 && date < 20190902) {
+      return offseasonArray19[1];
     } else if (season == 2019 && date < 20191022) {
       return offseasonArray19[week];
     } else if (season == 2019 && date > 20191021) {

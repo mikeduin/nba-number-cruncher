@@ -564,11 +564,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
     .orderBy('s.etm')
     .then(async (games) => {
-
-      // console.log('games are ', games);
-
       const teamStats = await knex("teams_full_base");
-
       res.send({
         week: week,
         weekArray: weekArray,
@@ -579,8 +575,6 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
 });
 
 router.get("/api/fetchGames/:day", async (req, res, next) => {
-  console.log('params.day is ', req.params.day);
-
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gdte', req.params.day)

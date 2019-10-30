@@ -137,12 +137,11 @@ export const setActiveDay = date => async dispatch => {
   const dayGameData = await dayGamePull.json();
 
   dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });
-  dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
+  dispatch ({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
 export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
   let urlDate = window.location.href.substr(window.location.href.length-10);
-  let newWeek = 0;
   let baseDay = week.weekArray[0];
   if (dir == "inc") {
     baseDay = moment(baseDay, 'YYYYMMDD').add(7, 'days').format('YYYYMMDD');
