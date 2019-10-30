@@ -1,7 +1,8 @@
 import React from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom';
-import { Button, Dimmer, Header, Image, Card } from 'semantic-ui-react'
+import { Button, Dimmer, Header, Image, Card } from 'semantic-ui-react';
+import logos from '../modules/logos';
 
 class ScheduleCard extends React.Component {
   state = {}
@@ -22,7 +23,7 @@ class ScheduleCard extends React.Component {
     return (
       <Card>
         <Dimmer.Dimmable as={Image}
-          src={`/images/logos/${game.h[0].ta}.svg`}
+          src={logos[game.h[0].ta]}
           dimmed={ active }
           dimmer={{ active, content }}
           onMouseEnter={this.handleShow}

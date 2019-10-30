@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { Sidebar, Menu, Item, Button, Icon, Transition } from "semantic-ui-react";
+import logos from '../modules/logos';
 
 import { fetchGame } from "../actions";
 
@@ -31,10 +32,10 @@ class TodaysGames extends React.Component {
           onClick={() => {this.fetchGame(this.key)}}
           fitted='vertically'
         >
-          <Item.Image size="mini" src={`/images/logos/${game.v[0].ta}.svg`} />
+          <Item.Image size="mini" src={logos[game.v[0].ta]} />
           {game.v[0].ta}
           <br />
-          <Item.Image size="mini" src={`/images/logos/${game.h[0].ta}.svg`} />
+          <Item.Image size="mini" src={logos[game.h[0].ta]} />
           {game.h[0].ta}
         </Menu.Item>
       );
