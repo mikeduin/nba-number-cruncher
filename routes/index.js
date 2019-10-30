@@ -50,7 +50,7 @@ setTimeout(async () => {
   // const seasonYear = data.teamSitesOnly.seasonYear;
   // const statsStage = data.teamSitesOnly.statsStage;
   // console.log(seasonYear)
-  updateTeamStats.updateFullTeamBuilds()
+  // updateTeamStats.updateFullTeamBuilds()
 }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
