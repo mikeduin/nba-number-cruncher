@@ -27,13 +27,30 @@ let activeGames = [];
 let completedGames = [];
 let todayGids = [];
 
+const timedDbUpdaters = schedule.scheduleJob("36 14 * * *", () => {
+  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
+  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
+  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
+  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
+  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
+  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000); <-- ALL SET!
+  // setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
+  // setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
+  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
+  // setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
+  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
+  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
+})
+
 setTimeout(async () => {
   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
   // const data = today.data;
   // const seasonYear = data.teamSitesOnly.seasonYear;
   // const statsStage = data.teamSitesOnly.statsStage;
   // console.log(seasonYear)
-  updatePlayerStats.updatePlayerStatBuilds()
+  updateTeamStats.updateFullTeamBuilds()
 }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
@@ -755,23 +772,6 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
     vInfo: vInfo[0],
     rotPlayers: fullPlayerData
   });
-})
-
-const timedDbUpdaters = schedule.scheduleJob("36 14 * * *", () => {
-  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
-  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
-  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
-  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
-  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
-  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
-  // setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
-  // setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
-  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
-  // setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
-  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
-  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
 })
 
 module.exports = router;

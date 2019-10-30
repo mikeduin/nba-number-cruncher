@@ -19,8 +19,8 @@ const updateFullTeamBuild = (games, db, period) => {
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildAdvancedTeamDb(db, teamData);
-      dbBuilders.updateAdvancedTeamDb(db, teamData);
+      dbBuilders.buildAdvancedTeamDb(db, teamData);
+      // dbBuilders.updateAdvancedTeamDb(db, teamData);
     });
 };
 
@@ -29,8 +29,8 @@ const updatePartialTeamBuild = (games, db, lineup) => {
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
       // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildAdvancedTeamDb(db, teamData);
-      dbBuilders.updateAdvancedTeamDb(db, teamData);
+      dbBuilders.buildAdvancedTeamDb(db, teamData);
+      // dbBuilders.updateAdvancedTeamDb(db, teamData);
     })
 };
 
