@@ -33,7 +33,7 @@ setTimeout(async () => {
   // const seasonYear = data.teamSitesOnly.seasonYear;
   // const statsStage = data.teamSitesOnly.statsStage;
   // console.log(seasonYear)
-  // dbBuilders.buildSchedule();
+  updatePlayerStats.updatePlayerStatBuilds()
 }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
@@ -65,7 +65,7 @@ setInterval(()=>{
   // oddsLoaders.sportsbookFull();
   // oddsLoaders.sportsbookFirstH();
   // oddsLoaders.sportsbookFirstQ();
-}, 5000);
+}, 30000);
 
 // This function attempts to retrieve 2H/3Q odds between 9am and midnight
 setInterval(()=>{
