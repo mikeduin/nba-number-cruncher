@@ -23,6 +23,8 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
     return game.gdte === today;
   });
 
+  // console.log('todaysGames are ', todaysGames);
+
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
   dispatch({ type: 'FETCH_WEEK', payload: updated });
 }
@@ -166,8 +168,6 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
   let todayInt = moment().format('YYYYMMDD');
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}`);
   const response = game.data;
-
-  console.log('response is ', response);
 
   if (response.final) {
     dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });

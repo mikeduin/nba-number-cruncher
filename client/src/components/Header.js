@@ -68,20 +68,8 @@ class Header extends React.Component {
         <Link to="/schedule" className="item" onClick={this.setActiveDay}>
           <b>Schedule</b>
         </Link>
-        <Link to="" className="item">
-          Daily Digest
-        </Link>
         <Link to="/gamblecast" className="item">
           GambleCast
-        </Link>
-        <Link to="" className="item">
-          Teams
-        </Link>
-        <Link to="" className="item">
-          Tools
-        </Link>
-        <Link to="" className="item">
-          Research
         </Link>
         <Link to="/netratings" className="item">
           <b>Net Ratings</b>
@@ -101,3 +89,40 @@ class Header extends React.Component {
 }
 
 export default connect(null, { setActiveDay, fetchPlayerData }) (Header);
+
+
+// <Menu pointing secondary>
+//   <Link to="/" className="item">
+//     Home
+//   </Link>
+//   <Link to="/schedule" className="item" onClick={this.setActiveDay}>
+//     <b>Schedule</b>
+//   </Link>
+//   <Link to="" className="item">
+//     Daily Digest
+//   </Link>
+//   <Link to="/gamblecast" className="item">
+//     GambleCast
+//   </Link>
+//   <Link to="" className="item">
+//     Teams
+//   </Link>
+//   <Link to="" className="item">
+//     Tools
+//   </Link>
+//   <Link to="" className="item">
+//     Research
+//   </Link>
+//   <Link to="/netratings" className="item">
+//     <b>Net Ratings</b>
+//   </Link>
+//   <Search
+//     style={{position: 'absolute', right: '10%'}}
+//     loading={isLoading}
+//     onResultSelect={this.handleResultSelect}
+//     onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
+//     results={results}
+//     value={value}
+//     resultRenderer={resultRenderer}
+//   />
+// </Menu>

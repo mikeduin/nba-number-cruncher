@@ -7,8 +7,8 @@ const getGameSecs = require('./getGameSecs');
 
 module.exports = {
   buildSubData: async (gid) => {
-    const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/pbp/00${gid}_full_pbp.json`;
-    const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/00${gid}_gamedetail.json`;
+    const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2019/scores/pbp/00${gid}_full_pbp.json`;
+    const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2019/scores/gamedetail/00${gid}_gamedetail.json`;
 
     const gDetail = await axios.get(gameDetailUrl);
     const gcode = gDetail.data.g.gcode;

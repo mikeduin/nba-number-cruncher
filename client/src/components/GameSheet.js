@@ -23,8 +23,10 @@ class GameSheet extends React.Component {
   render () {
     let game = this.props.game;
     if (!this.props.game.info || !this.props.hPlayers[0] || !this.props.vPlayers[0]) {
+      console.log(this.props);
       return <div> Loading ... </div>
     } else {
+
       return (
         <div style={{marginBottom: 50}}>
         <InfoTable />
