@@ -21,27 +21,39 @@ const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.js
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
-let today = moment().format('YYYY-MM-DD');
+// subtract 8 hours to convert to west coast time ...
+// ... do we want west coast time?
+// let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
+let today = moment().tz("America/Los Angeles").format('YYYY-MM-DD');
+console.log('today is ', today);
 
 let activeGames = [];
 let completedGames = [];
 let todayGids = [];
 
-const timedDbUpdaters = schedule.scheduleJob("36 14 * * *", () => {
-  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000); <-- ALL SET!
-  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000); <-- ALL SET!
-  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000); <-- ALL SET!
-  // setTimeout(()=>{dbBuilders.updateSchedule()}, 480000); <-- ALL SET!
-  // setTimeout(()=>{dbBuilders.addGameStints()}, 540000); <-- ALL SET!
-  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000); <-- ALL SET!
-  // setTimeout(()=>{dbMappers.mapTeamPace()}, 600000); <-- ALL SET!
-  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000); <-- ALL SET!
-  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000); <-- ALL SET!
+let rule = new schedule.RecurrenceRule();
+rule.tz = 'America/Los_Angeles';
+
+// test values
+rule.hour = 1;
+rule.minute = 0;
+rule.second = 0;
+
+const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
+  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
+  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
+  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
+  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
+  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
+  setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
+  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
+  setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
+  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
+  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
 })
 
 // setTimeout(async () => {
@@ -59,7 +71,9 @@ setInterval(async () => {
   todayGids = todayGames.map(game => game.gid);
 
   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
-  let nowET = moment().add(180, 'minutes');
+  // let nowET = moment().add(180, 'minutes');
+  let nowET = moment().tz("America/Toronto");
+  console.log('nowET is ', moment(nowET).format());
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
     .where({final: true})
@@ -591,7 +605,6 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
     .orderBy('s.etm')
     .then(async (games) => {
-      console.log('games are ', games);
       const teamStats = await knex("teams_full_base");
       res.send({
         week: week,
