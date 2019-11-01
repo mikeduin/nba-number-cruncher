@@ -390,7 +390,7 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
       quarterUpdFn().then(qTotals => {
         if (period.current == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
         if (period.current == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
-        if (period.current == 4) {inDb[0].q4 != null ? q3 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
+        if (period.current == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
         if (period.current > 4) ot = qTotals.currentQuarter;
 
         res.send({
