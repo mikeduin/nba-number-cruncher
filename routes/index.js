@@ -145,12 +145,15 @@ setInterval(() => {
     };
 
     if (period.isEndOfPeriod || gameOver()) {
+      // console.log('period is end of period, period is ', period.current);
       let { hTeam, vTeam } = boxScore.data.stats;
       const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
       const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
       const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
       const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+
+      // console.log('totalsObj is ', totalsObj);
 
       const quarterObj = prevTotals => {
         return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
@@ -159,6 +162,8 @@ setInterval(() => {
       const quarterUpdFn = async () => {
         let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
         let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+        // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
+        // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
         return {
           currentQuarter: quarterTotals,
           prevQuarters: prevTotalsPull[0].totals[0]
@@ -185,9 +190,11 @@ setInterval(() => {
           }
         })
       } else if (period.current === 2) {
+        // console.log('about to pluck for q2 when period.isEndOfPeriod and current period is 2');
         knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
+              console.log('qTotals returned from quarterUpdFn are ', qTotals);
               knex("box_scores_v2").where({gid: gid}).update({
                 period_updated: 2,
                 clock_last_updated: gameSecs,
@@ -199,7 +206,8 @@ setInterval(() => {
               })
             })
           } else {
-            console.log('second period already entered in gid ', gid);
+            // console.log('qTest[0] for q2 pluck is ', qTest[0]);
+            console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
           }
         })
       } else if (period.current === 3) {
@@ -284,6 +292,8 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
     let ot = null;
     if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
+    // ERROR AT START OF 2Q: CANNOT READ PROPERTY '0' OF NULL FOR Q2
+
     res.send({
       gid: gid,
       q1: inDb[0].q1[0],
@@ -364,9 +374,9 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
       if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
       quarterUpdFn().then(qTotals => {
-        if (period.current == 2) q2 = qTotals.currentQuarter;
-        if (period.current == 3) q3 = qTotals.currentQuarter;
-        if (period.current == 4) q4 = qTotals.currentQuarter;
+        if (period.current == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
+        if (period.current == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
+        if (period.current == 4) {inDb[0].q4 != null ? q3 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
         if (period.current > 4) ot = qTotals.currentQuarter;
 
         res.send({
