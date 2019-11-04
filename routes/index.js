@@ -24,7 +24,8 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 // subtract 8 hours to convert to west coast time ...
 // ... do we want west coast time?
 // let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
-let today = moment().tz("America/Los Angeles").format('YYYY-MM-DD');
+// moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
+let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 console.log('today is ', today);
 
 let activeGames = [];
