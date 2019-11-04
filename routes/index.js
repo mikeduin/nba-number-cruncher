@@ -86,8 +86,11 @@ setInterval(async () => {
     // console.log(game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-      console.log('pushing ', game.gid, ' to activeGames');
-      activeGames.push(game.gid)
+      // REMOVE THESE GID REFS ONCE DONE TESTING
+      if (gid === 21900089 || gid === 21900090) {
+        console.log('pushing ', game.gid, ' to activeGames');
+        activeGames.push(game.gid)
+      }
     };
   })
 }, 10000)
@@ -159,7 +162,7 @@ setInterval(() => {
       return (period.current >= 4 && !isGameActivated)
     };
 
-    if (gid !== 21900088 && (period.isEndOfPeriod || gameOver())) {
+    if (period.isEndOfPeriod || gameOver()) {
       // console.log('period is end of period, period is ', period.current);
       let { hTeam, vTeam } = boxScore.data.stats;
       const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
