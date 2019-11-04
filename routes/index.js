@@ -158,7 +158,7 @@ setInterval(() => {
       return (period.current >= 4 && !isGameActivated)
     };
 
-    if (period.isEndOfPeriod || gameOver()) {
+    if (gid !== 21900088 && (period.isEndOfPeriod || gameOver())) {
       // console.log('period is end of period, period is ', period.current);
       let { hTeam, vTeam } = boxScore.data.stats;
       const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
@@ -204,26 +204,31 @@ setInterval(() => {
           }
         })
       } else if (period.current === 2) {
-        // console.log('about to pluck for q2 when period.isEndOfPeriod and current period is 2');
-        knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
-          if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              console.log('qTotals returned from quarterUpdFn are ', qTotals);
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 2,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q2: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }).then(() => {
-                console.log('Q2 stats inserted for ', gid);
+        console.log('about to pluck for q2 when period.isEndOfPeriod and current period is 2');
+        try {
+          knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
+            console.log('qTest in q2 func is ', qTest);
+            if (qTest[0] == null) {
+              quarterUpdFn().then(qTotals => {
+                console.log('qTotals returned from quarterUpdFn are ', qTotals);
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: 2,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  q2: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }).then(() => {
+                  console.log('Q2 stats inserted for ', gid);
+                })
               })
-            })
-          } else {
-            // console.log('qTest[0] for q2 pluck is ', qTest[0]);
-            console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
-          }
-        })
+            } else {
+              // console.log('qTest[0] for q2 pluck is ', qTest[0]);
+              console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
+            }
+          })
+        } catch (e) {
+          console.log('q2 insert failed for ', gid, ' error is ', e)
+        }
       } else if (period.current === 3) {
         knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
           if (qTest[0] == null) {
@@ -527,17 +532,21 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
             thru_period: 0
           })
         } else {
-          res.send({
-            quarterEnd: false,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-            gameSecs: gameSecs,
-            period: period,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: prevTotalsPull[0].totals[0]
-          })
+          try {
+            res.send({
+              quarterEnd: false,
+              live: true,
+              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              gameSecs: gameSecs,
+              period: period,
+              poss: poss,
+              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              totals: totalsObj,
+              prevQuarters: prevTotalsPull[0].totals[0]
+            })
+          } catch (e) {
+            console.log('error for ', gid ,' is ', e);
+          }
         }
       }
     }
