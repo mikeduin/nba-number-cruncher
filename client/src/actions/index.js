@@ -23,8 +23,6 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
     return game.gdte === today;
   });
 
-  // console.log('todaysGames are ', todaysGames);
-
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
   dispatch({ type: 'FETCH_WEEK', payload: updated });
 }
