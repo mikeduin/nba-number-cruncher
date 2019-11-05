@@ -87,10 +87,8 @@ setInterval(async () => {
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
-      if (game.gid === 21900090) {
-        console.log('pushing ', game.gid, ' to activeGames');
-        activeGames.push(game.gid)
-      }
+      console.log('pushing ', game.gid, ' to activeGames');
+      activeGames.push(game.gid)
     };
   })
 }, 10000)
