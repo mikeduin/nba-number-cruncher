@@ -37,7 +37,7 @@ rule.tz = 'America/Los_Angeles';
 
 // test values
 rule.hour = 12;
-rule.minute = 27;
+rule.minute = 30;
 rule.second = 0;
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
