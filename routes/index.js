@@ -143,7 +143,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 })
 
 setInterval(() => {
-  let todayInt = moment().format('YYYYMMDD');
+  let todayInt = moment().subtract(8, 'hours').format('YYYYMMDD');
   activeGames.forEach(async (gid) => {
     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
     const boxScore = await axios.get(url);
