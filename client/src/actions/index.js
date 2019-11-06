@@ -186,7 +186,7 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
     };
 
     const calcPoss = (fga, to, fta, oreb) => {
-      return (0.96*((fga+to+(0.44*fta)-oreb)));
+      return ((fga+to+(0.44*fta)-oreb));
     };
 
     const calcQuarterPace = (quarterPoss, per, gameSecs) => {

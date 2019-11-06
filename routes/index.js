@@ -36,7 +36,7 @@ let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
 // test values
-rule.hour = 12;
+rule.hour = 1;
 rule.minute = 35;
 rule.second = 0;
 

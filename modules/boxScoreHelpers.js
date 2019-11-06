@@ -37,7 +37,7 @@ module.exports = {
     const fta = parseInt(hTotals.fta) + parseInt(vTotals.fta);
     const offReb = parseInt(hTotals.offReb) + parseInt(vTotals.offReb);
 
-    return (0.96*((fga+to+(0.44*fta)-offReb)));
+    return ((fga+to+(0.44*fta)-offReb));
   },
   calcQuarterPoss: (hTotals, vTotals, prevTotals) => {
     const fga = ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - prevTotals.t.fga);
@@ -45,7 +45,7 @@ module.exports = {
     const fta = ((parseInt(hTotals.fta) + parseInt(vTotals.fta)) - prevTotals.t.fta);
     const offReb = ((parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - prevTotals.t.offReb);
 
-    return (0.96*((fga+to+(0.44*fta)-offReb)));
+    return ((fga+to+(0.44*fta)-offReb));
   },
   clockReturner: (clock, period, gameSecs) => {
     if (clock.length < 1) {
