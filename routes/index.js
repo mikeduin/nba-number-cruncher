@@ -36,8 +36,8 @@ let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
 // test values
-rule.hour = 12;
-rule.minute = 10;
+rule.hour = 9;
+rule.minute = 30;
 rule.second = 0;
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
