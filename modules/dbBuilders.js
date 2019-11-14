@@ -51,33 +51,35 @@ module.exports = {
   fetchBaseTeamParams: (games, period) => {
     return {
       Conference: "",
-      Division: "",
-      GameScope: "",
-      PlayerExperience: "",
-      PlayerNull: "",
-      MeasureType: "Base",
-      LeagueID: "00",
-      PerMode: "PerGame",
-      PlusMinus: "N",
-      PaceAdjust: "N",
-      Rank: "N",
-      Season: "2019-20",
-      SeasonType: "Regular Season",
-      Outcome: "",
-      SeasonSegment: "",
       DateFrom: "",
       DateTo: "",
-      OpponentTeamID: 0,
-      VsConference: "",
-      VsDivision: "",
-      LastNGames: games,
-      Location: "",
-      Period: period,
+      Division: "",
+      GameScope: "",
       GameSegment: "",
+      LastNGames: games,
+      LeagueID: "00",
+      Location: "",
+      MeasureType: "Base",
       Month: 0,
+      OpponentTeamID: 0,
+      Outcome: "",
       PORound: 0,
+      PaceAdjust: "N",
+      PerMode: "PerGame",
+      Period: period,
+      PlayerExperience: "",
+      PlayerPosition: null, // added
+      PlusMinus: "N",
+      Rank: "N",
+      Season: "2019-20",
+      SeasonSegment: "",
+      SeasonType: "Regular Season",
+      ShotClockRange: null,
+      StarterBench: null,
       TeamID: 0,
-      TwoWay: 0
+      TwoWay: 0,
+      VsConference: "",
+      VsDivision: ""
     };
   },
   fetchAdvancedTeamParams: (games, period) => {
@@ -763,6 +765,7 @@ module.exports = {
   },
   updateAdvancedTeamDb: (db, arrayData) => {
     arrayData.forEach(team => {
+      console.log('array data being updated for ', team);
       knex(db)
         .where({ team_id: team[0] })
         .update(

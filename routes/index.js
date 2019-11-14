@@ -36,25 +36,29 @@ let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
 // test values
-rule.hour = 9;
-rule.minute = 30;
+rule.hour = 3;
+rule.minute = 53;
 rule.second = 0;
+
+// setTimeout(() => {
+//   updateTeamStats.updateFullTeamBuilds()
+// }, 1000)
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 60000);
-  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 120000);
-  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 180000);
-  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 240000);
-  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 300000);
-  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 360000);
-  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 420000);
-  setTimeout(()=>{dbBuilders.updateSchedule()}, 480000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 540000);
-  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 540000);
-  setTimeout(()=>{dbMappers.mapTeamPace()}, 600000);
-  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 660000);
-  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 720000);
+  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
+  setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
+  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+  setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
 })
 
 // setTimeout(async () => {
