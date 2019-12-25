@@ -22,8 +22,6 @@ const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
 // subtract 8 hours to convert to west coast time ...
-// ... do we want west coast time?
-// let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 // moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
 let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 console.log('today is ', today);
@@ -36,15 +34,20 @@ let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
 // test values
-rule.hour = 3;
-rule.minute = 53;
-rule.second = 0;
+// rule.hour = 3;
+// rule.minute = 53;
+// rule.second = 0;
+
+rule.hour = 12;
+rule.minute = 58;
+rule.second = 10;
 
 // setTimeout(() => {
 //   updateTeamStats.updateFullTeamBuilds()
 // }, 1000)
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+  // console.log('running updaters');
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
@@ -104,13 +107,13 @@ setInterval(()=>{
   oddsLoaders.sportsbookFirstQ();
 }, 30000);
 
-// This function attempts to retrieve 2H/3Q odds between 9am and midnight
+// This function attempts to retrieve 2H/3Q odds [DISABLED TIME CONDITIONAL] between 9am and midnight
 setInterval(()=>{
-  const hour = new Date().getHours();
-  if (hour >= 9 && hour <= 24) {
+  // const hour = new Date().getHours();
+  // if (hour >= 9 && hour <= 24) {
     oddsLoaders.sportsbookSecondH();
     oddsLoaders.sportsbookThirdQ();
-  }
+  // }
 }, 60000);
 
 /* GET home page. */
@@ -148,6 +151,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
 setInterval(() => {
   let todayInt = moment().subtract(8, 'hours').format('YYYYMMDD');
+  console.log('todayInt is ', todayInt);
   activeGames.forEach(async (gid) => {
     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
     const boxScore = await axios.get(url);

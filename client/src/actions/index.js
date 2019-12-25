@@ -3,7 +3,8 @@ import moment from 'moment';
 import _ from 'lodash';
 import { getGameSecs } from '../modules/gameTimeFuncs';
 
-let today = moment().format('YYYY-MM-DD');
+// let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
+let today = moment().tz("America/Toronto").subtract(3, 'hours').format('YYYY-MM-DD');
 
 export const fetchNetRatings = () => async dispatch => {
   let response = await fetch('/api/getNetRatings');
@@ -14,6 +15,7 @@ export const fetchNetRatings = () => async dispatch => {
 
 export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let digitDate = moment(date).format('YYYYMMDD');
+  console.log('digitDate is ', digitDate);
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
@@ -163,7 +165,7 @@ export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
 export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190314';
-  let todayInt = moment().format('YYYYMMDD');
+  let todayInt = moment().tz("America/Toronto").subtract(3, 'hours').format('YYYYMMDD');
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}`);
   const response = game.data;
 

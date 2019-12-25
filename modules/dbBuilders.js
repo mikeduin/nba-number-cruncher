@@ -765,7 +765,7 @@ module.exports = {
   },
   updateAdvancedTeamDb: (db, arrayData) => {
     arrayData.forEach(team => {
-      console.log('array data being updated for ', team);
+      // console.log('array data being updated for ', team);
       knex(db)
         .where({ team_id: team[0] })
         .update(
