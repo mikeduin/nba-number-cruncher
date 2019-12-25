@@ -68,7 +68,7 @@ module.exports = {
         fta: parseInt(hTotals.fta),
         to: parseInt(hTotals.turnovers),
         offReb: parseInt(hTotals.offReb),
-        fouls: parseInt(hTotals.pFouls)
+        fouls: parseInt(hTotals.team_fouls)
       },
       v: {
         pts: parseInt(vTotals.points),
@@ -78,7 +78,7 @@ module.exports = {
         fta: parseInt(vTotals.fta),
         to: parseInt(vTotals.turnovers),
         offReb: parseInt(vTotals.offReb),
-        fouls: parseInt(vTotals.pFouls)
+        fouls: parseInt(vTotals.team_fouls)
       },
       t: {
         pts: parseInt(hTotals.points) + parseInt(vTotals.points),
@@ -88,7 +88,7 @@ module.exports = {
         fta: parseInt(hTotals.fta) + parseInt(vTotals.fta),
         to: parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers),
         offReb: parseInt(hTotals.offReb) + parseInt(vTotals.offReb),
-        fouls: parseInt(hTotals.pFouls) + parseInt(vTotals.pFouls),
+        fouls: parseInt(hTotals.team_fouls) + parseInt(vTotals.team_fouls),
         poss: poss,
         pace: module.exports.calcGamePace(poss, parseInt(period), gameSecs)
       }
@@ -107,7 +107,7 @@ module.exports = {
         fta: parseInt(hTotals.fta) - parseInt(prevTotals.h.fta),
         to: parseInt(hTotals.turnovers) - parseInt(prevTotals.h.to),
         offReb: parseInt(hTotals.offReb) - parseInt(prevTotals.h.offReb),
-        fouls: parseInt(hTotals.pFouls) - parseInt(prevTotals.h.fouls)
+        fouls: parseInt(hTotals.team_fouls) - parseInt(prevTotals.h.fouls)
       },
       v: {
         pts: parseInt(vTotals.points) - parseInt(prevTotals.v.pts),
@@ -117,7 +117,7 @@ module.exports = {
         fta: parseInt(vTotals.fta) - parseInt(prevTotals.v.fta),
         to: parseInt(vTotals.turnovers) - parseInt(prevTotals.v.to),
         offReb: parseInt(vTotals.offReb) - parseInt(prevTotals.v.offReb),
-        fouls: parseInt(vTotals.pFouls) - parseInt(prevTotals.v.fouls)
+        fouls: parseInt(vTotals.team_fouls) - parseInt(prevTotals.v.fouls)
       },
       t: {
         pts: (parseInt(hTotals.points) + parseInt(vTotals.points)) - parseInt(prevTotals.t.pts),
@@ -130,7 +130,7 @@ module.exports = {
         fta: (parseInt(hTotals.fta) + parseInt(vTotals.fta)) - parseInt(prevTotals.t.fta),
         to: (parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - parseInt(prevTotals.t.to),
         offReb: (parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - parseInt(prevTotals.t.offReb),
-        fouls: (parseInt(hTotals.pFouls) + parseInt(vTotals.pFouls)) - parseInt(prevTotals.t.fouls),
+        fouls: (parseInt(hTotals.team_fouls) + parseInt(vTotals.team_fouls)) - parseInt(prevTotals.t.fouls),
         poss: quarterPoss,
         pace: module.exports.calcEndOfQuarterPace(quarterPoss, period, gameSecs)
       }
