@@ -27,7 +27,7 @@ let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 console.log('today is ', today);
 
 let activeGames = [];
-let completedGames = [];
+let completedGames = [21900455];
 let todayGids = [];
 
 let rule = new schedule.RecurrenceRule();
@@ -38,16 +38,16 @@ rule.tz = 'America/Los_Angeles';
 // rule.minute = 53;
 // rule.second = 0;
 
-rule.hour = 12;
-rule.minute = 58;
-rule.second = 10;
+rule.hour = 10;
+rule.minute = 19;
+rule.second = 48;
 
 // setTimeout(() => {
 //   updateTeamStats.updateFullTeamBuilds()
 // }, 1000)
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
-  // console.log('running updaters');
+  console.log('running updaters');
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
@@ -80,7 +80,7 @@ setInterval(async () => {
 
   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
   // let nowET = moment().add(180, 'minutes');
-  let nowET = moment().tz("America/Toronto");
+  let nowET = moment().tz("America/Toronto").add(5, 'hours');
   console.log('nowET is ', moment(nowET).format());
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
@@ -90,7 +90,7 @@ setInterval(async () => {
   completedGames = finalBoxScores;
   todayGames.forEach(game => {
     let mins = nowET.diff(moment(game.etm), 'minutes');
-    // console.log(game.etm, ' starts in ', mins, ' mins');
+    console.log(game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
@@ -184,14 +184,22 @@ setInterval(() => {
       }
 
       const quarterUpdFn = async () => {
-        let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-        let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
-        // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
-        // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
-        return {
-          currentQuarter: quarterTotals,
-          prevQuarters: prevTotalsPull[0].totals[0]
-        }
+        // if (gid !== 21900455) {
+          let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+          let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+          // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
+          // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
+          return {
+            currentQuarter: quarterTotals,
+            prevQuarters: prevTotalsPull[0].totals[0]
+          }
+        // } else {
+        //   return {
+        //     currentQuarter: null,
+        //     prevQuarters: null
+        //   }
+        // }
+
       }
 
       if (period.current === 1) {
