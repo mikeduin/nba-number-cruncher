@@ -1,0 +1,15 @@
+
+
+
+@media screen and (max-width: 800px) {
+  .gamblecast-main {
+    width: 1000px;
+  }
+  .ui.table:not(.unstackable) tbody,  .ui.table:not(.unstackable) tr>td, .ui.table:not(.unstackable) tr>th {
+      /* width: auto!important; */
+      display: inline-table !important;
+  }
+  table {
+    table-layout: fixed !important;
+  }
+}

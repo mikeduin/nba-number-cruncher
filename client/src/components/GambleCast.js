@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
 import { Header } from 'semantic-ui-react';
 
@@ -30,7 +31,7 @@ class GambleCast extends React.Component {
       return <div> Loading ... </div>
     } else {
       return (
-        <div style={{marginBottom: 200}}>
+        <div style={{marginBottom: 200}} className='gamblecast-main'>
           <Header size='huge'> Today's Games </Header>
           {this.renderBoxScores()}
         </div>
