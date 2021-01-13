@@ -8,7 +8,7 @@ const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
 
 const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2019/league/00_full_schedule_week.json";
+  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2020/league/00_full_schedule_week.json";
 // const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
@@ -231,8 +231,8 @@ module.exports = {
                 v: [vObj],
                 stt: game.stt,
                 // BEGIN HARD-CODED VALUES
-                season_year: 2019,
-                display_year: '2019-20',
+                season_year: 2020,
+                display_year: '2020-21',
                 // END HARD-CODED VALUES
                 updated_at: new Date()
               },

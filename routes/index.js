@@ -21,13 +21,13 @@ const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.js
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
+// dbBuilders.buildSchedule();
+
 // subtract 8 hours to convert to west coast time ...
 // moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
 let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
-console.log('today is ', today);
-
 let activeGames = [];
-let completedGames = [21900455];
+let completedGames = [];
 let todayGids = [];
 
 let rule = new schedule.RecurrenceRule();
@@ -81,7 +81,6 @@ setInterval(async () => {
   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
   // let nowET = moment().add(180, 'minutes');
   let nowET = moment().tz("America/Toronto").add(5, 'hours');
-  console.log('nowET is ', moment(nowET).format());
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
     .where({final: true})
@@ -90,7 +89,7 @@ setInterval(async () => {
   completedGames = finalBoxScores;
   todayGames.forEach(game => {
     let mins = nowET.diff(moment(game.etm), 'minutes');
-    console.log(game.etm, ' starts in ', mins, ' mins');
+    // console.log(game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
@@ -115,12 +114,6 @@ setInterval(()=>{
     oddsLoaders.sportsbookThirdQ();
   // }
 }, 60000);
-
-/* GET home page. */
-// router.get("/", (req, res, next) => {
-//
-//   res.send({ Hi: "there" });
-// });
 
 router.get("/todayGameStatus", (req, res, next) => {
   res.send({
@@ -151,7 +144,6 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
 setInterval(() => {
   let todayInt = moment().subtract(8, 'hours').format('YYYYMMDD');
-  console.log('todayInt is ', todayInt);
   activeGames.forEach(async (gid) => {
     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
     const boxScore = await axios.get(url);
