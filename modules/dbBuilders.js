@@ -200,6 +200,7 @@ module.exports = {
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
+          let season_name = gweek ? 'regular' : null;
           let hObj = {
             tid: game.h.tid,
             re: game.h.re,
@@ -232,6 +233,7 @@ module.exports = {
                 stt: game.stt,
                 // BEGIN HARD-CODED VALUES
                 season_year: 2020,
+                season_name,
                 display_year: '2020-21',
                 // END HARD-CODED VALUES
                 updated_at: new Date()
