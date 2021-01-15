@@ -64,6 +64,23 @@ const timedDbUpdaters = schedule.scheduleJob(rule, () => {
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
 })
 
+  // console.log('running updaters');
+  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
+  // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+  // setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
+  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+  // setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
+
+
 // setTimeout(async () => {
 //   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
 //   // const data = today.data;
@@ -133,6 +150,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
     .where('pgs.player_id', pid)
+    .where('pgs.gdte', '>', '2020-10-10')
     .orderBy('s.gid', 'desc')
     .select('s.*', "pgs.game_stints");
 
