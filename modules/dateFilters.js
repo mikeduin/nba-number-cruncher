@@ -14,25 +14,50 @@ module.exports = {
   fetchScoreMonth: function() {
     // This fn is an array shortcut to cut through the league schedule JSON
     let month = moment().format("M");
-    switch (true) {
-      case month == 9:
-        return 0;
-      case month == 10:
-        return 1;
-      case month == 11:
-        return 2;
-      case month == 12:
-        return 3;
-      case month == 1:
-        return 4;
-      case month == 2:
-        return 5;
-      case month == 3:
-        return 6;
-      case month == 4:
-        return 7;
-      default:
-        return 8;
+    let season = moment().format("Y");
+    // console.log('season is ', season);
+    if (parseInt(season) === 2021 && moment().isBefore('2021-07-01')) {
+      switch (true) {
+        case month == 12:
+          return 0;
+        case month == 1:
+          return 1;
+        case month == 2:
+          return 2;
+        case month == 3:
+          return 3;
+        case month == 4:
+          return 4;
+        case month == 5:
+          return 5;
+        case month == 6:
+          return 6;
+        case month == 7:
+          return 7;
+        default:
+          return 8;
+      }
+    } else {
+      switch (true) {
+        case month == 9:
+          return 0;
+        case month == 10:
+          return 1;
+        case month == 11:
+          return 2;
+        case month == 12:
+          return 3;
+        case month == 1:
+          return 4;
+        case month == 2:
+          return 5;
+        case month == 3:
+          return 6;
+        case month == 4:
+          return 7;
+        default:
+          return 8;
+      }
     }
   },
   fetchGmWk: function(date, season, stage) {

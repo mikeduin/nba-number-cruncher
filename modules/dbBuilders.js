@@ -197,7 +197,7 @@ module.exports = {
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
-          let season_name = gweek ? 'regular' : null;
+          let season_name = game.gweek ? 'regular' : null;
           let hObj = {
             tid: game.h.tid,
             re: game.h.re,
@@ -223,7 +223,7 @@ module.exports = {
                 an: game.an,
                 ac: game.ac,
                 as: game.as,
-                etm: game.etm,
+                etm: moment(game.etm),
                 gweek: game.gweek,
                 h: [hObj],
                 v: [vObj],
@@ -270,6 +270,7 @@ module.exports = {
             .update({
               h: [hObj],
               v: [vObj],
+              etm: moment(game.etm),
               stt: game.stt,
               updated_at: new Date()
             })
