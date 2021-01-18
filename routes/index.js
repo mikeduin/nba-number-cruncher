@@ -33,11 +33,6 @@ let todayGids = [];
 let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
-// test values
-// rule.hour = 3;
-// rule.minute = 53;
-// rule.second = 0;
-
 rule.hour = 10;
 rule.minute = 19;
 rule.second = 48;
@@ -106,7 +101,7 @@ setInterval(async () => {
   completedGames = finalBoxScores;
   todayGames.forEach(game => {
     let mins = nowET.diff(moment(game.etm), 'minutes');
-    // console.log(game.etm, ' starts in ', mins, ' mins');
+    console.log(game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
