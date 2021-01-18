@@ -93,8 +93,8 @@ setInterval(async () => {
 
   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
   // let nowET = moment().add(180, 'minutes');
-  // let nowET = moment().tz("America/Toronto").add(5, 'hours');
-  let nowET = moment().tz("America/Toronto");
+  let nowET = moment().tz("America/Toronto").add(5, 'hours');
+  // let nowET = moment().tz("America/Toronto");
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
     .where({final: true})
@@ -103,7 +103,7 @@ setInterval(async () => {
   completedGames = finalBoxScores;
   todayGames.forEach(game => {
     let mins = nowET.diff(moment(game.etm), 'minutes');
-    console.log(game.etm, ' starts in ', mins, ' mins');
+    console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
