@@ -22,10 +22,17 @@ let now = new Date();
 module.exports = {
   fetchAdvancedPlayerParams: games => {
     return {
+      College: "",
+      Conference: "",
+      Country: "",
       DateFrom: "",
       DateTo: "",
+      Division: "",
+      DraftPick: "",
+      DraftYear: "",
       GameScope: "",
       GameSegment: "",
+      Height: "",
       LastNGames: games,
       LeagueID: "00",
       Location: "",
@@ -33,6 +40,7 @@ module.exports = {
       Month: 0,
       OpponentTeamID: 0,
       Outcome: "",
+      PORound: 0,
       PaceAdjust: "N",
       PerMode: "PerGame",
       Period: 0,
@@ -43,9 +51,13 @@ module.exports = {
       Season: "2020-21",
       SeasonSegment: "",
       SeasonType: "Regular Season",
+      ShotClockRange: "",
       StarterBench: "",
+      TeamID: 0,
+      TwoWay: 0,
       VsConference: "",
-      VsDivision: ""
+      VsDivision: "",
+      Weight: ""
     };
   },
   fetchBaseTeamParams: (games, period) => {
@@ -270,7 +282,7 @@ module.exports = {
             .update({
               h: [hObj],
               v: [vObj],
-              etm: moment(game.etm),
+              etm: game.etm,
               stt: game.stt,
               updated_at: new Date()
             })

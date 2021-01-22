@@ -41,6 +41,8 @@ rule.second = 48;
 // setTimeout(() => {
 //   updateTeamStats.updateFullTeamBuilds()
 // }, 1000)
+// setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 1000);
+// setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
   console.log('running updaters');
@@ -104,6 +106,8 @@ setInterval(async () => {
   todayGames.forEach(game => {
     let mins = nowET.diff(moment(game.etm), 'minutes');
     console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
+
+    // you need mins to be a positive value
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
       // REMOVE THESE GID REFS ONCE DONE TESTING
