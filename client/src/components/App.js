@@ -38,7 +38,7 @@ class App extends React.Component {
               <Route path='/gamesheet/:gid' component={GameSheet} />
               <Route path='/gamblecast' component={GambleCast} />
               <Route path='/player/:pid' component={Player} />
-              <TodaysGames />
+
             </div>
           </BrowserRouter>
         </div>
@@ -47,7 +47,7 @@ class App extends React.Component {
   }
 };
 
-
+              // <TodaysGames />
 
 const mapStateToProps = state => {
   return {
