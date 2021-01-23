@@ -45,7 +45,6 @@ rule.second = 48;
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
 const timedDbUpdaters = schedule.scheduleJob(rule, () => {
-  console.log('running updaters');
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);

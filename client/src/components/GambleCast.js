@@ -31,7 +31,7 @@ class GambleCast extends React.Component {
       return <div> Loading ... </div>
     } else {
       return (
-        <div style={{marginBottom: 200}} className='gamblecast-main'>
+        <div style={{paddingBottom: 150}} className='gamblecast-main'>
           <Header size='huge'> Today's Games </Header>
           {this.renderBoxScores()}
         </div>
