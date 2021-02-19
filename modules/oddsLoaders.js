@@ -1,6 +1,6 @@
 const knex = require("../db/knex");
 const axios = require("axios");
-const cheerio = require("cheerio");
+// const cheerio = require("cheerio");
 
 const webScrapeHelpers = require("../modules/webScrapeHelpers");
 const apiRefs = require("../modules/apiRefs");
@@ -8,9 +8,16 @@ const apiRefs = require("../modules/apiRefs");
 let sbFull = apiRefs.sportsbook().full;
 
 module.exports = {
+  // sportsbookFull: () => {
+  //   const browser = await puppeteer.launch();
+  //   const page = await browser.newPage();
+  //   // const pageClient = page["_client"];
+  //   await page.goto('https://www.sportsbook.ag/sbk/sportsbook4/nba-betting/nba-game-lines-nba-game-lines.sbk');
+  // }
   sportsbookFull: () => {
     axios.get(sbFull).then(
       response => {
+        // console.log('respnse is ', response);
         if (response.status === 200) {
           const lines = webScrapeHelpers.parseSbHtml(response.data);
           lines.forEach(line => {

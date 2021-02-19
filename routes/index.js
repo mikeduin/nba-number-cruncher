@@ -121,7 +121,7 @@ setInterval(()=>{
   oddsLoaders.sportsbookFull();
   oddsLoaders.sportsbookFirstH();
   oddsLoaders.sportsbookFirstQ();
-}, 30000);
+}, 5000);
 
 // This function attempts to retrieve 2H/3Q odds [DISABLED TIME CONDITIONAL] between 9am and midnight
 setInterval(()=>{

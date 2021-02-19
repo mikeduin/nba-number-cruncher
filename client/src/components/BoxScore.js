@@ -72,6 +72,8 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
 
+    console.log('game is ', game);
+
     if (!boxScore || !boxScore.totals ) {
       if (!game) {
         return <div> loading ... </div>
@@ -128,7 +130,7 @@ class BoxScore extends React.Component {
             </Table.Header>
             <Table.Body>
               <Table.Row>
-                <Table.Cell> {game.away_team}  </Table.Cell>
+                <Table.Cell> {game.v[0].tn}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.v.pts}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.v.fgPct}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.v.pts : null}  </Table.Cell>
@@ -145,7 +147,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
-                <Table.Cell> {game.home_team} </Table.Cell>
+                <Table.Cell> {game.h[0].tn} </Table.Cell>
                 <Table.Cell> {boxScore.totals.h.pts}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.h.fgPct}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.h.pts : null}  </Table.Cell>
