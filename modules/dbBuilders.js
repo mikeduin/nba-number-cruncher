@@ -209,49 +209,51 @@ module.exports = {
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
-          let season_name = game.gweek ? 'regular' : null;
-          let hObj = {
-            tid: game.h.tid,
-            re: game.h.re,
-            ta: game.h.ta,
-            tn: game.h.tn,
-            tc: game.h.tc,
-            s: game.h.s
-          };
-          let vObj = {
-            tid: game.v.tid,
-            re: game.v.re,
-            ta: game.v.ta,
-            tn: game.v.tn,
-            tc: game.v.tc,
-            s: game.v.s
-          };
-          knex("schedule")
-            .insert(
-              {
-                gid: game.gid,
-                gcode: game.gcode,
-                gdte: game.gdte,
-                an: game.an,
-                ac: game.ac,
-                as: game.as,
-                etm: moment(game.etm),
-                gweek: game.gweek,
-                h: [hObj],
-                v: [vObj],
-                stt: game.stt,
-                // BEGIN HARD-CODED VALUES
-                season_year: 2020,
-                season_name,
-                display_year: '2020-21',
-                // END HARD-CODED VALUES
-                updated_at: new Date()
-              },
-              "*"
-            )
-            .then(ent => {
-              console.log(ent[0].gcode, " entered in DB");
-            });
+          if (game.gweek > 11) {
+            let season_name = game.gweek ? 'regular' : null;
+            let hObj = {
+              tid: game.h.tid,
+              re: game.h.re,
+              ta: game.h.ta,
+              tn: game.h.tn,
+              tc: game.h.tc,
+              s: game.h.s
+            };
+            let vObj = {
+              tid: game.v.tid,
+              re: game.v.re,
+              ta: game.v.ta,
+              tn: game.v.tn,
+              tc: game.v.tc,
+              s: game.v.s
+            };
+            knex("schedule")
+              .insert(
+                {
+                  gid: game.gid,
+                  gcode: game.gcode,
+                  gdte: game.gdte,
+                  an: game.an,
+                  ac: game.ac,
+                  as: game.as,
+                  etm: moment(game.etm),
+                  gweek: game.gweek,
+                  h: [hObj],
+                  v: [vObj],
+                  stt: game.stt,
+                  // BEGIN HARD-CODED VALUES
+                  season_year: 2020,
+                  season_name,
+                  display_year: '2020-21',
+                  // END HARD-CODED VALUES
+                  updated_at: new Date()
+                },
+                "*"
+              )
+              .then(ent => {
+                console.log(ent[0].gcode, " entered in DB");
+              });
+          }
         });
       });
     });
