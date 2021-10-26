@@ -36,6 +36,10 @@ if (process.env.NODE_ENV === 'production') {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT);
 
+if (app.get('env') === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED='0';
+}
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   const err = new Error('Not Found');

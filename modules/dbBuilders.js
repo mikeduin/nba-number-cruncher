@@ -8,7 +8,7 @@ const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
 
 const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2020/league/00_full_schedule_week.json";
+  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2021/league/00_full_schedule_week.json";
 // const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
@@ -209,51 +209,49 @@ module.exports = {
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
-          if (game.gweek > 11) {
-            let season_name = game.gweek ? 'regular' : null;
-            let hObj = {
-              tid: game.h.tid,
-              re: game.h.re,
-              ta: game.h.ta,
-              tn: game.h.tn,
-              tc: game.h.tc,
-              s: game.h.s
-            };
-            let vObj = {
-              tid: game.v.tid,
-              re: game.v.re,
-              ta: game.v.ta,
-              tn: game.v.tn,
-              tc: game.v.tc,
-              s: game.v.s
-            };
-            knex("schedule")
-              .insert(
-                {
-                  gid: game.gid,
-                  gcode: game.gcode,
-                  gdte: game.gdte,
-                  an: game.an,
-                  ac: game.ac,
-                  as: game.as,
-                  etm: moment(game.etm),
-                  gweek: game.gweek,
-                  h: [hObj],
-                  v: [vObj],
-                  stt: game.stt,
-                  // BEGIN HARD-CODED VALUES
-                  season_year: 2020,
-                  season_name,
-                  display_year: '2020-21',
-                  // END HARD-CODED VALUES
-                  updated_at: new Date()
-                },
-                "*"
-              )
-              .then(ent => {
-                console.log(ent[0].gcode, " entered in DB");
-              });
-          }
+          let season_name = game.gweek ? 'regular' : null;
+          let hObj = {
+            tid: game.h.tid,
+            re: game.h.re,
+            ta: game.h.ta,
+            tn: game.h.tn,
+            tc: game.h.tc,
+            s: game.h.s
+          };
+          let vObj = {
+            tid: game.v.tid,
+            re: game.v.re,
+            ta: game.v.ta,
+            tn: game.v.tn,
+            tc: game.v.tc,
+            s: game.v.s
+          };
+          knex("schedule")
+            .insert(
+              {
+                gid: game.gid,
+                gcode: game.gcode,
+                gdte: game.gdte,
+                an: game.an,
+                ac: game.ac,
+                as: game.as,
+                etm: moment(game.etm),
+                gweek: game.gweek,
+                h: [hObj],
+                v: [vObj],
+                stt: game.stt,
+                // BEGIN HARD-CODED VALUES
+                season_year: 2021,
+                season_name,
+                display_year: '2021-22',
+                // END HARD-CODED VALUES
+                updated_at: new Date()
+              },
+              "*"
+            )
+            .then(ent => {
+              console.log(ent[0].gcode, " entered in DB");
+            });
         });
       });
     });
@@ -846,17 +844,17 @@ module.exports = {
   },
   buildGameWeekArrays: () => {
     let digitSched = [
-      [null],
-      [20181016, 20181017, 20181018, 20181019, 20181020, 20181021]
+      // [null],
+      // [20181016, 20181017, 20181018, 20181019, 20181020, 20181021]
     ];
     let day = moment()
-      .set("year", 2018)
-      .set("month", 9)
-      .set("date", 21);
+      .set("year", 2021)
+      .set("month", 09)
+      .set("date", 10);
     let week = [];
 
     const dayAdder = () => {
-      while (moment(day).isBefore("2019-04-11")) {
+      while (moment(day).isBefore("2022-04-14")) {
         day = moment(day).add(1, "days");
         let digitDay = moment(day).format("YYYYMMDD");
         if (week.length < 7) {

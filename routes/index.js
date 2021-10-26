@@ -21,8 +21,11 @@ const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.js
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
+// STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
 // dbBuilders.updateSchedule();
+
+console.log(dbBuilders.buildGameWeekArrays());
 
 // subtract 8 hours to convert to west coast time ...
 // moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
@@ -44,39 +47,24 @@ rule.second = 48;
 // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 1000);
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
-const timedDbUpdaters = schedule.scheduleJob(rule, () => {
-  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
-  setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
-  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-  setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-})
-
-  // console.log('running updaters');
-  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-  // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-  // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-  // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-  // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
-  // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-  // setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
-  // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-  // setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-  // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-  // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-
+// const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+// (async () => { 
+//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
+//   setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+//   setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
+//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+//   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
+// // })
+// })()
 
 // setTimeout(async () => {
 //   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
@@ -188,14 +176,13 @@ setInterval(() => {
 
       const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 
-      // console.log('totalsObj is ', totalsObj);
-
       const quarterObj = prevTotals => {
         return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
       }
+      
 
       const quarterUpdFn = async () => {
-        // if (gid !== 21900455) {
+        try {
           let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
           let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
           // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
@@ -204,13 +191,9 @@ setInterval(() => {
             currentQuarter: quarterTotals,
             prevQuarters: prevTotalsPull[0].totals[0]
           }
-        // } else {
-        //   return {
-        //     currentQuarter: null,
-        //     prevQuarters: null
-        //   }
-        // }
-
+        } catch (e) {
+          console.log('error in quarterUpdFn is ', e)
+        }
       }
 
       if (period.current === 1) {
