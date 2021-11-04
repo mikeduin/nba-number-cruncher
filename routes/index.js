@@ -8,6 +8,8 @@ const momentTz = require("moment-timezone");
 const cheerio = require('cheerio');
 const _ = require('lodash');
 
+// import endQuarterResObj from '../modules/boxScoreHelpers/endQuarterResObj';
+
 const updateTeamStats = require("../modules/updateTeamStats");
 const updatePlayerStats = require("../modules/updatePlayerStats");
 const dbBuilders = require("../modules/dbBuilders");
@@ -16,6 +18,7 @@ const dateFilters = require("../modules/dateFilters");
 const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
 const boxScoreHelpers = require("../modules/boxScoreHelpers");
+const endQuarterResObj = require("../modules/boxScoreHelpers/endQuarterResObj");
 
 const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
 const getGameSecs = require('../modules/getGameSecs');
@@ -24,8 +27,6 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
 // dbBuilders.updateSchedule();
-
-console.log(dbBuilders.buildGameWeekArrays());
 
 // subtract 8 hours to convert to west coast time ...
 // moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
@@ -362,13 +363,13 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
     const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
     const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-    const hPlayers = activePlayers.filter(player => {
-      return (player.teamId === hTid && player.isOnCourt)
-    }).map(active => active.personId);
+    const hPlayers = activePlayers
+      .filter(player => player.teamId === hTid && player.isOnCourt)
+      .map(active => active.personId);
 
-    const vPlayers = activePlayers.filter(player => {
-      return (player.teamId === hTid && player.isOnCourt)
-    }).map(active => active.personId);
+    const vPlayers = activePlayers
+      .filter(player => player.teamId === hTid && player.isOnCourt)
+      .map(active => active.personId);
 
     const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
 
@@ -435,86 +436,8 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
 
     // <-- If at End of Period, or if Game is Over --> //
     if (period.isEndOfPeriod || gameOver()) {
-      if (period.current === 1) {
-        res.send({
-          quarterEnd: true,
-          live: true,
-          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-          gameSecs: gameSecs,
-          period: period,
-          thru_period: 1,
-          poss: poss,
-          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-          totals: totalsObj,
-          prevQuarters: totalsObj,
-          quarter: totalsObj
-        })
-      } else if (period.current === 2) {
-        quarterUpdFn().then(qTotals => {
-          res.send({
-            quarterEnd: true,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: 2,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: qTotals.prevQuarters,
-            quarter: qTotals.currentQuarter
-          })
-        })
-      } else if (period.current === 3) {
-        quarterUpdFn().then(qTotals => {
-          res.send({
-            quarterEnd: true,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: 3,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: qTotals.prevQuarters,
-            quarter: qTotals.currentQuarter
-          })
-        })
-      } else if (period.current === 4 ) {
-        quarterUpdFn().then(qTotals => {
-          res.send({
-            quarterEnd: true,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: 4,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: qTotals.prevQuarters,
-            quarter: qTotals.currentQuarter
-          })
-        })
-      } else {
-        // I don't think this needs any addl adjusting for mult OTs ... does it?
-        quarterUpdFn().then(qTotals => {
-          res.send({
-            quarterEnd: true,
-            live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: period.current,
-            poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
-            totals: totalsObj,
-            prevQuarters: qTotals.prevQuarters,
-            quarter: qTotals.currentQuarter
-          })
-        })
-      }
+      const qTotals = await quarterUpdFn();
+      res.send(endQuarterResObj(clock, period, period.current, gameSecs, poss, totalsObj, qTotals))
     } else {
       // if endOfPeriod is false && game is not activated ... does it get here if game has started?
       // CONFIRM THIS WORKS IN EVENT OF OT
