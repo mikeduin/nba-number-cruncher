@@ -83,7 +83,8 @@ setInterval(async () => {
 
   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
   // let nowET = moment().add(180, 'minutes');
-  let nowET = moment().tz("America/Toronto").add(5, 'hours');
+  let nowET = moment();
+  console.log('nowET is ', nowET);
   // let nowET = moment().tz("America/Toronto");
   const finalBoxScores = await knex("box_scores_v2")
     .whereIn('gid', todayGids)
@@ -92,13 +93,22 @@ setInterval(async () => {
 
   completedGames = finalBoxScores;
   todayGames.forEach(game => {
-    let mins = nowET.diff(moment(game.etm), 'minutes');
+
+    // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
+    // So, to fix the date and bring it back to PST-based, you need to adjust three hours
+    const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
+
+    let mins = nowET.diff(adjustedTime, 'minutes');
     console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
 
     // you need mins to be a positive value
 
     if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-      // REMOVE THESE GID REFS ONCE DONE TESTING
+      // If ...
+      // mins >= 0 ... (fix this shit)
+      // and game is not already in activeGames
+      // and game has not been completed
+      // push to activeGames
       console.log('pushing ', game.gid, ' to activeGames');
       activeGames.push(game.gid)
     };
@@ -139,7 +149,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
     .where('pgs.player_id', pid)
-    .where('pgs.gdte', '>', '2020-10-10')
+    .where('pgs.gdte', '>', '2021-10-10')
     .orderBy('s.gid', 'desc')
     .select('s.*', "pgs.game_stints");
 
@@ -160,6 +170,7 @@ setInterval(() => {
     const vTid = boxScore.data.basicGameData.vTeam.teamId;
     const hAbb = boxScore.data.basicGameData.hTeam.triCode;
     const vAbb = boxScore.data.basicGameData.vTeam.triCode;
+    const qVariable = `q${period.current}`;
 
     let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
 
@@ -171,7 +182,7 @@ setInterval(() => {
     if (period.isEndOfPeriod || gameOver()) {
       // console.log('period is end of period, period is ', period.current);
       let { hTeam, vTeam } = boxScore.data.stats;
-      const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
+      const poss = boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
       const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
       const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
@@ -185,7 +196,7 @@ setInterval(() => {
       const quarterUpdFn = async () => {
         try {
           let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-          let quarterTotals = await quarterObj(prevTotalsPull[0].totals);
+          let quarterTotals = quarterObj(prevTotalsPull[0].totals);
           // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
           // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
           return {
@@ -197,63 +208,70 @@ setInterval(() => {
         }
       }
 
+
+
       if (period.current === 1) {
-        knex("box_scores_v2").where({gid: gid}).then(entry => {
-          if (!entry[0]) {
-            knex("box_scores_v2").insert({
-              gid: gid,
-              h_tid: hTid,
-              v_tid: vTid,
-              period_updated: 1,
-              clock_last_updated: gameSecs,
-              totals: [totalsObj],
-              q1: [totalsObj],
-              updated_at: new Date()
-            }).then(() => {
-              console.log('Q1 stats inserted for ', gid);
-            })
-          } else {
-            console.log('first period already entered in gid ', gid);
-          }
-        })
-      } else if (period.current === 2) {
-        console.log('about to pluck for q2 when period.isEndOfPeriod and current period is 2');
         try {
-          knex("box_scores_v2").where({gid: gid}).pluck('q2').then(qTest => {
-            console.log('qTest in q2 func is ', qTest);
+          knex("box_scores_v2").where({gid: gid}).then(entry => {
+            if (!entry[0]) {
+              knex("box_scores_v2").insert({
+                gid: gid,
+                h_tid: hTid,
+                v_tid: vTid,
+                period_updated: 1,
+                clock_last_updated: gameSecs,
+                totals: [totalsObj],
+                q1: [totalsObj],
+                updated_at: new Date()
+              }).then(() => {
+                console.log('Q1 stats inserted for ', gid);
+              })
+            } else {
+              console.log('first period already entered in gid ', gid);
+            }
+          })
+        } catch (e) {
+          console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
+        }
+      } else if (period.current === 2) {
+        console.log(`about to pluck for ${qVariable} when period.isEndOfPeriod and current period is ${qVariable}`);
+        try {
+          knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(async qTest => {
+            console.log(`qTest in ${qVariable} func is ', ${qTest}`);
             if (qTest[0] == null) {
-              quarterUpdFn().then(qTotals => {
+              let qTotals = await quarterUpdFn();
+              // quarterUpdFn().then(qTotals => {
                 console.log('qTotals returned from quarterUpdFn are ', qTotals);
                 knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: 2,
+                  period_updated: period.current,
                   clock_last_updated: gameSecs,
                   totals: [totalsObj],
                   q2: [qTotals.currentQuarter],
                   updated_at: new Date()
                 }).then(() => {
-                  console.log('Q2 stats inserted for ', gid);
+                  console.log(`${qVariable} stats inserted for ${gid}`);
                 })
-              })
+              // })
             } else {
               // console.log('qTest[0] for q2 pluck is ', qTest[0]);
               console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
             }
           })
         } catch (e) {
-          console.log('q2 insert failed for ', gid, ' error is ', e)
+          console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
         }
       } else if (period.current === 3) {
-        knex("box_scores_v2").where({gid: gid}).pluck('q3').then(qTest => {
+        knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => {
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
               knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 3,
+                period_updated: period.current,
                 clock_last_updated: gameSecs,
                 totals: [totalsObj],
                 q3: [qTotals.currentQuarter],
                 updated_at: new Date()
               }).then(() => {
-                console.log('Q3 stats inserted for ', gid);
+                console.log(`${qVariable} stats inserted for ${gid}`);
               })
             })
           } else {
@@ -261,17 +279,17 @@ setInterval(() => {
           }
         })
       } else if (period.current === 4 ) {
-        knex("box_scores_v2").where({gid: gid}).pluck('q4').then(qTest => {
+        knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => { // undefined here
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
               knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: 4,
+                period_updated: period.current,
                 clock_last_updated: gameSecs,
                 totals: [totalsObj],
                 q4: [qTotals.currentQuarter],
                 updated_at: new Date()
               }).then(() => {
-                console.log('Q4 stats inserted for ', gid);
+                console.log(`${qVariable} stats inserted for ${gid}`);
               })
             })
           } else {

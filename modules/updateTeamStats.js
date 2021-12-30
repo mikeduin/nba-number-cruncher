@@ -39,14 +39,14 @@ const updateBaseTeamBuild = (games, db, period) => {
 
 
 const updateFullTeamBuild = (games, db, period) => {
-  // console.log('updating full team build for ', games, db, period);
+  console.log('updating full team build for ', games, db, period);
   axios.get(teamStatsUrl, {
     params: dbBuilders.fetchAdvancedTeamParams(games, period),
     headers: headers
   })
     .then(response => {
       let teamData = response.data.resultSets[0].rowSet;
-      // console.log('team date is ', teamData);
+      console.log('team date is ', teamData);
       // Change this to .buildTeabDb for initial builds
       // dbBuilders.buildAdvancedTeamDb(db, teamData);
       dbBuilders.updateAdvancedTeamDb(db, teamData);
