@@ -38,7 +38,7 @@ let todayGids = [];
 let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
-rule.hour = 10;
+rule.hour = 02;
 rule.minute = 19;
 rule.second = 48;
 
@@ -48,23 +48,23 @@ rule.second = 48;
 // setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 1000);
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
-// const timedDbUpdaters = schedule.scheduleJob(rule, () => {
 // (async () => { 
-//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
-//   setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-//   setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
-//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-//   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-// // })
+const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
+  setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
+  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+  setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
+})
 // })()
 
 // setTimeout(async () => {
@@ -164,7 +164,17 @@ setInterval(() => {
   console.log('active games are ', activeGames);
   activeGames.forEach(async (gid) => {
     const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
-    const boxScore = await axios.get(url);
+    let boxScore;
+
+    try {
+      boxScore = await axios.get(url);
+    } catch (e) {
+      console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
+      return res.status(400).send({
+        message: `error attempting to fetch boc score for ${gid} is ${e}`
+     });
+    }
+    
     const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
     const hTid = boxScore.data.basicGameData.hTeam.teamId;
     const vTid = boxScore.data.basicGameData.vTeam.teamId;
@@ -237,10 +247,8 @@ setInterval(() => {
         console.log(`about to pluck for ${qVariable} when period.isEndOfPeriod and current period is ${qVariable}`);
         try {
           knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(async qTest => {
-            console.log(`qTest in ${qVariable} func is ', ${qTest}`);
             if (qTest[0] == null) {
               let qTotals = await quarterUpdFn();
-              // quarterUpdFn().then(qTotals => {
                 console.log('qTotals returned from quarterUpdFn are ', qTotals);
                 knex("box_scores_v2").where({gid: gid}).update({
                   period_updated: period.current,
@@ -251,9 +259,7 @@ setInterval(() => {
                 }).then(() => {
                   console.log(`${qVariable} stats inserted for ${gid}`);
                 })
-              // })
             } else {
-              // console.log('qTest[0] for q2 pluck is ', qTest[0]);
               console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
             }
           })
