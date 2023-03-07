@@ -81,43 +81,43 @@ const timedDbUpdaters = schedule.scheduleJob(rule, () => {
 // }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
-// setInterval(async () => {
-//   // today = moment().subtract(18, 'hours').format('YYYY-MM-DD');
-//   const todayGames = await knex("schedule").where({gdte: today});
-//   const todayGids = todayGames.map(game => game.gid);
+setInterval(async () => {
+  // today = moment().subtract(18, 'hours').format('YYYY-MM-DD');
+  const todayGames = await knex("schedule").where({gdte: today});
+  const todayGids = todayGames.map(game => game.gid);
 
-//   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
-//   // let nowET = moment().add(180, 'minutes');
-//   let nowET = moment();
-//   console.log('nowET is ', nowET);
-//   // let nowET = moment().tz("America/Toronto");
-//   const completedGames = await knex("box_scores_v2")
-//     .whereIn('gid', todayGids)
-//     .where({final: true})
-//     .pluck('gid');
+  // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
+  // let nowET = moment().add(180, 'minutes');
+  let nowET = moment();
+  console.log('nowET is ', nowET);
+  // let nowET = moment().tz("America/Toronto");
+  const completedGames = await knex("box_scores_v2")
+    .whereIn('gid', todayGids)
+    .where({final: true})
+    .pluck('gid');
 
-//   todayGames.forEach(game => {
+  todayGames.forEach(game => {
 
-//     // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
-//     // So, to fix the date and bring it back to PST-based, you need to adjust three hours
-//     const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
+    // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
+    // So, to fix the date and bring it back to PST-based, you need to adjust three hours
+    const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
 
-//     let mins = nowET.diff(adjustedTime, 'minutes');
-//     console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
+    let mins = nowET.diff(adjustedTime, 'minutes');
+    console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
 
-//     // you need mins to be a positive value
+    // you need mins to be a positive value
 
-//     if (mins >= 0 && activeGames.map(g => g.gid).indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-//       // If ...
-//       // mins >= 0 ... (fix this shit)
-//       // and game is not already in activeGames
-//       // and game has not been completed
-//       // push to activeGames
-//       console.log('pushing ', game.gid, ' to activeGames');
-//       activeGames.push(game);
-//     };
-//   })
-// }, 10000)
+    if (mins >= 0 && activeGames.map(g => g.gid).indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
+      // If ...
+      // mins >= 0 ... (fix this shit)
+      // and game is not already in activeGames
+      // and game has not been completed
+      // push to activeGames
+      console.log('pushing ', game.gid, ' to activeGames');
+      activeGames.push(game);
+    };
+  })
+}, 10000)
 
 // This function pulls in odds
 // setInterval(()=>{
