@@ -161,11 +161,11 @@ export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
   dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
-export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
+export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190314';
   let todayInt = moment().tz("America/Toronto").subtract(3, 'hours').format('YYYYMMDD');
-  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}`);
+  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}/${vAbb}/${hAbb}`);
   const response = game.data;
 
   if (response.final) {
@@ -180,7 +180,7 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
 
   // are things not showing up because it's not live in response?
   if (response.live) {
-    let { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
+    const { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
 
     const calcFgPct = (fgm, fga) => {
       return (((fgm/fga)*100).toFixed(1));
@@ -207,24 +207,24 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
       };
     }
 
-    const calcGamePace = (poss, per, gameSecs) => {
-      let pace = 0;
-      if (per < 5) {
-        pace = (((2880/gameSecs)*poss)/2)
-      } else {
-        pace = ((2880+((300*(per-4))/gameSecs)*poss)/2)
-      };
-      if (pace == null) {
-        return 0
-      } else {
-        return pace
-      };
-    }
+    // const calcGamePace = (poss, per, gameSecs) => {
+    //   let pace = 0;
+    //   if (per < 5) {
+    //     pace = (((2880/gameSecs)*poss)/2)
+    //   } else {
+    //     pace = ((2880+((300*(per-4))/gameSecs)*poss)/2)
+    //   };
+    //   if (pace == null) {
+    //     return 0
+    //   } else {
+    //     return pace
+    //   };
+    // }
 
     let liveData = {
       gid: gid,
       active: true,
-      period: period.current,
+      period,
       endOfPeriod: false,
       gameSecs,
       clock,
@@ -234,7 +234,7 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
     };
 
     if (response.quarterEnd) {
-      let perToUpdate = response.thru_period;
+      let perToUpdate = thru_period;
       let endOfQuarterData = response.quarter;
       let prevQuarters = response.prevQuarters;
 
@@ -247,10 +247,10 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
         }
       }
     } else {
-      let perToUpdate = period.current;
+      let perToUpdate = period;
       let inQuarter = {};
 
-      if (period.current === 1) {
+      if (period === 1) {
         inQuarter = {
           ...liveData,
           perToUpdate,
@@ -263,7 +263,7 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
       } else {
 
         let prevQuarters = response.prevQuarters;
-        let perToUpdate = period.current;
+        let perToUpdate = period;
 
         const quarterPoss = calcPoss(
           ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
@@ -276,14 +276,14 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
               - parseInt(prevQuarters.t.offReb))
         );
 
-        let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
-            - parseInt(prevQuarters.t.fga));
-        let perTO = ( (parseInt(totals.h.to) + parseInt(totals.v.to))
-            - parseInt(prevQuarters.t.to));
-        let perFta = ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
-            - parseInt(prevQuarters.t.fta));
-        let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
-            - parseInt(prevQuarters.t.offReb));
+        // let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
+        //     - parseInt(prevQuarters.t.fga));
+        // let perTO = ( (parseInt(totals.h.to) + parseInt(totals.v.to))
+        //     - parseInt(prevQuarters.t.to));
+        // let perFta = ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
+        //     - parseInt(prevQuarters.t.fta));
+        // let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
+        //     - parseInt(prevQuarters.t.offReb));
 
         let currentQuarter = {
             h: {
@@ -322,7 +322,7 @@ export const fetchBoxScore = (gid, init) => async (dispatch, getState) => {
               offReb: (parseInt(totals.h.offReb) + parseInt(totals.v.offReb)) - parseInt(prevQuarters.t.offReb),
               fouls: (parseInt(totals.h.fouls) + parseInt(totals.v.fouls)) - parseInt(prevQuarters.t.fouls),
               poss: quarterPoss,
-              pace: calcQuarterPace(quarterPoss, period.current, gameSecs)
+              pace: calcQuarterPace(quarterPoss, period, gameSecs)
             }
         }
 

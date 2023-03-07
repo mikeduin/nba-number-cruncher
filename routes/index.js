@@ -19,6 +19,7 @@ const teamLookup = require("../modules/teamLookup");
 const oddsLoaders = require("../modules/oddsLoaders");
 const boxScoreHelpers = require("../modules/boxScoreHelpers");
 const endQuarterResObj = require("../modules/boxScoreHelpers/endQuarterResObj");
+const fetchBoxScore = require("../modules/fetchBoxScore");
 
 const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
 const getGameSecs = require('../modules/getGameSecs');
@@ -26,14 +27,17 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
-// dbBuilders.updateSchedule();
+
+// TEAM DB: I think I can just wipe out all in-season data and it will rebuild it all. leave the basic team details in place
+// PLAYER DB: should be built by default in timed process (adds new players)
+
+// dbBuilders.buildGameStintsDb();
 
 // subtract 8 hours to convert to west coast time ...
 // moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
 let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 let activeGames = [];
 let completedGames = [];
-let todayGids = [];
 
 let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
@@ -77,59 +81,59 @@ const timedDbUpdaters = schedule.scheduleJob(rule, () => {
 // }, 2000)
 
 // this function manages a day's active and completed games for the GambleCast
-setInterval(async () => {
-  const todayGames = await knex("schedule").where({gdte: today});
-  todayGids = todayGames.map(game => game.gid);
+// setInterval(async () => {
+//   // today = moment().subtract(18, 'hours').format('YYYY-MM-DD');
+//   const todayGames = await knex("schedule").where({gdte: today});
+//   const todayGids = todayGames.map(game => game.gid);
 
-  // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
-  // let nowET = moment().add(180, 'minutes');
-  let nowET = moment();
-  console.log('nowET is ', nowET);
-  // let nowET = moment().tz("America/Toronto");
-  const finalBoxScores = await knex("box_scores_v2")
-    .whereIn('gid', todayGids)
-    .where({final: true})
-    .pluck('gid');
+//   // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
+//   // let nowET = moment().add(180, 'minutes');
+//   let nowET = moment();
+//   console.log('nowET is ', nowET);
+//   // let nowET = moment().tz("America/Toronto");
+//   const completedGames = await knex("box_scores_v2")
+//     .whereIn('gid', todayGids)
+//     .where({final: true})
+//     .pluck('gid');
 
-  completedGames = finalBoxScores;
-  todayGames.forEach(game => {
+//   todayGames.forEach(game => {
 
-    // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
-    // So, to fix the date and bring it back to PST-based, you need to adjust three hours
-    const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
+//     // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
+//     // So, to fix the date and bring it back to PST-based, you need to adjust three hours
+//     const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
 
-    let mins = nowET.diff(adjustedTime, 'minutes');
-    console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
+//     let mins = nowET.diff(adjustedTime, 'minutes');
+//     console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
 
-    // you need mins to be a positive value
+//     // you need mins to be a positive value
 
-    if (mins >= 0 && activeGames.indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-      // If ...
-      // mins >= 0 ... (fix this shit)
-      // and game is not already in activeGames
-      // and game has not been completed
-      // push to activeGames
-      console.log('pushing ', game.gid, ' to activeGames');
-      activeGames.push(game.gid)
-    };
-  })
-}, 10000)
+//     if (mins >= 0 && activeGames.map(g => g.gid).indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
+//       // If ...
+//       // mins >= 0 ... (fix this shit)
+//       // and game is not already in activeGames
+//       // and game has not been completed
+//       // push to activeGames
+//       console.log('pushing ', game.gid, ' to activeGames');
+//       activeGames.push(game);
+//     };
+//   })
+// }, 10000)
 
 // This function pulls in odds
-setInterval(()=>{
-  oddsLoaders.sportsbookFull();
-  oddsLoaders.sportsbookFirstH();
-  oddsLoaders.sportsbookFirstQ();
-}, 5000);
+// setInterval(()=>{
+//   oddsLoaders.sportsbookFull();
+//   oddsLoaders.sportsbookFirstH();
+//   oddsLoaders.sportsbookFirstQ();
+// }, 5000);
 
 // This function attempts to retrieve 2H/3Q odds [DISABLED TIME CONDITIONAL] between 9am and midnight
-setInterval(()=>{
-  // const hour = new Date().getHours();
-  // if (hour >= 9 && hour <= 24) {
-    oddsLoaders.sportsbookSecondH();
-    oddsLoaders.sportsbookThirdQ();
-  // }
-}, 60000);
+// setInterval(()=>{
+//   // const hour = new Date().getHours();
+//   // if (hour >= 9 && hour <= 24) {
+//     oddsLoaders.sportsbookSecondH();
+//     oddsLoaders.sportsbookThirdQ();
+//   // }
+// }, 60000);
 
 router.get("/todayGameStatus", (req, res, next) => {
   res.send({
@@ -160,52 +164,70 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 })
 
 setInterval(() => {
-  let todayInt = moment().subtract(8, 'hours').format('YYYYMMDD');
-  console.log('active games are ', activeGames);
-  activeGames.forEach(async (gid) => {
-    const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
+  // let todayInt = moment().subtract(8, 'hours').format('YYYYMMDD');
+  console.log('active games are ', activeGames.map(g => g.gid));
+  activeGames.forEach(async (game) => {
+  // activeGames.forEach(async (gid) => {
+    // const url = `https://data.nba.net/prod/v1/${todayInt}/00${gid}_boxscore.json`;
+    // let boxScore;
+
+    const hAbb = game.h[0].ta;
+    const vAbb = game.v[0].ta;
+    const gid = game.gid;
     let boxScore;
 
     try {
-      boxScore = await axios.get(url);
+      const response = await fetchBoxScore(vAbb, hAbb, gid);
+      boxScore = response.props.pageProps.game;
     } catch (e) {
       console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
       return res.status(400).send({
         message: `error attempting to fetch boc score for ${gid} is ${e}`
      });
     }
-    
-    const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
-    const hTid = boxScore.data.basicGameData.hTeam.teamId;
-    const vTid = boxScore.data.basicGameData.vTeam.teamId;
-    const hAbb = boxScore.data.basicGameData.hTeam.triCode;
-    const vAbb = boxScore.data.basicGameData.vTeam.triCode;
-    const qVariable = `q${period.current}`;
 
-    let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+    const hTid = boxScore.homeTeamId;
+    const vTid = boxScore.awayTeamId;
+
+    const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam} = boxScore;
+    const isGameActivated = gameStatus > 1;
+
+    const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
+    const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
+    
+    // const { period, clock, isGameActivated } = boxScore.data.basicGameData;
+    // const qVariable = `q${period.current}`;
+    const qVariable = `q${period}`;
+
+    const gameSecs = getGameSecs((parseInt(period)-1), clock);
 
     // gameOver fn returns true if game has started but no longer activated
-    const gameOver = () => {
-      return (period.current >= 4 && !isGameActivated)
-    };
+    // const gameOver = () => {
+    //   return (period.current >= 4 && !isGameActivated)
+    // };
 
-    if (period.isEndOfPeriod || gameOver()) {
+    const gameOver = gameStatusText === 'Final';
+    const isEndOfPeriod = fullClock === '00:00:00';
+
+    if (isEndOfPeriod || gameOver) {
       // console.log('period is end of period, period is ', period.current);
-      let { hTeam, vTeam } = boxScore.data.stats;
-      const poss = boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
-      const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-      const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+      // let { hTeam, vTeam } = boxScore.data.stats;
+      const hTeam = homeTeam.statistics;
+      const vTeam = awayTeam.statistics;
+      const poss = boxScoreHelpers.calcGamePoss(hTeam, vTeam);
 
-      const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+      // const hFgPct = boxScoreHelpers.calcFgPct(hTeam.fieldGoalsMade, hTeam.fieldGoalsAttempted);
+      // const vFgPct = boxScoreHelpers.calcFgPct(vTeam.fieldGoalsMade, vTeam.fieldGoalsAttempted);
+
+      const totalsObj = boxScoreHelpers.compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
       const quarterObj = prevTotals => {
-        return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
+        return boxScoreHelpers.compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
       }
-      
 
       const quarterUpdFn = async () => {
         try {
-          let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+          let prevTotalsPull = await knex("box_scores_v2").where({gid: game.gid}).select('totals');
           let quarterTotals = quarterObj(prevTotalsPull[0].totals);
           // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
           // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
@@ -218,11 +240,9 @@ setInterval(() => {
         }
       }
 
-
-
-      if (period.current === 1) {
+      if (period === 1) {
         try {
-          knex("box_scores_v2").where({gid: gid}).then(entry => {
+          knex("box_scores_v2").where({gid: game.gid}).then(entry => {
             if (!entry[0]) {
               knex("box_scores_v2").insert({
                 gid: gid,
@@ -243,7 +263,7 @@ setInterval(() => {
         } catch (e) {
           console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
         }
-      } else if (period.current === 2) {
+      } else if (period === 2) {
         console.log(`about to pluck for ${qVariable} when period.isEndOfPeriod and current period is ${qVariable}`);
         try {
           knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(async qTest => {
@@ -251,7 +271,7 @@ setInterval(() => {
               let qTotals = await quarterUpdFn();
                 console.log('qTotals returned from quarterUpdFn are ', qTotals);
                 knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: period.current,
+                  period_updated: period,
                   clock_last_updated: gameSecs,
                   totals: [totalsObj],
                   q2: [qTotals.currentQuarter],
@@ -266,12 +286,12 @@ setInterval(() => {
         } catch (e) {
           console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
         }
-      } else if (period.current === 3) {
+      } else if (period === 3) {
         knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => {
           if (qTest[0] == null) {
             quarterUpdFn().then(qTotals => {
               knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period.current,
+                period_updated: period,
                 clock_last_updated: gameSecs,
                 totals: [totalsObj],
                 q3: [qTotals.currentQuarter],
@@ -284,20 +304,24 @@ setInterval(() => {
             console.log('third period already entered in gid ', gid);
           }
         })
-      } else if (period.current === 4 ) {
+      } else if (period === 4 ) {
         knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => { // undefined here
           if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period.current,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q4: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }).then(() => {
-                console.log(`${qVariable} stats inserted for ${gid}`);
+              quarterUpdFn().then(qTotals => {
+                try {
+                  knex("box_scores_v2").where({gid: gid}).update({
+                    period_updated: period,
+                    clock_last_updated: gameSecs,
+                    totals: [totalsObj],
+                    q4: [qTotals.currentQuarter],
+                    updated_at: new Date()
+                  }).then(() => {
+                    console.log(`${qVariable} stats inserted for ${gid}`);
+                  })
+                } catch (e) {
+                  console.log('error updating period 4 stats for ', gid, ' is ', e);
+                }
               })
-            })
           } else {
             if (!isGameActivated) {
               console.log('4Q data already entered, and game is over');
@@ -317,7 +341,7 @@ setInterval(() => {
           if (qTest[0] == null && !isGameActivated) {
             quarterUpdFn().then(qTotals => {
               knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period.current,
+                period_updated: period,
                 clock_last_updated: gameSecs,
                 totals: [totalsObj],
                 ot: [qTotals.currentQuarter],
@@ -339,8 +363,8 @@ setInterval(() => {
   })
 }, 3000)
 
-router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
-  const { gid, date, init } = req.params;
+router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next) => {
+  const { gid, date, init, vAbb, hAbb } = req.params;
 
   // <-- If Game Is Final --> //
   if (completedGames.indexOf(parseInt(gid)) !== -1) {
@@ -370,36 +394,64 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
   let ot = null;
   let thru_period = 0;
 
-  const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
-  const boxScore = await axios.get(url);
-  const { period, clock, isGameActivated, startTimeUTC } = boxScore.data.basicGameData;
+  let boxScore;
 
-  const hTid = boxScore.data.basicGameData.hTeam.teamId;
-  const vTid = boxScore.data.basicGameData.vTeam.teamId;
-  const hAbb = boxScore.data.basicGameData.hTeam.triCode;
-  const vAbb = boxScore.data.basicGameData.vTeam.triCode;
-  let gameSecs = getGameSecs((parseInt(period.current)-1), clock);
+  try {
+    const response = await fetchBoxScore(vAbb, hAbb, gid);
+    boxScore = response.props.pageProps.game;
+  } catch (e) {
+    console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
+    return res.status(400).send({
+      message: `error attempting to fetch boc score for ${gid} is ${e}`
+   });
+  }
+
+  // const url = `https://data.nba.net/prod/v1/${date}/00${gid}_boxscore.json`;
+  // const boxScore = await axios.get(url);
+
+  const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam} = boxScore;
+  const isGameActivated = gameStatus > 1;
+  const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
+  const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
+
+  // const { period, clock, isGameActivated } = boxScore.data.basicGameData;
+
+  // const hTid = boxScore.homeTeamId;
+  // const vTid = boxScore.awayTeamId;
+
+  // const hTid = boxScore.data.basicGameData.hTeam.teamId;
+  // const vTid = boxScore.data.basicGameData.vTeam.teamId;
+  // const hAbb = boxScore.data.basicGameData.hTeam.triCode;
+  // const vAbb = boxScore.data.basicGameData.vTeam.triCode;
+  const gameSecs = getGameSecs((parseInt(period)-1), clock);
+  const derivedClock = boxScoreHelpers.clockReturner(clock, period, gameSecs);
 
   // <-- If Game Has Begun --> //
-  if (boxScore.data.stats) {
-    const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
-    const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
-    const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
-    const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
+  if (isGameActivated) {
+  // if (boxScore.data.stats) {
+    const hTeam = homeTeam.statistics;
+    const vTeam = awayTeam.statistics;
+    const poss = boxScoreHelpers.calcGamePoss(hTeam, vTeam);
+    const derivedPace = boxScoreHelpers.calcGamePace(poss, period, gameSecs);
 
-    const hPlayers = activePlayers
-      .filter(player => player.teamId === hTid && player.isOnCourt)
-      .map(active => active.personId);
+    // const { hTeam, vTeam, activePlayers } = boxScore.data.stats;
+    // const poss = await boxScoreHelpers.calcGamePoss(hTeam.totals, vTeam.totals)
+    // const hFgPct = boxScoreHelpers.calcFgPct(hTeam.totals.fgm, hTeam.totals.fga);
+    // const vFgPct = boxScoreHelpers.calcFgPct(vTeam.totals.fgm, vTeam.totals.fga);
 
-    const vPlayers = activePlayers
-      .filter(player => player.teamId === hTid && player.isOnCourt)
-      .map(active => active.personId);
+    // const hPlayers = activePlayers
+    //   .filter(player => player.teamId === hTid && player.isOnCourt)
+    //   .map(active => active.personId);
 
-    const totalsObj = boxScoreHelpers.compileGameStats(hTeam.totals, vTeam.totals, poss, period.current, gameSecs);
+    // const vPlayers = activePlayers
+    //   .filter(player => player.teamId === hTid && player.isOnCourt)
+    //   .map(active => active.personId);
+
+    const totalsObj = boxScoreHelpers.compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
     // this object calculates the stats for each quarter, using the previous totals from earlier Qs
     const quarterObj = prevTotals => {
-      return boxScoreHelpers.compileQuarterStats(hTeam.totals, vTeam.totals, prevTotals[0], period.current, gameSecs);
+      return boxScoreHelpers.compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
     }
 
     // this is the function that combines the two above
@@ -413,12 +465,14 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
     }
 
     // gameOver returns true if game has started but is no longer in progress
-    const gameOver = () => {
-      return (period.current >= 4 && !isGameActivated)
-    };
+    // const gameOver = () => {
+    //   return (period.current >= 4 && !isGameActivated)
+    // };
+    const gameOver = gameStatusText === 'Final';
+    const isEndOfPeriod = fullClock === '00:00:00';
 
     // <-- If Initial Box Score Load --> //
-    if (init == 'true' && period.current !== 1) {
+    if (init == 'true' && period !== 1) {
       let inDb = await knex("box_scores_v2").where({gid: gid});
 
       // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
@@ -430,22 +484,22 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
       if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
 
       quarterUpdFn().then(qTotals => {
-        if (period.current == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
-        if (period.current == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
-        if (period.current == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
-        if (period.current > 4) ot = qTotals.currentQuarter;
+        if (period == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
+        if (period == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
+        if (period == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
+        if (period > 4) ot = qTotals.currentQuarter;
 
         res.send({
           gid: gid,
           init: true,
-          quarterEnd: period.isEndOfPeriod,
+          quarterEnd: isEndOfPeriod,
           live: true,
-          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+          clock: derivedClock,
           gameSecs: gameSecs,
-          period: period.current,
+          period: period,
           thru_period: thru_period,
           poss: poss,
-          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+          pace: derivedPace,
           totals: totalsObj,
           q1: q1,
           q2: q2,
@@ -459,9 +513,9 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
     }
 
     // <-- If at End of Period, or if Game is Over --> //
-    if (period.isEndOfPeriod || gameOver()) {
+    if (isEndOfPeriod || gameOver) {
       const qTotals = await quarterUpdFn();
-      res.send(endQuarterResObj(clock, period, period.current, gameSecs, poss, totalsObj, qTotals))
+      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, qTotals))
     } else {
       // if endOfPeriod is false && game is not activated ... does it get here if game has started?
       // CONFIRM THIS WORKS IN EVENT OF OT
@@ -469,24 +523,24 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
         console.log(gid, ' has not started or has finished and gameOver fn not reached');
         res.send({
           quarterEnd: false,
-          clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+          clock: derivedClock,
           gameSecs: gameSecs,
           period: period,
           poss: poss,
-          pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+          pace: derivedPace,
           totals: totalsObj
         })
       } else {
         let prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-        if (period.current === 1) {
+        if (period === 1) {
           res.send({
             quarterEnd: false,
             live: true,
-            clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+            clock: derivedClock,
             gameSecs: gameSecs,
             period: period,
             poss: poss,
-            pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+            pace: derivedPace,
             totals: totalsObj,
             thru_period: 0
           })
@@ -495,11 +549,11 @@ router.get("/fetchBoxScore/:date/:gid/:init", async (req, res, next) => {
             res.send({
               quarterEnd: false,
               live: true,
-              clock: boxScoreHelpers.clockReturner(clock, period.current, gameSecs),
+              clock: derivedClock,
               gameSecs: gameSecs,
               period: period,
               poss: poss,
-              pace: boxScoreHelpers.calcGamePace(poss, period.current, gameSecs),
+              pace: derivedPace,
               totals: totalsObj,
               prevQuarters: prevTotalsPull[0].totals[0]
             })
@@ -559,11 +613,12 @@ router.get("/api/getNetRatings", (req, res, next) => {
 });
 
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
+  const { date } = req.params;
   const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
   const seasonYear = todayInfo.data.seasonScheduleYear;
-  const seasonName = dateFilters.fetchSeasonName(req.params.date);
-  const week = dateFilters.fetchGmWk(req.params.date, seasonYear, seasonName);
-  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, req.params.date);
+  const seasonName = dateFilters.fetchSeasonName(date);
+  const week = dateFilters.fetchGmWk(date, seasonYear, seasonName);
+  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, date);
 
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")

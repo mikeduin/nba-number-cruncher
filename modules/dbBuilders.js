@@ -8,10 +8,10 @@ const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
 
 // MUST CHANGE THIS SEASON VARIABLE AT BEGINNING OF EACH SEASON
-const season = "2021-22";
+const season = "2022-23";
 
 const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2021/league/00_full_schedule_week.json";
+  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2022/league/00_full_schedule_week.json";
 // const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
@@ -153,6 +153,8 @@ module.exports = {
       .where({ stt: "Final" })
       .limit(40);
 
+    console.log('games are ', games);
+
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
@@ -163,7 +165,8 @@ module.exports = {
       .pluck("gid")
       .whereNotNull("gweek")
       .where({ stt: "Final" })
-      .whereNull("game_stints");
+      .whereNull("game_stints")
+
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
@@ -244,9 +247,9 @@ module.exports = {
                 v: [vObj],
                 stt: game.stt,
                 // BEGIN HARD-CODED VALUES
-                season_year: 2021,
+                season_year: 2022,
                 season_name,
-                display_year: '2021-22',
+                display_year: '2022-23',
                 // END HARD-CODED VALUES
                 updated_at: new Date()
               },
@@ -296,100 +299,101 @@ module.exports = {
       });
     });
   },
-  buildPlayerDb: (db, arrayData) => {
-    // This function builds out the initial player DB and should only need to be run at the beginning of each season
-    arrayData.forEach(player => {
-      knex(db)
-        .insert(
-          {
-            player_id: player[0],
-            player_name: player[1],
-            team_id: player[2],
-            team_abbreviation: player[3],
-            age: player[4],
-            gp: player[5],
-            w: player[6],
-            l: player[7],
-            w_pct: player[8],
-            min: player[9],
-            eoff_rating: player[10],
-            off_rating: player[11],
-            sp_work_off_rating: player[12],
-            edef_rating: player[13],
-            def_rating: player[14],
-            sp_work_def_rating: player[15],
-            enet_rating: player[16],
-            net_rating: player[17],
-            sp_work_net_rating: player[18],
-            ast_pct: player[19],
-            ast_to: player[20],
-            ast_ratio: player[21],
-            oreb_pct: player[22],
-            dreb_pct: player[23],
-            reb_pct: player[24],
-            tm_tov_pct: player[25],
-            e_tov_pct: player[26],
-            efg_pct: player[27],
-            ts_pct: player[28],
-            usg_pct: player[29],
-            e_usg_pct: player[30],
-            epace: player[31],
-            pace: player[32],
-            pace_per40: player[33],
-            sp_work_pace: player[34],
-            pie: player[35],
-            poss: player[36],
-            fgm: player[37],
-            fga: player[38],
-            fgm_pg: player[39],
-            fga_pg: player[40],
-            fg_pct: player[41],
-            gp_rank: player[42],
-            w_rank: player[43],
-            l_rank: player[44],
-            w_pct_rank: player[45],
-            min_rank: player[46],
-            eoff_rating_rank: player[47],
-            off_rating_rank: player[48],
-            sp_work_off_rating_rank: player[49],
-            edef_rating_rank: player[50],
-            def_rating_rank: player[51],
-            sp_work_def_rating_rank: player[52],
-            enet_rating_rank: player[53],
-            net_rating_rank: player[54],
-            sp_work_net_rating_rank: player[55],
-            ast_pct_rank: player[56],
-            ast_to_rank: player[57],
-            ast_ratio_rank: player[58],
-            oreb_pct_rank: player[59],
-            dreb_pct_rank: player[60],
-            reb_pct_rank: player[61],
-            tov_pct_rank: player[62],
-            e_tov_pct_rank: player[63],
-            efg_pct_rank: player[64],
-            ts_pct_rank: player[65],
-            usg_pct_rank: player[66],
-            e_usg_pct_rank: player[67],
-            epace_rank: player[68],
-            pace_rank: player[69],
-            sp_work_pace_rank: player[70],
-            pie_rank: player[71],
-            fgm_rank: player[72],
-            fga_rank: player[73],
-            fgm_pg_rank: player[74],
-            fga_pg_rank: player[75],
-            fg_pct_rank: player[76],
-            cfid: player[77],
-            cfparams: player[78],
-            updated_at: new Date()
-          },
-          "*"
-        )
-        .then(entered => {
-          console.log(entered.player_name, " entered into player db");
-        });
-    });
-  },
+  // Don't think we need this -- update player data function will build this itself if players do not exist
+  // buildPlayerDb: (db, arrayData) => {
+  //   // This function builds out the initial player DB and should only need to be run at the beginning of each season
+  //   arrayData.forEach(player => {
+  //     knex(db)
+  //       .insert(
+  //         {
+  //           player_id: player[0],
+  //           player_name: player[1],
+  //           team_id: player[2],
+  //           team_abbreviation: player[3],
+  //           age: player[4],
+  //           gp: player[5],
+  //           w: player[6],
+  //           l: player[7],
+  //           w_pct: player[8],
+  //           min: player[9],
+  //           eoff_rating: player[10],
+  //           off_rating: player[11],
+  //           sp_work_off_rating: player[12],
+  //           edef_rating: player[13],
+  //           def_rating: player[14],
+  //           sp_work_def_rating: player[15],
+  //           enet_rating: player[16],
+  //           net_rating: player[17],
+  //           sp_work_net_rating: player[18],
+  //           ast_pct: player[19],
+  //           ast_to: player[20],
+  //           ast_ratio: player[21],
+  //           oreb_pct: player[22],
+  //           dreb_pct: player[23],
+  //           reb_pct: player[24],
+  //           tm_tov_pct: player[25],
+  //           e_tov_pct: player[26],
+  //           efg_pct: player[27],
+  //           ts_pct: player[28],
+  //           usg_pct: player[29],
+  //           e_usg_pct: player[30],
+  //           epace: player[31],
+  //           pace: player[32],
+  //           pace_per40: player[33],
+  //           sp_work_pace: player[34],
+  //           pie: player[35],
+  //           poss: player[36],
+  //           fgm: player[37],
+  //           fga: player[38],
+  //           fgm_pg: player[39],
+  //           fga_pg: player[40],
+  //           fg_pct: player[41],
+  //           gp_rank: player[42],
+  //           w_rank: player[43],
+  //           l_rank: player[44],
+  //           w_pct_rank: player[45],
+  //           min_rank: player[46],
+  //           eoff_rating_rank: player[47],
+  //           off_rating_rank: player[48],
+  //           sp_work_off_rating_rank: player[49],
+  //           edef_rating_rank: player[50],
+  //           def_rating_rank: player[51],
+  //           sp_work_def_rating_rank: player[52],
+  //           enet_rating_rank: player[53],
+  //           net_rating_rank: player[54],
+  //           sp_work_net_rating_rank: player[55],
+  //           ast_pct_rank: player[56],
+  //           ast_to_rank: player[57],
+  //           ast_ratio_rank: player[58],
+  //           oreb_pct_rank: player[59],
+  //           dreb_pct_rank: player[60],
+  //           reb_pct_rank: player[61],
+  //           tov_pct_rank: player[62],
+  //           e_tov_pct_rank: player[63],
+  //           efg_pct_rank: player[64],
+  //           ts_pct_rank: player[65],
+  //           usg_pct_rank: player[66],
+  //           e_usg_pct_rank: player[67],
+  //           epace_rank: player[68],
+  //           pace_rank: player[69],
+  //           sp_work_pace_rank: player[70],
+  //           pie_rank: player[71],
+  //           fgm_rank: player[72],
+  //           fga_rank: player[73],
+  //           fgm_pg_rank: player[74],
+  //           fga_pg_rank: player[75],
+  //           fg_pct_rank: player[76],
+  //           cfid: player[77],
+  //           cfparams: player[78],
+  //           updated_at: new Date()
+  //         },
+  //         "*"
+  //       )
+  //       .then(entered => {
+  //         console.log(entered.player_name, " entered into player db");
+  //       });
+  //   });
+  // },
   updatePlayerDb: (db, arrayData) => {
     arrayData.forEach(player => {
       knex(db)

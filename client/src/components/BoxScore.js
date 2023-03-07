@@ -36,31 +36,36 @@ class BoxScore extends React.Component {
   }
 
   componentDidMount () {
-    const game = this.props.game;
+    console.log('this.props', this.props)
+    const { game, teamStats, fetchBoxScore, activeGames, gambleCast } = this.props;
+    const { hNormal, final, gameSpread } = this.state;
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
+    const hTeamAbb = game.h[0].ta;
+    const vTeamAbb = game.v[0].ta;
+
     // let init = true;
-    this.props.fetchBoxScore(this.props.game.gid, 'true');
+    fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
     setInterval(() => {
-      if (this.props.teamStats && this.state.hNormal == null) {
-        const hNormal = this.props.teamStats.filter(team => team.team_id === game.h[0].tid)[0];
-        const vNormal = this.props.teamStats.filter(team => team.team_id === game.v[0].tid)[0];
+      if (teamStats && hNormal == null) {
+        const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
+        const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
 
         this.setState({ hNormal, vNormal });
       }
 
-      if (this.props.activeGames.indexOf(this.props.game.gid) !== -1 && !this.state.final) {
-        this.props.fetchBoxScore(this.props.game.gid, 'false');
+      if (activeGames.indexOf(game.gid) !== -1 && !final) {
+        fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
 
-        if (!this.state.gameSpread) {
+        if (!gameSpread) {
           this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
           this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q);
         };
 
-        if (this.props.gambleCast[`live_${game.gid}`]) {
-          if (this.props.gambleCast[`live_${game.gid}`].final == true) {
+        if (gambleCast[`live_${game.gid}`]) {
+          if (gambleCast[`live_${game.gid}`].final == true) {
             this.setState({final: true})
           }
         }

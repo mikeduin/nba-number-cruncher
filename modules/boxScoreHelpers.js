@@ -32,18 +32,18 @@ module.exports = {
     };
   },
   calcGamePoss: (hTotals, vTotals) => {
-    const fga = parseInt(hTotals.fga) + parseInt(vTotals.fga);
+    const fga = parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted);
     const to = parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers);
-    const fta = parseInt(hTotals.fta) + parseInt(vTotals.fta);
-    const offReb = parseInt(hTotals.offReb) + parseInt(vTotals.offReb);
+    const fta = parseInt(hTotals.freeThrowsAttempted) + parseInt(vTotals.freeThrowsAttempted);
+    const offReb = parseInt(hTotals.reboundsOffensive) + parseInt(vTotals.reboundsOffensive);
 
     return ((fga+to+(0.44*fta)-offReb));
   },
   calcQuarterPoss: (hTotals, vTotals, prevTotals) => {
-    const fga = ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - prevTotals.t.fga);
+    const fga = ((parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted)) - prevTotals.t.fga);
     const to = ((parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - prevTotals.t.to);
-    const fta = ((parseInt(hTotals.fta) + parseInt(vTotals.fta)) - prevTotals.t.fta);
-    const offReb = ((parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - prevTotals.t.offReb);
+    const fta = ((parseInt(hTotals.freeThrowsAttempted) + parseInt(vTotals.freeThrowsAttempted)) - prevTotals.t.fta);
+    const offReb = ((parseInt(hTotals.reboundsOffensive) + parseInt(vTotals.reboundsOffensive)) - prevTotals.t.offReb);
 
     return ((fga+to+(0.44*fta)-offReb));
   },
@@ -62,33 +62,33 @@ module.exports = {
     return {
       h: {
         pts: parseInt(hTotals.points),
-        fgm: parseInt(hTotals.fgm),
-        fga: parseInt(hTotals.fga),
-        fgPct: module.exports.calcFgPct(hTotals.fgm, hTotals.fga),
-        fta: parseInt(hTotals.fta),
+        fgm: parseInt(hTotals.fieldGoalsMade),
+        fga: parseInt(hTotals.fieldGoalsAttempted),
+        fgPct: module.exports.calcFgPct(hTotals.fieldGoalsMade, hTotals.fieldGoalsAttempted),
+        fta: parseInt(hTotals.freeThrowsAttempted),
         to: parseInt(hTotals.turnovers),
-        offReb: parseInt(hTotals.offReb),
-        fouls: parseInt(hTotals.team_fouls)
+        offReb: parseInt(hTotals.reboundsOffensive),
+        fouls: parseInt(hTotals.foulsPersonal)
       },
       v: {
         pts: parseInt(vTotals.points),
-        fgm: parseInt(vTotals.fgm),
-        fga: parseInt(vTotals.fga),
-        fgPct: module.exports.calcFgPct(vTotals.fgm, vTotals.fga),
-        fta: parseInt(vTotals.fta),
+        fgm: parseInt(vTotals.fieldGoalsMade),
+        fga: parseInt(vTotals.fieldGoalsAttempted),
+        fgPct: module.exports.calcFgPct(vTotals.fieldGoalsMade, vTotals.fieldGoalsAttempted),
+        fta: parseInt(vTotals.freeThrowsAttempted),
         to: parseInt(vTotals.turnovers),
-        offReb: parseInt(vTotals.offReb),
-        fouls: parseInt(vTotals.team_fouls)
+        offReb: parseInt(vTotals.reboundsOffensive),
+        fouls: parseInt(vTotals.foulsPersonal)
       },
       t: {
         pts: parseInt(hTotals.points) + parseInt(vTotals.points),
-        fgm: parseInt(hTotals.fgm) + parseInt(vTotals.fgm),
-        fga: parseInt(hTotals.fga) + parseInt(vTotals.fga),
-        fgPct: module.exports.calcFgPct((parseInt(hTotals.fgm) + parseInt(vTotals.fgm)), (parseInt(hTotals.fga) + parseInt(vTotals.fga))),
-        fta: parseInt(hTotals.fta) + parseInt(vTotals.fta),
+        fgm: parseInt(hTotals.fieldGoalsMade) + parseInt(vTotals.fieldGoalsMade),
+        fga: parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted),
+        fgPct: module.exports.calcFgPct((parseInt(hTotals.fieldGoalsMade) + parseInt(vTotals.fieldGoalsMade)), (parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted))),
+        fta: parseInt(hTotals.freeThrowsAttempted) + parseInt(vTotals.freeThrowsAttempted),
         to: parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers),
-        offReb: parseInt(hTotals.offReb) + parseInt(vTotals.offReb),
-        fouls: parseInt(hTotals.team_fouls) + parseInt(vTotals.team_fouls),
+        offReb: parseInt(hTotals.reboundsOffensive) + parseInt(vTotals.reboundsOffensive),
+        fouls: parseInt(hTotals.foulsPersonal) + parseInt(vTotals.foulsPersonal),
         poss: poss,
         pace: module.exports.calcGamePace(poss, parseInt(period), gameSecs)
       }
@@ -101,36 +101,36 @@ module.exports = {
     return {
       h: {
         pts: parseInt(hTotals.points) - parseInt(prevTotals.h.pts),
-        fgm: parseInt(hTotals.fgm) - parseInt(prevTotals.h.fgm),
-        fga: parseInt(hTotals.fga) - parseInt(prevTotals.h.fga),
-        fgPct: module.exports.calcFgPct((parseInt(hTotals.fgm)-prevTotals.h.fgm), (parseInt(hTotals.fga) - prevTotals.h.fga)),
-        fta: parseInt(hTotals.fta) - parseInt(prevTotals.h.fta),
+        fgm: parseInt(hTotals.fieldGoalsMade) - parseInt(prevTotals.h.fgm),
+        fga: parseInt(hTotals.fieldGoalsAttempted) - parseInt(prevTotals.h.fga),
+        fgPct: module.exports.calcFgPct((parseInt(hTotals.fieldGoalsMade)-prevTotals.h.fgm), (parseInt(hTotals.fieldGoalsAttempted) - prevTotals.h.fga)),
+        fta: parseInt(hTotals.freeThrowsAttempted) - parseInt(prevTotals.h.fta),
         to: parseInt(hTotals.turnovers) - parseInt(prevTotals.h.to),
-        offReb: parseInt(hTotals.offReb) - parseInt(prevTotals.h.offReb),
-        fouls: parseInt(hTotals.team_fouls) - parseInt(prevTotals.h.fouls)
+        offReb: parseInt(hTotals.reboundsOffensive) - parseInt(prevTotals.h.offReb),
+        fouls: parseInt(hTotals.foulsPersonal) - parseInt(prevTotals.h.fouls)
       },
       v: {
         pts: parseInt(vTotals.points) - parseInt(prevTotals.v.pts),
-        fgm: parseInt(vTotals.fgm) - parseInt(prevTotals.v.fgm),
-        fga: parseInt(vTotals.fga) - parseInt(prevTotals.v.fga),
-        fgPct: module.exports.calcFgPct((parseInt(vTotals.fgm)-prevTotals.v.fgm), (parseInt(vTotals.fga) - prevTotals.v.fga)),
-        fta: parseInt(vTotals.fta) - parseInt(prevTotals.v.fta),
+        fgm: parseInt(vTotals.fieldGoalsMade) - parseInt(prevTotals.v.fieldGoalsMade),
+        fga: parseInt(vTotals.fieldGoalsAttempted) - parseInt(prevTotals.v.fga),
+        fgPct: module.exports.calcFgPct((parseInt(vTotals.fieldGoalsMade)-prevTotals.v.fgm), (parseInt(vTotals.fieldGoalsAttempted) - prevTotals.v.fga)),
+        fta: parseInt(vTotals.freeThrowsAttempted) - parseInt(prevTotals.v.fta),
         to: parseInt(vTotals.turnovers) - parseInt(prevTotals.v.to),
-        offReb: parseInt(vTotals.offReb) - parseInt(prevTotals.v.offReb),
-        fouls: parseInt(vTotals.team_fouls) - parseInt(prevTotals.v.fouls)
+        offReb: parseInt(vTotals.reboundsOffensive) - parseInt(prevTotals.v.offReb),
+        fouls: parseInt(vTotals.foulsPersonal) - parseInt(prevTotals.v.fouls)
       },
       t: {
         pts: (parseInt(hTotals.points) + parseInt(vTotals.points)) - parseInt(prevTotals.t.pts),
-        fgm: (parseInt(hTotals.fgm) + parseInt(vTotals.fgm)) - parseInt(prevTotals.t.fgm),
-        fga: (parseInt(hTotals.fga) + parseInt(vTotals.fga)) - parseInt(prevTotals.t.fga),
+        fgm: (parseInt(hTotals.fieldGoalsMade) + parseInt(vTotals.fieldGoalsMade)) - parseInt(prevTotals.t.fgm),
+        fga: (parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted)) - parseInt(prevTotals.t.fga),
         fgPct: module.exports.calcFgPct(
-          ((parseInt(hTotals.fgm) + parseInt(vTotals.fgm)) - parseInt(prevTotals.t.fgm)),
-          ((parseInt(hTotals.fga) + parseInt(vTotals.fga)) - parseInt(prevTotals.t.fga))
+          ((parseInt(hTotals.fieldGoalsMade) + parseInt(vTotals.fieldGoalsMade)) - parseInt(prevTotals.t.fgm)),
+          ((parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted)) - parseInt(prevTotals.t.fga))
         ),
-        fta: (parseInt(hTotals.fta) + parseInt(vTotals.fta)) - parseInt(prevTotals.t.fta),
+        fta: (parseInt(hTotals.freeThrowsAttempted) + parseInt(vTotals.freeThrowsAttempted)) - parseInt(prevTotals.t.fta),
         to: (parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers)) - parseInt(prevTotals.t.to),
-        offReb: (parseInt(hTotals.offReb) + parseInt(vTotals.offReb)) - parseInt(prevTotals.t.offReb),
-        fouls: (parseInt(hTotals.team_fouls) + parseInt(vTotals.team_fouls)) - parseInt(prevTotals.t.fouls),
+        offReb: (parseInt(hTotals.reboundsOffensive) + parseInt(vTotals.reboundsOffensive)) - parseInt(prevTotals.t.offReb),
+        fouls: (parseInt(hTotals.foulsPersonal) + parseInt(vTotals.foulsPersonal)) - parseInt(prevTotals.t.fouls),
         poss: quarterPoss,
         pace: module.exports.calcEndOfQuarterPace(quarterPoss, period, gameSecs)
       }

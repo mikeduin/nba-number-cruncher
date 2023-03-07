@@ -4,20 +4,28 @@ const _ = require('lodash');
 const startPeriodSec = require('./startPeriodSec');
 const checkPeriodStart = require('./checkPeriodStart');
 const getGameSecs = require('./getGameSecs');
+const teamLookup = require('./teamLookup');
+
+function Schedule() {return knex('schedule')}
 
 module.exports = {
   buildSubData: async (gid) => {
-    const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2021/scores/pbp/00${gid}_full_pbp.json`;
-    const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2021/scores/gamedetail/00${gid}_gamedetail.json`;
+    const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2022/scores/pbp/00${gid}_full_pbp.json`;
+    const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2022/scores/gamedetail/00${gid}_gamedetail.json`;
 
     const gDetail = await axios.get(gameDetailUrl);
     const gcode = gDetail.data.g.gcode;
     const gdte = gDetail.data.g.gdte;
     const date = gcode.slice(0, 8);
 
-    const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`);
-    const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
-    const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
+    const gameInDb = await Schedule().where({gid});
+
+    // const mini = await axios.get(`https://data.nba.net/prod/v1/${date}/00${gid}_mini_boxscore.json`); // BROKEN
+    // const hTid = parseInt(mini.data.basicGameData.hTeam.teamId);
+    // const vTid = parseInt(mini.data.basicGameData.vTeam.teamId);
+
+    const hTid = gameInDb[0].h_tid;
+    const vTid = gameInDb[0].a_tid;
 
     const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
     const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
