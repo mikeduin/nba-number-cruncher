@@ -136,8 +136,9 @@ setInterval(async () => {
 // }, 60000);
 
 router.get("/todayGameStatus", (req, res, next) => {
+  console.log('in todayGameStatus active Games are ', activeGames)
   res.send({
-    activeGames: activeGames,
+    activeGames: activeGames.map(g => g.gid),
     completedGames: completedGames
   })
 })
@@ -209,7 +210,9 @@ setInterval(() => {
     const gameOver = gameStatusText === 'Final';
     const isEndOfPeriod = fullClock === '00:00:00';
 
-    if (isEndOfPeriod || gameOver) {
+    console.log('for gid ', game.gid, 'period is ', period, ' clock is ', clock, ' fullClock is ', fullClock, ' isEndOfPeriod is ', isEndOfPeriod, ' isGameActivated is ', isGameActivated, ' gameStatus is ', gameStatus);
+
+    if ((isEndOfPeriod && isGameActivated) || gameOver) {
       // console.log('period is end of period, period is ', period.current);
       // let { hTeam, vTeam } = boxScore.data.stats;
       const hTeam = homeTeam.statistics;
@@ -229,16 +232,18 @@ setInterval(() => {
         try {
           let prevTotalsPull = await knex("box_scores_v2").where({gid: game.gid}).select('totals');
           let quarterTotals = quarterObj(prevTotalsPull[0].totals);
-          // console.log('prevTotalsPull in quarterUpdFn is ', prevTotalsPull);
-          // console.log('quarterTotals in quarterUpdFn is ', quarterTotals);
+          console.log('prevTotalsPull in quarterUpdFn for gid ', game.gid, ' is ', prevTotalsPull);
+          console.log('quarterTotals in quarterUpdFn for gid ', game.gid, ' is ', quarterTotals);
           return {
             currentQuarter: quarterTotals,
             prevQuarters: prevTotalsPull[0].totals[0]
           }
         } catch (e) {
-          console.log('error in quarterUpdFn is ', e)
+          console.log('error in quarterUpdFn is ', e, ' for gid ', game.gid)
         }
       }
+
+      console.log('period for gid ', game.gid, ' is ', period);
 
       if (period === 1) {
         try {
@@ -268,17 +273,25 @@ setInterval(() => {
         try {
           knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(async qTest => {
             if (qTest[0] == null) {
-              let qTotals = await quarterUpdFn();
+              try {
+                let qTotals = await quarterUpdFn();
                 console.log('qTotals returned from quarterUpdFn are ', qTotals);
-                knex("box_scores_v2").where({gid: gid}).update({
-                  period_updated: period,
-                  clock_last_updated: gameSecs,
-                  totals: [totalsObj],
-                  q2: [qTotals.currentQuarter],
-                  updated_at: new Date()
-                }).then(() => {
-                  console.log(`${qVariable} stats inserted for ${gid}`);
-                })
+                try {
+                  knex("box_scores_v2").where({gid: gid}).update({
+                    period_updated: period,
+                    clock_last_updated: gameSecs,
+                    totals: [totalsObj],
+                    q2: [qTotals.currentQuarter],
+                    updated_at: new Date()
+                  }).then(() => {
+                    console.log(`${qVariable} stats inserted for ${gid}`);
+                  })
+                } catch (e) {
+                  console.log('ERROR updating q2 quarter totals is ', e);
+                }
+              } catch (e) {
+                console.log('outer error for updating q2Totals is ', e);
+              }
             } else {
               console.log('qTest for Q2 does not equal null, and/or second period already entered in gid ', gid);
             }
@@ -289,17 +302,21 @@ setInterval(() => {
       } else if (period === 3) {
         knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => {
           if (qTest[0] == null) {
-            quarterUpdFn().then(qTotals => {
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                q3: [qTotals.currentQuarter],
-                updated_at: new Date()
-              }).then(() => {
-                console.log(`${qVariable} stats inserted for ${gid}`);
+            try {
+              quarterUpdFn().then(qTotals => {
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: period,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  q3: [qTotals.currentQuarter],
+                  updated_at: new Date()
+                }).then(() => {
+                  console.log(`${qVariable} stats inserted for ${gid}`);
+                })
               })
-            })
+            } catch (e) {
+              console.log('outer error updating Q3 totals is ', e);
+            }
           } else {
             console.log('third period already entered in gid ', gid);
           }
@@ -307,6 +324,7 @@ setInterval(() => {
       } else if (period === 4 ) {
         knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`).then(qTest => { // undefined here
           if (qTest[0] == null) {
+            try {
               quarterUpdFn().then(qTotals => {
                 try {
                   knex("box_scores_v2").where({gid: gid}).update({
@@ -322,6 +340,9 @@ setInterval(() => {
                   console.log('error updating period 4 stats for ', gid, ' is ', e);
                 }
               })
+            } catch (e) {
+              console.log('outer error updating q4 totals is ', e);
+            }
           } else {
             if (!isGameActivated) {
               console.log('4Q data already entered, and game is over');
@@ -339,18 +360,23 @@ setInterval(() => {
         knex("box_scores_v2").where({gid: gid}).pluck('ot').then(qTest => {
           // <-- If No OT in DB and Game is Over --> //
           if (qTest[0] == null && !isGameActivated) {
-            quarterUpdFn().then(qTotals => {
-              knex("box_scores_v2").where({gid: gid}).update({
-                period_updated: period,
-                clock_last_updated: gameSecs,
-                totals: [totalsObj],
-                ot: [qTotals.currentQuarter],
-                final: true,
-                updated_at: new Date()
-              }).then(() => {
-                console.log('OT stats inserted for ', gid);
+            try {
+              quarterUpdFn().then(qTotals => {
+                knex("box_scores_v2").where({gid: gid}).update({
+                  period_updated: period,
+                  clock_last_updated: gameSecs,
+                  totals: [totalsObj],
+                  ot: [qTotals.currentQuarter],
+                  final: true,
+                  updated_at: new Date()
+                }).then(() => {
+                  console.log('OT stats inserted for ', gid);
+                })
               })
-            })
+            } catch (e) {
+              console.log('error updating ot totals is ', e);
+            }
+
           } else {
             // <-- If OT but Not Over, Keep Rolling Stats Over (OT stats not differentiated in DB) --> //
             console.log('Game still activated or ongoing!')

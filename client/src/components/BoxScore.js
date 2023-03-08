@@ -36,7 +36,6 @@ class BoxScore extends React.Component {
   }
 
   componentDidMount () {
-    console.log('this.props', this.props)
     const { game, teamStats, fetchBoxScore, activeGames, gambleCast } = this.props;
     const { hNormal, final, gameSpread } = this.state;
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
@@ -49,6 +48,7 @@ class BoxScore extends React.Component {
     fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
     setInterval(() => {
+      console.log('activeGames are ', activeGames, ' and final for game.gid is ', final);
       if (teamStats && hNormal == null) {
         const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
         const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
@@ -76,8 +76,6 @@ class BoxScore extends React.Component {
   render () {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
-
-    console.log('game is ', game);
 
     if (!boxScore || !boxScore.totals ) {
       if (!game) {

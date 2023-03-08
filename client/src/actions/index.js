@@ -30,17 +30,20 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
 
 export const checkActiveGames = () => async (dispatch, getState) => {
   const response = await axios.get('/todayGameStatus');
+  console.log('checkActiveGames response is ', response)
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
   const clientActive = getState().activeGames;
   const clientCompleted = getState().completedGames;
 
-  if (_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive)) == false) {
+  console.log('clientActive are ', clientActive);
+
+  if (_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive)) === false) {
     console.log('modifying active games');
     dispatch({ type: 'SET_ACTIVE_GAMES', payload: serverActive });
   }
 
-  if (_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted)) == false) {
+  if (_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted)) === false) {
     console.log('modifying completed games');
     dispatch({ type: 'SET_COMPLETED_GAMES', payload: serverCompleted });
   }
