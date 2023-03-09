@@ -499,45 +499,49 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
 
     // <-- If Initial Box Score Load --> //
     if (init == 'true' && period !== 1) {
-      let inDb = await knex("box_scores_v2").where({gid: gid});
+      try {
+        let inDb = await knex("box_scores_v2").where({gid: gid});
 
-      // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
-      q1 = inDb[0].q1[0];
-      thru_period = inDb[0].period_updated;
-      if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
-      if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
-      if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
-      if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
-
-      quarterUpdFn().then(qTotals => {
-        if (period == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
-        if (period == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
-        if (period == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
-        if (period > 4) ot = qTotals.currentQuarter;
-
-        res.send({
-          gid: gid,
-          init: true,
-          quarterEnd: isEndOfPeriod,
-          live: true,
-          clock: derivedClock,
-          gameSecs: gameSecs,
-          period: period,
-          thru_period: thru_period,
-          poss: poss,
-          pace: derivedPace,
-          totals: totalsObj,
-          q1: q1,
-          q2: q2,
-          q3: q3,
-          q4: q4,
-          ot: ot,
-          prevQuarters: qTotals.prevQuarters
+        // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
+        q1 = inDb[0].q1[0];
+        thru_period = inDb[0].period_updated;
+        if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
+        if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
+        if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
+        if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
+  
+        quarterUpdFn().then(qTotals => {
+          if (period == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
+          if (period == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
+          if (period == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
+          if (period > 4) ot = qTotals.currentQuarter;
+  
+          res.send({
+            gid: gid,
+            init: true,
+            quarterEnd: isEndOfPeriod,
+            live: true,
+            clock: derivedClock,
+            gameSecs: gameSecs,
+            period: period,
+            thru_period: thru_period,
+            poss: poss,
+            pace: derivedPace,
+            totals: totalsObj,
+            q1: q1,
+            q2: q2,
+            q3: q3,
+            q4: q4,
+            ot: ot,
+            prevQuarters: qTotals.prevQuarters
+          })
         })
-      })
-      return;
-    }
+        return;
+      } catch (e) {
+        console.log('error send box score response is ', e);
+      }
 
+    }
     // <-- If at End of Period, or if Game is Over --> //
     if (isEndOfPeriod || gameOver) {
       const qTotals = await quarterUpdFn();
