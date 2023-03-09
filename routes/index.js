@@ -136,7 +136,7 @@ setInterval(async () => {
 // }, 60000);
 
 router.get("/todayGameStatus", (req, res, next) => {
-  console.log('in todayGameStatus active Games are ', activeGames)
+  // console.log('in todayGameStatus active Games are ', activeGames)
   res.send({
     activeGames: activeGames.map(g => g.gid),
     completedGames: completedGames

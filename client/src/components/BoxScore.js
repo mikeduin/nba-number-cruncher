@@ -18,7 +18,7 @@ class BoxScore extends React.Component {
 
   checkSpread = (period, home, away, total) => {
     let game = this.props.game;
-    console.log('game is ', game);
+    // console.log('game is ', game);
 
     if (home < away) {
         this.setState({
@@ -36,7 +36,8 @@ class BoxScore extends React.Component {
   }
 
   componentDidMount () {
-    const { game, teamStats, fetchBoxScore, activeGames, gambleCast } = this.props;
+    // console.log('this.props in BoxScore are ', this.props);
+    const { game, teamStats, fetchBoxScore, gambleCast } = this.props;
     const { hNormal, final, gameSpread } = this.state;
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
@@ -48,7 +49,7 @@ class BoxScore extends React.Component {
     fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
     setInterval(() => {
-      console.log('activeGames are ', activeGames, ' and final for game.gid is ', final);
+      // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
       if (teamStats && hNormal == null) {
         const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
         const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
@@ -56,7 +57,7 @@ class BoxScore extends React.Component {
         this.setState({ hNormal, vNormal });
       }
 
-      if (activeGames.indexOf(game.gid) !== -1 && !final) {
+      if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
         fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
 
         if (!gameSpread) {
@@ -176,6 +177,8 @@ class BoxScore extends React.Component {
 }
 
 const mapStateToProps = state => {
+  // console.log('state in mapStateToProps is ', state);
+
   return {
     gambleCast: state.gambleCast,
     activeGames: state.activeGames,
