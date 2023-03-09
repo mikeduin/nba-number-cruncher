@@ -544,8 +544,13 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
     }
     // <-- If at End of Period, or if Game is Over --> //
     if (isEndOfPeriod || gameOver) {
-      const qTotals = await quarterUpdFn();
+      try {
+        const qTotals = await quarterUpdFn();
       res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, qTotals))
+      } catch (e) {
+        console.log('error setting end of game q totals is ', e);
+      } 
+      
     } else {
       // if endOfPeriod is false && game is not activated ... does it get here if game has started?
       // CONFIRM THIS WORKS IN EVENT OF OT
