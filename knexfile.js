@@ -40,8 +40,8 @@ pg.defaults.ssl = {
 module.exports = {
   development: {
     client: 'pg',
-    // connection: process.env.DATABASE_URL,
-    connection: process.env.DATABASE_URL_TEST_NEW,
+    connection: process.env.DATABASE_URL,
+    // connection: process.env.DATABASE_URL_TEST_NEW,
     // connection: pgconfig,
     ssl: {
       rejectUnauthorized: false,  

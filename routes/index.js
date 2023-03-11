@@ -114,7 +114,10 @@ setInterval(async () => {
       // and game has not been completed
       // push to activeGames
       console.log('pushing ', game.gid, ' to activeGames');
-      activeGames.push(game);
+      if (game.gid !== 22200998 && game.gid !== 22200999) {
+        activeGames.push(game);
+      }
+      
     };
   })
 }, 10000)
