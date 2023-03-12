@@ -117,8 +117,13 @@ setInterval(async () => {
       if (game.gid !== 22200998 && game.gid !== 22200999) {
         activeGames.push(game);
       }
-      
     };
+
+    if (completedGames.indexOf(game.gid) !== -1 && activeGames.indexOf(game.gid) !== -1) {
+      const index = completeGames.indexOf(completedGames.indexOf(game.gid));
+      completeGames.splice(index, 1);
+      console.log(game.gid, ' removed from active games');
+    }
   })
 }, 10000)
 
@@ -210,7 +215,7 @@ setInterval(() => {
     //   return (period.current >= 4 && !isGameActivated)
     // };
 
-    const gameOver = gameStatusText === 'Final';
+    const gameOver = gameStatusText === 'Final' || gameStatus === 3;
     const isEndOfPeriod = fullClock === '00:00:00';
 
     console.log('for gid ', game.gid, 'period is ', period, ' clock is ', clock, ' fullClock is ', fullClock, ' isEndOfPeriod is ', isEndOfPeriod, ' isGameActivated is ', isGameActivated, ' gameStatus is ', gameStatus);
@@ -347,7 +352,7 @@ setInterval(() => {
               console.log('outer error updating q4 totals is ', e);
             }
           } else {
-            if (!isGameActivated) {
+            if (gameOver) { // this is prob not working properly
               console.log('4Q data already entered, and game is over');
               knex("box_scores_v2").where({gid: gid}).update({
                 final: true
