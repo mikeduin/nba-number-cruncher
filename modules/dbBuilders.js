@@ -8,10 +8,10 @@ const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
 
 // MUST CHANGE THIS SEASON VARIABLE AT BEGINNING OF EACH SEASON
-const season = "2022-23";
+const season = "2023-24";
 
 const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2022/league/00_full_schedule_week.json";
+  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/league/00_full_schedule_week.json";
 // const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 let now = new Date();
@@ -247,9 +247,9 @@ module.exports = {
                 v: [vObj],
                 stt: game.stt,
                 // BEGIN HARD-CODED VALUES
-                season_year: 2022,
+                season_year: 2023,
                 season_name,
-                display_year: '2022-23',
+                display_year: '2023-24',
                 // END HARD-CODED VALUES
                 updated_at: new Date()
               },
