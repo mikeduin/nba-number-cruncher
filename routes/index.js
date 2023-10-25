@@ -26,7 +26,7 @@ const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
 // STEP 1: BUILD NBA SCHEDULE
-dbBuilders.buildSchedule();
+// dbBuilders.buildSchedule();
 
 // TEAM DB: I think I can just wipe out all in-season data and it will rebuild it all. leave the basic team details in place
 // PLAYER DB: should be built by default in timed process (adds new players)
