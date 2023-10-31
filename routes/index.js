@@ -657,8 +657,9 @@ router.get("/api/getNetRatings", (req, res, next) => {
 
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const { date } = req.params;
-  const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
-  const seasonYear = todayInfo.data.seasonScheduleYear;
+  // const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
+  // const seasonYear = todayInfo.data.seasonScheduleYear;
+  const seasonYear = dateFilters.fetchCurrentSeason();
   const seasonName = dateFilters.fetchSeasonName(date);
   const week = dateFilters.fetchGmWk(date, seasonYear, seasonName);
   const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, date);
