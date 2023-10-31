@@ -23,6 +23,11 @@ let now = new Date();
 // NOTE: For future season builds, will have to change hard-coded season values in params below
 
 module.exports = {
+  // clearAllDatabases: () => {
+  //   // clears all player and DBs for new season
+
+
+  // }, 
   fetchAdvancedPlayerParams: games => {
     return {
       College: "",
