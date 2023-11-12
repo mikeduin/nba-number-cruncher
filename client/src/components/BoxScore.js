@@ -42,6 +42,8 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
+    console.log('game in box score is ', game);
+
     const hTeamAbb = game.h[0].ta;
     const vTeamAbb = game.v[0].ta;
 

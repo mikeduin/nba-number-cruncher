@@ -1,0 +1,66 @@
+exports.up = function(knex, Promise) {
+    return knex.schema.alterTable('player_data', (t) => {
+      t.float('ppg_3q_full'),
+      t.float('ppg_3q_l5'),
+      t.float('rpg_3q_full'),
+      t.float('rpg_3q_l5'),
+      t.float('apg_3q_full'),
+      t.float('apg_3q_l5'),
+      t.float('spg_3q_full'),
+      t.float('spg_3q_l5'),
+      t.float('bpg_3q_full'),
+      t.float('bpg_3q_l5'),
+      t.float('3pg_3q_full'),
+      t.float('3pg_3q_l5'),
+      t.float('topg_3q_full'),
+      t.float('topg_3q_l5'),
+      t.float('ppg_4q_full'),
+      t.float('ppg_4q_l5'),
+      t.float('rpg_4q_full'),
+      t.float('rpg_4q_l5'),
+      t.float('apg_4q_full'),
+      t.float('apg_4q_l5'),
+      t.float('spg_4q_full'),
+      t.float('spg_4q_l5'),
+      t.float('bpg_4q_full'),
+      t.float('bpg_4q_l5'),
+      t.float('3pg_4q_full'),
+      t.float('3pg_4q_l5'),
+      t.float('topg_4q_full'),
+      t.float('topg_4q_l5')
+    })
+  };
+  
+  exports.down = function(knex, Promise) {
+    return knex.schema.alterTable('player_data', (t) => {
+      t.dropColumn('ppg_3q_full'),
+      t.dropColumn('ppg_3q_l5'),
+      t.dropColumn('rpg_3q_full'),
+      t.dropColumn('rpg_3q_l5'),
+      t.dropColumn('apg_3q_full'),
+      t.dropColumn('apg_3q_l5'),
+      t.dropColumn('spg_3q_full'),
+      t.dropColumn('spg_3q_l5'),
+      t.dropColumn('bpg_3q_full'),
+      t.dropColumn('bpg_3q_l5'),
+      t.dropColumn('3pg_3q_full'),
+      t.dropColumn('3pg_3q_l5'),
+      t.dropColumn('topg_3q_full'),
+      t.dropColumn('topg_3q_l5'),
+      t.dropColumn('ppg_4q_full'),
+      t.dropColumn('ppg_4q_l5'),
+      t.dropColumn('rpg_4q_full'),
+      t.dropColumn('rpg_4q_l5'),
+      t.dropColumn('apg_4q_full'),
+      t.dropColumn('apg_4q_l5'),
+      t.dropColumn('spg_4q_full'),
+      t.dropColumn('spg_4q_l5'),
+      t.dropColumn('bpg_4q_full'),
+      t.dropColumn('bpg_4q_l5'),
+      t.dropColumn('3pg_4q_full'),
+      t.dropColumn('3pg_4q_l5'),
+      t.dropColumn('topg_4q_full'),
+      t.dropColumn('topg_4q_l5')
+    })
+  };
+  

@@ -1,0 +1,852 @@
+[
+    {
+        "id": 940126497,
+        "uuid": "af88919d-0ff5-4489-9499-07c29843ff04",
+        "type": "incident",
+        "ut": 1698974772,
+        "data": {
+            "incident": {
+                "id": "1-30624792",
+                "action": "update",
+                "incident_id": 2716,
+                "incident_name": "Free throws awarded",
+                "attribute_ids": [
+                    503
+                ],
+                "properties": [],
+                "additional_info": [],
+                "confirmation": null,
+                "participant_id": 1541,
+                "participant_name": "Detroit Pistons",
+                "subparticipant_id": 1224291,
+                "subparticipant_name": "Ausar Thompson",
+                "info": null,
+                "important": "no",
+                "important_for_trader": "yes",
+                "add_data": null,
+                "show_popup": "yes",
+                "show_scores": "no",
+                "show_action": "yes",
+                "show_time": "yes",
+                "show_on_timeline": "no",
+                "event_time": "25:12",
+                "event_status_id": 19,
+                "event_status_name": "3rd quarter",
+                "game_break": "no",
+                "x_pos": null,
+                "y_pos": null,
+                "ct": 1698974766,
+                "ut": 1698974772
+            },
+            "event": {
+                "id": 5149376,
+                "action": "update",
+                "start_date": "2023-11-03 00:00",
+                "ft_only": "no",
+                "coverage_type": "from_tv",
+                "status_id": 19,
+                "status_name": "3rd quarter",
+                "sport_id": 1,
+                "sport_name": "Basketball",
+                "day": null,
+                "neutral_venue": "no",
+                "item_status": "active",
+                "clock_time": 72,
+                "clock_status": "stopped",
+                "area_id": 191,
+                "area_name": "USA",
+                "competition_id": 101,
+                "competition_name": "NBA",
+                "season_id": 59385,
+                "stage_id": 129791,
+                "group_id": null,
+                "tour_id": null,
+                "gender": "male",
+                "bet_status": "active",
+                "bet_cards": "active",
+                "bet_corners": "active",
+                "relation_status": "in_progress",
+                "status_type": "live",
+                "name": "New Orleans Pelicans - Detroit Pistons",
+                "round_id": null,
+                "round_name": null,
+                "scoutsfeed": "yes",
+                "latency": "7-15s",
+                "event_stats_lvl": "vip",
+                "event_stats_lvl_live": "vip",
+                "event_stats_lvl_after": "vip",
+                "verified_result": "no",
+                "details": [
+                    {
+                        "id": 11,
+                        "value": "2023-11-03 00:10:50"
+                    },
+                    {
+                        "id": 12,
+                        "value": "2023-11-03 00:38:50"
+                    },
+                    {
+                        "id": 13,
+                        "value": "2023-11-03 01:23:25"
+                    },
+                    {
+                        "id": 14,
+                        "value": null
+                    },
+                    {
+                        "id": 15,
+                        "value": null
+                    },
+                    {
+                        "id": 16,
+                        "value": 12
+                    },
+                    {
+                        "id": 17,
+                        "value": 4
+                    },
+                    {
+                        "id": 18,
+                        "value": null
+                    },
+                    {
+                        "id": 19,
+                        "value": null
+                    },
+                    {
+                        "id": 20,
+                        "value": null
+                    },
+                    {
+                        "id": 50,
+                        "value": 5
+                    },
+                    {
+                        "id": 51,
+                        "value": 0
+                    },
+                    {
+                        "id": 52,
+                        "value": "Jumpball"
+                    },
+                    {
+                        "id": 124,
+                        "value": "down"
+                    },
+                    {
+                        "id": 141,
+                        "value": null
+                    },
+                    {
+                        "id": 171,
+                        "value": null
+                    },
+                    {
+                        "id": 172,
+                        "value": null
+                    },
+                    {
+                        "id": 173,
+                        "value": null
+                    },
+                    {
+                        "id": 174,
+                        "value": null
+                    },
+                    {
+                        "id": 176,
+                        "value": null
+                    },
+                    {
+                        "id": 177,
+                        "value": 24
+                    },
+                    {
+                        "id": 205,
+                        "value": "yes"
+                    },
+                    {
+                        "id": 234,
+                        "value": "home"
+                    }
+                ],
+                "participants": [
+                    {
+                        "id": 1412,
+                        "counter": 1,
+                        "name": "New Orleans Pelicans",
+                        "short_name": "New Orleans Pelicans",
+                        "acronym": "NEW",
+                        "area_id": 191,
+                        "area_name": "USA",
+                        "area_code": "USA",
+                        "ut": 1608559656,
+                        "type": "team",
+                        "stats": [
+                            {
+                                "id": 22,
+                                "value": 8
+                            },
+                            {
+                                "id": 41,
+                                "value": 17
+                            },
+                            {
+                                "id": 54,
+                                "value": 25
+                            },
+                            {
+                                "id": 55,
+                                "value": 42
+                            },
+                            {
+                                "id": 56,
+                                "value": 9
+                            },
+                            {
+                                "id": 57,
+                                "value": 17
+                            },
+                            {
+                                "id": 58,
+                                "value": 16
+                            },
+                            {
+                                "id": 59,
+                                "value": 25
+                            },
+                            {
+                                "id": 60,
+                                "value": 16
+                            },
+                            {
+                                "id": 61,
+                                "value": 18
+                            },
+                            {
+                                "id": 62,
+                                "value": 3
+                            },
+                            {
+                                "id": 63,
+                                "value": 20
+                            },
+                            {
+                                "id": 64,
+                                "value": 23
+                            },
+                            {
+                                "id": 70,
+                                "value": 3
+                            },
+                            {
+                                "id": 71,
+                                "value": 2
+                            },
+                            {
+                                "id": 72,
+                                "value": 4
+                            },
+                            {
+                                "id": 73,
+                                "value": 0
+                            },
+                            {
+                                "id": 75,
+                                "value": null
+                            },
+                            {
+                                "id": 100,
+                                "value": 59.5
+                            },
+                            {
+                                "id": 101,
+                                "value": 64
+                            },
+                            {
+                                "id": 102,
+                                "value": 52.9
+                            },
+                            {
+                                "id": 103,
+                                "value": 88.9
+                            },
+                            {
+                                "id": 718,
+                                "value": 11829
+                            },
+                            {
+                                "id": 1122,
+                                "value": 2
+                            },
+                            {
+                                "id": 1314,
+                                "value": 9
+                            },
+                            {
+                                "id": 1315,
+                                "value": 8
+                            },
+                            {
+                                "id": 1316,
+                                "value": 2
+                            },
+                            {
+                                "id": 1317,
+                                "value": 17
+                            },
+                            {
+                                "id": 1318,
+                                "value": 5
+                            },
+                            {
+                                "id": 1319,
+                                "value": 1
+                            },
+                            {
+                                "id": 1320,
+                                "value": 1
+                            },
+                            {
+                                "id": 1321,
+                                "value": 15
+                            },
+                            {
+                                "id": 1322,
+                                "value": 1
+                            },
+                            {
+                                "id": 1323,
+                                "value": null
+                            },
+                            {
+                                "id": 1324,
+                                "value": null
+                            },
+                            {
+                                "id": 1325,
+                                "value": 32
+                            },
+                            {
+                                "id": 1326,
+                                "value": 6
+                            },
+                            {
+                                "id": 1327,
+                                "value": 1
+                            },
+                            {
+                                "id": 1328,
+                                "value": 1
+                            },
+                            {
+                                "id": 1329,
+                                "value": 53.13
+                            },
+                            {
+                                "id": 1330,
+                                "value": 83.33
+                            },
+                            {
+                                "id": 1331,
+                                "value": 100
+                            },
+                            {
+                                "id": 1332,
+                                "value": 100
+                            },
+                            {
+                                "id": 1333,
+                                "value": 9
+                            },
+                            {
+                                "id": 1334,
+                                "value": 5
+                            },
+                            {
+                                "id": 1335,
+                                "value": 1
+                            },
+                            {
+                                "id": 1336,
+                                "value": 1
+                            },
+                            {
+                                "id": 1337,
+                                "value": 7
+                            },
+                            {
+                                "id": 1338,
+                                "value": 1
+                            },
+                            {
+                                "id": 1339,
+                                "value": null
+                            },
+                            {
+                                "id": 1340,
+                                "value": null
+                            },
+                            {
+                                "id": 1341,
+                                "value": 16
+                            },
+                            {
+                                "id": 1342,
+                                "value": 6
+                            },
+                            {
+                                "id": 1343,
+                                "value": 1
+                            },
+                            {
+                                "id": 1344,
+                                "value": 1
+                            },
+                            {
+                                "id": 1345,
+                                "value": 56.25
+                            },
+                            {
+                                "id": 1346,
+                                "value": 83.33
+                            },
+                            {
+                                "id": 1347,
+                                "value": 100
+                            },
+                            {
+                                "id": 1348,
+                                "value": 100
+                            },
+                            {
+                                "id": 1349,
+                                "value": 8
+                            },
+                            {
+                                "id": 1350,
+                                "value": 8
+                            },
+                            {
+                                "id": 1351,
+                                "value": 16
+                            },
+                            {
+                                "id": 1352,
+                                "value": 50
+                            },
+                            {
+                                "id": 1353,
+                                "value": 17
+                            }
+                        ],
+                        "results": [
+                            {
+                                "id": 2,
+                                "value": 75
+                            },
+                            {
+                                "id": 3,
+                                "value": 75
+                            },
+                            {
+                                "id": 4,
+                                "value": 72
+                            },
+                            {
+                                "id": 5,
+                                "value": 3
+                            },
+                            {
+                                "id": 50,
+                                "value": 35
+                            },
+                            {
+                                "id": 51,
+                                "value": 37
+                            },
+                            {
+                                "id": 52,
+                                "value": 3
+                            },
+                            {
+                                "id": 53,
+                                "value": null
+                            },
+                            {
+                                "id": 104,
+                                "value": null
+                            },
+                            {
+                                "id": 411,
+                                "value": 0
+                            },
+                            {
+                                "id": 412,
+                                "value": 0
+                            },
+                            {
+                                "id": 702,
+                                "value": null
+                            },
+                            {
+                                "id": 703,
+                                "value": null
+                            },
+                            {
+                                "id": 704,
+                                "value": null
+                            },
+                            {
+                                "id": 705,
+                                "value": null
+                            },
+                            {
+                                "id": 715,
+                                "value": null
+                            }
+                        ],
+                        "subparticipants": []
+                    },
+                    {
+                        "id": 1541,
+                        "counter": 2,
+                        "name": "Detroit Pistons",
+                        "short_name": "Detroit Pistons",
+                        "acronym": "DET",
+                        "area_id": 191,
+                        "area_name": "USA",
+                        "area_code": "USA",
+                        "ut": 1608560820,
+                        "type": "team",
+                        "stats": [
+                            {
+                                "id": 22,
+                                "value": 18
+                            },
+                            {
+                                "id": 41,
+                                "value": 12
+                            },
+                            {
+                                "id": 54,
+                                "value": 19
+                            },
+                            {
+                                "id": 55,
+                                "value": 50
+                            },
+                            {
+                                "id": 56,
+                                "value": 6
+                            },
+                            {
+                                "id": 57,
+                                "value": 22
+                            },
+                            {
+                                "id": 58,
+                                "value": 13
+                            },
+                            {
+                                "id": 59,
+                                "value": 28
+                            },
+                            {
+                                "id": 60,
+                                "value": 7
+                            },
+                            {
+                                "id": 61,
+                                "value": 9
+                            },
+                            {
+                                "id": 62,
+                                "value": 11
+                            },
+                            {
+                                "id": 63,
+                                "value": 12
+                            },
+                            {
+                                "id": 64,
+                                "value": 23
+                            },
+                            {
+                                "id": 70,
+                                "value": 0
+                            },
+                            {
+                                "id": 71,
+                                "value": 3
+                            },
+                            {
+                                "id": 72,
+                                "value": 9
+                            },
+                            {
+                                "id": 73,
+                                "value": 0
+                            },
+                            {
+                                "id": 75,
+                                "value": null
+                            },
+                            {
+                                "id": 100,
+                                "value": 38
+                            },
+                            {
+                                "id": 101,
+                                "value": 46.4
+                            },
+                            {
+                                "id": 102,
+                                "value": 27.3
+                            },
+                            {
+                                "id": 103,
+                                "value": 77.8
+                            },
+                            {
+                                "id": 718,
+                                "value": 12162
+                            },
+                            {
+                                "id": 1122,
+                                "value": 1
+                            },
+                            {
+                                "id": 1314,
+                                "value": 15
+                            },
+                            {
+                                "id": 1315,
+                                "value": 16
+                            },
+                            {
+                                "id": 1316,
+                                "value": 2
+                            },
+                            {
+                                "id": 1317,
+                                "value": 13
+                            },
+                            {
+                                "id": 1318,
+                                "value": 4
+                            },
+                            {
+                                "id": 1319,
+                                "value": 2
+                            },
+                            {
+                                "id": 1320,
+                                "value": null
+                            },
+                            {
+                                "id": 1321,
+                                "value": 25
+                            },
+                            {
+                                "id": 1322,
+                                "value": 5
+                            },
+                            {
+                                "id": 1323,
+                                "value": null
+                            },
+                            {
+                                "id": 1324,
+                                "value": 1
+                            },
+                            {
+                                "id": 1325,
+                                "value": 38
+                            },
+                            {
+                                "id": 1326,
+                                "value": 9
+                            },
+                            {
+                                "id": 1327,
+                                "value": 2
+                            },
+                            {
+                                "id": 1328,
+                                "value": 1
+                            },
+                            {
+                                "id": 1329,
+                                "value": 35.9
+                            },
+                            {
+                                "id": 1330,
+                                "value": 50
+                            },
+                            {
+                                "id": 1331,
+                                "value": 100
+                            },
+                            {
+                                "id": 1332,
+                                "value": 0
+                            },
+                            {
+                                "id": 1333,
+                                "value": 7
+                            },
+                            {
+                                "id": 1334,
+                                "value": 4
+                            },
+                            {
+                                "id": 1335,
+                                "value": 2
+                            },
+                            {
+                                "id": 1336,
+                                "value": null
+                            },
+                            {
+                                "id": 1337,
+                                "value": 9
+                            },
+                            {
+                                "id": 1338,
+                                "value": 5
+                            },
+                            {
+                                "id": 1339,
+                                "value": null
+                            },
+                            {
+                                "id": 1340,
+                                "value": 1
+                            },
+                            {
+                                "id": 1341,
+                                "value": 16
+                            },
+                            {
+                                "id": 1342,
+                                "value": 9
+                            },
+                            {
+                                "id": 1343,
+                                "value": 2
+                            },
+                            {
+                                "id": 1344,
+                                "value": 1
+                            },
+                            {
+                                "id": 1345,
+                                "value": 47.06
+                            },
+                            {
+                                "id": 1346,
+                                "value": 50
+                            },
+                            {
+                                "id": 1347,
+                                "value": 100
+                            },
+                            {
+                                "id": 1348,
+                                "value": 0
+                            },
+                            {
+                                "id": 1349,
+                                "value": 6
+                            },
+                            {
+                                "id": 1350,
+                                "value": 16
+                            },
+                            {
+                                "id": 1351,
+                                "value": 22
+                            },
+                            {
+                                "id": 1352,
+                                "value": 27.27
+                            },
+                            {
+                                "id": 1353,
+                                "value": 31
+                            }
+                        ],
+                        "results": [
+                            {
+                                "id": 2,
+                                "value": 51
+                            },
+                            {
+                                "id": 3,
+                                "value": 51
+                            },
+                            {
+                                "id": 4,
+                                "value": 49
+                            },
+                            {
+                                "id": 5,
+                                "value": 2
+                            },
+                            {
+                                "id": 50,
+                                "value": 29
+                            },
+                            {
+                                "id": 51,
+                                "value": 20
+                            },
+                            {
+                                "id": 52,
+                                "value": 2
+                            },
+                            {
+                                "id": 53,
+                                "value": null
+                            },
+                            {
+                                "id": 104,
+                                "value": null
+                            },
+                            {
+                                "id": 411,
+                                "value": 0
+                            },
+                            {
+                                "id": 412,
+                                "value": 0
+                            },
+                            {
+                                "id": 702,
+                                "value": null
+                            },
+                            {
+                                "id": 703,
+                                "value": null
+                            },
+                            {
+                                "id": 704,
+                                "value": null
+                            },
+                            {
+                                "id": 705,
+                                "value": null
+                            },
+                            {
+                                "id": 715,
+                                "value": null
+                            }
+                        ],
+                        "subparticipants": []
+                    }
+                ]
+            }
+        }
+    }
+]

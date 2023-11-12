@@ -24,22 +24,79 @@ const headers = {
 
 // NOTE - WHEN THIS WAS NOT WORKING AT BEGINNING OF 2020-21 SEASON, HAD TO GO UPDATE dbBuilders.fetchAdvancedPlayerParams TO INCLUDE ADDITIONAL QUERY PARAMETERS THAT WERE BEING SENT ALONG WITH NEW REQUEST (things like "Height" and "Weight" had been added since last year)
 
-const updatePlayerStats = (games, db) => {
+const updatePlayerAdvancedStats = (games, db) => {
   axios.get(advancedPlayerStats, {
     params: dbBuilders.fetchAdvancedPlayerParams(games),
     headers: headers
   })
     .then(response => {
-      let playerData = response.data.resultSets[0].rowSet;
-      dbBuilders.updatePlayerDb(db, playerData);
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const playerData = resultSets[0].rowSet;
+      dbBuilders.updatePlayerDbAdvancedStats(db, playerData, headers);
+    });
+};
+
+const updatePlayerBaseStats = (games, db) => {
+  axios.get(advancedPlayerStats, {
+    params: dbBuilders.fetchBasePlayerParams(games),
+    headers: headers
+  })
+    .then(response => {
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const playerData = resultSets[0].rowSet;
+      dbBuilders.updatePlayerDbBaseStats(db, playerData, headers);
+    });
+};
+
+const updatePlayerBaseStatsThirdQ = (games, db) => {
+  const period = 3;
+  axios.get(advancedPlayerStats, {
+    params: dbBuilders.fetchBasePlayerParams(games, period),
+    headers: headers
+  })
+    .then(response => {
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const playerData = resultSets[0].rowSet;
+      dbBuilders.updatePlayerDbBaseStatsThirdQ(db, playerData, headers);
+    });
+};
+
+const updatePlayerBaseStatsFourthQ = (games, db) => {
+  const period = 4;
+  axios.get(advancedPlayerStats, {
+    params: dbBuilders.fetchBasePlayerParams(games, period),
+    headers: headers
+  })
+    .then(response => {
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const playerData = resultSets[0].rowSet;
+      dbBuilders.updatePlayerDbBaseStatsFourthQ(db, playerData, headers);
     });
 };
 
 module.exports = {
-  updatePlayerStatBuilds: () => {
-    updatePlayerStats(0, 'players_full');
-    updatePlayerStats(5, 'players_l5');
-    updatePlayerStats(10, 'players_l10');
-    updatePlayerStats(5, 'players_l15');
+  updatePlayerAdvancedStatBuilds: () => {
+    updatePlayerAdvancedStats(0, 'players_full');
+    updatePlayerAdvancedStats(5, 'players_l5');
+    updatePlayerAdvancedStats(10, 'players_l10');
+    updatePlayerAdvancedStats(5, 'players_l15');
+  },
+  updatePlayerBaseStatBuilds: () => {
+    updatePlayerBaseStats(0, 'players_full');
+    updatePlayerBaseStats(5, 'players_l5');
+    updatePlayerBaseStats(10, 'players_l10');
+    updatePlayerBaseStats(15, 'players_l15');
+  },
+  updatePlayerBaseStatBuildsThirdQ: () => {
+    updatePlayerBaseStatsThirdQ(0, 'players_full');
+    updatePlayerBaseStatsThirdQ(5, 'players_l5');
+  },
+  updatePlayerBaseStatBuildsFourthQ: () => {
+    updatePlayerBaseStatsFourthQ(0, 'players_full');
+    updatePlayerBaseStatsFourthQ(5, 'players_l5');
   }
 }

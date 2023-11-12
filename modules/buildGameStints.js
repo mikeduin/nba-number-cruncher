@@ -10,7 +10,6 @@ function Schedule() {return knex('schedule')}
 
 module.exports = {
   buildSubData: async (gid) => {
-    // co
     const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/scores/pbp/00${gid}_full_pbp.json`;
     const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/scores/gamedetail/00${gid}_gamedetail.json`;
 

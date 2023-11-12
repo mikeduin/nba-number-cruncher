@@ -25,6 +25,14 @@ const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.js
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
+const bovada = require("../modules/bovadaScraper");
+
+const bovadaScraper = bovada.scrapeBovada;
+
+// (async () => {
+//   await bovadaScraper();
+// })();
+
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
 
@@ -49,26 +57,29 @@ rule.second = 48;
 // setTimeout(() => {
 //   updateTeamStats.updateFullTeamBuilds()
 // }, 1000)
-// setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 1000);
+// setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 1000);
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
 // (async () => { 
-const timedDbUpdaters = schedule.scheduleJob(rule, () => {
-  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-  setTimeout(()=>{updatePlayerStats.updatePlayerStatBuilds()}, 210000);
-  setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-  setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
-  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-  setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-})
+// // const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
+//   setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+//   setTimeout(()=>{dbBuilders.addGameStints()}, 270000);
+//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+//   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
+// // })
 // })()
 
 // setTimeout(async () => {
