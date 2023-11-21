@@ -42,13 +42,11 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
-    console.log('game in box score is ', game);
-
     const hTeamAbb = game.h[0].ta;
     const vTeamAbb = game.v[0].ta;
 
     // let init = true;
-    fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
+    // fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
     setInterval(() => {
       // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
@@ -60,7 +58,7 @@ class BoxScore extends React.Component {
       }
 
       if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
-        fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
+        // fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
 
         if (!gameSpread) {
           this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);

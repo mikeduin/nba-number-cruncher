@@ -1,6 +1,7 @@
 const knex = require("../db/knex");
 const axios = require("axios");
 const moment = require("moment");
+const momentTz = require("moment-timezone")
 const _ = require('lodash');
 
 const dateFilters = require("./dateFilters");
@@ -308,33 +309,34 @@ module.exports = {
     });
   },
   updateSchedule: () => {
-    let currMonth = dateFilters.fetchScoreMonth();
+    // let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
-      response.data.lscd.slice(currMonth).forEach(month => {
+      // response.data.lscd.slice(currMonth).forEach(month => {
+      response.data.lscd.forEach(month => {
         month.mscd.g.forEach(game => {
-          let hObj = {
-            tid: game.h.tid,
-            re: game.h.re,
-            ta: game.h.ta,
-            tn: game.h.tn,
-            tc: game.h.tc,
-            s: game.h.s
-          };
-          let vObj = {
-            tid: game.v.tid,
-            re: game.v.re,
-            ta: game.v.ta,
-            tn: game.v.tn,
-            tc: game.v.tc,
-            s: game.v.s
-          };
+          // let hObj = {
+          //   tid: game.h.tid,
+          //   re: game.h.re,
+          //   ta: game.h.ta,
+          //   tn: game.h.tn,
+          //   tc: game.h.tc,
+          //   s: game.h.s
+          // };
+          // let vObj = {
+          //   tid: game.v.tid,
+          //   re: game.v.re,
+          //   ta: game.v.ta,
+          //   tn: game.v.tn,
+          //   tc: game.v.tc,
+          //   s: game.v.s
+          // };
           knex("schedule")
             .where({ gid: game.gid })
             .update({
-              h: [hObj],
-              v: [vObj],
-              etm: game.etm,
-              stt: game.stt,
+              // h: [hObj],
+              // v: [vObj],
+              etm: momentTz.tz(game.etm, 'America/New_York'),
+              // stt: game.stt,
               updated_at: new Date()
             })
             .then(res => {

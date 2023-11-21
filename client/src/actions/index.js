@@ -28,6 +28,18 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   dispatch({ type: 'FETCH_WEEK', payload: updated });
 }
 
+export const fetchPlayerProps = () => async (dispatch) => {
+  console.log('player props being fetched in actions');
+  const response = await axios.get('/api/fetchPlayerProps');
+  console.log('hello');
+  const data = response.data;
+  console.log('data is ', data);
+  dispatch({ type: 'FETCH_PLAYER_PROPS', payload: { 
+    data,
+    fetchedAt: moment().format('YYYY-MM-DD HH:mm:ss')
+  }});
+}
+
 export const checkActiveGames = () => async (dispatch, getState) => {
   const response = await axios.get('/todayGameStatus');
   console.log('checkActiveGames response is ', response)
@@ -36,7 +48,7 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   const clientActive = getState().activeGames;
   const clientCompleted = getState().completedGames;
 
-  console.log('clientActive are ', clientActive);
+  // console.log('clientActive are ', clientActive);
 
   if (_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive)) === false) {
     console.log('modifying active games');
@@ -269,14 +281,14 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
         let perToUpdate = period;
 
         const quarterPoss = calcPoss(
-          ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
-              - parseInt(prevQuarters.t.fga)),
-          ( (parseInt(totals.h.to) + parseInt(totals.v.to))
-              - parseInt(prevQuarters.t.to)),
-          ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
-              - parseInt(prevQuarters.t.fta)),
-          ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
-              - parseInt(prevQuarters.t.offReb))
+          ( (parseInt(totals?.h.fga) + parseInt(totals?.v.fga))
+              - parseInt(prevQuarters?.t.fga)),
+          ( (parseInt(totals?.h.to) + parseInt(totals?.v.to))
+              - parseInt(prevQuarters?.t.to)),
+          ( (parseInt(totals?.h.fta) + parseInt(totals?.v.fta))
+              - parseInt(prevQuarters?.t.fta)),
+          ( (parseInt(totals?.h.offReb) + parseInt(totals?.v.offReb))
+              - parseInt(prevQuarters?.t.offReb))
         );
 
         // let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
@@ -290,40 +302,40 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
 
         let currentQuarter = {
             h: {
-              pts: parseInt(totals.h.pts) - parseInt(prevQuarters.h.pts),
-              fgm: parseInt(totals.h.fgm) - parseInt(prevQuarters.h.fgm),
-              fga: parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga),
-              fgPct: calcFgPct((parseInt(totals.h.fgm)-prevQuarters.h.fgm), (parseInt(totals.h.fga) - parseInt(prevQuarters.h.fga))),
-              fta: parseInt(totals.h.fta) - parseInt(prevQuarters.h.fta),
-              to: parseInt(totals.h.to) - parseInt(prevQuarters.h.to),
-              offReb: parseInt(totals.h.offReb) - parseInt(prevQuarters.h.offReb),
-              fouls: parseInt(totals.h.fouls) - parseInt(prevQuarters.h.fouls)
+              pts: parseInt(totals?.h.pts) - parseInt(prevQuarters?.h.pts),
+              fgm: parseInt(totals?.h.fgm) - parseInt(prevQuarters?.h.fgm),
+              fga: parseInt(totals?.h.fga) - parseInt(prevQuarters?.h.fga),
+              fgPct: calcFgPct((parseInt(totals?.h.fgm)-prevQuarters?.h.fgm), (parseInt(totals?.h.fga) - parseInt(prevQuarters?.h.fga))),
+              fta: parseInt(totals?.h.fta) - parseInt(prevQuarters?.h.fta),
+              to: parseInt(totals?.h.to) - parseInt(prevQuarters?.h.to),
+              offReb: parseInt(totals?.h.offReb) - parseInt(prevQuarters?.h.offReb),
+              fouls: parseInt(totals?.h.fouls) - parseInt(prevQuarters?.h.fouls)
             },
             v: {
-              pts: parseInt(totals.v.pts) - parseInt(prevQuarters.v.pts),
-              fgm: parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm),
-              fga: parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga),
+              pts: parseInt(totals?.v.pts) - parseInt(prevQuarters?.v.pts),
+              fgm: parseInt(totals?.v.fgm) - parseInt(prevQuarters?.v.fgm),
+              fga: parseInt(totals?.v.fga) - parseInt(prevQuarters?.v.fga),
               fgPct: calcFgPct(
-                (parseInt(totals.v.fgm) - parseInt(prevQuarters.v.fgm)),
-                (parseInt(totals.v.fga) - parseInt(prevQuarters.v.fga))
+                (parseInt(totals?.v.fgm) - parseInt(prevQuarters?.v.fgm)),
+                (parseInt(totals?.v.fga) - parseInt(prevQuarters?.v.fga))
               ),
-              fta: parseInt(totals.v.fta) - parseInt(prevQuarters.v.fta),
-              to: parseInt(totals.v.to) - parseInt(prevQuarters.v.to),
-              offReb: parseInt(totals.v.offReb) - parseInt(prevQuarters.v.offReb),
-              fouls: parseInt(totals.v.fouls) - parseInt(prevQuarters.v.fouls)
+              fta: parseInt(totals?.v.fta) - parseInt(prevQuarters?.v.fta),
+              to: parseInt(totals?.v.to) - parseInt(prevQuarters?.v.to),
+              offReb: parseInt(totals?.v.offReb) - parseInt(prevQuarters?.v.offReb),
+              fouls: parseInt(totals?.v.fouls) - parseInt(prevQuarters?.v.fouls)
             },
             t: {
-              pts: (parseInt(totals.h.pts) + parseInt(totals.v.pts)) - parseInt(prevQuarters.t.pts),
-              fgm: (parseInt(totals.h.fgm) + parseInt(totals.v.fgm)) - parseInt(prevQuarters.t.fgm),
-              fga: (parseInt(totals.h.fga) + parseInt(totals.v.fga)) - parseInt(prevQuarters.t.fga),
+              pts: (parseInt(totals?.h.pts) + parseInt(totals?.v.pts)) - parseInt(prevQuarters?.t.pts),
+              fgm: (parseInt(totals?.h.fgm) + parseInt(totals?.v.fgm)) - parseInt(prevQuarters?.t.fgm),
+              fga: (parseInt(totals?.h.fga) + parseInt(totals?.v.fga)) - parseInt(prevQuarters?.t.fga),
               fgPct: calcFgPct(
-                ((parseInt(totals.h.fgm) + parseInt(totals.v.fgm)) - parseInt(prevQuarters.t.fgm)),
-                ((parseInt(totals.h.fga) + parseInt(totals.v.fga)) - parseInt(prevQuarters.t.fga))
+                ((parseInt(totals?.h.fgm) + parseInt(totals?.v.fgm)) - parseInt(prevQuarters?.t.fgm)),
+                ((parseInt(totals?.h.fga) + parseInt(totals?.v.fga)) - parseInt(prevQuarters?.t.fga))
               ),
-              fta: (parseInt(totals.h.fta) + parseInt(totals.v.fta)) - parseInt(prevQuarters.t.fta),
-              to: (parseInt(totals.h.to) + parseInt(totals.v.to)) - parseInt(prevQuarters.t.to),
-              offReb: (parseInt(totals.h.offReb) + parseInt(totals.v.offReb)) - parseInt(prevQuarters.t.offReb),
-              fouls: (parseInt(totals.h.fouls) + parseInt(totals.v.fouls)) - parseInt(prevQuarters.t.fouls),
+              fta: (parseInt(totals?.h.fta) + parseInt(totals?.v.fta)) - parseInt(prevQuarters?.t.fta),
+              to: (parseInt(totals?.h.to) + parseInt(totals?.v.to)) - parseInt(prevQuarters?.t.to),
+              offReb: (parseInt(totals?.h.offReb) + parseInt(totals?.v.offReb)) - parseInt(prevQuarters?.t.offReb),
+              fouls: (parseInt(totals?.h.fouls) + parseInt(totals?.v.fouls)) - parseInt(prevQuarters?.t.fouls),
               poss: quarterPoss,
               pace: calcQuarterPace(quarterPoss, period, gameSecs)
             }

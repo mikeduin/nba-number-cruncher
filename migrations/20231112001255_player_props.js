@@ -1,0 +1,64 @@
+exports.up = function(knex, Promise) {
+    return knex.schema.createTable('player_props', t => {
+      t.increments();
+      t.integer('player_id');
+      t.string('player_name');
+      t.string('team');
+      t.integer('gid');
+      t.string('gdte');
+      t.float('pts');
+      t.integer('pts_over');
+      t.integer('pts_under');
+      t.boolean('pts_active');
+      t.float('pts+reb');
+      t.integer('pts+reb_over');
+      t.integer('pts+reb_under');
+      t.boolean('pts+reb_active');
+      t.float('pts+ast');
+      t.integer('pts+ast_over');
+      t.integer('pts+ast_under');
+      t.boolean('pts+ast_active');
+      t.float('pts+reb+ast');
+      t.integer('pts+reb+ast_over');
+      t.integer('pts+reb+ast_under');
+      t.boolean('pts+reb+ast_active');
+      t.float('reb');
+      t.integer('reb_over');
+      t.integer('reb_under');
+      t.boolean('reb_active');
+      t.float('reb+ast');
+      t.integer('reb+ast_over');
+      t.integer('reb+ast_under');
+      t.boolean('reb+ast_active');
+      t.float('ast');
+      t.integer('ast_over');
+      t.integer('ast_under');
+      t.boolean('ast_active');
+      t.float('stl');
+      t.integer('stl_over');
+      t.integer('stl_under');
+      t.boolean('stl_active');  
+      t.float('blk');
+      t.integer('blk_over');
+      t.integer('blk_under');
+      t.boolean('blk_active');
+      t.float('tov');
+      t.integer('tov_over');
+      t.integer('tov_under');
+      t.boolean('tov_active');
+      t.float('fg3m');
+      t.integer('fg3m_over');
+      t.integer('fg3m_under');
+      t.boolean('fg3m_active');
+      t.text('closing');
+      t.text('halftime');
+      t.text('log');
+      t.timestamp('created_at');
+      t.timestamp('updated_at');
+    });
+  };
+  
+  exports.down = function(knex, Promise) {
+    return knex.schema.dropTable('player_props');
+  };
+  

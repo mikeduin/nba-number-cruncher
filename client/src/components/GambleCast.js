@@ -3,22 +3,57 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
+import PlayerProps from './PlayerProps';
 import { Header } from 'semantic-ui-react';
+import { fetchPlayerProps } from '../actions';
 
 class GambleCast extends React.Component {
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     playerProps: props.playerProps
+  //   }
+  // }
+
   componentDidMount () {
-    console.log('props in gcast are ', this.props);
+    const { fetchPlayerProps } = this.props;
+    fetchPlayerProps();
+    setInterval(() => {
+      fetchPlayerProps();
+    }, 10000)
+  }
+
+  componentDidUpdate (prevProps) {
+    console.log('component updated');
+    if (prevProps.playerProps !== this.props.playerProps) {
+      console.log('re-rendering gamblecast');
+      this.setState({ playerProps: this.props.playerProps });
+    }
   }
 
   renderBoxScores = () => {
+    const { activeGames, games, playerProps, playersMetadata} = this.props;
+    console.log('playerProps are ', playerProps);
+    console.log('playersMetadata in gamblecast are ', playersMetadata);
+
     const checkActive = (gid) => {
-      return this.props.activeGames.indexOf(gid) !== -1
+      return activeGames.indexOf(gid) !== -1
     };
 
-    if (this.props.games[0]) {
-      return this.props.games.map(game => {
+    if (games[0]) {
+      return games.map(game => {
+        console.log('game in gamblecast is ', game)
+        const hTid = game.h[0].tid;
+        const vTid = game.v[0].tid;
         return (
-          <BoxScore key={game.gid} game={game}/>
+          <div key={game.gid}>
+            <BoxScore game={game}/>
+            <PlayerProps 
+              key={`props-${game.gid}`} 
+              game={game}
+              playersMetadata={playersMetadata.filter(player => player.team_id == hTid || player.team_id == vTid)}
+            />
+          </div>
         )
       })
     } else {
@@ -45,8 +80,10 @@ const mapStateToProps = state => {
     games: state.todaysGames,
     gambleCast: state.gambleCast,
     activeDay: state.activeDay,
-    activeGames: state.activeGames
+    activeGames: state.activeGames,
+    playerProps: state.playerProps,
+    playersMetadata: state.playersMetadata
   }
 }
 
-export default connect (mapStateToProps) (GambleCast);
+export default connect (mapStateToProps, { fetchPlayerProps }) (GambleCast);

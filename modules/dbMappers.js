@@ -1,6 +1,22 @@
 const knex = require("../db/knex");
 
+const marketMappers = {
+  'Total Points': 'pts',
+  'Total Rebounds': 'reb',
+  'Total Assists': 'ast',
+  'Total Steals': 'stl',
+  'Total Blocks': 'blk',
+  'Total Turnovers': 'tov',
+  'Total Made 3 Points Shots': 'fg3m',
+  'Total Points, Rebounds and Assists': 'pts+reb+ast',
+  'Total Points and Rebounds': 'pts+reb',
+  'Total Points and Assists': 'pts+ast',
+  'Total Rebounds and Assists': 'reb+ast'
+};
+
 module.exports = {
+  propMarketMappers: () => marketMappers,
+  mapBovadaMarketToDbColumn: (market) => marketMappers[market],
   mapFullPlayerData: function() {
     knex("players_full")
       .select(
