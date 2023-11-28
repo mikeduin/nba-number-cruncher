@@ -1,7 +1,7 @@
 const knex = require("../db/knex");
 const getGameSecs = require('./getGameSecs');
 const boxScoreHelpers = require('./boxScoreHelpers');
-const boxScoreMock = require('../utils/mocks/boxScoreMock.json');
+// const boxScoreMock = require('../utils/mocks/boxScoreMock.json');
 const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
 
 module.exports = async (boxScore) => {
