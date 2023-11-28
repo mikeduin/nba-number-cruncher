@@ -18,7 +18,6 @@ class App extends React.Component {
     this.props.getPlayerMetadata();
     setInterval(()=>{
       this.props.checkActiveGames()
-      console.log('checking for active games in app wrapper every 5 seconds')
     }, 5000);
   }
 
@@ -31,7 +30,7 @@ class App extends React.Component {
           <BrowserRouter>
             <div>
               <Header players={this.props.players} />
-              <Route path='/' exact />
+              <Route path='/' exact component={Schedule} />
               <Route path='/schedule' exact component={Schedule} />
               <Route path='/schedule/:date' component={Schedule} />
               <Route path='/netratings' exact component={NetRatings} />

@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { fetchBoxScore } from '../actions';
-import { Table } from 'semantic-ui-react';
+import { Image, Table } from 'semantic-ui-react';
 import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
+import logos from '../modules/logos';
 
 class BoxScore extends React.Component {
   state = {
@@ -46,7 +47,7 @@ class BoxScore extends React.Component {
     const vTeamAbb = game.v[0].ta;
 
     // let init = true;
-    // fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
+    fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
     setInterval(() => {
       // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
@@ -58,7 +59,7 @@ class BoxScore extends React.Component {
       }
 
       if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
-        // fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
+        fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
 
         if (!gameSpread) {
           this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
@@ -86,9 +87,11 @@ class BoxScore extends React.Component {
       }
     } else {
       return (
-        <div>
-          <Table compact celled
-            style={{marginBottom: 20}}
+          <Table 
+            compact 
+            celled
+            // style={{marginBottom: 20}}
+            attached='top'
           >
             <Table.Header>
               <Table.Row style={{
@@ -134,7 +137,7 @@ class BoxScore extends React.Component {
             </Table.Header>
             <Table.Body>
               <Table.Row>
-                <Table.Cell> {game.v[0].tn}  </Table.Cell>
+                <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.v[0].ta]} /> {game.v[0].tn}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.v.pts}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.v.fgPct}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.v.pts : null}  </Table.Cell>
@@ -151,7 +154,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
-                <Table.Cell> {game.h[0].tn} </Table.Cell>
+                <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.h[0].ta]} /> {game.h[0].tn} </Table.Cell>
                 <Table.Cell> {boxScore.totals.h.pts}  </Table.Cell>
                 <Table.Cell> {boxScore.totals.h.fgPct}  </Table.Cell>
                 <Table.Cell> {boxScore.q1 ? boxScore.q1.h.pts : null}  </Table.Cell>
@@ -170,7 +173,6 @@ class BoxScore extends React.Component {
 
             </Table.Body>
           </Table>
-        </div>
       )
     }
   }

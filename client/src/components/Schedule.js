@@ -73,17 +73,20 @@ class Schedule extends React.Component {
     } else {
       return (
         <div style={{marginBottom: 100}}>
-          <div className="ui grid">
-            <div className={`nine column row weeklyRow`}>
-              <Icon className="column" name='angle left' size='massive'
-                onClick={() => this.props.changeSchedWeek(this.props.week, "dec")}
-              />
-              {this.renderWeekGrid()}
-              <Icon className="column" name='angle right' size='massive'
-                onClick={() => this.props.changeSchedWeek(this.props.week, "inc")}
-              />
+          <div style={{display: 'inline-flex'}}>
+            <Icon className="column" name='angle left' size='massive'
+              onClick={() => this.props.changeSchedWeek(this.props.week, "dec")}
+            />
+            <div className="ui grid">
+              <div className={`seven column row weeklyRow`}>
+                {this.renderWeekGrid()}
+              </div>
             </div>
+            <Icon className="column" name='angle right' size='massive'
+              onClick={() => this.props.changeSchedWeek(this.props.week, "inc")}
+            />
           </div>
+
           <div className="dayHeader"> - GAMES OF {moment(this.props.activeDay).format('dddd, MMMM Do').toUpperCase()} - </div>
 
           <Grid columns={4}>{this.renderGameGrid()}</Grid>

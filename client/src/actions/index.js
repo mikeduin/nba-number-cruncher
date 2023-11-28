@@ -29,11 +29,8 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
 }
 
 export const fetchPlayerProps = () => async (dispatch) => {
-  console.log('player props being fetched in actions');
   const response = await axios.get('/api/fetchPlayerProps');
-  console.log('hello');
   const data = response.data;
-  console.log('data is ', data);
   dispatch({ type: 'FETCH_PLAYER_PROPS', payload: { 
     data,
     fetchedAt: moment().format('YYYY-MM-DD HH:mm:ss')
@@ -42,7 +39,7 @@ export const fetchPlayerProps = () => async (dispatch) => {
 
 export const checkActiveGames = () => async (dispatch, getState) => {
   const response = await axios.get('/todayGameStatus');
-  console.log('checkActiveGames response is ', response)
+  // console.log('checkActiveGames response is ', response)
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
   const clientActive = getState().activeGames;
@@ -157,7 +154,16 @@ export const setActiveDay = date => async dispatch => {
 }
 
 export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
-  let urlDate = window.location.href.substr(window.location.href.length-10);
+  const url = window.location.href;
+  const urlDateMatch = url.match(/\/schedule\/(\d{4}-\d{2}-\d{2})/);
+  let urlDate;
+
+  if (urlDateMatch && urlDateMatch[1]) {
+    urlDate = urlDateMatch[1];
+  } else {
+    // If no date is present, create a new date using Moment.js
+    urlDate = moment().format("YYYY-MM-DD");
+  }
   let baseDay = week.weekArray[0];
   if (dir == "inc") {
     baseDay = moment(baseDay, 'YYYYMMDD').add(7, 'days').format('YYYYMMDD');
@@ -193,9 +199,11 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
     return;
   }
 
+  // console.log('response in fetchBoxScore is ', response);
+
   // are things not showing up because it's not live in response?
   if (response.live) {
-    const { totals, period, clock, poss, pace, gameSecs, thru_period } = response;
+    const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period } = response;
 
     const calcFgPct = (fgm, fga) => {
       return (((fgm/fga)*100).toFixed(1));
@@ -221,21 +229,7 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
         return pace
       };
     }
-
-    // const calcGamePace = (poss, per, gameSecs) => {
-    //   let pace = 0;
-    //   if (per < 5) {
-    //     pace = (((2880/gameSecs)*poss)/2)
-    //   } else {
-    //     pace = ((2880+((300*(per-4))/gameSecs)*poss)/2)
-    //   };
-    //   if (pace == null) {
-    //     return 0
-    //   } else {
-    //     return pace
-    //   };
-    // }
-
+    
     let liveData = {
       gid: gid,
       active: true,
@@ -245,7 +239,8 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
       clock,
       poss,
       pace,
-      totals
+      totals,
+      playerStats
     };
 
     if (response.quarterEnd) {
@@ -290,15 +285,6 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
           ( (parseInt(totals?.h.offReb) + parseInt(totals?.v.offReb))
               - parseInt(prevQuarters?.t.offReb))
         );
-
-        // let perFgs = ( (parseInt(totals.h.fga) + parseInt(totals.v.fga))
-        //     - parseInt(prevQuarters.t.fga));
-        // let perTO = ( (parseInt(totals.h.to) + parseInt(totals.v.to))
-        //     - parseInt(prevQuarters.t.to));
-        // let perFta = ( (parseInt(totals.h.fta) + parseInt(totals.v.fta))
-        //     - parseInt(prevQuarters.t.fta));
-        // let perOffReb = ( (parseInt(totals.h.offReb) + parseInt(totals.v.offReb))
-        //     - parseInt(prevQuarters.t.offReb));
 
         let currentQuarter = {
             h: {

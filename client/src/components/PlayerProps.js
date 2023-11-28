@@ -1,8 +1,9 @@
 import React from 'react';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { Accordion, Segment } from 'semantic-ui-react';
+import { Accordion, Button, Segment } from 'semantic-ui-react';
 import PropsTable from './playerProps/PropsTable';
+import { findKey } from 'lodash';
 
 const marketMappers = {
   'Total Points': 'pts',
@@ -18,11 +19,28 @@ const marketMappers = {
   'Total Rebounds and Assists': 'reb+ast',
 };
 
+const timeMappers = {
+  'Season': 'full',
+  'Last 5': 'l5',
+  // 'Last 10': 'l10',
+  // 'Last 15': 'l15',
+};
+
+function findKeyByValue(obj, targetValue) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key) && obj[key] === targetValue) {
+      return key;
+    }
+  }
+  return null; // Return null if the value is not found
+}
+
 class PlayerProps extends React.Component {
   state = {
     playerProps: this.props.playerProps.data.filter(prop => prop.gid === this.props.game.gid),
     lastUpdated: null,
     activeProp: 'pts',
+    activeTimeframe: 'full'
   };
 
   componentDidMount () {
@@ -41,25 +59,57 @@ class PlayerProps extends React.Component {
     }
   }
 
-  changePropState = (prop) => {
-    this.setState({ activeProp: prop });
-  }
-
   render () {
-    const { game, playersMetadata } = this.props;
-    const { activeProp } = this.state;
+    const { boxScore, game, playersMetadata } = this.props;
+    const { activeProp, activeTimeframe, playerProps } = this.state;
+
+    // console.log('boxScore in PlayerProps are ', boxScore);
 
     const homeTeamName = game.h[0].tn;
     const awayTeamName = game.v[0].tn;
 
     const Level1Content = (
-        <div style={{width: '100%'}}>
-          <PropsTable 
-            playerProps={this.state.playerProps}
-            playersMetadata={playersMetadata} 
-            market={activeProp}
-          />
-        </div>
+      <div style={{width: '100%'}}>
+        <Segment 
+          attached='top'
+          textAlign='right'
+        >
+          <div style={{display: 'inline-flex', alignItems: 'center'}}>
+            <div style={{marginRight: 10}}><i>MARKET:</i></div>
+            {Object.values(marketMappers).map(market => 
+              <Button 
+                color='black'
+                onClick={() =>  this.setState({ activeProp: market })}
+                basic={activeProp !== market}
+                key={market}
+              >
+                {market.toUpperCase()}
+              </Button>
+            )}
+          </div>
+          <div style={{display: 'inline-flex', alignItems: 'center'}}>
+            <div style={{marginRight: 10}}><i>SHOW AVERAGES FOR:</i></div>
+            {Object.keys(timeMappers).map(timeframe => 
+              <Button 
+                color='black'
+                onClick={() =>  this.setState({ activeTimeframe: timeMappers[timeframe] })}
+                basic={activeTimeframe !== timeMappers[timeframe]}
+                key={timeframe}
+              >
+                {timeframe.toUpperCase()}
+              </Button>
+            )}
+          </div>
+        </Segment>
+        <PropsTable 
+          playerProps={playerProps}
+          playerStats={boxScore ? boxScore.playerStats : []}
+          playersMetadata={playersMetadata} 
+          market={activeProp}
+          timeframe={activeTimeframe}
+          timeframeText={findKeyByValue(timeMappers, activeTimeframe)}
+        />
+      </div>
     )
     
     const rootPanels = [
@@ -67,7 +117,13 @@ class PlayerProps extends React.Component {
     ]
 
     return (
-      <Accordion panels={rootPanels} styled fluid />
+      <Accordion 
+        panels={rootPanels} 
+        styled 
+        fluid
+        attached='bottom'
+        style={{marginBottom: 20}}
+      />
     )
   }  
 }

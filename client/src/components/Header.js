@@ -62,27 +62,29 @@ class Header extends React.Component {
 
     return (
       <Menu pointing secondary>
-        <Link to="/" className="item">
-          Home
-        </Link>
-        <Link to="/schedule" className="item" onClick={this.setActiveDay}>
-          <b>Schedule</b>
+        <Link to="/" className="item" onClick={this.setActiveDay}>
+          Schedule
         </Link>
         <Link to="/gamblecast" className="item">
           GambleCast
         </Link>
         <Link to="/netratings" className="item">
-          <b>Net Ratings</b>
+          Net Ratings
         </Link>
-        <Search
-          style={{position: 'absolute', right: '10%'}}
-          loading={isLoading}
-          onResultSelect={this.handleResultSelect}
-          onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
-          results={results}
-          value={value}
-          resultRenderer={resultRenderer}
-        />
+        <Menu.Item position='right'>
+          <Search
+            placeholder='Search Players'
+            style={{position: 'absolute', right: '10%'}}
+            loading={isLoading}
+            onResultSelect={this.handleResultSelect}
+            onSearchChange={_.debounce(this.handleSearchChange, 500, {leading: true})}
+            results={results}
+            value={value}
+            resultRenderer={resultRenderer}
+          />
+
+        </Menu.Item>
+
       </Menu>
     )
   }

@@ -8,33 +8,24 @@ import { Header } from 'semantic-ui-react';
 import { fetchPlayerProps } from '../actions';
 
 class GambleCast extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {
-  //     playerProps: props.playerProps
-  //   }
-  // }
-
   componentDidMount () {
     const { fetchPlayerProps } = this.props;
     fetchPlayerProps();
     setInterval(() => {
       fetchPlayerProps();
-    }, 10000)
+    }, 5000)
   }
 
   componentDidUpdate (prevProps) {
-    console.log('component updated');
     if (prevProps.playerProps !== this.props.playerProps) {
-      console.log('re-rendering gamblecast');
       this.setState({ playerProps: this.props.playerProps });
     }
   }
 
   renderBoxScores = () => {
-    const { activeGames, games, playerProps, playersMetadata} = this.props;
-    console.log('playerProps are ', playerProps);
-    console.log('playersMetadata in gamblecast are ', playersMetadata);
+    const { activeGames, gambleCast, games, playerProps, playersMetadata} = this.props;
+    // console.log('playerProps are ', playerProps);
+    // console.log('playersMetadata in gamblecast are ', playersMetadata);
 
     const checkActive = (gid) => {
       return activeGames.indexOf(gid) !== -1
@@ -42,7 +33,6 @@ class GambleCast extends React.Component {
 
     if (games[0]) {
       return games.map(game => {
-        console.log('game in gamblecast is ', game)
         const hTid = game.h[0].tid;
         const vTid = game.v[0].tid;
         return (
@@ -52,6 +42,7 @@ class GambleCast extends React.Component {
               key={`props-${game.gid}`} 
               game={game}
               playersMetadata={playersMetadata.filter(player => player.team_id == hTid || player.team_id == vTid)}
+              boxScore={gambleCast[`live_${game.gid}`]}
             />
           </div>
         )

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Table } from 'semantic-ui-react';
+import { Image, Table } from 'semantic-ui-react';
+import logos from '../../modules/logos';
 
 
 const EmptyBoxScore = props => {
@@ -23,7 +24,7 @@ const EmptyBoxScore = props => {
   } else {
     return (
         <Table compact celled
-          style={{marginBottom: 20}}
+          attached='top'
         >
           <Table.Header>
             <Table.Row>
@@ -66,7 +67,7 @@ const EmptyBoxScore = props => {
           </Table.Header>
           <Table.Body>
             <Table.Row>
-              <Table.Cell> {game.v[0].tn}  </Table.Cell>
+              <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.v[0].ta]} /> <b>{game.v[0].tn}</b>  </Table.Cell>
               <Table.Cell> </Table.Cell>
               <Table.Cell> </Table.Cell>
               <Table.Cell> </Table.Cell>
@@ -83,7 +84,7 @@ const EmptyBoxScore = props => {
               <Table.Cell> </Table.Cell>
             </Table.Row>
             <Table.Row>
-            <Table.Cell> {game.h[0].tn}  </Table.Cell>
+            <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.h[0].ta]} /> <b>{game.h[0].tn}</b>  </Table.Cell>
             <Table.Cell> </Table.Cell>
             <Table.Cell> </Table.Cell>
             <Table.Cell> </Table.Cell>

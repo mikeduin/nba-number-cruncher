@@ -27,8 +27,24 @@ module.exports = {
     const hTid = gameInDb[0].h_tid;
     const vTid = gameInDb[0].a_tid;
 
+    // console.log('gDetail is ', gDetail);
+
     const hPlayers = gDetail.data.g.hls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
     const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
+
+    // try {
+
+    // } catch (e) {
+    //   console.log('error in buildSubData is ', e);
+    //   console.log('gid is ', gid);
+    //   console.log('hPlayers are ', gDetail.data.g.hls.pstsg);
+    //   console.log('vPlayers are ', gDetail.data.g.vls.pstsg);
+    //   console.log('hPlayers are ', gDetail.data.g.hls);
+    //   console.log('vPlayers are ', gDetail.data.g.vls);
+    //   // console.log('gDetail is ', gDetail);
+    // }
+
+
     const allPlayers = hPlayers.concat(vPlayers);
     let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
     let gameStints = {};

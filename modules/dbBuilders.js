@@ -199,8 +199,6 @@ module.exports = {
       .where({ stt: "Final" })
       .limit(40);
 
-    console.log('games are ', games);
-
     games.forEach(game => {
       buildGameStints.buildSubData(game);
     });
@@ -211,7 +209,7 @@ module.exports = {
       .pluck("gid")
       .whereNotNull("gweek")
       .where({ stt: "Final" })
-      .whereNull("game_stints")
+      .whereNull("game_stints");
 
     games.forEach(game => {
       buildGameStints.buildSubData(game);
@@ -448,7 +446,12 @@ module.exports = {
             .update(
               {
                 min_3q: player[headers.indexOf('MIN')],
+                fgm_3q: player[headers.indexOf('FGM')],
+                fga_3q: player[headers.indexOf('FGA')],
                 fg3m_3q: player[headers.indexOf('FG3M')],
+                fg3a_3q: player[headers.indexOf('FG3A')],
+                ftm_3q: player[headers.indexOf('FTM')],
+                fta_3q: player[headers.indexOf('FTA')],
                 reb_3q: player[headers.indexOf('REB')],
                 ast_3q: player[headers.indexOf('AST')],
                 tov_3q: player[headers.indexOf('TOV')],
@@ -475,6 +478,12 @@ module.exports = {
             .update(
               {
                 min_4q: player[headers.indexOf('MIN')],
+                fgm_4q: player[headers.indexOf('FGM')],
+                fga_4q: player[headers.indexOf('FGA')],
+                fg3m_4q: player[headers.indexOf('FG3M')],
+                fg3a_4q: player[headers.indexOf('FG3A')],
+                ftm_4q: player[headers.indexOf('FTM')],
+                fta_4q: player[headers.indexOf('FTA')],
                 fg3m_4q: player[headers.indexOf('FG3M')],
                 reb_4q: player[headers.indexOf('REB')],
                 ast_4q: player[headers.indexOf('AST')],

@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Image, Table } from 'semantic-ui-react';
+import '../styles/gamblecast.css';
 // find and import player logo image references
 import logos from '../../modules/logos';
-
+import { Link } from 'react-router-dom';
 
 const marketMappers = {
   'Total Points': 'pts',
@@ -20,53 +21,118 @@ const marketMappers = {
 };
 
 const headerMappers = {
-  'Total Points': 'PTS',
-  'Total Rebounds': 'REB',
-  'Total Assists': 'AST',
-  'Total Steals': 'STL',
-  'Total Blocks': 'BLK',
-  'Total Turnovers': 'TO',
-  'Total Made 3 Points Shots': '3PT',
-  'Total Points, Rebounds and Assists': 'P+R+A',
-  'Total Points and Rebounds': 'P+R',
-  'Total Points and Assists': 'P+A',
-  'Total Rebounds and Assists': 'R+A'
+  'pts': 'PTS',
+  'reb': 'REB',
+  'ast': 'AST',
+  'stl': 'STL',
+  'blk': 'BLK',
+  'tov': 'TO',
+  'fg3m': 'FG3M',
+  'pts+reb+ast': 'P+R+A',
+  'pts+reb': 'PTS+REB',
+  'pts+ast': 'PTS+AST',
+  'reb+ast': 'REB+AST'
 };
+
+const statMapper = {
+  // market : db column prefix (e.g., ppg_3q_full has 'ppg' as the prefix)
+  'pts': 'ppg',
+  'reb': 'rpg',
+  'ast': 'apg',
+  'stl': 'spg',
+  'blk': 'bpg',
+  'tov': 'topg',
+  'fg3m': '3pg',
+  'fg3a': '3pa',
+  'min': 'min',
+  'fgm': 'fgm',
+  'fga': 'fga',
+  'ftm': 'ftm',
+  'fta': 'fta',
+}
+
+function getPlayerStat(playerStats, market, live = true, phase = null, games = 'full') {
+  if (!playerStats) return null;
+
+  const formKey = (marketArg) => {
+    let key = marketArg;
+    if (!live) {
+      key = statMapper[marketArg];
+  
+      if (!phase) {
+        key=`${key}_${games}`;
+      } else {
+        key=`${key}_${phase}_${games}`;
+      }
+    }
+    return key
+  }
+
+  // Check if the market is a combo market
+  if (market.includes('+')) {
+    // Split the combo market into individual markets
+    const markets = market.split('+');
+    const keys = markets.map(m => formKey(m));
+    
+    // Calculate the sum of the individual markets
+    const sum = keys.reduce((total, s) => total + (playerStats[s] || 0), 0);
+    return Math.round(sum * 10) / 10;
+  } else {
+    // If it's not a combo market, return the value of the specified market
+    return playerStats[formKey(market)] || 0;
+  }
+}
+
+const formatJuice = (value) => {
+  if (parseInt(value) > 1) {
+    return `+${value}`;
+  } else {
+    return value;
+  }
+}
 
 class PropsTable extends React.Component {
 
-
   render () {
-    const { market, playerProps, playersMetadata } = this.props;
+    const { market, playerProps, playerStats, playersMetadata, timeframe, timeframeText } = this.props;
 
     console.log('playerProps in PropsTable are ', playerProps);
-    console.log('playersMetadata in PropsTable are ', playersMetadata);
+    // console.log('playersMetadata in PropsTable are ', playersMetadata);
+    // console.log('playerStats in PropsTable are ', playerStats);
 
     const renderPropRows = () => {
-      // const stat = marketMappers[market];
       return playerProps
-        .sort((a, b) => b[market] - a[market])
+        .sort((a, b) => {
+          if (b[market] === a[market]) {
+            return a[`${market}_over`] - b[`${market}_over`];
+          }
+          return b[market] - a[market];
+        })
         .map(prop => { 
-          
-
+          const livePlayerStats = playerStats ? playerStats.filter(player => player.player_id === prop.player_id)[0] : null;
+          const seasonPlayerStats = playersMetadata ? playersMetadata.filter(player => player.player_id === prop.player_id)[0] : null;
+          // console.log('seasonPlayerStats is ', seasonPlayerStats);
           return (
-            <Table.Row key={`${prop.player_name}-${market}`}>
+            <Table.Row key={`${prop.player_name}-${market}`} style={{backgroundColor: prop[`${market}_active`] !== true ? 'grey' : 'white'}}>
               <Table.Cell style={{position: 'relative'}}>
                 <div style={{ position: 'absolute', top: 0, right: 5, height: '30px', width: '30px', display: 'inline-block'}}>
                   <Image size="mini" circular src={logos[prop.team]} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span>{prop.player_name}</span>
+                  <Link to={`/player/${prop.player_id}`} className='player-link'>
+                    {prop.player_name}
+                  </Link>
                 </div>
               </Table.Cell>
-              <Table.Cell style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexDirection: 'column',
-                      fontSize: '22px',
-                    }}> 
+              <Table.Cell 
+                style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'column',
+                fontSize: '22px',
+              }}> 
                 <div style={{marginBottom: '5px '}}>
-                  {prop[market]} 
+                  <b>{prop[market]}</b> 
                 </div>
                 <div>
                   <Table compact celled>
@@ -76,67 +142,89 @@ class PropsTable extends React.Component {
                         fontSize: '10px',
                         padding: 0
                       }}>
-                        <Table.HeaderCell>{prop[`${market}_over`]}</Table.HeaderCell>
-                        <Table.HeaderCell>{prop[`${market}_under`]}</Table.HeaderCell>
+                        <Table.HeaderCell>{formatJuice(prop[`${market}_over`])}</Table.HeaderCell>
+                        <Table.HeaderCell>{formatJuice(prop[`${market}_under`])}</Table.HeaderCell>
                       </Table.Row>
                     </Table.Header>
                   </Table>
                 </div>
               </Table.Cell>
-              <Table.Cell> Season Avg </Table.Cell>
-              <Table.Cell> MIN </Table.Cell>
-              <Table.Cell> PTS </Table.Cell>
-              <Table.Cell> FG </Table.Cell>
-              <Table.Cell> FT </Table.Cell>
-              <Table.Cell> Fouls </Table.Cell>
-              <Table.Cell> MIN </Table.Cell>
-              <Table.Cell> PTS </Table.Cell>
-              <Table.Cell> FG </Table.Cell>
-              <Table.Cell> FT </Table.Cell>
-              <Table.Cell> MIN </Table.Cell>
-              <Table.Cell> PTS </Table.Cell>
-              <Table.Cell> FG </Table.Cell>
-              <Table.Cell> FT </Table.Cell>
+              <Table.Cell> {livePlayerStats?.min} </Table.Cell>
+              <Table.Cell style={{fontSize: '20px'}}> <b>
+                  { market === 'fg3m' 
+                  ? `${getPlayerStat(livePlayerStats, market, true)} - ${getPlayerStat(livePlayerStats, 'fg3a', true)}`
+                  : getPlayerStat(livePlayerStats, market, true) } </b>
+              </Table.Cell>
+              { market === 'pts' && <>
+                <Table.Cell> {livePlayerStats?.fgm} - {livePlayerStats?.fga} </Table.Cell>
+                <Table.Cell> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
+              </>}        
+              <Table.Cell textAlign='center'> {livePlayerStats?.fouls} </Table.Cell>
+              <Table.Cell style={{fontSize: 18}}> 
+                  <b>{ market === 'fg3m' 
+                  ? `${getPlayerStat(seasonPlayerStats, market, false, null, timeframe)} - ${getPlayerStat(seasonPlayerStats, 'fg3a', false, null, timeframe)}`
+                  : getPlayerStat(seasonPlayerStats, market, false, null, timeframe) }</b> 
+                </Table.Cell>
+              <Table.Cell> {getPlayerStat(seasonPlayerStats, 'min', false, '3q', timeframe)} </Table.Cell>
+              <Table.Cell style={{fontSize: 16}}> <b>{getPlayerStat(seasonPlayerStats, market, false, '3q', timeframe)}</b> </Table.Cell>
+              { market === 'pts' && <>
+                <Table.Cell> {getPlayerStat(seasonPlayerStats, 'fgm', false, '3q', timeframe)} - {getPlayerStat(seasonPlayerStats, 'fga', false, '3q', timeframe)} </Table.Cell>
+                <Table.Cell> {getPlayerStat(seasonPlayerStats, 'ftm', false, '3q', timeframe)} - {getPlayerStat(seasonPlayerStats, 'fta', false, '3q', timeframe)} </Table.Cell>
+              </>}
+              <Table.Cell> {getPlayerStat(seasonPlayerStats, 'min', false, '4q', timeframe)} </Table.Cell>
+              <Table.Cell style={{fontSize: 16}}> <b>{getPlayerStat(seasonPlayerStats, market, false, '4q', timeframe)}</b> </Table.Cell>
+              { market === 'pts' && <>
+              <Table.Cell> {getPlayerStat(seasonPlayerStats, 'fgm', false, '4q', timeframe)} - {getPlayerStat(seasonPlayerStats, 'fga', false, '4q', timeframe)} </Table.Cell>
+                <Table.Cell> {getPlayerStat(seasonPlayerStats, 'ftm', false, '4q', timeframe)} - {getPlayerStat(seasonPlayerStats, 'fta', false, '4q', timeframe)} </Table.Cell>
+              </>}
             </Table.Row>
           )
-  }) 
+        }) 
     }
 
     return (
-      <div>
-        <Table compact celled
-          style={{marginBottom: 20}}
-        >
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
-              <Table.HeaderCell rowSpan="2"> Bov Line </Table.HeaderCell>
-              <Table.HeaderCell rowSpan="2"> Season Avg </Table.HeaderCell>
-              <Table.HeaderCell colSpan="5"> Live </Table.HeaderCell>
-              <Table.HeaderCell colSpan="4"> Q3 </Table.HeaderCell>
-              <Table.HeaderCell colSpan="4"> Q4 </Table.HeaderCell>
-            </Table.Row>
-            <Table.Row>
-              <Table.HeaderCell> MIN </Table.HeaderCell>
-              <Table.HeaderCell> PTS </Table.HeaderCell>
+      <Table
+        attached='bottom' 
+        compact 
+        celled
+        style={{marginBottom: 20}}
+      >
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
+            <Table.HeaderCell rowSpan="2"> Bov Line </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 5 : 3}> Live </Table.HeaderCell>
+            <Table.HeaderCell> {timeframeText} </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2}> Q3 </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2}> Q4 </Table.HeaderCell>
+          </Table.Row>
+          <Table.Row>
+            <Table.HeaderCell> MIN </Table.HeaderCell>
+            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            { market === 'pts' && <>
               <Table.HeaderCell> FG </Table.HeaderCell>
               <Table.HeaderCell> FT </Table.HeaderCell>
-              <Table.HeaderCell> Fouls </Table.HeaderCell>
-              <Table.HeaderCell> MIN </Table.HeaderCell>
-              <Table.HeaderCell> PTS </Table.HeaderCell>
+            </>}
+            <Table.HeaderCell> Fouls </Table.HeaderCell>
+            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            <Table.HeaderCell> MIN </Table.HeaderCell>
+            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            { market === 'pts' && <>
               <Table.HeaderCell> FG </Table.HeaderCell>
               <Table.HeaderCell> FT </Table.HeaderCell>
-              <Table.HeaderCell> MIN </Table.HeaderCell>
-              <Table.HeaderCell> PTS </Table.HeaderCell>
+            </>}
+            <Table.HeaderCell> MIN </Table.HeaderCell>
+            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            { market === 'pts' && <>
               <Table.HeaderCell> FG </Table.HeaderCell>
               <Table.HeaderCell> FT </Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {renderPropRows()}
-          </Table.Body>
-        </Table>
-      </div>
+            </>}
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {renderPropRows()}
+        </Table.Body>
+      </Table>
     )
   }
 }

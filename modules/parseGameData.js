@@ -4,8 +4,8 @@ const boxScoreHelpers = require('./boxScoreHelpers');
 const boxScoreMock = require('../utils/mocks/boxScoreMock.json');
 const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
 
-module.exports = async () => {
-  const boxScore = boxScoreMock.props.pageProps.game;
+module.exports = async (boxScore) => {
+  // const boxScore = boxScoreMock.props.pageProps.game;
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
   const isGameActivated = gameStatus > 1;
@@ -16,6 +16,13 @@ module.exports = async () => {
 
   const gameOver = gameStatusText === 'Final' || gameStatus === 3;
   const isEndOfPeriod = fullClock === '00:00:00';
+
+  // if (gid == 22300245) {
+  //   console.log('gameStatusText is ', gameStatusText, ' and gameStatus is ', gameStatus, ' and fullClock is ', fullClock, ' and period is ', period);
+  // }
+
+  // console.log('gameStatusText is ', gameStatusText, ' and gameStatus is ', gameStatus, ' and fullClock is ', fullClock, ' and period is ', period);
+  // console.log('isEndOfPeriod is ', isEndOfPeriod, ' and isGameActivated is ', isGameActivated, ' and gameOver is ', gameOver);
 
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
     const hTeam = homeTeam.statistics;
@@ -33,7 +40,7 @@ module.exports = async () => {
 
     const quarterUpdFn = async () => {
       try {
-        let prevTotalsPull = await knex("box_scores_v2").where({gid: game.gid}).select('totals');
+        let prevTotalsPull = await knex("box_scores_v2").where({gid}).select('totals');
         let quarterTotals = quarterObj(prevTotalsPull[0].totals);
         // console.log('prevTotalsPull in quarterUpdFn for gid ', game.gid, ' is ', prevTotalsPull);
         // console.log('quarterTotals in quarterUpdFn for gid ', game.gid, ' is ', quarterTotals);
@@ -42,13 +49,13 @@ module.exports = async () => {
           prevQuarters: prevTotalsPull[0].totals[0]
         }
       } catch (e) {
-        console.log('error in quarterUpdFn is ', e, ' for gid ', game.gid)
+        console.log('error in quarterUpdFn is ', e, ' for gid ', gid)
       }
     }
 
     if (period === 1) {
       try {
-        const entry = await knex("box_scores_v2").where({gid: game.gid});
+        const entry = await knex("box_scores_v2").where({gid});
         if (!entry[0]) {
           await knex("box_scores_v2").insert({
             gid: gid,
@@ -71,26 +78,25 @@ module.exports = async () => {
     } else if (period === 2 || period === 3 || period === 4) {
       // console.log(`about to pluck for ${qVariable} when period.isEndOfPeriod and current period is ${qVariable}`);
       try {
-        const qTest = await knex("box_scores_v2").where({gid: gid}).pluck(`${qVariable}`);
+        const qTest = await knex("box_scores_v2").where({gid}).pluck(`${qVariable}`);
         if (qTest[0] == null) {
-          try {
-            const qTotals = await quarterUpdFn();
-            await knex("box_scores_v2").where({gid: gid}).update({
-              period_updated: period,
-              clock_last_updated: gameSecs,
-              totals: [totalsObj],
-              [qVariable]: [qTotals.currentQuarter],
-              player_stats: JSON.stringify(playerStats),
-              updated_at: new Date()
-            });
-            console.log(`${qVariable} stats inserted for ${gid}`);
-          } catch (e) {
-            console.log('outer error for updating q2Totals is ', e);
-          }
+          const qTotals = await quarterUpdFn();
+          await knex("box_scores_v2").where({gid}).update({
+            period_updated: period,
+            clock_last_updated: gameSecs,
+            totals: [totalsObj],
+            [qVariable]: [qTotals.currentQuarter],
+            player_stats: JSON.stringify(playerStats),
+            updated_at: new Date()
+          });
+          console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
           await knex("box_scores_v2").where({gid: gid}).update({
             final: true
-          });
+          }); 
+          await knex("schedule").where({gid: gid}).update({
+            stt: "Final"
+          }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
           console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid}`);
@@ -99,9 +105,10 @@ module.exports = async () => {
         console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
       }
     } else {
-      const qTest = await knex("box_scores_v2").where({gid: gid}).pluck('ot');
+      // const qTest = await knex("box_scores_v2").where({gid: gid}).pluck('ot');
       // <-- If No OT in DB and Game is Over --> //
-      if (qTest[0] == null && !isGameActivated) {
+      // if (qTest[0] == null && !isGameActivated) {
+      if (gameOver) {
         try {
           const qTotals = await quarterUpdFn();
           await knex("box_scores_v2").where({gid: gid}).update({

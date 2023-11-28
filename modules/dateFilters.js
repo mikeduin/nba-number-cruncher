@@ -342,6 +342,7 @@ module.exports = {
       return wk;
     } else if (season == 2023) {
       const gameWkArray = [
+        [20221009,20221010,20221011,20221012,20221013,20221014,20221015], // in 2023 update, when pulling from Survivor data, needed to manually add a prelim week here
         [20231016,20231017,20231018,20231019,20231020,20231021,20231022],
         [20231023,20231024,20231025,20231026,20231027,20231028,20231029],
         [20231030,20231031,20231101,20231102,20231103,20231104,20231105],
@@ -534,6 +535,7 @@ module.exports = {
       [20230403, 20230404, 20230405, 20230406, 20230407, 20230408, 20230409]
     ];
     const seasonArray23 = [
+      [20221009,20221010,20221011,20221012,20221013,20221014,20221015], // in 2023 update, when pulling from Survivor data, needed to manually add a prelim week here
       [20231016,20231017,20231018,20231019,20231020,20231021,20231022],
       [20231023,20231024,20231025,20231026,20231027,20231028,20231029],
       [20231030,20231031,20231101,20231102,20231103,20231104,20231105],
@@ -577,7 +579,7 @@ module.exports = {
     } else if (season == 2022) {
       return seasonArray22[week];
     } else if (season == 2023) {
-      return seasonArray22[week];
+      return seasonArray23[week];
     } else {
       console.log('error in date filters - no applicable week found, returning null');
       return null;

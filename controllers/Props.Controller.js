@@ -12,11 +12,19 @@ const { Players, PlayerProps, Schedule } = DbController;
 const { scrapeBovada } = ScraperController;
 const { getTodaysGames } = ScheduleController;
 
-const fetchDailyGameProps = async () => {
-  // const today = moment().tz('America/New_York').format('YYYY-MM-DD');
-  const today = moment().format('YYYY-MM-DD');
+const playerNameMismatches = {
+  // Bovada name : DB name
+  'Bruce Brown Jr.': 'Bruce Brown',
+  'DeAndre Ayton': 'Deandre Ayton',
+  'De’Anthony Melton': "De'Anthony Melton",
+  'Jabari Smith': 'Jabari Smith Jr.',
+  'Jabari Smith Jr': 'Jabari Smith Jr.',
+  'Lonnie Walker': 'Lonnie Walker IV',
+  'Nicolas Claxton': 'Nic Claxton'
+}
 
-  // const dailyGames = await getTodaysGames(today);
+const fetchDailyGameProps = async () => {
+  const today = moment().format('YYYY-MM-DD');
 
   const dailyGames = await Schedule()
     .where({gdte: today})
@@ -28,42 +36,22 @@ const fetchDailyGameProps = async () => {
     .whereIn('team_id', dailyGames.map(game => game.h[0].tid).concat(dailyGames.map(game => game.v[0].tid)))
     .select('player_id', 'player_name', 'team_id');
 
-  console.log('dailyGames are ', dailyGames);
-
-  // console.log('dailyPlayers are ', dailyPlayers);
-
-  // const nowUTC = moment().utc();
   dailyGames.forEach(async game => { 
-
-    // console.log('game is ', game);
-
-    const timeDiff = moment(game.etm).diff(moment(), 'minutes');
-    const gameStarted = timeDiff < 0;
-
-    // TODO: If timeDiff is < 2 mins, log closing prices
-
-
-
-
-    // console.log('timeDiff is ', timeDiff, ' and gameStarted is ', gameStarted);
-
     const bovadaUrl = formBovadaUrl(game);
-    // console.log('bovadaUrl is ', bovadaUrl);
-    
     const gamesPropsOnBovada = await scrapeBovada(bovadaUrl);
     const gamePropPlayersInDb = dailyProps
       .filter(prop => prop.gid === game.gid)
       .map(prop => prop.player_name);
 
-    const playerPropsMap = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb);
-    // for (const [player, props] of Object.entries(playerPropsMap)) {
-    //   // do something with player and props
-    // }
-    // console.log('gameProps are ', gamesPropsOnBovada);
+    // console.log('gamePropPlayersInDb are ', gamePropPlayersInDb);
 
-    // console.log('playerPropsMap is ', playerPropsMap);
+    const playerPropsMap = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb);
     
-    for (const [player, props] of playerPropsMap) {
+    for (let [player, props] of playerPropsMap) {
+      if (Object.keys(playerNameMismatches).includes(player)) {
+        player = playerNameMismatches[player];
+      }
+      
       const playerPropsExists = dailyProps.filter(prop => prop.player_name === player).length;
 
       if (playerPropsExists) {

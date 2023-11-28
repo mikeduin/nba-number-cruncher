@@ -18,6 +18,14 @@ module.exports = (players, teamId, teamAbb) => players.map(player => {
     turnovers: tov 
   } = player.statistics;
 
+  const formMins = (min) => {
+    if (min.slice(0, 2) === 'PT') {
+      return parseInt(min.match(regex)[1]);
+    } else {
+      return parseInt(min.split(':')[0]);
+    }
+  }
+
   return {
     player_id: player.personId,
     player_name: player.name,
@@ -30,7 +38,8 @@ module.exports = (players, teamId, teamAbb) => players.map(player => {
     fouls,
     ftm,
     fta,
-    min: parseInt(min.match(regex)[1]),
+    min: formMins(min),
+    reb,
     pts,
     stl,
     fg3m,
