@@ -142,8 +142,8 @@ class PropsTable extends React.Component {
                   : getPlayerStat(livePlayerStats, market, true) } </b>
               </Table.Cell>
               { market === 'pts' && <>
-                <Table.Cell> {livePlayerStats?.fgm} - {livePlayerStats?.fga} </Table.Cell>
-                <Table.Cell> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
+                <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.fgm} - {livePlayerStats?.fga} </Table.Cell>
+                <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
               </>}        
               <Table.Cell textAlign='center'> {livePlayerStats?.fouls} </Table.Cell>
               <Table.Cell style={{fontSize: 18}}> 
