@@ -34,10 +34,12 @@ const PropsController = require("../controllers/Props.Controller");
 const bovadaScraper = ScraperController.scrapeBovada;
 const { fetchDailyGameProps } = PropsController;
 
+const formBovadaUrl = require("../utils/props/formBovadaUrl");
+
 (async () => {
   // await bovadaScraper();
   await fetchDailyGameProps();
-  // await dbBuilders.updateSchedule();
+  // await dbBuilders.buildSchedule();
   // parseGameData();
 })();
 
@@ -72,23 +74,23 @@ rule.second = 48;
 
 // (async () => { 
 // // const timedDbUpdaters = schedule.scheduleJob(rule, () => {
-//   // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//   // setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-//   // setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-//   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-//   // setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-//   // setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-//   // setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
-//   // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-//   // setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
-//   // setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-//   // setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-//   // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-//   // setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
+//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
+//   setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+//   setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
+//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
+//   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
+//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
+//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
 // // })
 // })()
 
@@ -104,6 +106,18 @@ rule.second = 48;
 setInterval(async () => {
   await fetchDailyGameProps();
 }, 8000)
+
+// setTimeout(async () => {
+//   const scheduleGames = await knex("schedule");
+//   scheduleGames.forEach(async game => {
+//     try {
+//       await knex("schedule").where({gid: game.gid}).update({bovada_url: formBovadaUrl(game)});
+//       console.log('bovada_url updated for ', game.gid);
+//     } catch (e) {
+//       console.log('error updating bovada_url for ', game.gid, ' is ', e);
+//     }
+//   })
+// }, 1000)
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
@@ -177,6 +191,17 @@ router.get("/todayGameStatus", (req, res, next) => {
     activeGames: activeGames.map(g => g.gid),
     completedGames: completedGames
   })
+})
+
+router.post("/api/updateBovadaUrl", async (req, res, next) => {
+  const { gid, url } = req.body;
+  try {
+    await knex("schedule").where({gid: gid}).update({bovada_url: url});
+    res.send({message: 'success'});
+  } catch (e) {
+    console.log('error updating bovada url for ', gid, ' is ', e);
+    res.send({message: 'error'});
+  }
 })
 
 router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
@@ -463,7 +488,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
     .where('s.gweek', week - 1)
     .where('s.season_year', seasonYear)
     .where('s.season_name', seasonName)
-    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
+    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url')
     .orderBy('s.etm')
     .then(async (games) => {
       // console.log('games are ', games);

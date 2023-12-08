@@ -15,12 +15,15 @@ const { getTodaysGames } = ScheduleController;
 const playerNameMismatches = {
   // Bovada name : DB name
   'Bruce Brown Jr.': 'Bruce Brown',
+  'Cameron Reddish': 'Cam Reddish',
   'DeAndre Ayton': 'Deandre Ayton',
   'De’Anthony Melton': "De'Anthony Melton",
   'Jabari Smith': 'Jabari Smith Jr.',
   'Jabari Smith Jr': 'Jabari Smith Jr.',
   'Lonnie Walker': 'Lonnie Walker IV',
-  'Nicolas Claxton': 'Nic Claxton'
+  'Nicolas Claxton': 'Nic Claxton',
+  'PJ Washington': 'P.J. Washington',
+  'Trey Murphy': 'Trey Murphy III',
 }
 
 const fetchDailyGameProps = async () => {
@@ -29,7 +32,7 @@ const fetchDailyGameProps = async () => {
   const dailyGames = await Schedule()
     .where({gdte: today})
     .whereNot({stt: 'Final'})
-    .select('gid', 'etm', 'h', 'v');
+    .select('gid', 'etm', 'h', 'v', 'bovada_url');
   const dailyProps = await PlayerProps().where({gdte: today});
   // fetch the players who have teams that are found as either h[0].tid or v[0].tid in the dailyGames array
   const dailyPlayers = await Players()
@@ -37,8 +40,8 @@ const fetchDailyGameProps = async () => {
     .select('player_id', 'player_name', 'team_id');
 
   dailyGames.forEach(async game => { 
-    const bovadaUrl = formBovadaUrl(game);
-    const gamesPropsOnBovada = await scrapeBovada(bovadaUrl);
+    // const bovadaUrl = formBovadaUrl(game);
+    const gamesPropsOnBovada = await scrapeBovada(game.bovada_url);
     const gamePropPlayersInDb = dailyProps
       .filter(prop => prop.gid === game.gid)
       .map(prop => prop.player_name);
@@ -57,7 +60,7 @@ const fetchDailyGameProps = async () => {
       if (playerPropsExists) {
         // update the entry
         try {
-          await PlayerProps().where({player_name: player}).update({
+          await PlayerProps().where({player_name: player, gid: game.gid}).update({
             ...props,
             updated_at: new Date()
           });

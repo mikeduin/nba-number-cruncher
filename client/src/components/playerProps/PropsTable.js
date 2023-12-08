@@ -4,21 +4,7 @@ import { Image, Table } from 'semantic-ui-react';
 import '../styles/gamblecast.css';
 // find and import player logo image references
 import logos from '../../modules/logos';
-import { Link } from 'react-router-dom';
-
-const marketMappers = {
-  'Total Points': 'pts',
-  'Total Rebounds': 'reb',
-  'Total Assists': 'ast',
-  'Total Steals': 'stl',
-  'Total Blocks': 'blk',
-  'Total Turnovers': 'tov',
-  'Total Made 3 Points Shots': 'fg3m',
-  'Total Points, Rebounds and Assists': 'pts+reb+ast',
-  'Total Points and Rebounds': 'pts+reb',
-  'Total Points and Assists': 'pts+ast',
-  'Total Rebounds and Assists': 'reb+ast'
-};
+import { Link } from 'react-router-dom';  
 
 const headerMappers = {
   'pts': 'PTS',
@@ -96,7 +82,7 @@ class PropsTable extends React.Component {
   render () {
     const { market, playerProps, playerStats, playersMetadata, timeframe, timeframeText } = this.props;
 
-    console.log('playerProps in PropsTable are ', playerProps);
+    // console.log('playerProps in PropsTable are ', playerProps);
     // console.log('playersMetadata in PropsTable are ', playersMetadata);
     // console.log('playerStats in PropsTable are ', playerStats);
 
@@ -165,6 +151,12 @@ class PropsTable extends React.Component {
                   ? `${getPlayerStat(seasonPlayerStats, market, false, null, timeframe)} - ${getPlayerStat(seasonPlayerStats, 'fg3a', false, null, timeframe)}`
                   : getPlayerStat(seasonPlayerStats, market, false, null, timeframe) }</b> 
                 </Table.Cell>
+              <Table.Cell style={{fontSize: 16}}> 
+                {(Math.round((getPlayerStat(seasonPlayerStats, 'min', false, '3q', timeframe) + getPlayerStat(seasonPlayerStats, 'min', false, '4q', timeframe)) * 10) / 10)}
+              </Table.Cell>
+              <Table.Cell style={{fontSize: 16}}> 
+                <b>{(Math.round((getPlayerStat(seasonPlayerStats, market, false, '3q', timeframe) + getPlayerStat(seasonPlayerStats, market, false, '4q', timeframe)) * 10) / 10)}</b> 
+              </Table.Cell>
               <Table.Cell> {getPlayerStat(seasonPlayerStats, 'min', false, '3q', timeframe)} </Table.Cell>
               <Table.Cell style={{fontSize: 16}}> <b>{getPlayerStat(seasonPlayerStats, market, false, '3q', timeframe)}</b> </Table.Cell>
               { market === 'pts' && <>
@@ -193,10 +185,11 @@ class PropsTable extends React.Component {
           <Table.Row>
             <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
             <Table.HeaderCell rowSpan="2"> Bov Line </Table.HeaderCell>
-            <Table.HeaderCell colSpan={market === 'pts' ? 5 : 3}> Live </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 5 : 3} textAlign='center'> Live </Table.HeaderCell>
             <Table.HeaderCell> {timeframeText} </Table.HeaderCell>
-            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2}> Q3 </Table.HeaderCell>
-            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2}> Q4 </Table.HeaderCell>
+            <Table.HeaderCell colSpan="2" textAlign='center' style={{backgroundColor: '#959EE7'}}> 2H </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#C793ED'}}> Q3 </Table.HeaderCell>
+            <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#E79595'}}> Q4 </Table.HeaderCell>
           </Table.Row>
           <Table.Row>
             <Table.HeaderCell> MIN </Table.HeaderCell>
@@ -205,19 +198,25 @@ class PropsTable extends React.Component {
               <Table.HeaderCell> FG </Table.HeaderCell>
               <Table.HeaderCell> FT </Table.HeaderCell>
             </>}
-            <Table.HeaderCell> Fouls </Table.HeaderCell>
+            <Table.HeaderCell> PF </Table.HeaderCell>
+            {/* season */}
             <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
-            <Table.HeaderCell> MIN </Table.HeaderCell>
-            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            {/* 2H */}
+            <Table.HeaderCell style={{backgroundColor: '#BCC7F0'}}> MIN </Table.HeaderCell>
+            <Table.HeaderCell style={{backgroundColor: '#BCC7F0'}}> {headerMappers[market]} </Table.HeaderCell>
+            {/* 3Q */}
+            <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> MIN </Table.HeaderCell>
+            <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> {headerMappers[market]} </Table.HeaderCell>
             { market === 'pts' && <>
-              <Table.HeaderCell> FG </Table.HeaderCell>
-              <Table.HeaderCell> FT </Table.HeaderCell>
+              <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> FG </Table.HeaderCell>
+              <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> FT </Table.HeaderCell>
             </>}
-            <Table.HeaderCell> MIN </Table.HeaderCell>
-            <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
+            {/* 4Q */}
+            <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> MIN </Table.HeaderCell>
+            <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> {headerMappers[market]} </Table.HeaderCell>
             { market === 'pts' && <>
-              <Table.HeaderCell> FG </Table.HeaderCell>
-              <Table.HeaderCell> FT </Table.HeaderCell>
+              <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> FG </Table.HeaderCell>
+              <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> FT </Table.HeaderCell>
             </>}
           </Table.Row>
         </Table.Header>

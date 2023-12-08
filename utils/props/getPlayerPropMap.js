@@ -16,15 +16,15 @@ const buildActivePropsMap = players => {
   return activePropsMap;
 }
 
-module.exports = async (gameProps, gamePropPlayersInDb) => {
+module.exports = async (gamePropsOnBovada, gamePropPlayersInDb) => {
   const playerPropsMap = new Map();
   const activePropsMap = buildActivePropsMap(gamePropPlayersInDb);
 
-  // console.log('gameProps are ', gameProps);
+  // console.log('gamePropsOnBovada are ', gamePropsOnBovada);
   // console.log('activePropsMap is ', activePropsMap);
 
-  if (gameProps) {
-    gameProps.forEach((prop) => {
+  if (gamePropsOnBovada) {
+    gamePropsOnBovada.forEach((prop) => {
       const playerName = prop.player;
       const dbColumn = mapBovadaMarketToDbColumn(prop.market);
   

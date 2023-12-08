@@ -13,7 +13,7 @@ class GambleCast extends React.Component {
     fetchPlayerProps();
     setInterval(() => {
       fetchPlayerProps();
-    }, 5000)
+    }, 3000)
   }
 
   componentDidUpdate (prevProps) {

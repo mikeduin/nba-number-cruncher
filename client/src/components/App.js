@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
+import ToastContainer from './ToastContainer';
 
 import { fetchWeek, getPlayerMetadata, checkActiveGames } from '../actions';
 
@@ -30,6 +31,7 @@ class App extends React.Component {
           <BrowserRouter>
             <div>
               <Header players={this.props.players} />
+              <ToastContainer />
               <Route path='/' exact component={Schedule} />
               <Route path='/schedule' exact component={Schedule} />
               <Route path='/schedule/:date' component={Schedule} />

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import axios from 'axios';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { Accordion, Button, Segment } from 'semantic-ui-react';
+import { Accordion, Button, Input, Segment } from 'semantic-ui-react';
 import PropsTable from './playerProps/PropsTable';
+import { toast } from 'react-semantic-toasts';
 import { findKey } from 'lodash';
 
 const marketMappers = {
@@ -40,18 +42,16 @@ class PlayerProps extends React.Component {
     playerProps: this.props.playerProps.data.filter(prop => prop.gid === this.props.game.gid),
     lastUpdated: null,
     activeProp: 'pts',
-    activeTimeframe: 'full'
+    activeTimeframe: 'full',
+    bovadaUrl: ''
   };
 
   componentDidMount () {
-    // const { game, props } = this.props;
-    // console.log('props are ', props); 
     console.log('playerProps are ', this.state.playerProps);
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.playerProps.fetchedAt !== prevProps.playerProps.fetchedAt) {
-      console.log('updating player props in PlayerProps');
       this.setState({
         playerProps: this.props.playerProps.data.filter(prop => prop.gid === this.props.game.gid),
         lastUpdated: this.props.playerProps.fetchedAt
@@ -59,11 +59,39 @@ class PlayerProps extends React.Component {
     }
   }
 
+  updateBovadaUrl = async (url) => {
+    const gid = this.props.game.gid;
+    if (this.state.bovadaUrl.length) {
+      const response = await axios.post('/api//updateBovadaUrl', {gid, url: this.state.bovadaUrl});
+      if (response.status === 200) {
+        console.log('bovada URL updated');
+        toast({
+          type: 'warning',
+          icon: 'check circle',
+          color: 'violet',
+          title: 'URL updated',
+          description: `Bovada URL has been successfully updated`,
+          animation: 'slide down',
+          time: 3000
+        });
+        // react-semantic-toasts
+      }
+    } else {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'URL Not Updated',
+        description: `No URL was input, Bovada URL was not updated`,
+        animation: 'slide down',
+        time: 3000
+      });
+    }
+  }
+
   render () {
     const { boxScore, game, playersMetadata } = this.props;
     const { activeProp, activeTimeframe, playerProps } = this.state;
-
-    // console.log('boxScore in PlayerProps are ', boxScore);
 
     const homeTeamName = game.h[0].tn;
     const awayTeamName = game.v[0].tn;
@@ -74,7 +102,12 @@ class PlayerProps extends React.Component {
           attached='top'
           textAlign='right'
         >
-          <div style={{display: 'inline-flex', alignItems: 'center'}}>
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
+            <div style={{marginRight: 10}}><i>BOVADA URL:</i></div>
+            <Input placeholder={game.bovada_url} style={{width: 700}} onChange={(e) => {this.setState({bovadaUrl: e.target.value})}}/>
+            <Button primary style={{marginLeft: 10}} onClick={() => this.updateBovadaUrl()}>Update URL</Button>
+          </div>
+          <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
             <div style={{marginRight: 10}}><i>MARKET:</i></div>
             {Object.values(marketMappers).map(market => 
               <Button 
@@ -87,7 +120,8 @@ class PlayerProps extends React.Component {
               </Button>
             )}
           </div>
-          <div style={{display: 'inline-flex', alignItems: 'center'}}>
+
+          <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
             <div style={{marginRight: 10}}><i>SHOW AVERAGES FOR:</i></div>
             {Object.keys(timeMappers).map(timeframe => 
               <Button 
@@ -100,6 +134,7 @@ class PlayerProps extends React.Component {
               </Button>
             )}
           </div>
+
         </Segment>
         <PropsTable 
           playerProps={playerProps}

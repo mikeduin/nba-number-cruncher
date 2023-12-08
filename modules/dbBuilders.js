@@ -3,6 +3,7 @@ const axios = require("axios");
 const moment = require("moment");
 const momentTz = require("moment-timezone")
 const _ = require('lodash');
+const formBovadaUrl = require("../utils/props/formBovadaUrl");
 
 const dateFilters = require("./dateFilters");
 const buildGameStints = require("./buildGameStints");
@@ -253,6 +254,74 @@ module.exports = {
       })
     })
   },
+  // buildSchedule: () => {
+  //   // This function builds out the initial schedule and should only need to be run at the beginning of each season
+  //   // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
+  //   axios.get(leagueScheduleUrl).then(response => {
+  //     response.data.lscd.forEach(month => {
+
+  //       if (month.mscd.mon === "December") {
+  //         month.mscd.g.forEach(async game => {
+  //           let season_name = game.gweek ? 'regular' : null;
+  //           let hObj = {
+  //             tid: game.h.tid,
+  //             re: game.h.re,
+  //             ta: game.h.ta,
+  //             tn: game.h.tn,
+  //             tc: game.h.tc,
+  //             s: game.h.s
+  //           };
+  //           let vObj = {
+  //             tid: game.v.tid,
+  //             re: game.v.re,
+  //             ta: game.v.ta,
+  //             tn: game.v.tn,
+  //             tc: game.v.tc,
+  //             s: game.v.s
+  //           };
+
+  //           const dbGame = await knex("schedule").where({gid: game.gid});
+
+  //           if (!dbGame.length) {
+  //             knex("schedule")
+  //             .insert(
+  //               {
+  //                 gid: game.gid,
+  //                 gcode: game.gcode,
+  //                 gdte: game.gdte,
+  //                 an: game.an,
+  //                 ac: game.ac,
+  //                 as: game.as,
+  //                 etm: moment(game.etm).subtract(3, 'hours'),
+  //                 gweek: game.gweek,
+  //                 h: [hObj],
+  //                 v: [vObj],
+  //                 stt: game.stt,
+  //                 // BEGIN HARD-CODED VALUES
+  //                 season_year: 2023,
+  //                 season_name,
+  //                 display_year: '2023-24',
+  //                 // END HARD-CODED VALUES
+  //                 bovada_url: formBovadaUrl(game),
+  //                 updated_at: new Date()
+  //               },
+  //               "*"
+  //             )
+  //             .then(ent => {
+  //               console.log(ent[0].gcode, " entered in DB");
+  //             });
+
+  //           }
+
+
+  //         });
+
+  //       }
+
+
+  //     });
+  //   });
+  // },
   buildSchedule: () => {
     // This function builds out the initial schedule and should only need to be run at the beginning of each season
     // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
@@ -285,7 +354,7 @@ module.exports = {
                 an: game.an,
                 ac: game.ac,
                 as: game.as,
-                etm: moment(game.etm),
+                etm: moment(game.etm).subtract(3, 'hours'),
                 gweek: game.gweek,
                 h: [hObj],
                 v: [vObj],
@@ -295,6 +364,7 @@ module.exports = {
                 season_name,
                 display_year: '2023-24',
                 // END HARD-CODED VALUES
+                bovada_url: formBovadaUrl(game),
                 updated_at: new Date()
               },
               "*"
@@ -306,6 +376,69 @@ module.exports = {
       });
     });
   },
+  // buildSchedule: () => {
+  //   // This function builds out the initial schedule and should only need to be run at the beginning of each season
+  //   // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
+  //   axios.get(leagueScheduleUrl).then(response => {
+  //     response.data.lscd.forEach(month => {
+
+  //       if (month.mscd.mon === "December") {
+  //         month.mscd.g.forEach(async game => {
+  //           let season_name = game.gweek ? 'regular' : null;
+  //           let hObj = {
+  //             tid: game.h.tid,
+  //             re: game.h.re,
+  //             ta: game.h.ta,
+  //             tn: game.h.tn,
+  //             tc: game.h.tc,
+  //             s: game.h.s
+  //           };
+  //           let vObj = {
+  //             tid: game.v.tid,
+  //             re: game.v.re,
+  //             ta: game.v.ta,
+  //             tn: game.v.tn,
+  //             tc: game.v.tc,
+  //             s: game.v.s
+  //           };
+
+  //           const gameLookup = await knex("schedule").where({ gid: game.gid });
+
+  //           if (!gameLookup.length) {
+  //             knex("schedule")
+  //               .insert(
+  //                 {
+  //                   gid: game.gid,
+  //                   gcode: game.gcode,
+  //                   gdte: game.gdte,
+  //                   an: game.an,
+  //                   ac: game.ac,
+  //                   as: game.as,
+  //                   etm: moment(game.etm).subtract(3, 'hours'),
+  //                   gweek: game.gweek,
+  //                   h: [hObj],
+  //                   v: [vObj],
+  //                   stt: game.stt,
+  //                   // BEGIN HARD-CODED VALUES
+  //                   season_year: 2023,
+  //                   season_name,
+  //                   display_year: '2023-24',
+  //                   // END HARD-CODED VALUES
+  //                   updated_at: new Date()
+  //                 },
+  //                 "*"
+  //               )
+  //               .then(ent => {
+  //                 console.log(ent[0].gcode, " entered in DB");
+  //               });
+  //           } else {
+  //             console.log(game.gid,  " already exists in DB");
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  // },
   updateSchedule: () => {
     // let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
