@@ -1,7 +1,7 @@
 const express = require('express');
-// const puppeteer = require('puppeteer');
-const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer-core');
+// const chromium = require('chrome-aws-lambda');
 const axios = require("axios");
 const cheerio = require('cheerio');
 const app = express();
