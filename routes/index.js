@@ -72,8 +72,8 @@ rule.second = 48;
 // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 1000);
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
-(async () => { 
-// const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+// (async () => { 
+const timedDbUpdaters = schedule.scheduleJob(rule, () => {
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
@@ -91,8 +91,8 @@ rule.second = 48;
   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-// })
-})()
+})
+// })()
 
 // setTimeout(async () => {
 //   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
