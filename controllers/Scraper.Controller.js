@@ -10,30 +10,28 @@ const parseBovadaLines = require('../utils/props/parseBovadaLines');
 
 module.exports = {
   scrapeBovada: async (gameUrl) => {
-    // let browser;
+    let browser;
 
     // const executablePath = await chromium.executablePath;
 
-    // // if (app.get('env') !== 'development') {
-    //   const browser = await puppeteer.launch({
-    //     executablePath,
-    //     args: chromium.args,
-    //     headless: chromium.headless,
-    // });
-    // // } else {
-    //   // browser = await puppeteer.launch({
-    //   //   executablePath: '/opt/homebrew/bin/chromium',
-    //   //   args: ['--no-sandbox']
-    //   // });
-    // }
+    if (app.get('env') !== 'development') {
+      browser = await puppeteer.launch({
+        args: ['--no-sandbox']
+      });
+    } else {
+      browser = await puppeteer.launch({
+        executablePath: '/opt/homebrew/bin/chromium',
+        args: ['--no-sandbox']
+      });
+    }
 
 
 
     try {
-      const browser = await puppeteer.launch({
-        executablePath: '/opt/homebrew/bin/chromium',
-        args: ['--no-sandbox']
-      });
+      // const browser = await puppeteer.launch({
+      //   executablePath: '/opt/homebrew/bin/chromium',
+      //   args: ['--no-sandbox']
+      // });
       const page = await browser.newPage();
   
       // Navigate to the URL
