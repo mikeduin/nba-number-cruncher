@@ -8,7 +8,8 @@ module.exports = {
   scrapeBovada: async (gameUrl) => {
     try {
       const browser = await puppeteer.launch({
-        executablePath: '/opt/homebrew/bin/chromium'
+        executablePath: '/opt/homebrew/bin/chromium',
+        args: ['--no-sandbox']
       });
       const page = await browser.newPage();
   

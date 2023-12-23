@@ -16,14 +16,20 @@ const playerNameMismatches = {
   // Bovada name : DB name
   'Bruce Brown Jr.': 'Bruce Brown',
   'Cameron Reddish': 'Cam Reddish',
+  'Cam Johnson': 'Cameron Johnson',
   'DeAndre Ayton': 'Deandre Ayton',
   'De’Anthony Melton': "De'Anthony Melton",
   'Jabari Smith': 'Jabari Smith Jr.',
   'Jabari Smith Jr': 'Jabari Smith Jr.',
+  'Kelly Oubre Jr': 'Kelly Oubre Jr.',
   'Lonnie Walker': 'Lonnie Walker IV',
+  'Marcus Morris': 'Marcus Morris Sr.',
   'Nicolas Claxton': 'Nic Claxton',
   'PJ Washington': 'P.J. Washington',
+  'Tim Hardaway Jr': 'Tim Hardaway Jr.',
+  'TJ McConnell': 'T.J. McConnell',
   'Trey Murphy': 'Trey Murphy III',
+  'Wendell Carter Jr': 'Wendell Carter Jr.',
 }
 
 const fetchDailyGameProps = async () => {

@@ -951,7 +951,7 @@ module.exports = {
           "*"
         )
         .then(team => {
-          console.log('team is ', team);
+          // console.log('team is ', team);
           console.log(team[0].team_name, " has been updated in base db");
         });
     });

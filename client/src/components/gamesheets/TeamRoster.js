@@ -10,7 +10,7 @@ class TeamRoster extends React.Component {
 
   addPlayers = (team, segment) => {
     let seg='full';
-    console.log('team is ', team);
+    // console.log('team is ', team);
     return team.map(player => {
       return (
         <Table.Row key={player.id}>
