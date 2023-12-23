@@ -12,7 +12,8 @@ module.exports = {
 
     if (app.get('env') !== 'development') {
       browser = await puppeteer.launch({
-        args: ['--no-sandbox']
+        args: ['--no-sandbox'],
+        headless: true
       });
     } else {
       browser = await puppeteer.launch({
