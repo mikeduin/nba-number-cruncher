@@ -1,16 +1,33 @@
+const express = require('express');
 const puppeteer = require('puppeteer');
 const axios = require("axios");
 const cheerio = require('cheerio');
+const app = express();
 
 const parseBovadaLines = require('../utils/props/parseBovadaLines');
 
 module.exports = {
   scrapeBovada: async (gameUrl) => {
-    try {
-      const browser = await puppeteer.launch({
+    let browser;
+
+    if (app.get('env') !== 'development') {
+      browser = await puppeteer.launch({
+        args: ['--no-sandbox']
+      });
+    } else {
+      browser = await puppeteer.launch({
         executablePath: '/opt/homebrew/bin/chromium',
         args: ['--no-sandbox']
       });
+    }
+
+
+
+    try {
+      // const browser = await puppeteer.launch({
+      //   executablePath: '/opt/homebrew/bin/chromium',
+      //   args: ['--no-sandbox']
+      // });
       const page = await browser.newPage();
   
       // Navigate to the URL
