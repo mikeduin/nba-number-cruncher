@@ -53,6 +53,12 @@ module.exports = async (boxScore) => {
       }
     }
 
+    if (gid === 22300399) {
+      console.log('hPlayerStats are ', hPlayerStats);
+    }
+
+    // console.log('playerStats are ', playerStats);
+
     if (period === 1) {
       try {
         const entry = await knex("box_scores_v2").where({gid});
@@ -99,7 +105,10 @@ module.exports = async (boxScore) => {
           }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
-          console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid}`);
+          console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid} -- just updating player stats`);
+          await knex("box_scores_v2").where({gid}).update({
+            player_stats: JSON.stringify(playerStats),
+          });
         }
       } catch (e) {
         console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
@@ -120,6 +129,9 @@ module.exports = async (boxScore) => {
             final: true,
             updated_at: new Date()
           });
+          await knex("schedule").where({gid: gid}).update({
+            stt: "Final"
+          }); 
           console.log('OT stats inserted for ', gid);
         } catch (e) {
           console.log('error updating ot totals is ', e);

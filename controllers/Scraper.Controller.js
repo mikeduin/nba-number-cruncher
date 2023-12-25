@@ -14,16 +14,16 @@ module.exports = {
 
     // const executablePath = await chromium.executablePath;
 
-    if (app.get('env') !== 'development') {
-      browser = await puppeteer.launch({
-        args: ['--no-sandbox']
-      });
-    } else {
+    // if (app.get('env') !== 'development') {
+    //   browser = await puppeteer.launch({
+    //     args: ['--no-sandbox']
+    //   });
+    // } else {
       browser = await puppeteer.launch({
         executablePath: '/opt/homebrew/bin/chromium',
         args: ['--no-sandbox']
       });
-    }
+    // }
 
 
 
