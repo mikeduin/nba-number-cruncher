@@ -374,7 +374,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
     if (isEndOfPeriod || gameOver) {
       try {
       const qTotals = await quarterUpdFn();
-      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, qTotals))
+      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, qTotals, playerStats))
       } catch (e) {
         console.log('error setting end of game q totals is ', e);
       } 
