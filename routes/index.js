@@ -103,9 +103,12 @@ rule.second = 48;
 //   // dbMappers.mapSegmentedPlayerData()
 // }, 2000)
 
-setInterval(async () => {
-  await fetchDailyGameProps();
-}, 8000)
+if (process.env.NODE_ENV !== 'production') {
+  setInterval(async () => {
+    await fetchDailyGameProps();
+  }, 8000)
+}
+
 
 // setTimeout(async () => {
 //   const scheduleGames = await knex("schedule");
