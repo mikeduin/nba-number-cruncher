@@ -222,6 +222,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
     blk: 0,
     tov: 0,
     fg3m: 0,
+    fg3a: 0,
     fgm: 0,
     fga: 0,
     ftm: 0,
