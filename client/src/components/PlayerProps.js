@@ -59,10 +59,10 @@ class PlayerProps extends React.Component {
     }
   }
 
-  updateBovadaUrl = async (url) => {
+  updateBovadaUrl = async () => {
     const gid = this.props.game.gid;
     if (this.state.bovadaUrl.length) {
-      const response = await axios.post('/api//updateBovadaUrl', {gid, url: this.state.bovadaUrl});
+      const response = await axios.post('/api/updateBovadaUrl', {gid, url: this.state.bovadaUrl});
       if (response.status === 200) {
         console.log('bovada URL updated');
         toast({
@@ -89,6 +89,23 @@ class PlayerProps extends React.Component {
     }
   }
 
+  removeDuplicateProps = async (url) => {
+    const gid = this.props.game.gid;
+    const response = await axios.delete(`/api/deleteDuplicateProps/${gid}`);
+    if (response.status === 200) {
+      console.log('Duplicate props removed');
+      toast({
+        type: 'warning',
+        icon: 'check circle',
+        color: 'violet',
+        title: 'Duplicates deleted',
+        description: `Duplicate props have been removed for game ${gid}`,
+        animation: 'slide down',
+        time: 3000
+      });
+    }
+  }
+
   render () {
     const { boxScore, game, playersMetadata } = this.props;
     const { activeProp, activeTimeframe, playerProps } = this.state;
@@ -106,6 +123,7 @@ class PlayerProps extends React.Component {
             <div style={{marginRight: 10}}><i>BOVADA URL:</i></div>
             <Input placeholder={game.bovada_url} style={{width: 700}} onChange={(e) => {this.setState({bovadaUrl: e.target.value})}}/>
             <Button primary style={{marginLeft: 10}} onClick={() => this.updateBovadaUrl()}>Update URL</Button>
+            <Button color='red' style={{marginLeft: 10}} onClick={() => this.removeDuplicateProps()}>Remove Dups</Button>
           </div>
           <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
             <div style={{marginRight: 10}}><i>MARKET:</i></div>

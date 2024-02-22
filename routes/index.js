@@ -35,6 +35,10 @@ const { fetchDailyGameProps } = PropsController;
 
 const formBovadaUrl = require("../utils/props/formBovadaUrl");
 
+(async () => {
+  await fetchDailyGameProps();
+})();
+
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -61,12 +65,6 @@ rule.tz = 'America/Los_Angeles';
 rule.hour = 02;
 rule.minute = 19;
 rule.second = 48;
-
-// setTimeout(() => {
-//   updateTeamStats.updateFullTeamBuilds()
-// }, 1000)
-// setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 1000);
-// setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
 // (async () => { 
 schedule.scheduleJob(rule, async () => {
@@ -97,20 +95,11 @@ schedule.scheduleJob(rule, async () => {
 }) 
 // })() 
 
-// setTimeout(async () => {
-//   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
-//   // const data = today.data;
-//   // const seasonYear = data.teamSitesOnly.seasonYear;
-//   // const statsStage = data.teamSitesOnly.statsStage;
-//   // console.log(seasonYear)
-//   // dbMappers.mapSegmentedPlayerData()
-// }, 2000)
-
-// if (process.env.NODE_ENV !== 'production') {
-//   setInterval(async () => {
-//     await fetchDailyGameProps();
-//   }, 8000)
-// }
+if (process.env.NODE_ENV !== 'production') {
+  setInterval(async () => {
+    await fetchDailyGameProps();
+  }, 8000)
+}
 
 
 // setTimeout(async () => {
@@ -197,6 +186,17 @@ router.get("/todayGameStatus", (req, res, next) => {
     activeGames: activeGames.map(g => g.gid),
     completedGames: completedGames
   })
+})
+
+router.delete("/api/deleteDuplicateProps/:gid", async (req, res, next) => {
+  const gid = req.params.gid;
+  try {
+    await PropsController.deleteDuplicateProps(gid);
+    res.send({message: 'success'});
+  } catch (e) {
+    console.log('error updating bovada url for ', gid, ' is ', e);
+    res.send({message: 'error'});
+  }
 })
 
 router.post("/api/updateBovadaUrl", async (req, res, next) => {

@@ -1,16 +1,11 @@
 const express = require('express');
 const moment = require('moment-timezone');
-const formBovadaUrl = require('../utils/props/formBovadaUrl');
 const getPlayerPropsMap = require('../utils/props/getPlayerPropMap');
-const app = express();
-
 const ScraperController = require('./Scraper.Controller');
-const ScheduleController = require('./Schedule.Controller');
 const DbController = require('./Db.Controller');
 
 const { Players, PlayerProps, Schedule } = DbController;
 const { scrapeBovada } = ScraperController;
-const { getTodaysGames } = ScheduleController;
 
 const playerNameMismatches = {
   // Bovada name : DB name
@@ -51,7 +46,6 @@ const fetchDailyGameProps = async () => {
     .select('player_id', 'player_name', 'team_id');
 
   dailyGames.forEach(async game => { 
-    // const bovadaUrl = formBovadaUrl(game);
     const gamesPropsOnBovada = await scrapeBovada(game.bovada_url);
     const gamePropPlayersInDb = dailyProps
       .filter(prop => prop.gid === game.gid)
@@ -99,4 +93,28 @@ const fetchDailyGameProps = async () => {
   })
 }
 
-module.exports = { fetchDailyGameProps };
+const deleteDuplicateProps = async (gid) => {
+  const gameProps = await PlayerProps()
+    .where({gid});
+
+    const groupedByDuplicateProps = gameProps.reduce((acc, curr) => {
+      const key = `${curr.player_name}`; // Define your own key based on what you consider a duplicate
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(curr);
+      return acc;
+    }, {});
+  
+    const duplicateIds = Object.values(groupedByDuplicateProps)
+      .filter(group => group.length > 1)
+      .map(group => group.slice(1).map(item => item.id)) // Exclude the first item of each group
+      .flat();
+  
+    // Delete the props with the duplicate IDs
+    for (const id of duplicateIds) {
+      await PlayerProps().where({ id }).del();
+    }
+}
+
+module.exports = { deleteDuplicateProps, fetchDailyGameProps };

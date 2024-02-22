@@ -102,3 +102,18 @@ export const startPeriodSec = (per) => {
     return (2880 + ((per-4)*300));
   };
 }
+
+export const gameTimeToMinutes = (timeString) => {
+  if (timeString && timeString.includes(':')) {
+    const [minutes, seconds] = timeString.split(':').map(Number);
+    return minutes + seconds / 60;
+  } else {
+    return 0;
+  }
+}
+
+export const minutesToGameTime = (minutes) => {
+  const wholeMinutes = Math.floor(minutes);
+  const seconds = Math.round((minutes - wholeMinutes) * 60);
+  return `${wholeMinutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}

@@ -1,20 +1,21 @@
 import React from 'react';
 import { Button, Header, Image, Segment, Tab, Table, TabPane, Grid } from 'semantic-ui-react';
+import { gameTimeToMinutes, minutesToGameTime } from '../../modules/gameTimeFuncs';
 
 const renderStatCells = (periods) => {
   return periods.map((period, i) => {
     return (
-      <>
+      <React.Fragment key={i}>
         <Table.Cell key={i}>
           {period.min}
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell style={{whiteSpace: 'nowrap'}}>
           {period.fgm}-{period.fga}
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell style={{whiteSpace: 'nowrap'}}>
           {period.fg3m}-{period.fg3a}
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell style={{whiteSpace: 'nowrap'}}>
           {period.ftm}-{period.fta}
         </Table.Cell>
         <Table.Cell>
@@ -31,20 +32,79 @@ const renderStatCells = (periods) => {
         </Table.Cell>
         {/* <Table.Cell>
           {period.tov}
-        </Table.Cell>
+        </Table.Cell> */}
         <Table.Cell>
           {period.fouls}
-        </Table.Cell> */}
+        </Table.Cell>
         <Table.Cell>
           {period.pts}
         </Table.Cell>
-      </>
+      </React.Fragment>
     )
   })
 }
 
+const renderHeaders = () => <>
+    <Table.HeaderCell> Min </Table.HeaderCell>
+    <Table.HeaderCell> FG </Table.HeaderCell>
+    <Table.HeaderCell> 3PT </Table.HeaderCell>
+    <Table.HeaderCell> FT </Table.HeaderCell>
+    <Table.HeaderCell> REB </Table.HeaderCell>
+    <Table.HeaderCell> AST </Table.HeaderCell>
+    <Table.HeaderCell> STL </Table.HeaderCell>
+    <Table.HeaderCell> BLK </Table.HeaderCell>
+    {/* <Table.HeaderCell> TOV </Table.HeaderCell> */}
+    <Table.HeaderCell> PF </Table.HeaderCell>
+    <Table.HeaderCell> PTS </Table.HeaderCell>
+</>
+
+const sumQuarterStats = (periods) => {
+  return periods.reduce((acc, period) => {
+    return {
+      min: acc.min + gameTimeToMinutes(period.min),
+      fgm: acc.fgm + period.fgm,
+      fga: acc.fga + period.fga,
+      fg3m: acc.fg3m + period.fg3m,
+      fg3a: acc.fg3a + period.fg3a,
+      ftm: acc.ftm + period.ftm,
+      fta: acc.fta + period.fta,
+      reb: acc.reb + period.reb,
+      ast: acc.ast + period.ast,
+      stl: acc.stl + period.stl,
+      blk: acc.blk + period.blk,
+      tov: acc.tov + period.tov,
+      fouls: acc.fouls + period.fouls,
+      pts: acc.pts + period.pts
+    }
+  }, {
+    min: 0,
+    fgm: 0,
+    fga: 0,
+    fg3m: 0,
+    fg3a: 0,
+    ftm: 0,
+    fta: 0,
+    reb: 0,
+    ast: 0,
+    stl: 0,
+    blk: 0,
+    tov: 0,
+    fouls: 0,
+    pts: 0
+  }) 
+}
+
+const transformMinutesToGametime = (halfStats) => {
+  const { min, ...rest } = halfStats;
+  return {
+    min: minutesToGameTime(halfStats.min),
+    ...rest
+  }
+}
+
 const BoxScoresByQuarter = ({ boxScores, team }) => {
-  const [half, setHalf] = React.useState(2);
+  const [half, setHalf] = React.useState(0);
+  
   return (
     <>
     <Segment 
@@ -53,16 +113,22 @@ const BoxScoresByQuarter = ({ boxScores, team }) => {
     >
       <Button   
         color='black'
+        basic={half !== 0}
+        size='large' 
+        onClick={() => setHalf(0)}
+      >FULL GAME (by H)</Button>
+      <Button   
+        color='black'
         basic={half !== 1}
         size='large' 
         onClick={() => setHalf(1)}
-      >1ST HALF</Button>
+      >1ST HALF (by Q)</Button>
       <Button   
         color='black'
         basic={half !== 2}
         size='large' 
         onClick={() => setHalf(2)}
-      >2ND HALF</Button>
+      >2ND HALF (by Q)</Button>
     </Segment>
       <Table
         attached='bottom' 
@@ -72,48 +138,54 @@ const BoxScoresByQuarter = ({ boxScores, team }) => {
       >
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell rowspan="2"> Date </Table.HeaderCell>
-            <Table.HeaderCell rowspan="2"> Game </Table.HeaderCell>
-            <Table.HeaderCell colspan="9" textAlign='center'> {half === 1 ? '1ST' : '3RD'} QUARTER </Table.HeaderCell>
-            <Table.HeaderCell colspan="9" textAlign='center'> {half === 1 ? '2ND' : '4TH'} QUARTER </Table.HeaderCell>
+            <Table.HeaderCell rowSpan="2"> Date </Table.HeaderCell>
+            <Table.HeaderCell rowSpan="2"> Game </Table.HeaderCell>
+            <Table.HeaderCell colSpan="10" textAlign='center'> 
+              {half === 0 
+                ? '1ST HALF' 
+                : half === 1 
+                ? '1ST QUARTER'
+                : '3RD QUARTER'
+              } 
+            </Table.HeaderCell>
+            <Table.HeaderCell colSpan="10" textAlign='center'>
+            {half === 0 
+                ? '2ND HALF' 
+                : half === 1 
+                ? '2ND QUARTER'
+                : '4TH QUARTER'
+              } 
+            </Table.HeaderCell>
           </Table.Row>
           <Table.Row>
-            <Table.HeaderCell> Min </Table.HeaderCell>
-            <Table.HeaderCell> FG </Table.HeaderCell>
-            <Table.HeaderCell> 3PT </Table.HeaderCell>
-            <Table.HeaderCell> FT </Table.HeaderCell>
-            <Table.HeaderCell> REB </Table.HeaderCell>
-            <Table.HeaderCell> AST </Table.HeaderCell>
-            <Table.HeaderCell> STL </Table.HeaderCell>
-            <Table.HeaderCell> BLK </Table.HeaderCell>
-            {/* <Table.HeaderCell> TOV </Table.HeaderCell>
-            <Table.HeaderCell> PF </Table.HeaderCell> */}
-            <Table.HeaderCell> PTS </Table.HeaderCell>
-            <Table.HeaderCell> Min </Table.HeaderCell>
-            <Table.HeaderCell> FG </Table.HeaderCell>
-            <Table.HeaderCell> 3PT </Table.HeaderCell>
-            <Table.HeaderCell> FT </Table.HeaderCell>
-            <Table.HeaderCell> REB </Table.HeaderCell>
-            <Table.HeaderCell> AST </Table.HeaderCell>
-            <Table.HeaderCell> STL </Table.HeaderCell>
-            <Table.HeaderCell> BLK </Table.HeaderCell>
-            {/* <Table.HeaderCell> TOV </Table.HeaderCell>
-            <Table.HeaderCell> PF </Table.HeaderCell> */}
-            <Table.HeaderCell> PTS </Table.HeaderCell>
+            {renderHeaders()}
+            {renderHeaders()}
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {boxScores.map((boxScore, i) => {
             const [aTeamAbb, , , hTeamAbb] = boxScore.summary.split(' ');
+            const firstHalfStats = sumQuarterStats(boxScore.periods.slice(0, 2));
+            const secondHalfStats = sumQuarterStats(boxScore.periods.slice(2, 4));
+            const statsByHalf = [
+              transformMinutesToGametime(firstHalfStats), 
+              transformMinutesToGametime(secondHalfStats)];
+            let effectivePeriods = statsByHalf;
+            if (half === 1) {
+              effectivePeriods = boxScore.periods.slice(0, 2);
+            }
+            if (half === 2) {
+              effectivePeriods = boxScore.periods.slice(2, 4);
+            }
             return (
-              <Table.Row key={i}>
+              <Table.Row key={`${boxScore.gid}-${half}-${i}`}>
                 <Table.Cell>
                   {boxScore.gdte}
                 </Table.Cell>
                 <Table.Cell>
                   <a href={`https://www.nba.com/game/${aTeamAbb}-vs-${hTeamAbb}-00${boxScore.gid}/box-score`} target="_blank"> {boxScore.summary} </a>
                 </Table.Cell>
-                {renderStatCells(boxScore.periods.slice(half === 2 ? 2 : 0, half * 2))}
+                {renderStatCells(effectivePeriods)}
               </Table.Row>
             )
           })}

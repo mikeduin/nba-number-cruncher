@@ -5,12 +5,13 @@ import { connect } from 'react-redux';
 import { setActiveDay, fetchPlayerData } from '../actions';
 import _ from 'lodash';
 import moment from 'moment';
+import logos from '../modules/logos';
 
 const resultRenderer = ({ player_name, player_id, team_abbreviation, min_full, net_rtg_full }) => {
   return (
     <Link to={`/player/${player_id}`}>
       <Item style={{padding: 0}}>
-        <Item.Image size='medium' src={`/images/logos/${team_abbreviation}.svg`} />
+        <Item.Image size='medium' src={logos[team_abbreviation]} />
         <Item.Content style={{marginRight: 0}}>
           <Item.Header> {player_name} </Item.Header>
           <Item.Description> {min_full} MPG </Item.Description>
