@@ -1,7 +1,9 @@
 const knex = require('../db/knex');
 const axios = require('axios');
 const advancedPlayerStats = 'https://stats.nba.com/stats/leaguedashplayerstats';
+const boxScoreStats = 'https://stats.nba.com/stats/boxscoretraditionalv3';
 const dbBuilders = require("../modules/dbBuilders");
+const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
 
 const headers = {
   Accept: "application/json, text/plain, */*",
@@ -23,6 +25,42 @@ const headers = {
 }
 
 // NOTE - WHEN THIS WAS NOT WORKING AT BEGINNING OF 2020-21 SEASON, HAD TO GO UPDATE dbBuilders.fetchAdvancedPlayerParams TO INCLUDE ADDITIONAL QUERY PARAMETERS THAT WERE BEING SENT ALONG WITH NEW REQUEST (things like "Height" and "Weight" had been added since last year)
+const updatePlayerBoxScoresByPeriod = async (gdte) => {
+  const yesterdayGames = await knex('schedule').where({gdte}).pluck('gid');
+  console.log('yesterdayGames for ', gdte, ' are ', yesterdayGames);
+  for (const gid of yesterdayGames) {
+    await Promise.all([1, 2, 3, 4].map(async (period) => {
+      const periodChecker = await knex('player_boxscores_by_q').where({gid, period});
+
+      if (!periodChecker.length) {
+        console.log('stats not found for game ', gid, ' and period ', period, ' so fetching now');
+        const boxScorePeriod = await axios.get(boxScoreStats, {
+          params: {
+            GameID: `00${gid}`,
+            LeagueID: '00',
+            endPeriod: period,
+            endRange: 28800,
+            rangeType: 1,
+            startPeriod: period,
+            startRange: 0,
+          },
+          headers: headers
+        })
+    
+        const { boxScoreTraditional } = boxScorePeriod.data;
+        const { homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid} = boxScoreTraditional;
+        const gameCompleted = true;
+        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, gameCompleted);
+        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, gameCompleted);
+    
+        await dbBuilders.insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode);
+        await dbBuilders.insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode);  
+      } else {
+        console.log('stats found for game ', gid, ' and period ', period, ' so not fetching');
+      }
+    }));
+  }
+}
 
 const updatePlayerAdvancedStats = (games, db) => {
   axios.get(advancedPlayerStats, {
@@ -79,6 +117,7 @@ const updatePlayerBaseStatsFourthQ = (games, db) => {
 };
 
 module.exports = {
+  updatePlayerBoxScoresByPeriod,
   updatePlayerAdvancedStatBuilds: () => {
     updatePlayerAdvancedStats(0, 'players_full');
     updatePlayerAdvancedStats(5, 'players_l5');

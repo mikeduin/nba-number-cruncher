@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import ScheduleCard from './ScheduleCard';
 import './styles/schedule.css';
-import { Segment, Statistic, Grid, Column, Image, Card, Button, Dimmer, Header, Icon } from "semantic-ui-react";
+import { Segment, Statistic, Grid, Icon } from "semantic-ui-react";
 
 import { connect } from "react-redux";
 import { fetchWeek, setActiveDay, changeSchedWeek } from "../actions";

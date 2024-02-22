@@ -46,7 +46,7 @@ class TodaysGames extends React.Component {
     return (
       <div>
         <Sidebar animation={"push"} direction={"bottom"} visible={this.state.visible}>
-          <Menu fluid widths={this.props.todaysGames.length+1} inverted={true}>
+          <Menu fluid widths={this.props.todaysGames.length} inverted={true}>
             <Menu.Item
               style={{ textAlign: "center" }}
               onClick={this.hideSidebar}

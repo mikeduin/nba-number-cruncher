@@ -70,7 +70,7 @@ module.exports = {
       } catch (e) {
         console.log('error scraping bovada props for ', gameUrl, ' and error is ', e);
       }
-  
+
       // Close the browser when you're done
       await browser.close();
   

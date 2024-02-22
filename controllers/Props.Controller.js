@@ -20,12 +20,14 @@ const playerNameMismatches = {
   'DeAndre Ayton': 'Deandre Ayton',
   'De’Anthony Melton': "De'Anthony Melton",
   'Dennis Smith Jr': 'Dennis Smith Jr.',
+  'Gregory Jackson': 'GG Jackson',
   'Jabari Smith': 'Jabari Smith Jr.',
   'Jabari Smith Jr': 'Jabari Smith Jr.',
   'Kelly Oubre Jr': 'Kelly Oubre Jr.',
   'Kevin Knox': 'Kevin Knox II',
   'Lonnie Walker': 'Lonnie Walker IV',
   'Marcus Morris': 'Marcus Morris Sr.',
+  'Marvin Bagley': 'Marvin Bagley III',
   'Mohamed Bamba': 'Mo Bamba',
   'Nicolas Claxton': 'Nic Claxton',
   'PJ Washington': 'P.J. Washington',
@@ -54,8 +56,6 @@ const fetchDailyGameProps = async () => {
     const gamePropPlayersInDb = dailyProps
       .filter(prop => prop.gid === game.gid)
       .map(prop => prop.player_name);
-
-    // console.log('gamePropPlayersInDb are ', gamePropPlayersInDb);
 
     const playerPropsMap = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb);
     

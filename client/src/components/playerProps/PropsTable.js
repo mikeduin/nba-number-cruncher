@@ -78,13 +78,8 @@ const formatJuice = (value) => {
 }
 
 class PropsTable extends React.Component {
-
   render () {
     const { market, playerProps, playerStats, playersMetadata, timeframe, timeframeText } = this.props;
-
-    // console.log('playerProps in PropsTable are ', playerProps);
-    // console.log('playersMetadata in PropsTable are ', playersMetadata);
-    // console.log('playerStats in PropsTable are ', playerStats);
 
     const renderPropRows = () => {
       return playerProps
@@ -97,7 +92,6 @@ class PropsTable extends React.Component {
         .map(prop => { 
           const livePlayerStats = playerStats ? playerStats.filter(player => player.player_id === prop.player_id)[0] : null;
           const seasonPlayerStats = playersMetadata ? playersMetadata.filter(player => player.player_id === prop.player_id)[0] : null;
-          // console.log('seasonPlayerStats is ', seasonPlayerStats);
           return (
             <Table.Row key={`${prop.player_name}-${market}`} style={{backgroundColor: prop[`${market}_active`] !== true ? 'grey' : 'white'}}>
               <Table.Cell style={{position: 'relative'}}>

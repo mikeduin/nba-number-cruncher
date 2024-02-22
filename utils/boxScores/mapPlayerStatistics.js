@@ -1,6 +1,6 @@
 const regex = /PT(\d+)M/;
 
-module.exports = (players, teamId, teamAbb) => players.map(player => {
+module.exports = (players, teamId, teamAbb, gameCompleted = false) => players.map(player => {
   const { 
     assists: ast,
     blocks: blk,
@@ -28,7 +28,7 @@ module.exports = (players, teamId, teamAbb) => players.map(player => {
 
   return {
     player_id: player.personId,
-    player_name: player.name,
+    player_name: !gameCompleted ? player.name : `${player.firstName} ${player.familyName}`,
     team_id: teamId,
     team_abbrev: teamAbb,
     ast,
@@ -38,7 +38,7 @@ module.exports = (players, teamId, teamAbb) => players.map(player => {
     fouls,
     ftm,
     fta,
-    min: formMins(min),
+    min: !gameCompleted ? formMins(min) : min,
     reb,
     pts,
     stl,

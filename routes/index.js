@@ -24,7 +24,6 @@ const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
 
 const parseGameData = require('../modules/parseGameData');
 
-const sampleBoxScoreQ1active = require('../modules/boxScoreResponse_q1_active.json');
 const getGameSecs = require('../modules/getGameSecs');
 const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
 
@@ -36,17 +35,14 @@ const { fetchDailyGameProps } = PropsController;
 
 const formBovadaUrl = require("../utils/props/formBovadaUrl");
 
-(async () => {
-  // await bovadaScraper();
-  await fetchDailyGameProps();
-  // await dbBuilders.buildSchedule();
-  // parseGameData();
-})();
-
-
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
+// dbBuilders.updateScheduleAddMissingGames();
+// dbBuilders.updateBovadaUrls();
 
 // TEAM DB: I think I can just wipe out all in-season data and it will rebuild it all. leave the basic team details in place
 // PLAYER DB: should be built by default in timed process (adds new players)
@@ -72,8 +68,15 @@ rule.second = 48;
 // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 1000);
 // setTimeout(()=>{dbMappers.mapFullPlayerData()}, 1000);
 
-(async () => { 
-// const timedDbUpdaters = schedule.scheduleJob(rule, () => {
+// (async () => { 
+schedule.scheduleJob(rule, async () => {
+  let yesterday = moment().subtract(12, 'hours').format('YYYY-MM-DD');
+  while (moment(yesterday).isAfter('2024-02-21')) {
+    await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
+    await delay(20000);
+    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  }
+
   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
@@ -91,8 +94,8 @@ rule.second = 48;
   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-// })
-})()
+}) 
+// })() 
 
 // setTimeout(async () => {
 //   // const today = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
@@ -103,11 +106,11 @@ rule.second = 48;
 //   // dbMappers.mapSegmentedPlayerData()
 // }, 2000)
 
-if (process.env.NODE_ENV !== 'production') {
-  setInterval(async () => {
-    await fetchDailyGameProps();
-  }, 8000)
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   setInterval(async () => {
+//     await fetchDailyGameProps();
+//   }, 8000)
+// }
 
 
 // setTimeout(async () => {
@@ -210,6 +213,22 @@ router.post("/api/updateBovadaUrl", async (req, res, next) => {
 router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const pid = req.params.pid;
 
+  const emptyBoxScore = {
+    min: 0,
+    pts: 0,
+    reb: 0,
+    ast: 0,
+    stl: 0,
+    blk: 0,
+    tov: 0,
+    fg3m: 0,
+    fgm: 0,
+    fga: 0,
+    ftm: 0,
+    fta: 0,
+    fouls: 0
+  }
+
   const mappedData = await knex("player_data as pd")
     .innerJoin("teams as t", "pd.team_id", "=", "t.tid")
     .where({player_id: pid})
@@ -219,12 +238,36 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
     .where('pgs.player_id', pid)
     .where('pgs.gdte', '>', '2021-10-10')
-    .orderBy('s.gid', 'desc')
+    .orderBy('pgs.gdte', 'desc')
     .select('s.*', "pgs.game_stints");
+
+  const boxScoresByQuarter = await knex("player_boxscores_by_q as pbs")
+    .innerJoin("schedule as s", "pbs.gid", "=", "s.gid")
+    .where('pbs.player_id', pid)
+    .orderBy('s.gdte', 'desc')
+    .select('s.gdte', 's.h', 's.v', "pbs.*");
+
+  // Group by gid
+  const groupedByGame = boxScoresByQuarter.reduce((acc, curr) => {
+    let game = acc.find(game => game.gid === curr.gid);
+    if (!game) {
+      game = { 
+        gid: curr.gid, 
+        gdte: curr.gdte, 
+        summary: `${curr.v[0].ta} ${curr.v[0].s} @ ${curr.h[0].ta} ${curr.h[0].s}`,
+        periods: [emptyBoxScore, emptyBoxScore, emptyBoxScore, emptyBoxScore] 
+      };
+      acc.push(game);
+    }
+    let { h, v, id, gdte, created_at, updated_at, ... restOfStats } = curr;
+    game.periods[curr.period - 1] = restOfStats; // Set the item at the index curr.period - 1
+    return acc;
+  }, []);
 
   res.send({
     gameStints: gameStints,
-    mappedData: mappedData[0]
+    mappedData: mappedData[0],
+    boxScoresByQuarter: groupedByGame
   });
 })
 

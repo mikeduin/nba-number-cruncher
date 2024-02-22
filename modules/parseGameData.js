@@ -1,11 +1,9 @@
 const knex = require("../db/knex");
 const getGameSecs = require('./getGameSecs');
 const boxScoreHelpers = require('./boxScoreHelpers');
-// const boxScoreMock = require('../utils/mocks/boxScoreMock.json');
 const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
 
 module.exports = async (boxScore) => {
-  // const boxScore = boxScoreMock.props.pageProps.game;
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
   const isGameActivated = gameStatus > 1;
@@ -52,12 +50,6 @@ module.exports = async (boxScore) => {
         console.log('error in quarterUpdFn is ', e, ' for gid ', gid)
       }
     }
-
-    if (gid === 22300399) {
-      console.log('hPlayerStats are ', hPlayerStats);
-    }
-
-    // console.log('playerStats are ', playerStats);
 
     if (period === 1) {
       try {
