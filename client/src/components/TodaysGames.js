@@ -43,10 +43,11 @@ class TodaysGames extends React.Component {
   };
 
   render() {
+    const { todaysGames } = this.props;
     return (
       <div>
         <Sidebar animation={"push"} direction={"bottom"} visible={this.state.visible}>
-          <Menu fluid widths={this.props.todaysGames.length} inverted={true}>
+          <Menu fluid widths={todaysGames.length > 11 ? todaysGames.length : todaysGames.length + 1} inverted={true}>
             <Menu.Item
               style={{ textAlign: "center" }}
               onClick={this.hideSidebar}

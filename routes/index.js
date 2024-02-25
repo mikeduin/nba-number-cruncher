@@ -68,7 +68,7 @@ rule.second = 48;
 
 // (async () => { 
 // // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(18, 'hours').format('YYYY-MM-DD');
+//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
 //   while (moment(yesterday).isAfter('2024-02-21')) {
 //     await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
 //     await delay(20000);
