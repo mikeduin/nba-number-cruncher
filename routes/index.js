@@ -66,6 +66,8 @@ rule.hour = 02;
 rule.minute = 19;
 rule.second = 48;
 
+dbBuilders.updatePlayoffScnedule();
+
 // (async () => { 
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');

@@ -18,6 +18,8 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
+  console.log('data in fetchWeek is ', data);
+
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
