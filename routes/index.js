@@ -68,34 +68,34 @@ rule.second = 48;
 
 dbBuilders.updatePlayoffScnedule();
 
-// (async () => { 
-// // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-02-21')) {
-//     await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(20000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
+(async () => { 
+// schedule.scheduleJob(rule, async () => {
+  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+  while (moment(yesterday).isAfter('2024-04-14')) {
+    await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
+    await delay(20000);
+    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  }
 
-//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
-//   setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
-//   setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
-//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 300000);
-//   setTimeout(()=>{dbMappers.mapTeamPace()}, 330000);
-//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 360000);
-//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 390000);
-// // }) 
-// })() 
+  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
+  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
+  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
+  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
+  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
+  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
+  setTimeout(()=>{dbBuilders.updateSchedule()}, 240000);
+  setTimeout(()=>{dbBuilders.addGameStints()}, 1000);
+  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 1000);
+  setTimeout(()=>{dbMappers.mapTeamPace()}, 10000);
+  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 20000);
+  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 30000);
+// }) 
+})() 
 
 if (process.env.NODE_ENV !== 'production') {
   setInterval(async () => {
