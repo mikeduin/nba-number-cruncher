@@ -98,7 +98,10 @@ dbBuilders.updatePlayoffScnedule();
 // })()
 
 (async () => {
-  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
+  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
+  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
 })()
 

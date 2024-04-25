@@ -1,68 +1,45 @@
-const knex = require('../db/knex');
 const axios = require('axios');
 const teamStatsUrl = 'https://stats.nba.com/stats/leaguedashteamstats';
 const dbBuilders = require("../modules/dbBuilders");
-
-const headers = {
-  Accept: "application/json, text/plain, */*",
-  "Accept-Encoding": "gzip, deflate, br",
-  "Accept-Language": "en-US,en;q=0.9",
-  "Cache-Control": "no-cache",
-  Connection: "keep-alive",
-  DNT: 1,
-  Host: "stats.nba.com",
-  Referer: "https://www.nba.com/",
-  "sec-ch-ua": '"Google Chrome";v="87", "\"Not;A\\Brand";v="99", "Chromium";v="87"',
-  "sec-ch-ua-mobile": "?1",
-  "Sec-Fetch-Dest": "empty",
-  "Sec-Fetch-Mode": "cors",
-  "Sec-Fetch-Site": "same-site",
-  "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36",
-  "x-nba-stats-origin": "stats",
-  "x-nba-stats-token": true
-}
+const { formApiCallParams } = require("../utils/nbaApi/formApiCallParams");
+const { requestHeaders } = require("../utils/nbaApi/requestHeaders");
 
 const updateBaseTeamBuild = (games, db, period) => {
-  // console.log('updating base team build for ', games, db, period);
   axios.get(teamStatsUrl, {
-    params: dbBuilders.fetchBaseTeamParams(games, period),
-    headers: headers
+    params: formApiCallParams(games, period, "Regular Season", "Base"),
+    headers: requestHeaders()
   })
     .then(response => {
-      // console.log('response is ', response);
-      let teamData = response.data.resultSets[0].rowSet;
-      // Change this to .buildBaseTeamDb for initial builds
-      // dbBuilders.buildBaseTeamDb(db, teamData);
-      dbBuilders.updateBaseTeamDb(db, teamData);
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const teamData = resultSets[0].rowSet;
+      dbBuilders.updateTeamDbBaseStats(db, teamData, headers);
     });
 };
 
-
 const updateFullTeamBuild = (games, db, period) => {
-  console.log('updating full team build for ', games, db, period);
   axios.get(teamStatsUrl, {
-    params: dbBuilders.fetchAdvancedTeamParams(games, period),
-    headers: headers
+    params: formApiCallParams(games, period, "Regular Season", "Advanced"),
+    headers: requestHeaders()
   })
     .then(response => {
-      let teamData = response.data.resultSets[0].rowSet;
-      // console.log('team date is ', teamData);
-      // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildAdvancedTeamDb(db, teamData);
-      dbBuilders.updateAdvancedTeamDb(db, teamData);
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const teamData = resultSets[0].rowSet;
+      dbBuilders.updateTeamDbAdvancedStats(db, teamData, headers);
     });
 };
 
 const updatePartialTeamBuild = (games, db, lineup) => {
   axios.get(teamStatsUrl, {
-    params: dbBuilders.fetchLineupParams(games, lineup),
-    headers: headers
+    params: formApiCallParams(games, 0, "Regular Season", "Advanced", lineup),
+    headers: requestHeaders()
   })
     .then(response => {
-      let teamData = response.data.resultSets[0].rowSet;
-      // Change this to .buildTeabDb for initial builds
-      // dbBuilders.buildAdvancedTeamDb(db, teamData);
-      dbBuilders.updateAdvancedTeamDb(db, teamData);
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const teamData = resultSets[0].rowSet;
+      dbBuilders.updateTeamDbAdvancedStats(db, teamData, headers);
     })
 };
 
@@ -112,6 +89,5 @@ module.exports = {
     updatePartialTeamBuild(10, 'teams_bench_l10', 'Bench');
     updatePartialTeamBuild(15, 'teams_bench_l15', 'Bench');
     updatePartialTeamBuild(20, 'teams_bench_l20', 'Bench');
-  },
-
+  }
 }
