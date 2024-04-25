@@ -25,7 +25,7 @@ const updatePlayerBoxScoresByPeriod = async (gdte) => {
             startPeriod: period,
             startRange: 0,
           },
-          headers: headers
+          headers: requestHeaders()
         })
     
         const { boxScoreTraditional } = boxScorePeriod.data;

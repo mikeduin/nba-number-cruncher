@@ -4,10 +4,6 @@ exports.formTeamBaseStatsBuild = (headers, team) => {
   const fg2_pct = fg2m/fg2a;
 
   return {
-    gp: team[headers.indexOf('GP')],
-    w: team[headers.indexOf('W')],
-    l: team[headers.indexOf('L')],
-    w_pct: team[headers.indexOf('W_PCT')],
     min: team[headers.indexOf('MIN')],
     fgm: team[headers.indexOf('FGM')],
     fga: team[headers.indexOf('FGA')],

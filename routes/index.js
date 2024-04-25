@@ -68,42 +68,42 @@ rule.second = 48;
 
 dbBuilders.updatePlayoffScnedule();
 
-// (async () => { 
-// // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-04-14')) {
-//     await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(20000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
+(async () => { 
+// schedule.scheduleJob(rule, async () => {
+  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+  while (moment(yesterday).isAfter('2024-04-23')) {
+    await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
+    await delay(20000);
+    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  }
 
-//   setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//   setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 30000);
-//   setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 60000);
-//   setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 90000);
-//   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
-//   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
-//   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 190000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 200000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 215000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
-//   // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-//   setTimeout(()=>{dbBuilders.addGameStints()}, 245000);
-//   setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 260000);
-//   setTimeout(()=>{dbMappers.mapTeamPace()}, 290000);
-//   setTimeout(()=>{dbMappers.mapFullPlayerData()}, 320000);
-//   setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 350000);
-// // }) 
-// })()
-
-(async () => {
-  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
-  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
+  setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+  setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 10000);
+  setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 20000);
+  setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 30000);
+  setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 40000);
+  setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 50000);
+  setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 60000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 70000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 80000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 90000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 100000);
+  // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+  setTimeout(()=>{dbBuilders.addGameStints()}, 120000);
+  setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 140000);
+  setTimeout(()=>{dbMappers.mapTeamPace()}, 160000);
+  setTimeout(()=>{dbMappers.mapFullPlayerData()}, 180000);
+  setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 200000);
+// }) 
 })()
+
+// (async () => {
+//   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
+//   // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
+// })()
 
 if (process.env.NODE_ENV !== 'production') {
   setInterval(async () => {
