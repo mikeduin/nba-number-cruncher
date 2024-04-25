@@ -418,7 +418,7 @@ module.exports = {
       });
     });
   },
-  updatePlayerDbPlayoffStats: (db, arrayData, headers, period) => {
+  updatePlayerDbBaseStats: (db, arrayData, headers, period, seasonType) => {
     arrayData.forEach(async player => {
       const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')] })
       if (!checkExist.length) {
@@ -426,174 +426,26 @@ module.exports = {
           const insert = await knex(db)
             .insert(
               {
-                ...formPlayerBaseStatsInsert(headers, player, period),
+                ...formPlayerBaseStatsInsert(headers, player, period, seasonType),
                 created_at: new Date()
               },"*");
-          console.log(insert[0].player_name, " entered into ", db);
+          console.log(`${insert[0].player_name} entered into ${db}`);
         } catch (e) {
-          console.log('error inserting player into DB for playoff stats is ', e);
+          console.log(`error inserting player into DB for ${seasonType} stats is ${e}`);
         }
       } else {
         try {
           const update = await knex(db)
             .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
             .update({
-              ...formPlayerBaseStatsInsert(headers, player, period),
+              ...formPlayerBaseStatsInsert(headers, player, period, seasonType),
             }, '*');
-          console.log(update[0].player_name, " updated for playoff stats for period ", period, " in ", db);
+          console.log(`${update[0].player_name} updated for ${seasonType} stats for period ${period} in ${db}`);
         } catch (e) {
-          console.log('error updating player in DB for playoff stats is ', e);
+          console.log(`error updating player in DB for ${seasonType} stats is ${e}`);
         }
       }
     })
-  },
-  updatePlayerDbBaseStats: (db, arrayData, headers) => {
-    arrayData.forEach(player => {
-      knex(db)
-        .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-        .then(res => {
-          if (!res[0]) {
-            knex(db)
-              .insert(
-                {
-                  player_id: player[headers.indexOf('PLAYER_ID')],
-                  player_name: player[headers.indexOf('PLAYER_NAME')],
-                  team_id: player[headers.indexOf('TEAM_ID')],
-                  team_abbreviation: player[headers.indexOf('TEAM_ABBREVIATION')],
-                  age: player[headers.indexOf('AGE')],
-                  gp: player[headers.indexOf('GP')],
-                  w: player[headers.indexOf('W')],
-                  l: player[headers.indexOf('L')],
-                  w_pct: player[headers.indexOf('W_PCT')],
-                  min: player[headers.indexOf('MIN')],
-                  fg3m: player[headers.indexOf('FG3M')],
-                  fg3a: player[headers.indexOf('FG3A')],
-                  fg3_pct: player[headers.indexOf('FG3_PCT')],
-                  ftm: player[headers.indexOf('FTM')],
-                  fta: player[headers.indexOf('FTA')],
-                  ft_pct: player[headers.indexOf('FT_PCT')],
-                  oreb: player[headers.indexOf('OREB')],
-                  dreb: player[headers.indexOf('DREB')],
-                  reb: player[headers.indexOf('REB')],
-                  ast: player[headers.indexOf('AST')],
-                  tov: player[headers.indexOf('TOV')],
-                  stl: player[headers.indexOf('STL')],
-                  blk: player[headers.indexOf('BLK')],
-                  blka: player[headers.indexOf('BLKA')],
-                  pf: player[headers.indexOf('PF')],
-                  pfd: player[headers.indexOf('PFD')],
-                  pts: player[headers.indexOf('PTS')],
-                  plus_minus: player[headers.indexOf('PLUS_MINUS')],
-                  nba_fantasy_pts: player[headers.indexOf('NBA_FANTASY_PTS')],
-                  dd2: player[headers.indexOf('DD2')],
-                  td3: player[headers.indexOf('TD3')],
-                  updated_at: new Date()
-                },
-                "*"
-              )
-              .then(entered => {
-                console.log(entered[0].player_name, " entered into ", db);
-              });
-          } else {
-            knex(db)
-              .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-              .update(
-                {
-                  team_id: player[headers.indexOf('TEAM_ID')],
-                  team_abbreviation: player[headers.indexOf('TEAM_ABBREVIATION')],
-                  age: player[headers.indexOf('AGE')],
-                  gp: player[headers.indexOf('GP')],
-                  w: player[headers.indexOf('W')],
-                  l: player[headers.indexOf('L')],
-                  w_pct: player[headers.indexOf('W_PCT')],
-                  min: player[headers.indexOf('MIN')],
-                  fg3m: player[headers.indexOf('FG3M')],
-                  fg3a: player[headers.indexOf('FG3A')],
-                  fg3_pct: player[headers.indexOf('FG3_PCT')],
-                  ftm: player[headers.indexOf('FTM')],
-                  fta: player[headers.indexOf('FTA')],
-                  ft_pct: player[headers.indexOf('FT_PCT')],
-                  oreb: player[headers.indexOf('OREB')],
-                  dreb: player[headers.indexOf('DREB')],
-                  reb: player[headers.indexOf('REB')],
-                  ast: player[headers.indexOf('AST')],
-                  tov: player[headers.indexOf('TOV')],
-                  stl: player[headers.indexOf('STL')],
-                  blk: player[headers.indexOf('BLK')],
-                  blka: player[headers.indexOf('BLKA')],
-                  pf: player[headers.indexOf('PF')],
-                  pfd: player[headers.indexOf('PFD')],
-                  pts: player[headers.indexOf('PTS')],
-                  plus_minus: player[headers.indexOf('PLUS_MINUS')],
-                  nba_fantasy_pts: player[headers.indexOf('NBA_FANTASY_PTS')],
-                  dd2: player[headers.indexOf('DD2')],
-                  td3: player[headers.indexOf('TD3')],
-                  updated_at: new Date()
-                },
-                "*"
-              )
-              .then(updated => {
-                console.log(updated[0].player_name, " had base stats updated in ", db);
-              });
-          }
-        });
-    });
-  },
-  updatePlayerDbBaseStatsThirdQ: (db, arrayData, headers, period) => {
-    arrayData.forEach(player => {
-      knex(db)
-        .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-        .update(
-          {
-            min_3q: player[headers.indexOf('MIN')],
-            fgm_3q: player[headers.indexOf('FGM')],
-            fga_3q: player[headers.indexOf('FGA')],
-            fg3m_3q: player[headers.indexOf('FG3M')],
-            fg3a_3q: player[headers.indexOf('FG3A')],
-            ftm_3q: player[headers.indexOf('FTM')],
-            fta_3q: player[headers.indexOf('FTA')],
-            reb_3q: player[headers.indexOf('REB')],
-            ast_3q: player[headers.indexOf('AST')],
-            tov_3q: player[headers.indexOf('TOV')],
-            stl_3q: player[headers.indexOf('STL')],
-            blk_3q: player[headers.indexOf('BLK')],
-            pts_3q: player[headers.indexOf('PTS')],
-            updated_at: new Date()
-          },
-          "*"
-        )
-        .then(updated => {
-          console.log(updated[0].player_name, " had base stats updated for 3rd Q in ", db);
-        });
-    });
-  },
-  updatePlayerDbBaseStatsFourthQ: (db, arrayData, headers) => {
-    arrayData.forEach(player => {
-      knex(db)
-        .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-        .update(
-          {
-            min_4q: player[headers.indexOf('MIN')],
-            fgm_4q: player[headers.indexOf('FGM')],
-            fga_4q: player[headers.indexOf('FGA')],
-            fg3m_4q: player[headers.indexOf('FG3M')],
-            fg3a_4q: player[headers.indexOf('FG3A')],
-            ftm_4q: player[headers.indexOf('FTM')],
-            fta_4q: player[headers.indexOf('FTA')],
-            reb_4q: player[headers.indexOf('REB')],
-            ast_4q: player[headers.indexOf('AST')],
-            tov_4q: player[headers.indexOf('TOV')],
-            stl_4q: player[headers.indexOf('STL')],
-            blk_4q: player[headers.indexOf('BLK')],
-            pts_4q: player[headers.indexOf('PTS')],
-            updated_at: new Date()
-          },
-          "*"
-        )
-        .then(updated => {
-          console.log(updated[0].player_name, " had base stats updated for 4th Q in ", db);
-        });
-    });
   },
   updatePlayerDbAdvancedStats: (db, arrayData, headers) => {
     arrayData.forEach(player => {

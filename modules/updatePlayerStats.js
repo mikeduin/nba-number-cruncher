@@ -74,64 +74,18 @@ const updatePlayerAdvancedStats = (games, db) => {
     });
 };
 
-const updatePlayerBaseStats = (games, db, seasonType = 'Regular Season') => {
-  const period = 0;
+const updatePlayerBaseStats = (games, db, period, seasonType) => {
   axios.get(advancedPlayerStats, {
     params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
-    headers: headers
+    headers
   })
     .then(response => {
       const { resultSets } = response.data
       const headers = resultSets[0].headers;
       const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbBaseStats(db, playerData, headers);
+      dbBuilders.updatePlayerDbBaseStats(db, playerData, headers, period, seasonType);
     });
 };
-
-const updatePlayerBaseStatsThirdQ = (games, db) => {
-  const period = 3;
-  const seasonType = 'Regular Season';
-  axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
-    headers: headers
-  })
-    .then(response => {
-      const { resultSets } = response.data
-      const headers = resultSets[0].headers;
-      const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbBaseStatsThirdQ(db, playerData, headers, period);
-    });
-};
-
-const updatePlayerBaseStatsFourthQ = (games, db) => {
-  const period = 4;
-  const seasonType = 'Regular Season';
-  axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
-    headers: headers
-  })
-    .then(response => {
-      const { resultSets } = response.data
-      const headers = resultSets[0].headers;
-      const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbBaseStatsFourthQ(db, playerData, headers, period);
-    });
-};
-
-const updatePlayerBaseStatsPlayoffs = (games, db, period) => {
-  console.log('updating player base stats for playoffs for period ', period);
-  const seasonType = 'Playoffs';
-  axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
-    headers: headers
-  })
-    .then(response => {
-      const { resultSets } = response.data
-      const headers = resultSets[0].headers;
-      const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbPlayoffStats(db, playerData, headers, period);
-    });
-}
 
 module.exports = {
   updatePlayerBoxScoresByPeriod,
@@ -141,23 +95,17 @@ module.exports = {
     updatePlayerAdvancedStats(10, 'players_l10');
     updatePlayerAdvancedStats(5, 'players_l15');
   },
-  updatePlayerBaseStatBuilds: () => {
-    updatePlayerBaseStats(0, 'players_full');
-    updatePlayerBaseStats(5, 'players_l5');
-    updatePlayerBaseStats(10, 'players_l10');
-    updatePlayerBaseStats(15, 'players_l15');
-  },
-  updatePlayerBaseStatBuildsThirdQ: () => {
-    updatePlayerBaseStatsThirdQ(0, 'players_full');
-    updatePlayerBaseStatsThirdQ(5, 'players_l5');
-  },
-  updatePlayerBaseStatBuildsFourthQ: () => {
-    updatePlayerBaseStatsFourthQ(0, 'players_full');
-    updatePlayerBaseStatsFourthQ(5, 'players_l5');
+  updatePlayerBaseStatBuilds: (period) => {
+    updatePlayerBaseStats(0, 'players_full', period, 'Regular Season');
+    setTimeout(() => updatePlayerBaseStats(5, 'players_l5', period, 'Regular Season'), 4000); 
+    if (period === 0) {
+      setTimeout(() => updatePlayerBaseStats(10, 'players_l10', period, 'Regular Season'), 8000);
+      setTimeout(() => updatePlayerBaseStats(15, 'players_l15', period, 'Regular Season'), 12000); 
+    }
   },
   updatePlayerBaseStatBuildsPlayoffs: async () => {
-    updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 0); // 0 period = full game
-    setTimeout(() => updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 3), 10000); 
-    setTimeout(() => updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 4), 20000); 
+    updatePlayerBaseStats(0, 'players_playoffs', 0, 'Playoffs'); // 0 period = full game
+    setTimeout(() => updatePlayerBaseStats(0, 'players_playoffs', 3, 'Playoffs'), 4000); 
+    setTimeout(() => updatePlayerBaseStats(0, 'players_playoffs', 4, 'Playoffs'), 8000); 
   }
 }

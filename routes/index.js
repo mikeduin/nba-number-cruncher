@@ -84,9 +84,9 @@ dbBuilders.updatePlayoffScnedule();
 //   setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 120000);
 //   setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 150000);
 //   setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 180000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds()}, 190000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsThirdQ()}, 200000);
-//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsFourthQ()}, 215000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 190000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 200000);
+//   setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 215000);
 //   setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 230000);
 //   // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
 //   setTimeout(()=>{dbBuilders.addGameStints()}, 245000);
@@ -98,7 +98,8 @@ dbBuilders.updatePlayoffScnedule();
 // })()
 
 (async () => {
-  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
+  setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
+  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
 })()
 
 if (process.env.NODE_ENV !== 'production') {
