@@ -8,6 +8,7 @@ const formBovadaUrl = require("../utils/props/formBovadaUrl");
 const dateFilters = require("./dateFilters");
 const buildGameStints = require("./buildGameStints");
 const teamLookup = require("../modules/teamLookup");
+const { formPlayerBaseStatsInsert } = require("../utils/nbaApi/formPlayerBaseStatsInsert");
 
 // MUST CHANGE THIS SEASON VARIABLE AT BEGINNING OF EACH SEASON
 const season = "2023-24";
@@ -27,116 +28,59 @@ let now = new Date();
 module.exports = {
   fetchAdvancedPlayerParams: games => {
     return {
-      College: "",
-      Conference: "",
-      Country: "",
-      DateFrom: "",
-      DateTo: "",
-      Division: "",
-      DraftPick: "",
-      DraftYear: "",
-      GameScope: "",
-      GameSegment: "",
-      Height: "",
       LastNGames: games,
       LeagueID: "00",
-      Location: "",
       MeasureType: "Advanced",
       Month: 0,
       OpponentTeamID: 0,
-      Outcome: "",
       PORound: 0,
       PaceAdjust: "N",
       PerMode: "PerGame",
       Period: 0,
-      PlayerExperience: "",
-      PlayerPosition: "",
       PlusMinus: "N",
       Rank: "N",
       Season: season,
-      SeasonSegment: "",
       SeasonType: "Regular Season",
-      ShotClockRange: "",
-      StarterBench: "",
       TeamID: 0,
       TwoWay: 0,
-      VsConference: "",
-      VsDivision: "",
-      Weight: ""
     };
   },
-  fetchBasePlayerParams: (games, period = 0) => {
+  fetchBasePlayerParams: (games, period, seasonType) => {
     return {
-      College: "",
-      Conference: "",
-      Country: "",
-      DateFrom: "",
-      DateTo: "",
-      Division: "",
-      DraftPick: "",
-      DraftYear: "",
-      GameScope: "",
-      GameSegment: "",
-      Height: "",
       LastNGames: games,
       LeagueID: "00",
-      Location: "",
       MeasureType: "Base",
       Month: 0,
       OpponentTeamID: 0,
-      Outcome: "",
       PORound: 0,
       PaceAdjust: "N",
       PerMode: "PerGame",
       Period: period,
-      PlayerExperience: "",
-      PlayerPosition: "",
       PlusMinus: "N",
       Rank: "N",
       Season: season,
-      SeasonSegment: "",
-      SeasonType: "Regular Season",
-      ShotClockRange: "",
-      StarterBench: "",
+      SeasonType: seasonType,
       TeamID: 0,
       TwoWay: 0,
-      VsConference: "",
-      VsDivision: "",
-      Weight: ""
     };
   },
   fetchBaseTeamParams: (games, period) => {
     return {
-      Conference: "",
-      DateFrom: "",
-      DateTo: "",
-      Division: "",
-      GameScope: "",
-      GameSegment: "",
       LastNGames: games,
       LeagueID: "00",
-      Location: "",
       MeasureType: "Base",
       Month: 0,
       OpponentTeamID: 0,
-      Outcome: "",
       PORound: 0,
       PaceAdjust: "N",
       PerMode: "PerGame",
       Period: period,
-      PlayerExperience: "",
-      PlayerPosition: null, // added
       PlusMinus: "N",
       Rank: "N",
       Season: season,
-      SeasonSegment: "",
       SeasonType: "Regular Season",
-      ShotClockRange: null,
-      StarterBench: null,
       TeamID: 0,
       TwoWay: 0,
-      VsConference: "",
-      VsDivision: ""
     };
   },
   fetchAdvancedTeamParams: (games, period) => {
@@ -148,17 +92,9 @@ module.exports = {
       Rank: "N",
       Season: season,
       SeasonType: "Regular Season",
-      Outcome: "",
-      SeasonSegment: "",
-      DateFrom: "",
-      DateTo: "",
       OpponentTeamID: 0,
-      VsConference: "",
-      VsDivision: "",
       LastNGames: games,
-      Location: "",
       Period: period,
-      GameSegment: "",
       Month: 0
     };
   },
@@ -171,17 +107,9 @@ module.exports = {
       Rank: "N",
       Season: season,
       SeasonType: "Regular Season",
-      Outcome: "",
-      SeasonSegment: "",
-      DateFrom: "",
-      DateTo: "",
       OpponentTeamID: 0,
-      VsConference: "",
-      VsDivision: "",
       LastNGames: games,
-      Location: "",
       Period: 0,
-      GameSegment: "",
       Month: 0,
       StarterBench: lineup
     };
@@ -345,12 +273,9 @@ module.exports = {
     console.log('updating playoff schedule');
     // let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
-      console.log('response is ', response.data.lscd);
-      // response.data.lscd.slice(currMonth).forEach(month => {
       response.data.lscd
       .filter((month, i) => month.mscd.mon === "April")
       .forEach(month => {
-        console.log('month is ', month);
         month.mscd.g
         .filter((game, i) => moment(game.gdte).isAfter(moment('2024-04-15')))
         .forEach(async (game) => {
@@ -383,32 +308,6 @@ module.exports = {
               tc: game.v.tc,
               s: game.v.s
             };
-
-            // .insert(
-            //   {
-            //     gid: game.gid,
-            //     gcode: game.gcode,
-            //     gdte: game.gdte,
-            //     an: game.an,
-            //     ac: game.ac,
-            //     as: game.as,
-            //     etm: moment(game.etm).subtract(3, 'hours'),
-            //     gweek: game.gweek,
-            //     h: [hObj],
-            //     v: [vObj],
-            //     stt: game.stt,
-            //     // BEGIN HARD-CODED VALUES
-            //     season_year: 2023,
-            //     season_name,
-            //     display_year: '2023-24',
-            //     // END HARD-CODED VALUES
-            //     bovada_url: formBovadaUrl(game),
-            //     updated_at: new Date()
-            //   },
-            //   "*"
-            // )
-
-            console.log('game is ', game);
 
             try {
               await knex("schedule")
@@ -519,6 +418,35 @@ module.exports = {
       });
     });
   },
+  updatePlayerDbPlayoffStats: (db, arrayData, headers, period) => {
+    arrayData.forEach(async player => {
+      const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')] })
+      if (!checkExist.length) {
+        try {
+          const insert = await knex(db)
+            .insert(
+              {
+                ...formPlayerBaseStatsInsert(headers, player, period),
+                created_at: new Date()
+              },"*");
+          console.log(insert[0].player_name, " entered into ", db);
+        } catch (e) {
+          console.log('error inserting player into DB for playoff stats is ', e);
+        }
+      } else {
+        try {
+          const update = await knex(db)
+            .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
+            .update({
+              ...formPlayerBaseStatsInsert(headers, player, period),
+            }, '*');
+          console.log(update[0].player_name, " updated for playoff stats for period ", period, " in ", db);
+        } catch (e) {
+          console.log('error updating player in DB for playoff stats is ', e);
+        }
+      }
+    })
+  },
   updatePlayerDbBaseStats: (db, arrayData, headers) => {
     arrayData.forEach(player => {
       knex(db)
@@ -611,35 +539,31 @@ module.exports = {
         });
     });
   },
-  updatePlayerDbBaseStatsThirdQ: (db, arrayData, headers) => {
+  updatePlayerDbBaseStatsThirdQ: (db, arrayData, headers, period) => {
     arrayData.forEach(player => {
       knex(db)
         .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-        .then(res => {
-          knex(db)
-            .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-            .update(
-              {
-                min_3q: player[headers.indexOf('MIN')],
-                fgm_3q: player[headers.indexOf('FGM')],
-                fga_3q: player[headers.indexOf('FGA')],
-                fg3m_3q: player[headers.indexOf('FG3M')],
-                fg3a_3q: player[headers.indexOf('FG3A')],
-                ftm_3q: player[headers.indexOf('FTM')],
-                fta_3q: player[headers.indexOf('FTA')],
-                reb_3q: player[headers.indexOf('REB')],
-                ast_3q: player[headers.indexOf('AST')],
-                tov_3q: player[headers.indexOf('TOV')],
-                stl_3q: player[headers.indexOf('STL')],
-                blk_3q: player[headers.indexOf('BLK')],
-                pts_3q: player[headers.indexOf('PTS')],
-                updated_at: new Date()
-              },
-              "*"
-            )
-            .then(updated => {
-              console.log(updated[0].player_name, " had base stats updated for 3rd Q in ", db);
-            });
+        .update(
+          {
+            min_3q: player[headers.indexOf('MIN')],
+            fgm_3q: player[headers.indexOf('FGM')],
+            fga_3q: player[headers.indexOf('FGA')],
+            fg3m_3q: player[headers.indexOf('FG3M')],
+            fg3a_3q: player[headers.indexOf('FG3A')],
+            ftm_3q: player[headers.indexOf('FTM')],
+            fta_3q: player[headers.indexOf('FTA')],
+            reb_3q: player[headers.indexOf('REB')],
+            ast_3q: player[headers.indexOf('AST')],
+            tov_3q: player[headers.indexOf('TOV')],
+            stl_3q: player[headers.indexOf('STL')],
+            blk_3q: player[headers.indexOf('BLK')],
+            pts_3q: player[headers.indexOf('PTS')],
+            updated_at: new Date()
+          },
+          "*"
+        )
+        .then(updated => {
+          console.log(updated[0].player_name, " had base stats updated for 3rd Q in ", db);
         });
     });
   },
@@ -647,32 +571,27 @@ module.exports = {
     arrayData.forEach(player => {
       knex(db)
         .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-        .then(res => {
-          knex(db)
-            .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
-            .update(
-              {
-                min_4q: player[headers.indexOf('MIN')],
-                fgm_4q: player[headers.indexOf('FGM')],
-                fga_4q: player[headers.indexOf('FGA')],
-                fg3m_4q: player[headers.indexOf('FG3M')],
-                fg3a_4q: player[headers.indexOf('FG3A')],
-                ftm_4q: player[headers.indexOf('FTM')],
-                fta_4q: player[headers.indexOf('FTA')],
-                fg3m_4q: player[headers.indexOf('FG3M')],
-                reb_4q: player[headers.indexOf('REB')],
-                ast_4q: player[headers.indexOf('AST')],
-                tov_4q: player[headers.indexOf('TOV')],
-                stl_4q: player[headers.indexOf('STL')],
-                blk_4q: player[headers.indexOf('BLK')],
-                pts_4q: player[headers.indexOf('PTS')],
-                updated_at: new Date()
-              },
-              "*"
-            )
-            .then(updated => {
-              console.log(updated[0].player_name, " had base stats updated for 4th Q in ", db);
-            });
+        .update(
+          {
+            min_4q: player[headers.indexOf('MIN')],
+            fgm_4q: player[headers.indexOf('FGM')],
+            fga_4q: player[headers.indexOf('FGA')],
+            fg3m_4q: player[headers.indexOf('FG3M')],
+            fg3a_4q: player[headers.indexOf('FG3A')],
+            ftm_4q: player[headers.indexOf('FTM')],
+            fta_4q: player[headers.indexOf('FTA')],
+            reb_4q: player[headers.indexOf('REB')],
+            ast_4q: player[headers.indexOf('AST')],
+            tov_4q: player[headers.indexOf('TOV')],
+            stl_4q: player[headers.indexOf('STL')],
+            blk_4q: player[headers.indexOf('BLK')],
+            pts_4q: player[headers.indexOf('PTS')],
+            updated_at: new Date()
+          },
+          "*"
+        )
+        .then(updated => {
+          console.log(updated[0].player_name, " had base stats updated for 4th Q in ", db);
         });
     });
   },

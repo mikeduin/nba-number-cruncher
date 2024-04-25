@@ -27,7 +27,6 @@ const headers = {
 // NOTE - WHEN THIS WAS NOT WORKING AT BEGINNING OF 2020-21 SEASON, HAD TO GO UPDATE dbBuilders.fetchAdvancedPlayerParams TO INCLUDE ADDITIONAL QUERY PARAMETERS THAT WERE BEING SENT ALONG WITH NEW REQUEST (things like "Height" and "Weight" had been added since last year)
 const updatePlayerBoxScoresByPeriod = async (gdte) => {
   const yesterdayGames = await knex('schedule').where({gdte}).pluck('gid');
-  console.log('yesterdayGames for ', gdte, ' are ', yesterdayGames);
   for (const gid of yesterdayGames) {
     await Promise.all([1, 2, 3, 4].map(async (period) => {
       const periodChecker = await knex('player_boxscores_by_q').where({gid, period});
@@ -75,9 +74,10 @@ const updatePlayerAdvancedStats = (games, db) => {
     });
 };
 
-const updatePlayerBaseStats = (games, db) => {
+const updatePlayerBaseStats = (games, db, seasonType = 'Regular Season') => {
+  const period = 0;
   axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games),
+    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
     headers: headers
   })
     .then(response => {
@@ -90,31 +90,48 @@ const updatePlayerBaseStats = (games, db) => {
 
 const updatePlayerBaseStatsThirdQ = (games, db) => {
   const period = 3;
+  const seasonType = 'Regular Season';
   axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games, period),
+    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
     headers: headers
   })
     .then(response => {
       const { resultSets } = response.data
       const headers = resultSets[0].headers;
       const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbBaseStatsThirdQ(db, playerData, headers);
+      dbBuilders.updatePlayerDbBaseStatsThirdQ(db, playerData, headers, period);
     });
 };
 
 const updatePlayerBaseStatsFourthQ = (games, db) => {
   const period = 4;
+  const seasonType = 'Regular Season';
   axios.get(advancedPlayerStats, {
-    params: dbBuilders.fetchBasePlayerParams(games, period),
+    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
     headers: headers
   })
     .then(response => {
       const { resultSets } = response.data
       const headers = resultSets[0].headers;
       const playerData = resultSets[0].rowSet;
-      dbBuilders.updatePlayerDbBaseStatsFourthQ(db, playerData, headers);
+      dbBuilders.updatePlayerDbBaseStatsFourthQ(db, playerData, headers, period);
     });
 };
+
+const updatePlayerBaseStatsPlayoffs = (games, db, period) => {
+  console.log('updating player base stats for playoffs for period ', period);
+  const seasonType = 'Playoffs';
+  axios.get(advancedPlayerStats, {
+    params: dbBuilders.fetchBasePlayerParams(games, period, seasonType),
+    headers: headers
+  })
+    .then(response => {
+      const { resultSets } = response.data
+      const headers = resultSets[0].headers;
+      const playerData = resultSets[0].rowSet;
+      dbBuilders.updatePlayerDbPlayoffStats(db, playerData, headers, period);
+    });
+}
 
 module.exports = {
   updatePlayerBoxScoresByPeriod,
@@ -137,5 +154,10 @@ module.exports = {
   updatePlayerBaseStatBuildsFourthQ: () => {
     updatePlayerBaseStatsFourthQ(0, 'players_full');
     updatePlayerBaseStatsFourthQ(5, 'players_l5');
+  },
+  updatePlayerBaseStatBuildsPlayoffs: async () => {
+    updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 0); // 0 period = full game
+    setTimeout(() => updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 3), 10000); 
+    setTimeout(() => updatePlayerBaseStatsPlayoffs(0, 'players_playoffs', 4), 20000); 
   }
 }
