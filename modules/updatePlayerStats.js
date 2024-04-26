@@ -58,7 +58,7 @@ const updatePlayerAdvancedStats = (games, db) => {
 
 const updatePlayerBaseStats = (games, db, period, seasonType) => {
   axios.get(advancedPlayerStats, {
-    params: formApiCallParams(games, period, "Regular Season", "Base"),
+    params: formApiCallParams(games, period, seasonType, "Base"),
     headers: requestHeaders()
   })
     .then(response => {
