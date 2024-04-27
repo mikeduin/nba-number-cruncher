@@ -98,14 +98,14 @@ dbBuilders.updatePlayoffScnedule();
 // // }) 
 // })()
 
-(async () => {
-  // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
-  // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
-  // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
-  setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
-})()
+// (async () => {
+//   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
+//   // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
+//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
+//   // setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
+// })()
 
 if (process.env.NODE_ENV !== 'production') {
   setInterval(async () => {
@@ -511,7 +511,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
 // })
 
 router.get("/api/getPlayerMetadata", async (req, res, next) => {
-  let players = await knex("player_data")
+  const players = await knex("player_data")
     .orderBy('min_full', 'desc')
     .select('player_id', 'player_name', 'team_abbreviation', 'team_id', 'min_full', 'net_rtg_full', 
     'min_l5', 'ppg_full', 'ppg_l5', 'rpg_full', 'rpg_l5', 'apg_full', 'apg_l5', 'spg_full',
@@ -522,7 +522,10 @@ router.get("/api/getPlayerMetadata", async (req, res, next) => {
     'bpg_4q_full', 'bpg_4q_l5', '3pg_4q_full', '3pg_4q_l5', '3pa_4q_full', '3pa_4q_l5', 'topg_4q_full', 'topg_4q_l5', 'min_4q_full', 'min_4q_l5',
     'fgm_full', 'fgm_l5', 'fgm_3q_full', 'fgm_3q_l5', 'fgm_4q_full', 'fgm_4q_l5', 'fga_full', 'fga_l5', 'fga_3q_full', 'fga_3q_l5', 'fga_4q_full', 'fga_4q_l5',
     'ftm_full', 'ftm_l5', 'ftm_3q_full', 'ftm_3q_l5', 'ftm_4q_full', 'ftm_4q_l5', 'fta_full', 'fta_l5', 'fta_3q_full', 'fta_3q_l5', 'fta_4q_full', 'fta_4q_l5',
-    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5');
+    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5', 'min_post', 'fgm_post', 'fga_post', '3pg_post', '3pa_post', 'ftm_post', 'fta_post',
+    'topg_post', 'ppg_post', 'rpg_post', 'apg_post', 'spg_post', 'bpg_post', 'min_3q_post', 'fgm_3q_post', 'fga_3q_post', '3pg_3q_post', '3pa_3q_post', 'ftm_3q_post', 
+    'fta_3q_post', 'topg_3q_post', 'ppg_3q_post', 'rpg_3q_post', 'apg_3q_post', 'spg_3q_post', 'bpg_3q_post', 'min_4q_post', 'fgm_4q_post', 'fga_4q_post', '3pg_4q_post', 
+    '3pa_4q_post', 'ftm_4q_post', 'fta_4q_post', 'topg_4q_post', 'ppg_4q_post', 'rpg_4q_post', 'apg_4q_post', 'spg_4q_post', 'bpg_4q_post');
 
   res.send({players});
 })
@@ -621,7 +624,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   }
 
   const rotationPlayers = hPlayers.concat(vPlayers)
-  .filter(player => player.mp_pct > 0.2);
+    .filter(player => player.mp_pct > 0.2);
 
   // Do not modify this sort w/o also modifying impactPlayers pull on client side
   const sortedRotPlayers = _.orderBy(rotationPlayers, ['netRtg_delta'], ['desc']);

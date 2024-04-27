@@ -24,6 +24,7 @@ const marketMappers = {
 const timeMappers = {
   'Season': 'full',
   'Last 5': 'l5',
+  'Playoffs': 'post'
   // 'Last 10': 'l10',
   // 'Last 15': 'l15',
 };
@@ -64,7 +65,6 @@ class PlayerProps extends React.Component {
     if (this.state.bovadaUrl.length) {
       const response = await axios.post('/api/updateBovadaUrl', {gid, url: this.state.bovadaUrl});
       if (response.status === 200) {
-        console.log('bovada URL updated');
         toast({
           type: 'warning',
           icon: 'check circle',
@@ -74,7 +74,6 @@ class PlayerProps extends React.Component {
           animation: 'slide down',
           time: 3000
         });
-        // react-semantic-toasts
       }
     } else {
       toast({
@@ -93,7 +92,6 @@ class PlayerProps extends React.Component {
     const gid = this.props.game.gid;
     const response = await axios.delete(`/api/deleteDuplicateProps/${gid}`);
     if (response.status === 200) {
-      console.log('Duplicate props removed');
       toast({
         type: 'warning',
         icon: 'check circle',
