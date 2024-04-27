@@ -140,6 +140,7 @@ class PropsTable extends React.Component {
                 <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
               </>}        
               <Table.Cell textAlign='center'> {livePlayerStats?.fouls} </Table.Cell>
+              <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'min', false, null, timeframe)} </Table.Cell>
               <Table.Cell style={{fontSize: 18}}> 
                   <b>{ market === 'fg3m' 
                   ? `${getPlayerStat(seasonPlayerStats, market, false, null, timeframe)} - ${getPlayerStat(seasonPlayerStats, 'fg3a', false, null, timeframe)}`
@@ -180,7 +181,7 @@ class PropsTable extends React.Component {
             <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
             <Table.HeaderCell rowSpan="2"> Bov Line </Table.HeaderCell>
             <Table.HeaderCell colSpan={market === 'pts' ? 5 : 3} textAlign='center'> Live </Table.HeaderCell>
-            <Table.HeaderCell> {timeframeText} </Table.HeaderCell>
+            <Table.HeaderCell colSpan="2"> {timeframeText} </Table.HeaderCell>
             <Table.HeaderCell colSpan="2" textAlign='center' style={{backgroundColor: '#959EE7'}}> 2H </Table.HeaderCell>
             <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#C793ED'}}> Q3 </Table.HeaderCell>
             <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#E79595'}}> Q4 </Table.HeaderCell>
@@ -194,6 +195,7 @@ class PropsTable extends React.Component {
             </>}
             <Table.HeaderCell> PF </Table.HeaderCell>
             {/* season */}
+            <Table.HeaderCell> MIN </Table.HeaderCell>
             <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
             {/* 2H */}
             <Table.HeaderCell style={{backgroundColor: '#BCC7F0'}}> MIN </Table.HeaderCell>
