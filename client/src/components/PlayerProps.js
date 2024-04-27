@@ -22,8 +22,8 @@ const marketMappers = {
 };
 
 const timeMappers = {
-  'Season': 'full',
-  'Last 5': 'l5',
+  'Reg Season': 'full',
+  'Last 5 (RS)': 'l5',
   'Playoffs': 'post'
   // 'Last 10': 'l10',
   // 'Last 15': 'l15',
