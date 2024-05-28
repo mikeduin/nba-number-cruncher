@@ -52,12 +52,15 @@ module.exports = {
   
         $('sp-alternate').each(function(i, elem) {
           const market = parseBovadaLines($(elem).find('h3.league-header').text());
+
+          // console.log('market is ', market);
   
           if (market) {
             const over = $(elem).find('ul.market-type').find('span.bet-price').first().text().trim();
             const under = $(elem).find('ul.market-type').find('span.bet-price').eq(1).text().trim()
   
             market.line = parseFloat($(elem).find('ul.spread-header').children().first().text().trim());
+            // console.log('line for ', market.player, market.market, ' is ', market.line);
             market.over = over 
               ? over === 'EVEN' ? 100 : parseFloat(over)
               : null;

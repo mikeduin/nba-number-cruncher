@@ -186,51 +186,63 @@ module.exports = {
   mapPlayerPlayoffData: async () => {
     const playoffData = await knex("players_playoffs");
     playoffData.forEach(player => {
-      knex("player_data").where({player_id: player.player_id}).update({
-        gp_post: player.gp,
-        min_post: player.min,
-        'fgm_post': player.fgm,
-        'fga_post': player.fga,
-        '3pg_post': player.fg3m,
-        '3pa_post': player.fg3a,
-        'ftm_post': player.ftm,
-        'fta_post': player.fta,
-        rpg_post: player.reb,
-        apg_post: player.ast,
-        spg_post: player.stl,
-        bpg_post: player.blk,
-        topg_post: player.tov,
-        ppg_post: player.pts,
-        pf_post: player.pf,
-        min_3q_post: player.min_3q,
-        'fgm_3q_post': player.fgm_3q,
-        'fga_3q_post': player.fga_3q,
-        '3pg_3q_post': player.fg3m_3q,
-        '3pa_3q_post': player.fg3a_3q,
-        'ftm_3q_post': player.ftm_3q,
-        'fta_3q_post': player.fta_3q,
-        rpg_3q_post: player.reb_3q,
-        apg_3q_post: player.ast_3q,
-        spg_3q_post: player.stl_3q,
-        bpg_3q_post: player.blk_3q,
-        topg_3q_post: player.tov_3q,
-        ppg_3q_post: player.pts_3q,
-        min_4q_post: player.min_4q,
-        'fgm_4q_post': player.fgm_4q,
-        'fga_4q_post': player.fga_4q,
-        '3pg_4q_post': player.fg3m_4q,
-        '3pa_4q_post': player.fg3a_4q,
-        'ftm_4q_post': player.ftm_4q,
-        'fta_4q_post': player.fta_4q,
-        rpg_4q_post: player.reb_4q,
-        apg_4q_post: player.ast_4q,
-        spg_4q_post: player.stl_4q,
-        bpg_4q_post: player.blk_4q,
-        topg_4q_post: player.tov_4q,
-        ppg_4q_post: player.pts_4q,
-      }, '*').then(updated => {
-        console.log(updated[0].player_name, ' updated for playoff data');
-      })
+      // console.log('player is ', player);
+      try {
+        knex("player_data").where({player_id: player.player_id}).update({
+          gp_post: player.gp,
+          min_post: player.min,
+          'fgm_post': player.fgm,
+          'fga_post': player.fga,
+          '3pg_post': player.fg3m,
+          '3pa_post': player.fg3a,
+          'ftm_post': player.ftm,
+          'fta_post': player.fta,
+          rpg_post: player.reb,
+          apg_post: player.ast,
+          spg_post: player.stl,
+          bpg_post: player.blk,
+          topg_post: player.tov,
+          ppg_post: player.pts,
+          pf_post: player.pf,
+          min_3q_post: player.min_3q,
+          'fgm_3q_post': player.fgm_3q,
+          'fga_3q_post': player.fga_3q,
+          '3pg_3q_post': player.fg3m_3q,
+          '3pa_3q_post': player.fg3a_3q,
+          'ftm_3q_post': player.ftm_3q,
+          'fta_3q_post': player.fta_3q,
+          rpg_3q_post: player.reb_3q,
+          apg_3q_post: player.ast_3q,
+          spg_3q_post: player.stl_3q,
+          bpg_3q_post: player.blk_3q,
+          topg_3q_post: player.tov_3q,
+          ppg_3q_post: player.pts_3q,
+          min_4q_post: player.min_4q,
+          'fgm_4q_post': player.fgm_4q,
+          'fga_4q_post': player.fga_4q,
+          '3pg_4q_post': player.fg3m_4q,
+          '3pa_4q_post': player.fg3a_4q,
+          'ftm_4q_post': player.ftm_4q,
+          'fta_4q_post': player.fta_4q,
+          rpg_4q_post: player.reb_4q,
+          apg_4q_post: player.ast_4q,
+          spg_4q_post: player.stl_4q,
+          bpg_4q_post: player.blk_4q,
+          topg_4q_post: player.tov_4q,
+          ppg_4q_post: player.pts_4q,
+        }, '*').then(updated => {
+          // console.log('updated is ', updated);
+          if (updated.length) {
+            console.log(updated[0].player_name, ' updated for playoff data');
+          } else {
+            console.log('updated[0] not found, updated is ', updated);
+          }
+          
+        })
+      } catch (e) {
+        console.log('error is ', e);
+      }
+
     })
   },
   mapSegmentedPlayerData: function () {

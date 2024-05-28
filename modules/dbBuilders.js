@@ -204,7 +204,7 @@ module.exports = {
     // let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd
-      .filter((month, i) => month.mscd.mon === "April")
+      .filter((month, i) => month.mscd.mon === "May")
       .forEach(month => {
         month.mscd.g
         .filter((game, i) => moment(game.gdte).isAfter(moment('2024-04-15')))
@@ -249,7 +249,7 @@ module.exports = {
                   ac: game.ac,
                   as: game.as,
                   etm: moment(game.etm).subtract(3, 'hours'),
-                  gweek: 26, // temp while figuring this out
+                  gweek: 28, // temp while figuring this out
                   h: [hObj],
                   v: [vObj],
                   stt: game.stt,
