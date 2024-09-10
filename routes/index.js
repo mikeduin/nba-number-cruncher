@@ -29,6 +29,7 @@ const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAn
 
 const ScraperController = require("../controllers/Scraper.Controller");
 const PropsController = require("../controllers/Props.Controller");
+const ScheduleController = require("../controllers/Schedule.Controller");
 
 const bovadaScraper = ScraperController.scrapeBovada;
 const { fetchDailyGameProps } = PropsController;
@@ -68,36 +69,38 @@ rule.second = 48;
 
 dbBuilders.updatePlayoffScnedule();
 
-(async () => { 
-// schedule.scheduleJob(rule, async () => {
-  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-  while (moment(yesterday).isAfter('2024-04-29')) {
-    await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
-    await delay(20000);
-    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-  }
+ScheduleController.buildSeasonGameWeekArray('2024-10-22', '2025-04-13');
 
-    setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-    setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 10000);15
-    setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 20000);
-    setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 30000);
-    setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 40000);
-    setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 50000);
-    setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 60000);
-    setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 70000);
-    setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 80000);
-    setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 90000);
-    setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 100000);
-    setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 111000);
-    // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    setTimeout(()=>{dbBuilders.addGameStints()}, 120000);
-    setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 140000);
-    setTimeout(()=>{dbMappers.mapTeamPace()}, 160000);
-    setTimeout(()=>{dbMappers.mapFullPlayerData()}, 180000);
-    setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 200000);
-    setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 220000);
-  // }) 
-})()
+// (async () => { 
+// // schedule.scheduleJob(rule, async () => {
+//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+//   while (moment(yesterday).isAfter('2024-06-05')) {
+//     await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
+//     await delay(3000);
+//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   }
+
+//     setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
+//     setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 10000);15
+//     setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 20000);
+//     setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 30000);
+//     setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 40000);
+//     setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 50000);
+//     setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 60000);
+//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 70000);
+//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 80000);
+//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 90000);
+//     setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 100000);
+//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 111000);
+//     // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+//     setTimeout(()=>{dbBuilders.addGameStints()}, 120000);
+//     setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 140000);
+//     setTimeout(()=>{dbMappers.mapTeamPace()}, 160000);
+//     setTimeout(()=>{dbMappers.mapFullPlayerData()}, 180000);
+//     setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 200000);
+//     setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 220000);
+//   // }) 
+// })()
 
 // (async () => {
 //   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
@@ -545,7 +548,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const seasonName = dateFilters.fetchSeasonName(date);
   const week = dateFilters.fetchGmWk(date, seasonYear, seasonName);
   const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, date);
-
+  
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week - 1)

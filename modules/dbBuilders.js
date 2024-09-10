@@ -13,12 +13,11 @@ const { formPlayerAdvancedStatsBuild } = require("../utils/nbaApi/formPlayerAdva
 const { formTeamBaseStatsBuild } = require("../utils/nbaApi/formTeamBaseStatsBuild");
 const { formTeamAdvancedStatsBuild } = require("../utils/nbaApi/formTeamAdvancedStatsBuild");
 
-// MUST CHANGE THIS SEASON VARIABLE AT BEGINNING OF EACH SEASON
-const season = "2023-24";
+const ScheduleController = require('../controllers/Schedule.Controller');
+const { getCurrentNbaSeason } = ScheduleController;
+const currentNbaSeasonInt = parseInt(getCurrentNbaSeason().slice(0, 4));
 
-const leagueScheduleUrl =
-  "https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/league/00_full_schedule_week.json";
-// const leagueScheduleUrl = "https://data.nba.com/data/10s/v2015/json/mobile_teams/utah/2019/league/16_full_schedule.json";
+const leagueScheduleUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${currentNbaSeasonInt}/league/00_full_schedule_week.json`;
 const teamInfoUrl = "https://data.nba.net/10s/prod/v2/2019/teams.json";
 
 // ONE-TIME BUILDER/UPDATE INDEX ... NO REGULAR REPETITION NEEDED
@@ -39,7 +38,7 @@ module.exports = {
       PlusMinus: "N",
       Period: 0,
       Rank: "N",
-      Season: season,
+      Season: getCurrentNbaSeason(),
       SeasonType: "Regular Season",
       StarterBench: lineup
     };
@@ -144,11 +143,9 @@ module.exports = {
                 h: [hObj],
                 v: [vObj],
                 stt: game.stt,
-                // BEGIN HARD-CODED VALUES
-                season_year: 2023,
+                season_year: currentNbaSeasonInt,
                 season_name,
-                display_year: '2023-24',
-                // END HARD-CODED VALUES
+                display_year: getCurrentNbaSeason(),
                 bovada_url: formBovadaUrl(game),
                 updated_at: new Date()
               },
@@ -204,7 +201,7 @@ module.exports = {
     // let currMonth = dateFilters.fetchScoreMonth();
     axios.get(leagueScheduleUrl).then(response => {
       response.data.lscd
-      .filter((month, i) => month.mscd.mon === "May")
+      .filter((month, i) => month.mscd.mon === "June")
       .forEach(month => {
         month.mscd.g
         .filter((game, i) => moment(game.gdte).isAfter(moment('2024-04-15')))
@@ -253,9 +250,9 @@ module.exports = {
                   h: [hObj],
                   v: [vObj],
                   stt: game.stt,
-                  season_year: 2023,
+                  season_year: currentNbaSeasonInt,
                   season_name: 'regular', // needs this for fetchApiData to work
-                  display_year: '2023-24',
+                  display_year: getCurrentNbaSeason(),
                   bovada_url: formBovadaUrl(game),
                   updated_at: new Date(),
                 });
@@ -330,10 +327,8 @@ module.exports = {
                   h: [hObj],
                   v: [vObj],
                   stt: game.stt,
-                  // BEGIN HARD-CODED VALUES
-                  season_year: 2023,
-                  display_year: '2023-24',
-                  // END HARD-CODED VALUES
+                  season_year: getCurrentNbaSeason(),
+                  display_year: currentNbaSeasonInt,
                   bovada_url: formBovadaUrl(game),
                   updated_at: new Date()
                 },
