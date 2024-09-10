@@ -1,26 +1,20 @@
 import knex from "../db/knex.js";
-import getGameSecs from './getGameSecs.js';
-import { calcGamePoss, compileGameStats, compileQuarterStats} from './boxScoreHelpers.js';
+import { getClocks, getGameSecs } from '../utils/boxScores/gameTimeAndClock.js';
+import { getCurrentAndPrevQuarterStats } from "../utils/boxScores/calculateQuarters.js";
+import { calcGamePoss } from "../utils/boxScores/calculateRateStats.js";
+import { compileGameStats } from "../utils/boxScores/calculateGame.js";
 import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
 
 const parseGameData = async (boxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
   const isGameActivated = gameStatus > 1;
-  const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
-  const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
+  const { clock, fullClock } = getClocks(gameClock);
   const qVariable = `q${period}`;
   const gameSecs = getGameSecs((parseInt(period)-1), clock);
 
   const gameOver = gameStatusText === 'Final' || gameStatus === 3;
   const isEndOfPeriod = fullClock === '00:00:00';
-
-  // if (gid == 22300245) {
-  //   console.log('gameStatusText is ', gameStatusText, ' and gameStatus is ', gameStatus, ' and fullClock is ', fullClock, ' and period is ', period);
-  // }
-
-  // console.log('gameStatusText is ', gameStatusText, ' and gameStatus is ', gameStatus, ' and fullClock is ', fullClock, ' and period is ', period);
-  // console.log('isEndOfPeriod is ', isEndOfPeriod, ' and isGameActivated is ', isGameActivated, ' and gameOver is ', gameOver);
 
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
     const hTeam = homeTeam.statistics;
@@ -32,24 +26,8 @@ const parseGameData = async (boxScore) => {
     const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
     const playerStats = [ ...hPlayerStats, ...vPlayerStats];
 
-    const quarterObj = prevTotals => {
-      return compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
-    }
-
-    const quarterUpdFn = async () => {
-      try {
-        let prevTotalsPull = await knex("box_scores_v2").where({gid}).select('totals');
-        let quarterTotals = quarterObj(prevTotalsPull[0].totals);
-        // console.log('prevTotalsPull in quarterUpdFn for gid ', game.gid, ' is ', prevTotalsPull);
-        // console.log('quarterTotals in quarterUpdFn for gid ', game.gid, ' is ', quarterTotals);
-        return {
-          currentQuarter: quarterTotals,
-          prevQuarters: prevTotalsPull[0].totals[0]
-        }
-      } catch (e) {
-        console.log('error in quarterUpdFn is ', e, ' for gid ', gid)
-      }
-    }
+    const qTotals = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
+    const currentQuarter = qTotals?.currentQuarter;
 
     if (period === 1) {
       try {
@@ -78,20 +56,19 @@ const parseGameData = async (boxScore) => {
       try {
         const qTest = await knex("box_scores_v2").where({gid}).pluck(`${qVariable}`);
         if (qTest[0] == null) {
-          const qTotals = await quarterUpdFn();
           await knex("box_scores_v2").where({gid}).update({
             period_updated: period,
             clock_last_updated: gameSecs,
             totals: [totalsObj],
-            [qVariable]: [qTotals.currentQuarter],
+            [qVariable]: [currentQuarter],
             player_stats: JSON.stringify(playerStats),
             updated_at: new Date()
           });
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
-          await knex("box_scores_v2").where({gid: gid}).update({
-            final: true
-          }); 
+          // await knex("box_scores_v2").where({gid: gid}).update({ // REACTIVATE
+          //   final: true
+          // }); 
           // await knex("schedule").where({gid: gid}).update({ // REACTIVATE
           //   stt: "Final"
           // }); 
@@ -111,12 +88,11 @@ const parseGameData = async (boxScore) => {
       // if (qTest[0] == null && !isGameActivated) {
       if (gameOver) {
         try {
-          const qTotals = await quarterUpdFn();
           await knex("box_scores_v2").where({gid: gid}).update({
             period_updated: period,
             clock_last_updated: gameSecs,
             totals: [totalsObj],
-            ot: [qTotals.currentQuarter],
+            ot: [currentQuarter],
             player_stats: JSON.stringify(playerStats),
             final: true,
             updated_at: new Date()

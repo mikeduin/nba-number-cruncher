@@ -8,8 +8,8 @@
   },
   "type": "module",
   "scripts": {
-    "start": "babel-node app.js",
-    "server": "babel-node app.js",
+    "start": "ts-node app.js",
+    "server": "nodemon --exec ts-node app.js",
     "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
@@ -55,7 +55,8 @@
     "@types/express": "^4.17.21",
     "@types/lodash": "^4.17.7",
     "@types/node-schedule": "^2.1.7",
-    "pg-connection-string": "^2.5.0"
+    "pg-connection-string": "^2.5.0",
+    "ts-node": "^10.9.2"
   },
   "repository": "https://github.com/mikeduin/nba-number-cruncher.git",
   "author": "Mike Duin <michael.s.duin@gmail.com>",

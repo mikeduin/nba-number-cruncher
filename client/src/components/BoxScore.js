@@ -46,37 +46,39 @@ class BoxScore extends React.Component {
     const vTeamAbb = game.v[0].ta;
 
     // let init = true;
-    fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
+    // fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
 
-    setInterval(() => {
-      // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
-      if (teamStats && hNormal == null) {
-        const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
-        const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
+    // setInterval(() => {
+    //   // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
+    //   if (teamStats && hNormal == null) {
+    //     const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
+    //     const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
 
-        this.setState({ hNormal, vNormal });
-      }
+    //     this.setState({ hNormal, vNormal });
+    //   }
 
-      if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
-        fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
+    //   if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
+    //     fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
 
-        if (!gameSpread) {
-          this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
-          this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q);
-        };
+    //     if (!gameSpread) {
+    //       this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
+    //       this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q);
+    //     };
 
-        if (gambleCast[`live_${game.gid}`]) {
-          if (gambleCast[`live_${game.gid}`].final == true) {
-            this.setState({final: true})
-          }
-        }
-      }
-    }, 5000);
+    //     if (gambleCast[`live_${game.gid}`]) {
+    //       if (gambleCast[`live_${game.gid}`].final == true) {
+    //         this.setState({final: true})
+    //       }
+    //     }
+    //   }
+    // }, 5000);
   }
 
   render () {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
+
+    console.log('boxScore is ', boxScore);
 
     if (!boxScore || !boxScore.totals ) {
       if (!game) {
@@ -110,11 +112,11 @@ class BoxScore extends React.Component {
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? (boxScore.totals.t.pace ? boxScore.totals.t.pace.toFixed(2) : null ) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? (boxScore.q1.t.pace ? boxScore.q1.t.pace.toFixed(2) : null) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 != null ? boxScore.q3.t.pace.toFixed(2) : null}</Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 != null ? boxScore.q4.t.pace.toFixed(2) : null}</Table.HeaderCell>
+                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? (boxScore.totals.t?.pace ? boxScore.totals.t.pace.toFixed(2) : null ) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? (boxScore.q1.t?.pace ? boxScore.q1.t.pace.toFixed(2) : null) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t?.pace.toFixed(2) : null} </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 != null ? boxScore.q3.t?.pace.toFixed(2) : null}</Table.HeaderCell>
+                <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 != null ? boxScore.q4.t?.pace.toFixed(2) : null}</Table.HeaderCell>
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> Teams </Table.HeaderCell>
@@ -137,37 +139,37 @@ class BoxScore extends React.Component {
             <Table.Body>
               <Table.Row>
                 <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.v[0].ta]} /> {game.v[0].tn}  </Table.Cell>
-                <Table.Cell> {boxScore.totals.v.pts}  </Table.Cell>
-                <Table.Cell> {boxScore.totals.v.fgPct}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.v.pts : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.v.fgPct : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.v.fouls : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.v.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.v.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.v.fouls : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.v.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.v.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.v.fouls : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.v.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.v.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.totals.v?.pts}  </Table.Cell>
+                <Table.Cell> {boxScore.totals.v?.fgPct}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.v?.pts : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.v?.fgPct : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.v?.fouls : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.v?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.v?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.v?.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.v?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.v?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.v?.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fouls : null} </Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.h[0].ta]} /> {game.h[0].tn} </Table.Cell>
-                <Table.Cell> {boxScore.totals.h.pts}  </Table.Cell>
-                <Table.Cell> {boxScore.totals.h.fgPct}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.h.pts : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.h.fgPct : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q1 ? boxScore.q1.h.fouls : null}  </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.h.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.h.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q2 ? boxScore.q2.h.fouls : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.h.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.h.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q3 ? boxScore.q3.h.fouls : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.h.pts : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fgPct : null} </Table.Cell>
-                <Table.Cell> {boxScore.q4 ? boxScore.q4.h.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.totals.h?.pts}  </Table.Cell>
+                <Table.Cell> {boxScore.totals.h?.fgPct}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.h?.pts : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.h?.fgPct : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q1 ? boxScore.q1.h?.fouls : null}  </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.h?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.h?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q2 ? boxScore.q2.h?.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.h?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.h?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q3 ? boxScore.q3.h?.fouls : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.pts : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fgPct : null} </Table.Cell>
+                <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fouls : null} </Table.Cell>
               </Table.Row>
 
             </Table.Body>

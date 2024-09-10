@@ -1,9 +1,7 @@
 import axios from 'axios';
 import knex from '../db/knex.js';
 import _ from 'lodash';
-import startPeriodSec from './startPeriodSec.js';
-import checkPeriodStart from './checkPeriodStart.js';
-import getGameSecs from './getGameSecs.js';
+import { checkPeriodStart, getGameSecs, startPeriodSec } from '../utils/boxScores/gameTimeAndClock.js';
 
 function Schedule() {return knex('schedule')}
 

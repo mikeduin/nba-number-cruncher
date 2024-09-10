@@ -7,25 +7,27 @@ import moment from 'moment';
 import momentTz from 'moment-timezone';
 import cheerio from 'cheerio';
 import _ from 'lodash';
-// import endQuarterResObj from '../modules/boxScoreHelpers/endQuarterResObj.js';
 
 import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1Builds, updateQ2Builds, updateQ3Builds, updateQ4Builds } from "../modules/updateTeamStats.js";
 import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod } from "../modules/updatePlayerStats.js";
 import { addGameStints, buildSchedule } from "../modules/dbBuilders.js";
 import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
 import { fetchCurrentSeason, fetchGmWk, fetchGmWkArrays, fetchSeasonName } from "../modules/dateFilters.js";
-import { clockReturner, calcGamePoss, calcGamePace, compileGameStats, compileQuarterStats } from "../modules/boxScoreHelpers.js";
-import endQuarterResObj from "../modules/boxScoreHelpers/endQuarterResObj.js";
-import fetchBoxScore from "../modules/fetchBoxScore.js";
+import { compileGameStats } from "../utils/boxScores/calculateGame.js";
+import { endQuarterResObj } from "../utils/boxScores/responseObjects.js";
 import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
+import { getCurrentAndPrevQuarterStats } from "../utils/boxScores/calculateQuarters.js";
 
 import parseGameData from '../modules/parseGameData.js';
 
-import getGameSecs from '../modules/getGameSecs.js';
-import { gameSecsToClockAndQuarter as gameSecsToGameTime } from "../modules/gameTimeFuncs.js";
+import { clockReturner, getClocks, getGameSecs } from '../utils/boxScores/gameTimeAndClock.js';
+import { gameSecsToClockAndQuarter as gameSecsToGameTime } from "../utils/boxScores/gameTimeAndClock.js";
+import { calcGamePoss, calcGamePace } from "../utils/boxScores/calculateRateStats.js";
 
+import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
-import { getActiveGames } from "../controllers/GambleCast.Controller.js";
+import { getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
+import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.ts";
 
 (async () => {
   await fetchDailyGameProps();
@@ -50,8 +52,8 @@ getActiveGames('2024-04-27');
 const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
 const testToday = moment().set({'year': 2024, 'month': 3, 'date': 27, 'timezone': 'America/Los_Angeles'}).format('YYYY-MM-DD');
 console.log('testToday is ', testToday);
-let activeGames = [];
-let completedGames = [];
+let activeGames = await getActiveGames(testToday);
+let completedGames = await getCompletedGameGids(testToday);
 
 console.log('today in index is ', today);
 
@@ -64,36 +66,36 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-(async () => { 
-// schedule.scheduleJob(rule, async () => {
-  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-  while (moment(yesterday).isAfter('2024-06-05')) {
-    await updatePlayerBoxScoresByPeriod(yesterday);
-    await delay(3000);
-    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-  }
+// (async () => { 
+// // schedule.scheduleJob(rule, async () => {
+//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+//   while (moment(yesterday).isAfter('2024-06-05')) {
+//     await updatePlayerBoxScoresByPeriod(yesterday);
+//     await delay(3000);
+//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   }
 
-    setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-    setTimeout(()=>{updateStarterBuilds()}, 10000);15
-    setTimeout(()=>{updateBenchBuilds()}, 20000);
-    setTimeout(()=>{updateQ1Builds()}, 30000);
-    setTimeout(()=>{updateQ2Builds()}, 40000);
-    setTimeout(()=>{updateQ3Builds()}, 50000);
-    setTimeout(()=>{updateQ4Builds()}, 60000);
-    setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 70000);
-    setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 80000);
-    setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 90000);
-    setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 100000);
-    setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 111000);
-    // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    setTimeout(()=>{addGameStints()}, 120000);
-    setTimeout(()=>{mapTeamNetRatings()}, 140000);
-    setTimeout(()=>{mapTeamPace()}, 160000);
-    setTimeout(()=>{mapFullPlayerData()}, 180000);
-    setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
-    setTimeout(()=>{mapSegmentedPlayerData()}, 220000);
-  // }) 
-})()
+//     setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+//     setTimeout(()=>{updateStarterBuilds()}, 10000);15
+//     setTimeout(()=>{updateBenchBuilds()}, 20000);
+//     setTimeout(()=>{updateQ1Builds()}, 30000);
+//     setTimeout(()=>{updateQ2Builds()}, 40000);
+//     setTimeout(()=>{updateQ3Builds()}, 50000);
+//     setTimeout(()=>{updateQ4Builds()}, 60000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 70000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 80000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 90000);
+//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 100000);
+//     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 111000);
+//     // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+//     setTimeout(()=>{addGameStints()}, 120000);
+//     setTimeout(()=>{mapTeamNetRatings()}, 140000);
+//     setTimeout(()=>{mapTeamPace()}, 160000);
+//     setTimeout(()=>{mapFullPlayerData()}, 180000);
+//     setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
+//     setTimeout(()=>{mapSegmentedPlayerData()}, 220000);
+//   // }) 
+// })()
 
 // (async () => {
 //   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
@@ -124,13 +126,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
-  completedGames = await knex("schedule")
-    .where({
-      gdte: testToday, // UPDATE to 'today'
-      stt: 'Final'
-    })
-    .pluck('gid');
-
+  completedGames = await getCompletedGameGids(testToday); // UPDATE
   // activeGames = GambleCastController.getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD')); // UPDATE
   activeGames = await getActiveGames(testToday); // UPDATE
 }, 10000)
@@ -156,13 +152,6 @@ router.get("/todayGameStatus", (req, res) => {
     activeGames: activeGames.map(game => game.gid),
     completedGames: completedGames
   })
-})
-
-router.get("/api/fetchActiveBoxScores", async (req, res) => {
-  const activeGids = activeGames.map(game => game.gid);
-  const boxScores = await knex("box_scores_v2").whereIn('gid', activeGids);
-  console.log('active box scores are ', boxScores);
-  res.send(boxScores);
 })
 
 router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
@@ -263,25 +252,65 @@ setInterval(() => {
     const gid = game.gid;
 
     try {
-      const response = await fetchBoxScore(vAbb, hAbb, gid);
+      const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
       const boxScore = response.props.pageProps.game;
-      await parseGameData(boxScore);
+      await parseGameData(boxScore); // write to DB if quarter is over
     } catch (e) {
       console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
     }
   })
 }, 3000)
 
+router.get("/api/fetchDailyBoxScores", async (req, res) => {
+  const todaysGames = await getTodaysGames(testToday); // UPDATE
+  const todayGids = todaysGames.map(game => game.gid);
+  const completedGames = await Db.BoxScores()
+    .where({final: true})
+    .whereIn('gid', todayGids);
+  
+  const completedBoxScores = completedGames.map((boxScore) => getCompletedGameResponse(boxScore));
+
+  // const boxScores = await knex("box_scores_v2").whereIn('gid', gids); // can't rely ONLY on this, because games not in DB until 1Q over ...
+  res.send(completedBoxScores);
+})
+
+router.get("/api/fetchActiveBoxScores", async (req, res) => {
+  const activeGames = await getActiveGames(testToday); // UPDATE
+  console.log('activeGames are ', activeGames);
+  activeGames.forEach(async (game) => {
+    const hAbb = game.h[0].ta;
+    const vAbb = game.v[0].ta;
+    const gid = game.gid;
+    let boxScore;
+    try {
+      const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
+      boxScore = response.props.pageProps.game;
+    } catch (e) {
+      console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
+    }
+
+    const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
+    const isGameActivated = gameStatus > 1;
+
+    if (isGameActivated) {
+      const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
+      const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
+      const gameSecs = getGameSecs((parseInt(period)-1), clock);
+      const derivedClock = clockReturner(clock, period, gameSecs);
+    
+    }
+  })
+  // const boxScores = await knex("box_scores_v2").whereIn('gid', activeGids);
+  // res.send(boxScores);
+})
+
 router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
   const { gid, init, vAbb, hAbb } = req.params;
 
   // <-- If Game Is Final --> //
   if (completedGames.indexOf(parseInt(gid)) !== -1) {
-    let inDb = await knex("box_scores_v2").where({gid: gid});
-    let ot = null;
-    if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
-
-    // ERROR AT START OF 2Q: CANNOT READ PROPERTY '0' OF NULL FOR Q2
+    const inDb = await knex("box_scores_v2").where({gid: gid});
+    let ot = inDb[0].ot?.[0] ?? null;
 
     res.send({
       gid: gid,
@@ -289,7 +318,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
       q2: inDb[0].q2[0],
       q3: inDb[0].q3[0],
       q4: inDb[0].q4[0],
-      ot: ot,
+      ot,
       totals: inDb[0].totals[0],
       final: true
     })
@@ -297,12 +326,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
   };
 
   let q1 = null;
-  let q2 = null;
-  let q3 = null;
-  let q4 = null;
-  let ot = null;
   let thru_period = 0;
-
   let boxScore;
 
   try {
@@ -317,8 +341,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
 
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
   const isGameActivated = gameStatus > 1;
-  const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
-  const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
+  const { clock, fullClock } = getClocks(gameClock);
 
   const gameSecs = getGameSecs((parseInt(period)-1), clock);
   const derivedClock = clockReturner(clock, period, gameSecs);
@@ -331,20 +354,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
     const derivedPace = calcGamePace(poss, period, gameSecs);
     const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
-    // this object calculates the stats for each quarter, using the previous totals from earlier Qs
-    const quarterObj = prevTotals => {
-      return compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
-    }
-
-    // this is the function that combines the two above
-    const quarterUpdFn = async () => {
-      const prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
-      const quarterTotals = await quarterObj(prevTotalsPull[0].totals);
-      return {
-        currentQuarter: quarterTotals,
-        prevQuarters: prevTotalsPull[0].totals[0]
-      }
-    }
+    const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
 
     const gameOver = gameStatusText === 'Final';
     const isEndOfPeriod = fullClock === '00:00:00';
@@ -357,37 +367,32 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
         // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
         q1 = inDb[0].q1[0];
         thru_period = inDb[0].period_updated;
-        if (inDb[0].q2 != null) { q2 = inDb[0].q2[0] };
-        if (inDb[0].q3 != null) { q3 = inDb[0].q3[0] };
-        if (inDb[0].q4 != null) { q4 = inDb[0].q4[0] };
-        if (inDb[0].ot != null) { ot = inDb[0].ot[0] };
-  
-        quarterUpdFn().then(qTotals => {
-          if (period == 2) {inDb[0].q2 != null ? q2 = inDb[0].q2[0] : q2 = qTotals.currentQuarter};
-          if (period == 3) {inDb[0].q3 != null ? q3 = inDb[0].q3[0] : q3 = qTotals.currentQuarter};
-          if (period == 4) {inDb[0].q4 != null ? q4 = inDb[0].q4[0] : q4 = qTotals.currentQuarter};
-          if (period > 4) ot = qTotals.currentQuarter;
-  
-          res.send({
-            gid,
-            init: true,
-            quarterEnd: isEndOfPeriod,
-            live: true,
-            clock: derivedClock,
-            gameSecs,
-            period,
-            thru_period,
-            poss,
-            pace: derivedPace,
-            totals: totalsObj,
-            q1: q1,
-            q2: q2,
-            q3: q3,
-            q4: q4,
-            ot: ot,
-            prevQuarters: qTotals.prevQuarters,
-            playerStats: JSON.parse(inDb[0].player_stats)
-          })
+
+        const q2 = inDb[0].q2?.[0] ?? period === 2 ? currentQuarter : null;
+        const q3 = inDb[0].q3?.[0] ?? period === 3 ? currentQuarter : null;
+        const q4 = inDb[0].q4?.[0] ?? period === 4 ? currentQuarter : null;
+        const ot = inDb[0].ot?.[0] ?? period > 4 ? currentQuarter : null;
+
+        res.send({
+          gid,
+          init: true,
+          quarterEnd: isEndOfPeriod,
+          live: true,
+          clock: derivedClock,
+          gameSecs,
+          period,
+          thru_period,
+          poss,
+          pace: derivedPace,
+          totals: totalsObj,
+          q1,
+          q2,
+          q3,
+          q4,
+          ot,
+          currentQuarter,
+          prevQuarters, // Am I ever using this on FE? 
+          playerStats: JSON.parse(inDb[0].player_stats)
         })
         return;
       } catch (e) {
@@ -398,8 +403,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
     // <-- If at End of Period, or if Game is Over --> //
     if (isEndOfPeriod || gameOver) {
       try {
-      const qTotals = await quarterUpdFn();
-      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, qTotals, playerStats))
+      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats))
       } catch (e) {
         console.log('error setting end of game q totals is ', e);
       } 

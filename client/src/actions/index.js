@@ -1,6 +1,6 @@
 import axios from 'axios';
 import moment from 'moment-timezone';
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import { getGameSecs } from '../modules/gameTimeFuncs';
 import { calcFgPct, calcPoss, calcQuarterPace } from '../utils/boxScoreHelpers';
 
@@ -185,81 +185,21 @@ export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
   dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
-export const fetchActiveBoxScores = () => async (dispatch, getState) => {
-  const activeGames = getState().activeGames;
-  console.log('active games in fetchActiveBoxScores are ', activeGames);
-  // const activeBoxScores = await axios.get('/api/fetchActiveBoxScores');
-  // activeBoxScores.data.forEach(game => {
-  //   if (game.final) {
-  //     dispatch({ type: 'SET_FINAL_BOX_SCORE', payload: game });
-  //   }
-
-  //   if (game.init) {
-  //     dispatch({ type: 'INITIALIZE_BOX_SCORE', payload: game });
-  //   }
-
-  //   if (game.live) {
-  //     const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period } = game;
-
-  //     const liveData = {
-  //       gid: game.gid,
-  //       active: true,
-  //       period,
-  //       endOfPeriod: false,
-  //       gameSecs,
-  //       clock,
-  //       poss,
-  //       pace,
-  //       totals,
-  //       playerStats
-  //     };
-
-  //     if (game.quarterEnd) {
-  //       let perToUpdate = thru_period;
-  //       let endOfQuarterData = game.quarter;
-  //       let prevQuarters = game.prevQuarters;
-  
-  //       if (getState().gambleCast[`live_${game.gid}`]) {
-  //         const perToUpdPts = endOfQuarterData.t.pts;
-  //         if (perToUpdPts !== 0) {
-  //           // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-  //           let snapshot = { ...liveData, totals, perToUpdate, endOfQuarterData, prevQuarters};
-  //           dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
-  //         }
-  //       }
-  //     } else {
-
-  //     }
-  //   }
-  // });
-  // console.log('activeBoxScores are ', activeBoxScores);
-}
-
-export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getState) => {
-  // For testing
-  // let todayInt = '20190314';
-  let todayInt = moment().tz("America/Los_Angeles").format('YYYYMMDD');
-  const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}/${vAbb}/${hAbb}`);
-  const response = game.data;
-
-  if (response.final) {
-    dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });
-    return;
+const updateGamblecast = (game) => async (dispatch, getState) => {
+  if (game.final) {
+    console.log('sending final payload for game.gid ', game);
+    dispatch({ type: 'SET_FINAL_BOX_SCORE', payload: game });
   }
 
-  if (response.init) {
-    dispatch ({ type: 'INITIALIZE_BOX_SCORE', payload: response });
-    return;
+  if (game.init) {
+    dispatch({ type: 'INITIALIZE_BOX_SCORE', payload: game });
   }
 
-  // console.log('response in fetchBoxScore is ', response);
+  if (game.live) {
+    const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period, currentQuarter } = game;
 
-  // are things not showing up because it's not live in response?
-  if (response.live) {
-    const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period } = response;
-    
-    let liveData = {
-      gid: gid,
+    const liveData = {
+      gid: game.gid,
       active: true,
       period,
       endOfPeriod: false,
@@ -271,100 +211,105 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
       playerStats
     };
 
-    if (response.quarterEnd) { // at end of quarter
+    if (game.quarterEnd) {
       let perToUpdate = thru_period;
-      let endOfQuarterData = response.quarter;
-      let prevQuarters = response.prevQuarters;
+      let endOfQuarterData = game.quarter;
 
-      if (getState().gambleCast[`live_${gid}`]) {
+      if (getState().gambleCast[`live_${game.gid}`]) {
         const perToUpdPts = endOfQuarterData.t.pts;
         if (perToUpdPts !== 0) {
           // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-          let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
+          let snapshot = { ...liveData, perToUpdate, endOfQuarterData};
           dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
         }
       }
-    } else { // quarter in progress
-      let perToUpdate = period;
-      let inQuarter = {};
-
-      if (period === 1) {
-        inQuarter = {
-          ...liveData,
-          perToUpdate,
-          clock,
-          quarterData: totals,
-          q1: totals
-        };
-        dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
-
-      } else {
-
-        let prevQuarters = response.prevQuarters;
-        let perToUpdate = period;
-
-        const quarterPoss = calcPoss(
-          ( (parseInt(totals?.h.fga) + parseInt(totals?.v.fga))
-              - parseInt(prevQuarters?.t.fga)),
-          ( (parseInt(totals?.h.to) + parseInt(totals?.v.to))
-              - parseInt(prevQuarters?.t.to)),
-          ( (parseInt(totals?.h.fta) + parseInt(totals?.v.fta))
-              - parseInt(prevQuarters?.t.fta)),
-          ( (parseInt(totals?.h.offReb) + parseInt(totals?.v.offReb))
-              - parseInt(prevQuarters?.t.offReb))
-        );
-
-        let currentQuarter = {
-            h: {
-              pts: parseInt(totals?.h.pts) - parseInt(prevQuarters?.h.pts),
-              fgm: parseInt(totals?.h.fgm) - parseInt(prevQuarters?.h.fgm),
-              fga: parseInt(totals?.h.fga) - parseInt(prevQuarters?.h.fga),
-              fgPct: calcFgPct((parseInt(totals?.h.fgm)-prevQuarters?.h.fgm), (parseInt(totals?.h.fga) - parseInt(prevQuarters?.h.fga))),
-              fta: parseInt(totals?.h.fta) - parseInt(prevQuarters?.h.fta),
-              to: parseInt(totals?.h.to) - parseInt(prevQuarters?.h.to),
-              offReb: parseInt(totals?.h.offReb) - parseInt(prevQuarters?.h.offReb),
-              fouls: parseInt(totals?.h.fouls) - parseInt(prevQuarters?.h.fouls)
-            },
-            v: {
-              pts: parseInt(totals?.v.pts) - parseInt(prevQuarters?.v.pts),
-              fgm: parseInt(totals?.v.fgm) - parseInt(prevQuarters?.v.fgm),
-              fga: parseInt(totals?.v.fga) - parseInt(prevQuarters?.v.fga),
-              fgPct: calcFgPct(
-                (parseInt(totals?.v.fgm) - parseInt(prevQuarters?.v.fgm)),
-                (parseInt(totals?.v.fga) - parseInt(prevQuarters?.v.fga))
-              ),
-              fta: parseInt(totals?.v.fta) - parseInt(prevQuarters?.v.fta),
-              to: parseInt(totals?.v.to) - parseInt(prevQuarters?.v.to),
-              offReb: parseInt(totals?.v.offReb) - parseInt(prevQuarters?.v.offReb),
-              fouls: parseInt(totals?.v.fouls) - parseInt(prevQuarters?.v.fouls)
-            },
-            t: {
-              pts: (parseInt(totals?.h.pts) + parseInt(totals?.v.pts)) - parseInt(prevQuarters?.t.pts),
-              fgm: (parseInt(totals?.h.fgm) + parseInt(totals?.v.fgm)) - parseInt(prevQuarters?.t.fgm),
-              fga: (parseInt(totals?.h.fga) + parseInt(totals?.v.fga)) - parseInt(prevQuarters?.t.fga),
-              fgPct: calcFgPct(
-                ((parseInt(totals?.h.fgm) + parseInt(totals?.v.fgm)) - parseInt(prevQuarters?.t.fgm)),
-                ((parseInt(totals?.h.fga) + parseInt(totals?.v.fga)) - parseInt(prevQuarters?.t.fga))
-              ),
-              fta: (parseInt(totals?.h.fta) + parseInt(totals?.v.fta)) - parseInt(prevQuarters?.t.fta),
-              to: (parseInt(totals?.h.to) + parseInt(totals?.v.to)) - parseInt(prevQuarters?.t.to),
-              offReb: (parseInt(totals?.h.offReb) + parseInt(totals?.v.offReb)) - parseInt(prevQuarters?.t.offReb),
-              fouls: (parseInt(totals?.h.fouls) + parseInt(totals?.v.fouls)) - parseInt(prevQuarters?.t.fouls),
-              poss: quarterPoss,
-              pace: calcQuarterPace(quarterPoss, period, gameSecs)
-            }
-        }
-
-        inQuarter = {
-          ...liveData,
-          perToUpdate,
-          [`q${currentQuarter}`]: currentQuarter,
-          quarterData: currentQuarter
-        }
-
-        dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
+    } else {
+      const inQuarter = {
+        ...liveData,
+        perToUpdate: period,
+        quarterData: period === 1 ? totals : currentQuarter,
+        [`q${period}`]: period === 1 ? totals : currentQuarter
       };
 
-    };
+      dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
+    }
   }
+}
+
+export const fetchDailyBoxScores = () => async (dispatch) => {
+  const dailyBoxScores = await axios.get('/api/fetchDailyBoxScores');
+  console.log('dailyBoxScores are ', dailyBoxScores.data);
+  dailyBoxScores.data.forEach(game => {
+    dispatch(updateGamblecast(game));
+  });
+}
+ 
+export const fetchActiveBoxScores = () => async (dispatch, getState) => {
+  const activeGames = getState().activeGames;
+  console.log('active games in fetchActiveBoxScores are ', activeGames);
+  const activeBoxScores = await axios.get('/api/fetchActiveBoxScores');
+  console.log('activeBoxScores are ', activeBoxScores);
+  activeBoxScores.data.forEach(game => {
+    updateGamblecast(game);
+  });
+}
+
+export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getState) => {
+  // // For testing
+  // // let todayInt = '20190314';
+  // let todayInt = moment().tz("America/Los_Angeles").format('YYYYMMDD');
+  // const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}/${vAbb}/${hAbb}`);
+  // const response = game.data;
+
+  // if (response.final) {
+  //   dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });
+  //   return;
+  // }
+
+  // if (response.init) {
+  //   dispatch ({ type: 'INITIALIZE_BOX_SCORE', payload: response });
+  //   return;
+  // }
+
+  // if (response.live) {
+  //   const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period, currentQuarter } = response;
+    
+  //   let liveData = {
+  //     gid,
+  //     active: true,
+  //     period,
+  //     endOfPeriod: false,
+  //     gameSecs,
+  //     clock,
+  //     poss,
+  //     pace,
+  //     totals,
+  //     playerStats
+  //   };
+
+  //   if (response.quarterEnd) { // at end of quarter
+  //     let perToUpdate = thru_period;
+  //     let endOfQuarterData = response.quarter;
+  //     // let prevQuarters = response.prevQuarters;
+
+  //     if (getState().gambleCast[`live_${gid}`]) {
+  //       const perToUpdPts = endOfQuarterData.t.pts;
+  //       if (perToUpdPts !== 0) {
+  //         // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
+  //         // let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
+  //         let snapshot = { ...liveData, perToUpdate, endOfQuarterData};
+  //         dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+  //       }
+  //     }
+  //   } else { // quarter in progress
+  //     const inQuarter = {
+  //       ...liveData,
+  //       perToUpdate: period,
+  //       quarterData: period === 1 ? totals : currentQuarter,
+  //       [`q${perToUpdate}`]: period === 1 ? totals : currentQuarter
+  //     };
+
+  //     dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
+  //   };
+  // }
 }

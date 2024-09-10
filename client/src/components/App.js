@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 import ToastContainer from './ToastContainer';
 
-import { fetchWeek, getPlayerMetadata, checkActiveGames, fetchActiveBoxScores } from '../actions';
+import { fetchWeek, getPlayerMetadata, checkActiveGames, fetchDailyBoxScores, fetchActiveBoxScores } from '../actions';
 
 import NetRatings from './NetRatings';
 import Schedule from './Schedule';
@@ -18,7 +18,7 @@ class App extends React.Component {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
     this.props.checkActiveGames();
-    this.props.fetchActiveBoxScores();
+    this.props.fetchDailyBoxScores();
     setInterval(()=>{
       this.props.checkActiveGames();
       this.props.fetchActiveBoxScores();
@@ -59,4 +59,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata, checkActiveGames, fetchActiveBoxScores })(App);
+export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata, checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores })(App);
