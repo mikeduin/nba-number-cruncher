@@ -1,6 +1,6 @@
-const boxScoreHelpers = require("../boxScoreHelpers");
+import * as boxScoreHelpers from '../boxScoreHelpers.js';
 
-module.exports = (clock, period, thru_period, gameSecs, poss, totalsObj, qTotals = null, playerStats) => {
+const endQuarterResObj = (clock, period, thru_period, gameSecs, poss, totalsObj, qTotals = null, playerStats) => {
   return {
     quarterEnd: true,
     live: true,
@@ -14,5 +14,7 @@ module.exports = (clock, period, thru_period, gameSecs, poss, totalsObj, qTotals
     prevQuarters: thru_period === 1 ? totalsObj : qTotals.prevQuarters,
     quarter: thru_period === 1 ? totalsObj : qTotals.currentQuarter,
     playerStats
-  }
-}
+  };
+};
+
+export default endQuarterResObj;

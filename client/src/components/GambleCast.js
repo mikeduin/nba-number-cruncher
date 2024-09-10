@@ -27,7 +27,7 @@ class GambleCast extends React.Component {
     // console.log('playerProps are ', playerProps);
     // console.log('playersMetadata in gamblecast are ', playersMetadata);
 
-    console.log('activeGames are ', activeGames);
+    console.log('activeGames in gamblecast are ', activeGames, ' and games are ', games);
 
     const checkActive = (gid) => {
       return activeGames.indexOf(gid) !== -1

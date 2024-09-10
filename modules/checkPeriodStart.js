@@ -1,5 +1,3 @@
-// This function takes in game seconds and returns its period
-
 const checkPeriodStart = (secs) => {
   if (secs < 2880) {
     return (Math.floor(secs/720));
@@ -8,4 +6,4 @@ const checkPeriodStart = (secs) => {
   };
 }
 
-module.exports = checkPeriodStart;
+export default checkPeriodStart;

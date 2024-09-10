@@ -6,9 +6,10 @@
   "engines": {
     "node": "16.x"
   },
+  "type": "module",
   "scripts": {
-    "start": "node app.js",
-    "server": "nodemon app.js",
+    "start": "babel-node app.js",
+    "server": "babel-node app.js",
     "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
@@ -42,10 +43,18 @@
     "semver": "^5.6.0",
     "serve-favicon": "^2.5.0",
     "type-fest": "^0.13.1",
-    "typescript": "^4.9.5",
+    "typescript": "^5.6.2",
     "victory": "^31.2.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.25.6",
+    "@babel/core": "^7.25.2",
+    "@babel/node": "^7.25.0",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@types/express": "^4.17.21",
+    "@types/lodash": "^4.17.7",
+    "@types/node-schedule": "^2.1.7",
     "pg-connection-string": "^2.5.0"
   },
   "repository": "https://github.com/mikeduin/nba-number-cruncher.git",

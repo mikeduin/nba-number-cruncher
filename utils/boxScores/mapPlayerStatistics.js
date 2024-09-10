@@ -1,6 +1,6 @@
 const regex = /PT(\d+)M/;
 
-module.exports = (players, teamId, teamAbb, gameCompleted = false) => players.map(player => {
+const mapPlayerStatistics = (players, teamId, teamAbb, gameCompleted = false) => players.map(player => {
   const { 
     assists: ast,
     blocks: blk,
@@ -47,3 +47,5 @@ module.exports = (players, teamId, teamAbb, gameCompleted = false) => players.ma
     tov
   }
 });
+
+export default mapPlayerStatistics;

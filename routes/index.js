@@ -1,40 +1,31 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const axios = require("axios");
-const knex = require("../db/knex");
-const schedule = require("node-schedule");
-const moment = require("moment");
-const momentTz = require("moment-timezone");
-const cheerio = require('cheerio');
-const _ = require('lodash');
+import axios from 'axios';
+import knex from '../db/knex.js';
+import schedule from 'node-schedule';
+import moment from 'moment';
+import momentTz from 'moment-timezone';
+import cheerio from 'cheerio';
+import _ from 'lodash';
+// import endQuarterResObj from '../modules/boxScoreHelpers/endQuarterResObj.js';
 
-// import endQuarterResObj from '../modules/boxScoreHelpers/endQuarterResObj';
+import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1Builds, updateQ2Builds, updateQ3Builds, updateQ4Builds } from "../modules/updateTeamStats.js";
+import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod } from "../modules/updatePlayerStats.js";
+import { addGameStints, buildSchedule } from "../modules/dbBuilders.js";
+import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
+import { fetchCurrentSeason, fetchGmWk, fetchGmWkArrays, fetchSeasonName } from "../modules/dateFilters.js";
+import { clockReturner, calcGamePoss, calcGamePace, compileGameStats, compileQuarterStats } from "../modules/boxScoreHelpers.js";
+import endQuarterResObj from "../modules/boxScoreHelpers/endQuarterResObj.js";
+import fetchBoxScore from "../modules/fetchBoxScore.js";
+import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
 
-const updateTeamStats = require("../modules/updateTeamStats");
-const updatePlayerStats = require("../modules/updatePlayerStats");
-const dbBuilders = require("../modules/dbBuilders");
-const dbMappers = require("../modules/dbMappers");
-const dateFilters = require("../modules/dateFilters");
-const teamLookup = require("../modules/teamLookup");
-const oddsLoaders = require("../modules/oddsLoaders");
-const boxScoreHelpers = require("../modules/boxScoreHelpers");
-const endQuarterResObj = require("../modules/boxScoreHelpers/endQuarterResObj");
-const fetchBoxScore = require("../modules/fetchBoxScore");
-const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
+import parseGameData from '../modules/parseGameData.js';
 
-const parseGameData = require('../modules/parseGameData');
+import getGameSecs from '../modules/getGameSecs.js';
+import { gameSecsToClockAndQuarter as gameSecsToGameTime } from "../modules/gameTimeFuncs.js";
 
-const getGameSecs = require('../modules/getGameSecs');
-const gameSecsToGameTime = require("../modules/gameTimeFuncs").gameSecsToClockAndQuarter;
-
-const ScraperController = require("../controllers/Scraper.Controller");
-const PropsController = require("../controllers/Props.Controller");
-const ScheduleController = require("../controllers/Schedule.Controller");
-
-const bovadaScraper = ScraperController.scrapeBovada;
-const { fetchDailyGameProps } = PropsController;
-
-const formBovadaUrl = require("../utils/props/formBovadaUrl");
+import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
+import { getActiveGames } from "../controllers/GambleCast.Controller.js";
 
 (async () => {
   await fetchDailyGameProps();
@@ -43,6 +34,8 @@ const formBovadaUrl = require("../utils/props/formBovadaUrl");
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+getActiveGames('2024-04-27');
 
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
@@ -54,53 +47,53 @@ function delay(ms) {
 
 // dbBuilders.buildGameStintsDb();
 
-// subtract 8 hours to convert to west coast time ...
-// moment.tz.add('America/Los_Angeles|PST PDT|80 70|0101|1Lzm0 1zb0 Op0');
-let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
+const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
+const testToday = moment().set({'year': 2024, 'month': 3, 'date': 27, 'timezone': 'America/Los_Angeles'}).format('YYYY-MM-DD');
+console.log('testToday is ', testToday);
 let activeGames = [];
 let completedGames = [];
+
+console.log('today in index is ', today);
 
 let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
 
-rule.hour = 02;
+rule.hour = 0o2;
 rule.minute = 19;
 rule.second = 48;
 
-dbBuilders.updatePlayoffScnedule();
+// dbBuilders.updatePlayoffSchedule();
 
-ScheduleController.buildSeasonGameWeekArray('2024-10-22', '2025-04-13');
+(async () => { 
+// schedule.scheduleJob(rule, async () => {
+  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+  while (moment(yesterday).isAfter('2024-06-05')) {
+    await updatePlayerBoxScoresByPeriod(yesterday);
+    await delay(3000);
+    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  }
 
-// (async () => { 
-// // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-06-05')) {
-//     await updatePlayerStats.updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(3000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
-
-//     setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//     setTimeout(()=>{updateTeamStats.updateStarterBuilds()}, 10000);15
-//     setTimeout(()=>{updateTeamStats.updateBenchBuilds()}, 20000);
-//     setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 30000);
-//     setTimeout(()=>{updateTeamStats.updateQ2Builds()}, 40000);
-//     setTimeout(()=>{updateTeamStats.updateQ3Builds()}, 50000);
-//     setTimeout(()=>{updateTeamStats.updateQ4Builds()}, 60000);
-//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 70000);
-//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(3)}, 80000);
-//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(4)}, 90000);
-//     setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 100000);
-//     setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 111000);
-//     // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-//     setTimeout(()=>{dbBuilders.addGameStints()}, 120000);
-//     setTimeout(()=>{dbMappers.mapTeamNetRatings()}, 140000);
-//     setTimeout(()=>{dbMappers.mapTeamPace()}, 160000);
-//     setTimeout(()=>{dbMappers.mapFullPlayerData()}, 180000);
-//     setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 200000);
-//     setTimeout(()=>{dbMappers.mapSegmentedPlayerData()}, 220000);
-//   // }) 
-// })()
+    setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+    setTimeout(()=>{updateStarterBuilds()}, 10000);15
+    setTimeout(()=>{updateBenchBuilds()}, 20000);
+    setTimeout(()=>{updateQ1Builds()}, 30000);
+    setTimeout(()=>{updateQ2Builds()}, 40000);
+    setTimeout(()=>{updateQ3Builds()}, 50000);
+    setTimeout(()=>{updateQ4Builds()}, 60000);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 70000);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 80000);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 90000);
+    setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 100000);
+    setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 111000);
+    // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+    setTimeout(()=>{addGameStints()}, 120000);
+    setTimeout(()=>{mapTeamNetRatings()}, 140000);
+    setTimeout(()=>{mapTeamPace()}, 160000);
+    setTimeout(()=>{mapFullPlayerData()}, 180000);
+    setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
+    setTimeout(()=>{mapSegmentedPlayerData()}, 220000);
+  // }) 
+})()
 
 // (async () => {
 //   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
@@ -117,7 +110,6 @@ if (process.env.NODE_ENV !== 'production') {
   }, 8000)
 }
 
-
 // setTimeout(async () => {
 //   const scheduleGames = await knex("schedule");
 //   scheduleGames.forEach(async game => {
@@ -132,52 +124,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
-  // await fetchDailyGameProps();
-  // today = moment().subtract(18, 'hours').format('YYYY-MM-DD');
-  const todayGames = await knex("schedule").where({gdte: today});
-  const todayGids = todayGames.map(game => game.gid);
-
-  // console.log('todayGames are ', todayGames);
-
-  // FIX THIS EVENTUALLY TO BE UTC TIME, NOT MANUALLY ADJUSTED WEST COAST TIME
-  // let nowET = moment().add(180, 'minutes');
-  let nowET = moment();
-  console.log('nowET is ', nowET);
-  // let nowET = moment().tz("America/Toronto");
-  const completedGames = await knex("box_scores_v2")
-    .whereIn('gid', todayGids)
-    .where({final: true})
+  completedGames = await knex("schedule")
+    .where({
+      gdte: testToday, // UPDATE to 'today'
+      stt: 'Final'
+    })
     .pluck('gid');
 
-  todayGames.forEach(game => {
-
-    // adjustedTime below is necessary because the DB stores the EST start time (as found in NBA DB) as a PST date (since I build the schedule locally in PST)
-    // So, to fix the date and bring it back to PST-based, you need to adjust three hours
-    const adjustedTime = moment(game.etm).subtract(3, 'hours'); 
-
-    let mins = nowET.diff(adjustedTime, 'minutes');
-    console.log(game.gid, ' at ', game.etm, ' starts in ', mins, ' mins');
-
-    // you need mins to be a positive value
-
-    if (mins >= 0 && activeGames.map(g => g.gid).indexOf(game.gid) === -1 && completedGames.indexOf(game.gid) === -1) {
-      // If ...
-      // mins >= 0 ... (fix this shit)
-      // and game is not already in activeGames
-      // and game has not been completed
-      // push to activeGames
-      console.log('pushing ', game.gid, ' to activeGames');
-      if (game.gid !== 22200998 && game.gid !== 22200999) {
-        activeGames.push(game);
-      }
-    };
-
-    if (completedGames.indexOf(game.gid) !== -1 && activeGames.indexOf(game.gid) !== -1) {
-      const index = completedGames.indexOf(completedGames.indexOf(game.gid));
-      completedGames.splice(index, 1);
-      console.log(game.gid, ' removed from active games');
-    }
-  })
+  // activeGames = GambleCastController.getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD')); // UPDATE
+  activeGames = await getActiveGames(testToday); // UPDATE
 }, 10000)
 
 // This function pulls in odds
@@ -196,15 +151,21 @@ setInterval(async () => {
 //   // }
 // }, 60000);
 
-router.get("/todayGameStatus", (req, res, next) => {
-  // console.log('in todayGameStatus active Games are ', activeGames)
+router.get("/todayGameStatus", (req, res) => {
   res.send({
-    activeGames: activeGames.map(g => g.gid),
+    activeGames: activeGames.map(game => game.gid),
     completedGames: completedGames
   })
 })
 
-router.delete("/api/deleteDuplicateProps/:gid", async (req, res, next) => {
+router.get("/api/fetchActiveBoxScores", async (req, res) => {
+  const activeGids = activeGames.map(game => game.gid);
+  const boxScores = await knex("box_scores_v2").whereIn('gid', activeGids);
+  console.log('active box scores are ', boxScores);
+  res.send(boxScores);
+})
+
+router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
   const gid = req.params.gid;
   try {
     await PropsController.deleteDuplicateProps(gid);
@@ -311,7 +272,7 @@ setInterval(() => {
   })
 }, 3000)
 
-router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next) => {
+router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
   const { gid, init, vAbb, hAbb } = req.params;
 
   // <-- If Game Is Final --> //
@@ -360,19 +321,19 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
   const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
 
   const gameSecs = getGameSecs((parseInt(period)-1), clock);
-  const derivedClock = boxScoreHelpers.clockReturner(clock, period, gameSecs);
+  const derivedClock = clockReturner(clock, period, gameSecs);
 
   // <-- If Game Has Begun --> //
   if (isGameActivated) {
     const hTeam = homeTeam.statistics;
     const vTeam = awayTeam.statistics;
-    const poss = boxScoreHelpers.calcGamePoss(hTeam, vTeam);
-    const derivedPace = boxScoreHelpers.calcGamePace(poss, period, gameSecs);
-    const totalsObj = boxScoreHelpers.compileGameStats(hTeam, vTeam, poss, period, gameSecs);
+    const poss = calcGamePoss(hTeam, vTeam);
+    const derivedPace = calcGamePace(poss, period, gameSecs);
+    const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
     // this object calculates the stats for each quarter, using the previous totals from earlier Qs
     const quarterObj = prevTotals => {
-      return boxScoreHelpers.compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
+      return compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
     }
 
     // this is the function that combines the two above
@@ -408,15 +369,15 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
           if (period > 4) ot = qTotals.currentQuarter;
   
           res.send({
-            gid: gid,
+            gid,
             init: true,
             quarterEnd: isEndOfPeriod,
             live: true,
             clock: derivedClock,
-            gameSecs: gameSecs,
-            period: period,
-            thru_period: thru_period,
-            poss: poss,
+            gameSecs,
+            period,
+            thru_period,
+            poss,
             pace: derivedPace,
             totals: totalsObj,
             q1: q1,
@@ -433,6 +394,7 @@ router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res, next)
         console.log('error send box score response is ', e);
       }
     }
+
     // <-- If at End of Period, or if Game is Over --> //
     if (isEndOfPeriod || gameOver) {
       try {
@@ -542,22 +504,22 @@ router.get("/api/getNetRatings", (req, res, next) => {
 
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
   const { date } = req.params;
-  // const todayInfo = await axios.get('https://data.nba.net/10s/prod/v3/today.json');
-  // const seasonYear = todayInfo.data.seasonScheduleYear;
-  const seasonYear = dateFilters.fetchCurrentSeason();
-  const seasonName = dateFilters.fetchSeasonName(date);
-  const week = dateFilters.fetchGmWk(date, seasonYear, seasonName);
-  const weekArray = dateFilters.fetchGmWkArrays(week, seasonYear, seasonName, date);
+  // const seasonYear = dateFilters.fetchCurrentSeason(); // UPDATE
+  const seasonYear = 2023;
+  const seasonName = fetchSeasonName(date);
+  const week = fetchGmWk(date, seasonYear, seasonName);
+  const weekArray = fetchGmWkArrays(week, seasonYear, seasonName, date);
+
+  console.log('week is', week, 'weekArray is ', weekArray);
   
   knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
-    .where('s.gweek', week - 1)
+    .where('s.gweek', week)
     .where('s.season_year', seasonYear)
     .where('s.season_name', seasonName)
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url')
     .orderBy('s.etm')
     .then(async (games) => {
-      // console.log('games are ', games);
       const teamStats = await knex("teams_full_base");
       res.send({
         week: week,
@@ -688,7 +650,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
       })
     })
 
-    sigEntries = gameEntries
+    const sigEntries = gameEntries
       .filter(set => {
         const median = Math.floor(set.length/2);
         return (
@@ -709,7 +671,7 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
         return quarters;
       }, [[], [], [], []]);
 
-    sigExits = gameExits
+    const sigExits = gameExits
       .filter(set => {
         const median = Math.floor(set.length/2);
         return (
@@ -751,4 +713,4 @@ router.get("/api/fetchGame/:gid", async (req, res, next) => {
   });
 })
 
-module.exports = router;
+export default router;

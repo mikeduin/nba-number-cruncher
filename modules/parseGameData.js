@@ -1,9 +1,9 @@
-const knex = require("../db/knex");
-const getGameSecs = require('./getGameSecs');
-const boxScoreHelpers = require('./boxScoreHelpers');
-const mapPlayerStatistics = require("../utils/boxScores/mapPlayerStatistics");
+import knex from "../db/knex.js";
+import getGameSecs from './getGameSecs.js';
+import { calcGamePoss, compileGameStats, compileQuarterStats} from './boxScoreHelpers.js';
+import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
 
-module.exports = async (boxScore) => {
+const parseGameData = async (boxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
   const isGameActivated = gameStatus > 1;
@@ -25,15 +25,15 @@ module.exports = async (boxScore) => {
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
     const hTeam = homeTeam.statistics;
     const vTeam = awayTeam.statistics;
-    const poss = boxScoreHelpers.calcGamePoss(hTeam, vTeam);
-    const totalsObj = boxScoreHelpers.compileGameStats(hTeam, vTeam, poss, period, gameSecs);
+    const poss = calcGamePoss(hTeam, vTeam);
+    const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
     const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
     const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
     const playerStats = [ ...hPlayerStats, ...vPlayerStats];
 
     const quarterObj = prevTotals => {
-      return boxScoreHelpers.compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
+      return compileQuarterStats(hTeam, vTeam, prevTotals[0], period, gameSecs);
     }
 
     const quarterUpdFn = async () => {
@@ -92,9 +92,9 @@ module.exports = async (boxScore) => {
           await knex("box_scores_v2").where({gid: gid}).update({
             final: true
           }); 
-          await knex("schedule").where({gid: gid}).update({
-            stt: "Final"
-          }); 
+          // await knex("schedule").where({gid: gid}).update({ // REACTIVATE
+          //   stt: "Final"
+          // }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
           console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid} -- just updating player stats`);
@@ -135,3 +135,5 @@ module.exports = async (boxScore) => {
     }
   }
 }
+
+export default parseGameData;

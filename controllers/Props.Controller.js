@@ -1,11 +1,7 @@
-const express = require('express');
-const moment = require('moment-timezone');
-const getPlayerPropsMap = require('../utils/props/getPlayerPropMap');
-const ScraperController = require('./Scraper.Controller');
-const DbController = require('./Db.Controller');
-
-const { Players, PlayerProps, Schedule } = DbController;
-const { scrapeBovada } = ScraperController;
+import moment from 'moment-timezone';
+import getPlayerPropsMap from '../utils/props/getPlayerPropMap.js';
+import { scrapeBovada } from './Scraper.Controller.js';
+import { Players, PlayerProps, Schedule } from './Db.Controller.js';
 
 const playerNameMismatches = {
   // Bovada name : DB name
@@ -32,7 +28,7 @@ const playerNameMismatches = {
   'Wendell Carter Jr': 'Wendell Carter Jr.',
 }
 
-const fetchDailyGameProps = async () => {
+export const fetchDailyGameProps = async () => {
   const today = moment().format('YYYY-MM-DD');
 
   const dailyGames = await Schedule()
@@ -93,7 +89,7 @@ const fetchDailyGameProps = async () => {
   })
 }
 
-const deleteDuplicateProps = async (gid) => {
+export const deleteDuplicateProps = async (gid) => {
   const gameProps = await PlayerProps()
     .where({gid});
 
@@ -116,5 +112,3 @@ const deleteDuplicateProps = async (gid) => {
       await PlayerProps().where({ id }).del();
     }
 }
-
-module.exports = { deleteDuplicateProps, fetchDailyGameProps };

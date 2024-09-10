@@ -26,8 +26,11 @@
 //   }
 // };
 
-require('dotenv').config();
-const pg = require('pg')
+import { config as dotenvConfig } from 'dotenv';
+import pg from 'pg';
+
+dotenvConfig();
+
 pg.defaults.ssl = {
    rejectUnauthorized: false,
 }
@@ -37,7 +40,7 @@ pg.defaults.ssl = {
 
 // console.log(process.env);
 
-module.exports = {
+const knexfile = {
   development: {
     client: 'pg',
     connection: process.env.DATABASE_URL,
@@ -57,3 +60,5 @@ module.exports = {
     acquireConnectionTimeout: 1000000,
   }
 };
+
+export default knexfile;

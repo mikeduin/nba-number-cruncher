@@ -1,7 +1,7 @@
-const moment = require('moment-timezone');
-const Db = require('./Db.Controller');
+import moment from 'moment-timezone';
+import * as Db from './Db.Controller.js';
 
-exports.getSeasonStartEndDates = (season) => {
+export const getSeasonStartEndDates = (season) => {
   if (season === 2024) {
     return ['2024-10-22', '2025-04-13'];
   } else {
@@ -9,7 +9,7 @@ exports.getSeasonStartEndDates = (season) => {
   }
 }
 
-exports.getCurrentNbaSeason = () => {
+export const getCurrentNbaSeason = () => {
   if (moment().isBefore('2024-09-01')) {
     return '2023-24';
   } else if (moment().isBefore(`2025-09-01`)) {
@@ -25,12 +25,12 @@ exports.getCurrentNbaSeason = () => {
   }
 }
 
-exports.getTodaysGames = async (today) => {
+export const getTodaysGames = async (today) => {
   const games = await Db.Schedule().where({gdte: today});
   return games;
 }
 
-exports.buildSeasonGameWeekArray = (seasonStart, seasonEnd) => {
+export const buildSeasonGameWeekArray = (seasonStart, seasonEnd) => {
   // Remember that in dashedDates and intDates, array indices correspond to LITERAL GAME WEEKS.
   // So dashedDates[1] will be the first week of Survivor play, and dashedDates[0] will be the week BEFORE the game begins
   let dashedDateWeeks = [];

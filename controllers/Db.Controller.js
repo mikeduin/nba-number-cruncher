@@ -1,7 +1,5 @@
-const knex = require("../db/knex");
+import knex from '../db/knex.js';
 
-module.exports = {
-  Schedule: () => knex('schedule'),
-  Players: () => knex('player_data'),
-  PlayerProps: () => knex('player_props'),
-}
+export const Schedule = () => knex('schedule');
+export const Players = () => knex('player_data');
+export const PlayerProps = () => knex('player_props');

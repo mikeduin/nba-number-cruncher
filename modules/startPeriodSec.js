@@ -4,6 +4,6 @@ const startPeriodSec = (per) => {
   } else {
     return (2880 + ((per-4)*300));
   };
-}
+};
 
-module.exports = startPeriodSec;
+export default startPeriodSec;

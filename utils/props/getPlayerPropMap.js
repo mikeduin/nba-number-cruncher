@@ -1,5 +1,4 @@
-const dbMappers = require('../../modules/dbMappers');
-const { mapBovadaMarketToDbColumn, propMarketMappers } = dbMappers;
+import { mapBovadaMarketToDbColumn, propMarketMappers } from '../../modules/dbMappers.js';
 const dbColumns = Object.values(propMarketMappers());
 
 const buildActivePropsMap = players => {
@@ -16,7 +15,7 @@ const buildActivePropsMap = players => {
   return activePropsMap;
 }
 
-module.exports = async (gamePropsOnBovada, gamePropPlayersInDb) => {
+const getPlayerPropMap = async (gamePropsOnBovada, gamePropPlayersInDb) => {
   const playerPropsMap = new Map();
   const activePropsMap = buildActivePropsMap(gamePropPlayersInDb);
 
@@ -80,6 +79,6 @@ module.exports = async (gamePropsOnBovada, gamePropPlayersInDb) => {
     console.log('NO GAME PROPS FOUND, likely timeout error (?) - returning empty object');
     return playerPropsMap;
   }
-
-
 }
+
+export default getPlayerPropMap;

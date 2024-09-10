@@ -2,9 +2,10 @@ import axios from 'axios';
 import moment from 'moment-timezone';
 import _ from 'lodash';
 import { getGameSecs } from '../modules/gameTimeFuncs';
+import { calcFgPct, calcPoss, calcQuarterPace } from '../utils/boxScoreHelpers';
 
 // let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
-let today = moment().tz("America/Toronto").subtract(3, 'hours').format('YYYY-MM-DD');
+let today = moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
 
 export const fetchNetRatings = () => async dispatch => {
   let response = await fetch('/api/getNetRatings');
@@ -14,7 +15,8 @@ export const fetchNetRatings = () => async dispatch => {
 }
 
 export const fetchWeek = (date = today) => async (dispatch, getState) => {
-  let digitDate = moment(date).format('YYYYMMDD');
+  // let digitDate = moment(date).format('YYYYMMDD'); // UPDATE
+  let digitDate = moment(date).format('20240427');
   let response = await fetch(`/api/fetchWeek/${digitDate}`);
   let data = await response.json();
 
@@ -23,7 +25,8 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   let updated = {...data, today};
 
   let todaysGames = data.weekGames.filter(game => {
-    return game.gdte === today;
+    // return game.gdte === today;
+    return game.gdte === '2024-04-27'; // UPDATE
   });
 
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
@@ -47,14 +50,12 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   const clientActive = getState().activeGames;
   const clientCompleted = getState().completedGames;
 
-  // console.log('clientActive are ', clientActive);
-
-  if (_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive)) === false) {
+  if (!_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive))) {
     console.log('modifying active games');
     dispatch({ type: 'SET_ACTIVE_GAMES', payload: serverActive });
   }
 
-  if (_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted)) === false) {
+  if (!_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted))) {
     console.log('modifying completed games');
     dispatch({ type: 'SET_COMPLETED_GAMES', payload: serverCompleted });
   }
@@ -184,10 +185,60 @@ export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
   dispatch({ type: 'SET_SCHED_DAY_GAMES', payload: dayGameData.dayGames });
 }
 
+export const fetchActiveBoxScores = () => async (dispatch, getState) => {
+  const activeGames = getState().activeGames;
+  console.log('active games in fetchActiveBoxScores are ', activeGames);
+  // const activeBoxScores = await axios.get('/api/fetchActiveBoxScores');
+  // activeBoxScores.data.forEach(game => {
+  //   if (game.final) {
+  //     dispatch({ type: 'SET_FINAL_BOX_SCORE', payload: game });
+  //   }
+
+  //   if (game.init) {
+  //     dispatch({ type: 'INITIALIZE_BOX_SCORE', payload: game });
+  //   }
+
+  //   if (game.live) {
+  //     const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period } = game;
+
+  //     const liveData = {
+  //       gid: game.gid,
+  //       active: true,
+  //       period,
+  //       endOfPeriod: false,
+  //       gameSecs,
+  //       clock,
+  //       poss,
+  //       pace,
+  //       totals,
+  //       playerStats
+  //     };
+
+  //     if (game.quarterEnd) {
+  //       let perToUpdate = thru_period;
+  //       let endOfQuarterData = game.quarter;
+  //       let prevQuarters = game.prevQuarters;
+  
+  //       if (getState().gambleCast[`live_${game.gid}`]) {
+  //         const perToUpdPts = endOfQuarterData.t.pts;
+  //         if (perToUpdPts !== 0) {
+  //           // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
+  //           let snapshot = { ...liveData, totals, perToUpdate, endOfQuarterData, prevQuarters};
+  //           dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
+  //         }
+  //       }
+  //     } else {
+
+  //     }
+  //   }
+  // });
+  // console.log('activeBoxScores are ', activeBoxScores);
+}
+
 export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getState) => {
   // For testing
   // let todayInt = '20190314';
-  let todayInt = moment().tz("America/Toronto").subtract(3, 'hours').format('YYYYMMDD');
+  let todayInt = moment().tz("America/Los_Angeles").format('YYYYMMDD');
   const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}/${vAbb}/${hAbb}`);
   const response = game.data;
 
@@ -206,31 +257,6 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
   // are things not showing up because it's not live in response?
   if (response.live) {
     const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period } = response;
-
-    const calcFgPct = (fgm, fga) => {
-      return (((fgm/fga)*100).toFixed(1));
-    };
-
-    const calcPoss = (fga, to, fta, oreb) => {
-      return ((fga+to+(0.44*fta)-oreb));
-    };
-
-    const calcQuarterPace = (quarterPoss, per, gameSecs) => {
-      let pace = 0;
-      if (per < 5) {
-        let quarterSecs = (parseInt(gameSecs) - (720*parseInt(per-1)));
-        pace = ((((720/quarterSecs)*quarterPoss)*4)/2);
-      } else {
-        let quarterSecs = (parseInt(gameSecs) - 2880 - (300*parseInt(per-4)));
-        pace = ((((300/quarterSecs)*quarterPoss)*4)/2)
-      };
-
-      if (pace == null) {
-        return 0
-      } else {
-        return pace
-      };
-    }
     
     let liveData = {
       gid: gid,
@@ -245,7 +271,7 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
       playerStats
     };
 
-    if (response.quarterEnd) {
+    if (response.quarterEnd) { // at end of quarter
       let perToUpdate = thru_period;
       let endOfQuarterData = response.quarter;
       let prevQuarters = response.prevQuarters;
@@ -258,7 +284,7 @@ export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getStat
           dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
         }
       }
-    } else {
+    } else { // quarter in progress
       let perToUpdate = period;
       let inQuarter = {};
 

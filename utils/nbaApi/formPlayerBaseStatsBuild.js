@@ -12,7 +12,7 @@ const formKey = (label, period) => {
 }
 
 
-exports.formPlayerBaseStatsBuild = (headers, player, period, seasonType) => {
+export const formPlayerBaseStatsBuild = (headers, player, period, seasonType) => {
   let baseInsert = {
     team_id: player[headers.indexOf('TEAM_ID')],
     team_abbreviation: player[headers.indexOf('TEAM_ABBREVIATION')],

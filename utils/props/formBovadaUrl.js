@@ -1,7 +1,7 @@
-const moment = require('moment-timezone');
-const teamLookup = require('../../modules/teamLookup');
+import moment from 'moment-timezone';
+import { findById } from '../../modules/teamLookup.js';
 
-module.exports = game => {
+const formBovadaUrl = game => {
   try {
     const { etm, gid } = game;
     let hTid;
@@ -17,8 +17,8 @@ module.exports = game => {
         vTid = game.v.tid;
     }
   
-    const hBovString = teamLookup.findById(hTid).bovada;
-    const vBovString = teamLookup.findById(vTid).bovada;
+    const hBovString = findById(hTid).bovada;
+    const vBovString = findById(vTid).bovada;
   
     const utcDateTime = moment.utc(etm, 'YYYY-MM-DD HH:mm:ss.SSS Z');
     // const easternDateTime = utcDateTime.tz('America/New_York');
@@ -44,5 +44,6 @@ module.exports = game => {
   } catch (e) {
     console.log('error updating bovada url for ', game.gid, ' is ', e);
   }
-
 } 
+
+export default formBovadaUrl;

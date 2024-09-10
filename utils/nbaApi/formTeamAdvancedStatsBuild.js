@@ -1,4 +1,4 @@
-exports.formTeamAdvancedStatsBuild = (headers, team) => ({
+export const formTeamAdvancedStatsBuild = (headers, team) => ({
   gp: team[headers.indexOf('GP')],
   w: team[headers.indexOf('W')],
   l: team[headers.indexOf('L')],

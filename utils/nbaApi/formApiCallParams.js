@@ -1,7 +1,6 @@
-const ScheduleController = require('../../controllers/Schedule.Controller');
-const { getCurrentNbaSeason } = ScheduleController;
+import { getCurrentNbaSeason } from '../../controllers/Schedule.Controller.js';
 
-exports.formApiCallParams = (games, period, seasonType, statsType, starterBench = null) => {
+export const formApiCallParams = (games, period, seasonType, statsType, starterBench = null) => {
   return {
     LastNGames: games,
     LeagueID: "00",

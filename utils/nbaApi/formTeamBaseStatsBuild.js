@@ -1,4 +1,4 @@
-exports.formTeamBaseStatsBuild = (headers, team) => {
+export const formTeamBaseStatsBuild = (headers, team) => {
   const fg2m = parseFloat(team[headers.indexOf('FGM')]) - parseFloat(team[headers.indexOf('FG3M')]);
   const fg2a = parseFloat(team[headers.indexOf('FGA')]) - parseFloat(team[headers.indexOf('FG3A')]);
   const fg2_pct = fg2m/fg2a;

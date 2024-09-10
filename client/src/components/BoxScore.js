@@ -19,7 +19,6 @@ class BoxScore extends React.Component {
 
   checkSpread = (period, home, away, total) => {
     let game = this.props.game;
-    // console.log('game is ', game);
 
     if (home < away) {
         this.setState({
