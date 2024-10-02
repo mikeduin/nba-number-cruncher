@@ -1,4 +1,4 @@
-import { BoxScore } from "../types/BoxScore.types";
+import { BoxScore } from "../types/BoxScore";
 
 export interface BoxScoreModel {
   id: string;

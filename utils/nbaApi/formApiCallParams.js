@@ -1,4 +1,4 @@
-import { getCurrentNbaSeason } from '../../controllers/Schedule.Controller.js';
+import { getCurrentNbaSeason } from '../schedule';
 
 export const formApiCallParams = (games, period, seasonType, statsType, starterBench = null) => {
   return {

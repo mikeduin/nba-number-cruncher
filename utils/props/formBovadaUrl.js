@@ -1,7 +1,7 @@
 import moment from 'moment-timezone';
 import { findById } from '../../modules/teamLookup.js';
 
-const formBovadaUrl = game => {
+export const formBovadaUrl = game => {
   try {
     const { etm, gid } = game;
     let hTid;
@@ -45,5 +45,3 @@ const formBovadaUrl = game => {
     console.log('error updating bovada url for ', game.gid, ' is ', e);
   }
 } 
-
-export default formBovadaUrl;

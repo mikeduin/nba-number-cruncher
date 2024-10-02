@@ -10,7 +10,7 @@ import _ from 'lodash';
 
 import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1Builds, updateQ2Builds, updateQ3Builds, updateQ4Builds } from "../modules/updateTeamStats.js";
 import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod } from "../modules/updatePlayerStats.js";
-import { addGameStints, buildSchedule } from "../modules/dbBuilders.js";
+import { addGameStints } from "../modules/dbBuilders.js";
 import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
 import { fetchCurrentSeason, fetchGmWk, fetchGmWkArrays, fetchSeasonName } from "../modules/dateFilters.js";
 import { compileGameStats } from "../utils/boxScores/calculateGame.js";
@@ -26,7 +26,7 @@ import { calcGamePoss, calcGamePace } from "../utils/boxScores/calculateRateStat
 
 import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
-import { getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
+import { buildSchedule, getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
 import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.ts";
 
 (async () => {

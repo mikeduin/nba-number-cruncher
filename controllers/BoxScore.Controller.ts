@@ -1,7 +1,7 @@
 import axios from "axios";
 import cheerio from "cheerio";
 import { BoxScoreModel } from "../models/boxScore"
-import { BoxScoreResponse } from "../types/BoxScore.types"
+import { BoxScoreResponse } from "../types/BoxScore"
 
 export const fetchBoxScore = async (vAbb: string, hAbb: string, gid: number) => {
   try {

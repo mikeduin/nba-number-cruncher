@@ -3,7 +3,7 @@ import axios from "axios";
 import moment from "moment";
 import momentTz from "moment-timezone";
 import _ from 'lodash';
-import formBovadaUrl from "../utils/props/formBovadaUrl.js";
+import { formBovadaUrl, getCurrentNbaSeason } from "../utils";
 
 import { buildSubData } from "./buildGameStints.js";
 import { formPlayerBaseStatsBuild } from "../utils/nbaApi/formPlayerBaseStatsBuild.js";
@@ -11,7 +11,6 @@ import { formPlayerAdvancedStatsBuild } from "../utils/nbaApi/formPlayerAdvanced
 import { formTeamBaseStatsBuild } from "../utils/nbaApi/formTeamBaseStatsBuild.js";
 import { formTeamAdvancedStatsBuild } from "../utils/nbaApi/formTeamAdvancedStatsBuild.js";
 
-import { getCurrentNbaSeason } from '../controllers/Schedule.Controller.js';
 const currentNbaSeasonInt = parseInt(getCurrentNbaSeason().slice(0, 4));
 
 const leagueScheduleUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${currentNbaSeasonInt}/league/00_full_schedule_week.json`;
@@ -105,59 +104,6 @@ export const updateTeamInfo = async () => {
   })
 };
 
-export const buildSchedule = () => {
-  // This function builds out the initial schedule and should only need to be run at the beginning of each season
-  // CHECK HARD-CODED SEASON VALUES BEFORE RUNNING!!!
-  axios.get(leagueScheduleUrl).then(response => {
-    response.data.lscd.forEach(month => {
-      month.mscd.g.forEach(game => {
-        let season_name = game.gweek ? 'regular' : null;
-        let hObj = {
-          tid: game.h.tid,
-          re: game.h.re,
-          ta: game.h.ta,
-          tn: game.h.tn,
-          tc: game.h.tc,
-          s: game.h.s
-        };
-        let vObj = {
-          tid: game.v.tid,
-          re: game.v.re,
-          ta: game.v.ta,
-          tn: game.v.tn,
-          tc: game.v.tc,
-          s: game.v.s
-        };
-        knex("schedule")
-          .insert(
-            {
-              gid: game.gid,
-              gcode: game.gcode,
-              gdte: game.gdte,
-              an: game.an,
-              ac: game.ac,
-              as: game.as,
-              etm: moment(game.etm).subtract(3, 'hours'),
-              gweek: game.gweek,
-              h: [hObj],
-              v: [vObj],
-              stt: game.stt,
-              season_year: currentNbaSeasonInt,
-              season_name,
-              display_year: getCurrentNbaSeason(),
-              bovada_url: formBovadaUrl(game),
-              updated_at: new Date()
-            },
-            "*"
-          )
-          .then(ent => {
-            console.log(ent[0].gcode, " entered in DB");
-          });
-      });
-    });
-  });
-}; 
-
 export const updateSchedule = () => {
   // let currMonth = dateFilters.fetchScoreMonth();
   axios.get(leagueScheduleUrl).then(response => {
@@ -197,78 +143,7 @@ export const updateSchedule = () => {
   });
 };
 
-export const updatePlayoffScnedule = () => {
-  console.log('updating playoff schedule');
-  // let currMonth = dateFilters.fetchScoreMonth();
-  axios.get(leagueScheduleUrl).then(response => {
-    response.data.lscd
-    .filter((month, i) => month.mscd.mon === "June")
-    .forEach(month => {
-      month.mscd.g
-      .filter((game, i) => moment(game.gdte).isAfter(moment('2024-04-15')))
-      .forEach(async (game) => {
-        // console.log('game is ', game);
 
-        // if game does not exist, insert game
-        const existingGame = await knex("schedule").where({ gid: game.gid.slice(2) }); 
-
-        if (!existingGame.length) {
-          console.log('game is not found in schedule, adding ', game.gid);
-
-          if (game.etm === 'TBD') {
-            console.log('start time is TBD for game.gid ', game.gid);
-            return;
-          }
-
-          let hObj = {
-            tid: game.h.tid,
-            re: game.h.re,
-            ta: game.h.ta,
-            tn: game.h.tn,
-            tc: game.h.tc,
-            s: game.h.s
-          };
-          let vObj = {
-            tid: game.v.tid,
-            re: game.v.re,
-            ta: game.v.ta,
-            tn: game.v.tn,
-            tc: game.v.tc,
-            s: game.v.s
-          };
-
-          try {
-            await knex("schedule")
-              .insert({
-                gid: game.gid,
-                gcode: game.gcode,
-                gdte: game.gdte,
-                an: game.an,
-                ac: game.ac,
-                as: game.as,
-                etm: moment(game.etm).subtract(3, 'hours'),
-                gweek: 28, // temp while figuring this out
-                h: [hObj],
-                v: [vObj],
-                stt: game.stt,
-                season_year: currentNbaSeasonInt,
-                season_name: 'regular', // needs this for fetchApiData to work
-                display_year: getCurrentNbaSeason(),
-                bovada_url: formBovadaUrl(game),
-                updated_at: new Date(),
-              });
-            console.log("game added", game.gid);
-          } catch (e) {
-            console.log('error adding game ', game.gid, e);
-          }
-
-        } else {
-          console.log('game already exists in schedule ', game.gid);
-        }
-      });
-    });
-  });
-};
 
 // export const updateBovadaUrls = () => {
 //   axios.get(leagueScheduleUrl).then(response => {

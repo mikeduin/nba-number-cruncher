@@ -1,5 +1,6 @@
 import moment from 'moment';
-import { buildSeasonGameWeekArray, getCurrentNbaSeason, getSeasonStartEndDates } from "../controllers/Schedule.Controller.js";
+import { getCurrentNbaSeason } from '../utils';
+import { buildSeasonGameWeekArray, getSeasonStartEndDates } from "../controllers/Schedule.Controller.js";
 // let nbaDate = moment().format('YYYYMMDD');
 
 
@@ -394,7 +395,7 @@ export const fetchGmWk = (date, season, stage) => {
   } else {
     let wk = 0;
     const currentSeasonInt = parseInt(getCurrentNbaSeason().slice(0, 4))
-    const [seasonStart, seasonEnd] = getSeasonStartEndDates(currentSeasonInt);
+    const [seasonStart, seasonEnd] = getSeasonStartEndDates[currentSeasonInt.toString];
     const { intDateWeeks } = buildSeasonGameWeekArray(seasonStart, seasonEnd);
     for (var i = 0; i < intDateWeeks.length; i++) {
       if (intDateWeeks[i].includes(parseInt(date))) {
