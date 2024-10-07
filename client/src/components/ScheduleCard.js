@@ -1,7 +1,7 @@
 import React from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom';
-import { Button, Dimmer, Header, Image, Card } from 'semantic-ui-react';
+import { Dimmer, Image, Card } from 'semantic-ui-react';
 import logos from '../modules/logos';
 
 class ScheduleCard extends React.Component {
@@ -39,7 +39,7 @@ class ScheduleCard extends React.Component {
           </Link>
           <Card.Meta>
             <div className="date"> {moment(game.etm).format("M/D/YY")} </div>
-            <div className="date"> {moment(game.etm).format("h:mm A")} EST{" "} </div>
+            <div className="date"> {moment(game.etm).format("h:mm A")} </div>
           </Card.Meta>
         </Card.Content>
         <Card.Content extra>

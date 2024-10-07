@@ -1,4 +1,4 @@
-import { getCurrentNbaSeason } from '../schedule';
+import { getCurrentSeasonDisplayYear } from '../schedule';
 
 export const formApiCallParams = (games, period, seasonType, statsType, starterBench = null) => {
   return {
@@ -13,7 +13,7 @@ export const formApiCallParams = (games, period, seasonType, statsType, starterB
     Period: period,
     PlusMinus: "N",
     Rank: "N",
-    Season: getCurrentNbaSeason(),
+    Season: getCurrentSeasonDisplayYear(),
     SeasonType: seasonType,
     StarterBench: starterBench,
     TeamID: 0,

@@ -12,9 +12,9 @@ import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1B
 import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod } from "../modules/updatePlayerStats.js";
 import { addGameStints } from "../modules/dbBuilders.js";
 import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
-import { fetchCurrentSeason, fetchGmWk, fetchGmWkArrays, fetchSeasonName } from "../modules/dateFilters.js";
+import { fetchCurrentSeason, fetchSeasonName } from "../modules/dateFilters.js";
 import { compileGameStats } from "../utils/boxScores/calculateGame.js";
-import { endQuarterResObj } from "../utils/boxScores/responseObjects.js";
+import { endOfQuarterResponse, initialBoxScoreResponse, quarterInProgressResponse } from "../utils/boxScores/responseObjects.js";
 import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
 import { getCurrentAndPrevQuarterStats } from "../utils/boxScores/calculateQuarters.js";
 
@@ -28,6 +28,9 @@ import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
 import { buildSchedule, getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
 import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.ts";
+import { getGameWeek, getCurrentSeasonStartYearInt, getCurrentSeasonStage, getWeekIntDateArray } from "../utils";
+import { convertIntDateToDashedDate } from "../utils";
+import { SeasonNameAbb } from "../types/Season.ts";
 
 (async () => {
   await fetchDailyGameProps();
@@ -37,7 +40,14 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-getActiveGames('2024-04-27');
+// getActiveGames('2024-04-27');
+
+// console.log('current season stage', getCurrentSeasonStage('2024-10-24'));
+
+// getGameWeek('2024-10-12');
+
+// getGameWeekDateArray('2024-10-12');
+
 
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
@@ -50,10 +60,15 @@ getActiveGames('2024-04-27');
 // dbBuilders.buildGameStintsDb();
 
 const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
-const testToday = moment().set({'year': 2024, 'month': 3, 'date': 27, 'timezone': 'America/Los_Angeles'}).format('YYYY-MM-DD');
-console.log('testToday is ', testToday);
-let activeGames = await getActiveGames(testToday);
-let completedGames = await getCompletedGameGids(testToday);
+
+// const testToday = moment().set({'year': 2024, 'month': 3, 'date': 27, 'timezone': 'America/Los_Angeles'}).format('YYYY-MM-DD');
+// console.log('testToday is ', testToday);
+// let activeGames = await getActiveGames(testToday);
+// let completedGames = await getCompletedGameGids(testToday);
+
+// console.log('testToday is ', today);
+let activeGames = await getActiveGames(today);
+let completedGames = await getCompletedGameGids(today);
 
 console.log('today in index is ', today);
 
@@ -106,29 +121,17 @@ rule.second = 48;
 //   setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
 // })()
 
-if (process.env.NODE_ENV !== 'production') {
-  setInterval(async () => {
-    await fetchDailyGameProps();
-  }, 8000)
-}
-
-// setTimeout(async () => {
-//   const scheduleGames = await knex("schedule");
-//   scheduleGames.forEach(async game => {
-//     try {
-//       await knex("schedule").where({gid: game.gid}).update({bovada_url: formBovadaUrl(game)});
-//       console.log('bovada_url updated for ', game.gid);
-//     } catch (e) {
-//       console.log('error updating bovada_url for ', game.gid, ' is ', e);
-//     }
-//   })
-// }, 1000)
+// if (process.env.NODE_ENV !== 'production') {
+//   setInterval(async () => {
+//     await fetchDailyGameProps();
+//   }, 8000)
+// }
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
-  completedGames = await getCompletedGameGids(testToday); // UPDATE
-  // activeGames = GambleCastController.getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD')); // UPDATE
-  activeGames = await getActiveGames(testToday); // UPDATE
+  // completedGames = await getCompletedGameGids(testToday); // UPDATE
+  activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD')); // UPDATE
+  // activeGames = await getActiveGames(testToday); // UPDATE
 }, 10000)
 
 // This function pulls in odds
@@ -262,7 +265,7 @@ setInterval(() => {
 }, 3000)
 
 router.get("/api/fetchDailyBoxScores", async (req, res) => {
-  const todaysGames = await getTodaysGames(testToday); // UPDATE
+  const todaysGames = await getTodaysGames(today);
   const todayGids = todaysGames.map(game => game.gid);
   const completedGames = await Db.BoxScores()
     .where({final: true})
@@ -275,184 +278,198 @@ router.get("/api/fetchDailyBoxScores", async (req, res) => {
 })
 
 router.get("/api/fetchActiveBoxScores", async (req, res) => {
-  const activeGames = await getActiveGames(testToday); // UPDATE
-  console.log('activeGames are ', activeGames);
-  activeGames.forEach(async (game) => {
-    const hAbb = game.h[0].ta;
-    const vAbb = game.v[0].ta;
-    const gid = game.gid;
-    let boxScore;
-    try {
-      const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
-      boxScore = response.props.pageProps.game;
-    } catch (e) {
-      console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
-    }
+  const activeGames = await getActiveGames(today);
 
-    const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
-    const isGameActivated = gameStatus > 1;
-
-    if (isGameActivated) {
-      const clock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}`; // e.g., 01:02
-      const fullClock = `${gameClock.slice(2, 4)}:${gameClock.slice(5, 7)}:${gameClock.slice(8, 10)}`; // e.g., 01:02:00
-      const gameSecs = getGameSecs((parseInt(period)-1), clock);
-      const derivedClock = clockReturner(clock, period, gameSecs);
-    
-    }
-  })
-  // const boxScores = await knex("box_scores_v2").whereIn('gid', activeGids);
-  // res.send(boxScores);
-})
-
-router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
-  const { gid, init, vAbb, hAbb } = req.params;
-
-  // <-- If Game Is Final --> //
-  if (completedGames.indexOf(parseInt(gid)) !== -1) {
-    const inDb = await knex("box_scores_v2").where({gid: gid});
-    let ot = inDb[0].ot?.[0] ?? null;
-
-    res.send({
-      gid: gid,
-      q1: inDb[0].q1[0],
-      q2: inDb[0].q2[0],
-      q3: inDb[0].q3[0],
-      q4: inDb[0].q4[0],
-      ot,
-      totals: inDb[0].totals[0],
-      final: true
-    })
-    return;
-  };
-
-  let q1 = null;
-  let thru_period = 0;
-  let boxScore;
-
-  try {
-    const response = await fetchBoxScore(vAbb, hAbb, gid);
-    boxScore = response.props.pageProps.game;
-  } catch (e) {
-    console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
-    return res.status(400).send({
-      message: `error attempting to fetch boc score for ${gid} is ${e}`
-   });
-  }
-
-  const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
-  const isGameActivated = gameStatus > 1;
-  const { clock, fullClock } = getClocks(gameClock);
-
-  const gameSecs = getGameSecs((parseInt(period)-1), clock);
-  const derivedClock = clockReturner(clock, period, gameSecs);
-
-  // <-- If Game Has Begun --> //
-  if (isGameActivated) {
-    const hTeam = homeTeam.statistics;
-    const vTeam = awayTeam.statistics;
-    const poss = calcGamePoss(hTeam, vTeam);
-    const derivedPace = calcGamePace(poss, period, gameSecs);
-    const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
-
-    const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
-
-    const gameOver = gameStatusText === 'Final';
-    const isEndOfPeriod = fullClock === '00:00:00';
-
-    // <-- If Initial Box Score Load --> //
-    if (init == 'true' && period !== 1) {
+  const activeBoxScores = async () => {
+    const boxScorePromises = activeGames.map(async (game) => {
+      const hAbb = game.h[0].ta;
+      const vAbb = game.v[0].ta;
+      const gid = game.gid;
+      let boxScore;
+  
       try {
-        let inDb = await knex("box_scores_v2").where({gid: gid});
-
-        // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
-        q1 = inDb[0].q1[0];
-        thru_period = inDb[0].period_updated;
-
-        const q2 = inDb[0].q2?.[0] ?? period === 2 ? currentQuarter : null;
-        const q3 = inDb[0].q3?.[0] ?? period === 3 ? currentQuarter : null;
-        const q4 = inDb[0].q4?.[0] ?? period === 4 ? currentQuarter : null;
-        const ot = inDb[0].ot?.[0] ?? period > 4 ? currentQuarter : null;
-
-        res.send({
-          gid,
-          init: true,
-          quarterEnd: isEndOfPeriod,
-          live: true,
-          clock: derivedClock,
-          gameSecs,
-          period,
-          thru_period,
-          poss,
-          pace: derivedPace,
-          totals: totalsObj,
-          q1,
-          q2,
-          q3,
-          q4,
-          ot,
-          currentQuarter,
-          prevQuarters, // Am I ever using this on FE? 
-          playerStats: JSON.parse(inDb[0].player_stats)
-        })
-        return;
+        const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
+        boxScore = response.props.pageProps.game;
       } catch (e) {
-        console.log('error send box score response is ', e);
+        console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
       }
-    }
+  
+      const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
+      const isGameActivated = gameStatus > 1;
+  
+      if (isGameActivated) {
+        const { clock, fullClock } = getClocks(gameClock);
+        const gameSecs = getGameSecs((parseInt(period)-1), clock);
+        const poss = calcGamePoss(homeTeam.statistics, awayTeam.statistics);
+        const totalsObj = compileGameStats(homeTeam.statistics, awayTeam.statistics, poss, period, gameSecs);
+  
+        console.log('gameStatusText is ', gameStatusText); // "Half" when game at half
 
-    // <-- If at End of Period, or if Game is Over --> //
-    if (isEndOfPeriod || gameOver) {
-      try {
-      res.send(endQuarterResObj(clock, period, thru_period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats))
-      } catch (e) {
-        console.log('error setting end of game q totals is ', e);
-      } 
-      
-    } else {
-      // if endOfPeriod is false && game is not activated ... does it get here if game has started?
-      // CONFIRM THIS WORKS IN EVENT OF OT
-      if (!isGameActivated) {
-        console.log(gid, ' has not started or has finished and gameOver fn not reached');
-        res.send({
-          quarterEnd: false,
-          clock: derivedClock,
-          gameSecs: gameSecs,
-          period: period,
-          poss: poss,
-          pace: derivedPace,
-          totals: totalsObj
-        })
-      } else {
-        const prevTotalsPull = await knex("box_scores_v2").where({gid: gid}).select('totals');
+        const gameOver = gameStatusText === 'Final';
+        const isEndOfPeriod = fullClock === '00:00:00';
+  
         const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
         const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
         const playerStats = [ ...hPlayerStats, ...vPlayerStats];
+  
+        const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, homeTeam.statistics, awayTeam.statistics, period, gameSecs);
 
-        res.send({
-          quarterEnd: false,
-          live: true,
-          clock: derivedClock,
-          gameSecs: gameSecs,
-          period: period,
-          poss: poss,
-          pace: derivedPace,
-          totals: totalsObj,
-          thru_period: period === 1 ? 0 : null,
-          prevQuarters: period === 1 
-            ? null 
-            : prevTotalsPull[0]?.totals[0],
-          playerStats
-        })
+        // console.log('currentQuarter is ', currentQuarter);
+
+        const inDb = await knex("box_scores_v2").where({gid: gid});
+
+        const q1 = (inDb[0]?.q1?.[0]) || (period === 1 ? currentQuarter : null);
+        const q2 = (inDb[0]?.q2?.[0]) || (period === 2 ? currentQuarter : null);
+        const q3 = (inDb[0]?.q3?.[0]) || (period === 3 ? currentQuarter : null);
+        const q4 = (inDb[0]?.q4?.[0]) || (period === 4 ? currentQuarter : null);
+        const ot = (inDb[0]?.ot?.[0]) || (period > 4 ? currentQuarter : null);
+
+        const thru_period = inDb[0]?.period_updated ?? 0;
+  
+        // // <-- If Initial Box Score Load --> //
+        // if (period !== 1) {
+        // // if (init == 'true' && period !== 1) {
+        //   try {
+        //     // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
+        //     // const playerStatsInDb = JSON.parse(inDb[0]?.player_stats ?? []);
+  
+        //     return initialBoxScoreResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
+        //   } catch (e) {
+        //     console.log('error send box score response is ', e);
+        //   }
+        // }
+    
+        // // <-- If at End of Period, or if Game is Over --> //
+        // if (isEndOfPeriod || gameOver) {
+        //   try {
+        //     return endOfQuarterResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
+        //   } catch (e) {
+        //     console.log('error setting end of game q totals is ', e);
+        //   } 
+        // } else {
+          // <-- Quarter in Progress --> //
+          try {
+            return quarterInProgressResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
+          } catch (e) {
+            console.log('error sending quarter in progress response is ', e);
+          }
+        // }
+      } else {
+        console.log(gid, ' has not started, sending back gid ref and active: false, gameStatus is ', gameStatus);
+        return {
+          gid: gid,
+          active: false
+        }
       }
-    }
-  } else {
-    console.log(gid, ' has not started, sending back gid ref and active: false');
-    res.send({
-      gid: gid,
-      active: false
     })
+
+    return Promise.all(boxScorePromises);
   }
+
+  const prepActiveBoxScores = await activeBoxScores();
+  res.send(prepActiveBoxScores);
 })
+
+// router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
+//   const { gid, init, vAbb, hAbb } = req.params;
+
+//   // <-- If Game Is Final --> //
+//   if (completedGames.indexOf(parseInt(gid)) !== -1) {
+//     const inDb = await knex("box_scores_v2").where({gid: gid});
+//     let ot = inDb[0].ot?.[0] ?? null;
+
+//     res.send({
+//       gid: gid,
+//       q1: inDb[0].q1[0],
+//       q2: inDb[0].q2[0],
+//       q3: inDb[0].q3[0],
+//       q4: inDb[0].q4[0],
+//       ot,
+//       totals: inDb[0].totals[0],
+//       final: true
+//     })
+//     return;
+//   };
+
+//   let q1 = null;
+//   let thru_period = 0;
+//   let boxScore;
+
+//   try {
+//     const response = await fetchBoxScore(vAbb, hAbb, gid);
+//     boxScore = response.props.pageProps.game;
+//   } catch (e) {
+//     console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
+//     return res.status(400).send({
+//       message: `error attempting to fetch box score for ${gid} is ${e}`
+//    });
+//   }
+
+//   const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
+//   const isGameActivated = gameStatus > 1;
+//   const { clock, fullClock } = getClocks(gameClock);
+//   const gameSecs = getGameSecs((parseInt(period)-1), clock);
+
+//   // <-- If Game Has Begun --> //
+//   if (isGameActivated) {
+//     const hTeam = homeTeam.statistics;
+//     const vTeam = awayTeam.statistics;
+//     const poss = calcGamePoss(hTeam, vTeam);
+//     const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
+
+//     const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
+
+//     const gameOver = gameStatusText === 'Final';
+//     const isEndOfPeriod = fullClock === '00:00:00';
+
+//     // <-- If Initial Box Score Load --> //
+//     if (init == 'true' && period !== 1) {
+//       try {
+//         let inDb = await knex("box_scores_v2").where({gid: gid});
+
+//         // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
+//         q1 = inDb[0].q1[0];
+//         thru_period = inDb[0].period_updated;
+
+//         const q2 = inDb[0].q2?.[0] ?? period === 2 ? currentQuarter : null;
+//         const q3 = inDb[0].q3?.[0] ?? period === 3 ? currentQuarter : null;
+//         const q4 = inDb[0].q4?.[0] ?? period === 4 ? currentQuarter : null;
+//         const ot = inDb[0].ot?.[0] ?? period > 4 ? currentQuarter : null;
+//         const playerStatsInDb = JSON.parse(inDb[0].player_stats);
+
+//         res.send(initialBoxScoreResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStatsInDb));
+//       } catch (e) {
+//         console.log('error send box score response is ', e);
+//       }
+//     }
+
+//     const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
+//     const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
+//     const playerStats = [ ...hPlayerStats, ...vPlayerStats];
+
+//     // <-- If at End of Period, or if Game is Over --> //
+//     if (isEndOfPeriod || gameOver) {
+//       try {
+//       res.send(endOfQuarterResponse(gid, clock, period, thru_period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats));
+//       } catch (e) {
+//         console.log('error setting end of game q totals is ', e);
+//       } 
+//     } else {
+//       // <-- Quarter in Progress --> //
+//       try {
+//         res.send(quarterInProgressResponse(gid, clock, period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats));
+//       } catch (e) {
+//         console.log('error sending quarter in progress response is ', e);
+//       }
+//     }
+//   } else {
+//     console.log(gid, ' has not started, sending back gid ref and active: false');
+//     res.send({
+//       gid: gid,
+//       active: false
+//     })
+//   }
+// })
 
 // how best to use this?
 // router.get("/fetchStarters", (req, res, next) => {
@@ -507,45 +524,38 @@ router.get("/api/getNetRatings", (req, res, next) => {
 });
 
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
+  console.log('date in fetchWeek is ', req.params.date);
   const { date } = req.params;
-  // const seasonYear = dateFilters.fetchCurrentSeason(); // UPDATE
-  const seasonYear = 2023;
-  const seasonName = fetchSeasonName(date);
-  const week = fetchGmWk(date, seasonYear, seasonName);
-  const weekArray = fetchGmWkArrays(week, seasonYear, seasonName, date);
+  const dashedDate = convertIntDateToDashedDate(date)
 
-  console.log('week is', week, 'weekArray is ', weekArray);
-  
-  knex("schedule as s")
+  const seasonYear = getCurrentSeasonStartYearInt();
+  const week = getGameWeek(dashedDate);
+  // const weekArray = getGameWeekDateArray(date, week);
+  const weekArray = getWeekIntDateArray(dashedDate);
+  const seasonName = getCurrentSeasonStage(dashedDate);
+
+  let query = knex("schedule as s")
     .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
     .where('s.gweek', week)
-    .where('s.season_year', seasonYear)
-    .where('s.season_name', seasonName)
+    .where('s.season_year', seasonYear);
+
+  if (seasonName) {
+    query = query.where('s.season_name', SeasonNameAbb[seasonName]);
+  }
+  
+  query
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url')
     .orderBy('s.etm')
     .then(async (games) => {
-      const teamStats = await knex("teams_full_base");
+      // const teamStats = await knex("teams_full_base");
       res.send({
-        week: week,
+        week,
         weekArray: weekArray,
         weekGames: games,
-        teamStats
+        // teamStats // this is terrible. split into own call -- Am I even using this?
       })
     });
 });
-
-router.get("/api/fetchGames/:day", async (req, res, next) => {
-  knex("schedule as s")
-    .leftJoin("odds_sportsbook as odds", "s.gcode", '=', "odds.gcode")
-    .where('s.gdte', req.params.day)
-    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt')
-    .orderBy('s.etm')
-    .then(async (games) => {
-      res.send({
-        dayGames: games
-      })
-    });
-})
 
 router.get("/api/fetchGame/:gid", async (req, res, next) => {
   const gid = req.params.gid;

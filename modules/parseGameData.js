@@ -52,7 +52,6 @@ const parseGameData = async (boxScore) => {
         console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
       }
     } else if (period === 2 || period === 3 || period === 4) {
-      // console.log(`about to pluck for ${qVariable} when period.isEndOfPeriod and current period is ${qVariable}`);
       try {
         const qTest = await knex("box_scores_v2").where({gid}).pluck(`${qVariable}`);
         if (qTest[0] == null) {

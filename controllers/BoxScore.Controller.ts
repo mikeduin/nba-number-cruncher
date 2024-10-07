@@ -21,13 +21,12 @@ export const fetchBoxScore = async (vAbb: string, hAbb: string, gid: number) => 
 
 export const getCompletedGameResponse = (boxScore: BoxScoreModel): BoxScoreResponse => {
   const { gid, final, q1, q2, q3, q4, ot, totals, player_stats } = boxScore;
-  console.log('boxScore', boxScore);
   return {
     gid,
-    q1: q1[0],
-    q2: q2[0],
-    q3: q3[0],
-    q4: q4[0],
+    q1: q1?.[0] ?? null,
+    q2: q2?.[0] ?? null,
+    q3: q3?.[0] ?? null,
+    q4: q4?.[0] ?? null,
     ot: ot?.[0] ?? null,
     totals: totals[0],
     final,

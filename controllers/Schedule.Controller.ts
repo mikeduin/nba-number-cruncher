@@ -1,35 +1,24 @@
 import moment from 'moment-timezone';
 import axios from 'axios';
-import knex from '../db/knex.js';
 import * as Db from './Db.Controller.js';
 import { SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
 import {
   formBovadaUrl,
-  getCurrentNbaSeason,
-  getCurrentNbaSeasonInt,
+  getCurrentSeasonDisplayYear,
+  getCurrentSeasonStartYearInt,
   getLeagueScheduleUrl,
   getSeasonNameAbb,
   getSeasonNameFull,
 } from '../utils';
 
-const getPrePostGameWeek = (gameDate: string, dashedDateWeeks) => {
-  // dashedDateWeeks is an array of arrays, where each inner array is a week of dates
-  // find the array that includes the gameDate, and return the index of that array
-  return dashedDateWeeks.findIndex(week => week.includes(gameDate));
+const getPrePostGameWeek = (gameDate: string, dashedDateWeeks: string[][]) => {
+  return dashedDateWeeks.findIndex((week: string[]) => week.includes(gameDate));
 }
 
-export const getSeasonStartEndDates = (season: number, seasonType: SeasonNameFull) => {
-  try {
-    const { start, end } = SEASON_DATES[season.toString()][seasonType];
-    return [start, end];
-  } catch {
-    throw new Error(`Missing dates for ${season} in SEASON_DATES`);
-  }
-}
-export const getTodaysGames = async (today) => await Db.Schedule().where({gdte: today});
+export const getTodaysGames = async (today: string) => await Db.Schedule().where({gdte: today});
 
-export const getActiveGames = async (date) => {
+export const getActiveGames = async (date: string) => {
   let testMoment = moment().set({
     'year': 2024,
     'month': 3,
@@ -50,15 +39,15 @@ export const getActiveGames = async (date) => {
 
   // console.log('todayGames are ', todayGames);
 
-  // return todayGames.filter(game => moment(game.etm).diff(moment()) <= 0);
-  return todayGames.filter(game => moment(game.etm).diff(testMoment, 'minutes') <= 0);
+  return todayGames.filter(game => moment(game.etm).diff(moment()) <= 0);
+  // return todayGames.filter(game => moment(game.etm).diff(testMoment, 'minutes') <= 0);
 };
 
-export const getCompletedGameGids = async (date) => await Db.Schedule()
+export const getCompletedGameGids = async (date: string) => await Db.Schedule()
   .where({gdte: date, stt: 'Final'})
   .pluck('gid');
 
-export const buildSeasonGameWeekArray = (seasonStart, seasonEnd) => {
+export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string) => {
   // Remember that in dashedDates and intDates, array indices correspond to LITERAL GAME WEEKS.
   // So dashedDates[1] will be the first week of Survivor play, and dashedDates[0] will be the week BEFORE the game begins
   let dashedDateWeeks = [];
@@ -108,9 +97,8 @@ export const buildSeasonGameWeekArray = (seasonStart, seasonEnd) => {
 }
 
 export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: SeasonNameAbb) => {
-  const seasonYear = getCurrentNbaSeasonInt();
-  console.log('seasonYear is ', seasonYear);
-  const currentSeasonDates = SEASON_DATES[seasonYear.toString()];
+  const seasonYear = getCurrentSeasonStartYearInt();
+  const currentSeasonDates = SEASON_DATES.find(season => season.yearInt === seasonYear);
   const schedulePull = await axios.get(getLeagueScheduleUrl());
   const leagueSchedule = schedulePull.data.lscd;
 
@@ -118,12 +106,10 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
     ? leagueSchedule.filter((month) => month.mscd.mon === monthFilter)
     : leagueSchedule;
 
-  console.log('parsedSchedule is ', parsedSchedule);
-
   parsedSchedule.forEach(month => {
     month.mscd.g.forEach(async game => {
       // if game does not exist, insert game
-      const existingGame = await knex("schedule").where({ gid: game.gid.slice(2) });
+      const existingGame = await Db.Schedule().where({ gid: game.gid.slice(2) });
 
       if (!existingGame.length) {
         console.log('game is not found in schedule, adding ', game.gid);
@@ -133,9 +119,9 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
           return;
         }
 
-        const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(game.gdte, currentSeasonDates.RegularSeason);
-        const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(game.gdte, currentSeasonDates.RegularSeason);
-        const gweek = game.gweek ?? getPrePostGameWeek(game.gdte, currentSeasonDates[seasonNameFull].dashedDateWeeks);
+        const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(game.gdte, currentSeasonDates.seasons.RegularSeason);
+        const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(game.gdte, currentSeasonDates.seasons.RegularSeason);
+        const gweek = game.gweek ?? getPrePostGameWeek(game.gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
     
         let hObj = {
           tid: game.h.tid,
@@ -170,7 +156,7 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
               stt: game.stt,
               season_year: seasonYear,
               season_name: seasonNameAbb,
-              display_year: getCurrentNbaSeason(),
+              display_year: getCurrentSeasonDisplayYear(),
               bovada_url: formBovadaUrl(game),
               updated_at: new Date()
             }
@@ -193,9 +179,6 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
     });
   });
 }; 
-
-buildSchedule(Month.October, SeasonNameAbb.Preseason);
-
 
 // DELETE THIS BELOW AFTER 2024 POSTSEASON PROCESSES CORRECTLY
 
@@ -255,7 +238,7 @@ buildSchedule(Month.October, SeasonNameAbb.Preseason);
 //                 stt: game.stt,
 //                 season_year: currentNbaSeasonInt,
 //                 season_name: 'regular', // needs this for fetchApiData to work
-//                 display_year: getCurrentNbaSeason(),
+//                 display_year: getCurrentSeasonDisplayYear(),
 //                 bovada_url: formBovadaUrl(game),
 //                 updated_at: new Date(),
 //               });

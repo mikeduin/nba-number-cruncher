@@ -1,9 +1,9 @@
 import React from 'react';
 import { Image, Table } from 'semantic-ui-react';
+import { BoxScoreHeader } from './BoxScoreHeader';
 import logos from '../../modules/logos';
 
-
-const EmptyBoxScore = props => {
+export const EmptyBoxScore = props => {
   const game = props.game;
 
   let spread = '';
@@ -18,6 +18,12 @@ const EmptyBoxScore = props => {
     spread = `${game.h[0].ta} PK`;
   }
 
+  // Helper function to generate empty table cells
+  const generateEmptyCells = (count) => {
+    return Array.from({ length: count }, (_, index) => (
+      <Table.Cell key={index}> </Table.Cell>
+    ));
+  };
 
   if (!game) {
     return <div> loading ... </div>
@@ -47,58 +53,16 @@ const EmptyBoxScore = props => {
               <Table.HeaderCell colSpan="3"> </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> </Table.HeaderCell>
             </Table.Row>
-            <Table.Row>
-              <Table.HeaderCell> Teams </Table.HeaderCell>
-              <Table.HeaderCell> score </Table.HeaderCell>
-              <Table.HeaderCell> fg% </Table.HeaderCell>
-              <Table.HeaderCell> pts </Table.HeaderCell>
-              <Table.HeaderCell> fg% </Table.HeaderCell>
-              <Table.HeaderCell> fouls </Table.HeaderCell>
-              <Table.HeaderCell> pts </Table.HeaderCell>
-              <Table.HeaderCell> fg% </Table.HeaderCell>
-              <Table.HeaderCell> fouls </Table.HeaderCell>
-              <Table.HeaderCell> pts </Table.HeaderCell>
-              <Table.HeaderCell> fg% </Table.HeaderCell>
-              <Table.HeaderCell> fouls </Table.HeaderCell>
-              <Table.HeaderCell> pts </Table.HeaderCell>
-              <Table.HeaderCell> fg% </Table.HeaderCell>
-              <Table.HeaderCell> fouls </Table.HeaderCell>
-            </Table.Row>
+            <BoxScoreHeader />
           </Table.Header>
           <Table.Body>
             <Table.Row>
               <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.v[0].ta]} /> <b>{game.v[0].tn}</b>  </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
-              <Table.Cell> </Table.Cell>
+              {generateEmptyCells(14)}
             </Table.Row>
             <Table.Row>
             <Table.Cell style={{display: 'inline-flex', alignItems: 'center'}}> <Image size="mini" circular src={logos[game.h[0].ta]} /> <b>{game.h[0].tn}</b>  </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
-            <Table.Cell> </Table.Cell>
+              {generateEmptyCells(14)}
             </Table.Row>
           </Table.Body>
         </Table>

@@ -21,26 +21,26 @@ export interface BoxScore {
 }
 
 export interface BoxScoreResponse {
-  gid: number;
-  final: boolean;
   active?: boolean;
+  clock?: string;
+  currentQuarter?: BoxScore;
+  final: boolean;
+  gameSecs?: number;
+  gid: number;
+  init?: boolean;
+  live?: boolean;
+  period?: number;
+  pace?: number;
+  poss?: number;
+  playerStats?: any; // TODO: Update for player stats model
+  prevQuarters?: BoxScore;
   q1: BoxScore | null;
   q2: BoxScore | null;
   q3: BoxScore | null;
   q4: BoxScore | null;
   ot: BoxScore | null;
-  totals: BoxScore;
-  init?: boolean;
   quarterEnd?: boolean;
-  live?: boolean;
-  clock?: string;
-  gameSecs?: number;
-  period?: number;
   thru_period?: number;
-  poss?: number;
-  pace?: number;
-  currentQuarter?: BoxScore;
-  prevQuarters?: BoxScore;
-  playerStats?: any; // TODO: Update for player stats model
+  totals: BoxScore;
 }
 

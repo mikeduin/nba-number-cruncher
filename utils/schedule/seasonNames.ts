@@ -1,6 +1,8 @@
 import moment from 'moment-timezone';
 import { SeasonNameFull, SeasonNameAbb } from '../../types';
 
+// TODO: Update to conditionally return summer league
+
 export const getSeasonNameAbb = (gameDate: string, regularSeasonDates): SeasonNameAbb => {
   switch (true) {
     case moment(gameDate).isBefore(moment(regularSeasonDates.start)):

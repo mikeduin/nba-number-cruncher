@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { fetchBoxScore } from '../actions';
 import { Image, Table } from 'semantic-ui-react';
-import EmptyBoxScore from './gambleCast/EmptyBoxScoreTable';
+import { EmptyBoxScore, BoxScoreHeader } from './boxscores';
 import logos from '../modules/logos';
 
 class BoxScore extends React.Component {
@@ -42,11 +42,11 @@ class BoxScore extends React.Component {
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
 
-    const hTeamAbb = game.h[0].ta;
-    const vTeamAbb = game.v[0].ta;
+    // const hTeamAbb = game.h[0].ta;
+    // const vTeamAbb = game.v[0].ta;
 
-    // let init = true;
-    // fetchBoxScore(game.gid, 'true', vTeamAbb, hTeamAbb);
+    // let init = 'true';
+    // fetchBoxScore(game.gid, init, vTeamAbb, hTeamAbb);
 
     // setInterval(() => {
     //   // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
@@ -58,7 +58,8 @@ class BoxScore extends React.Component {
     //   }
 
     //   if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
-    //     fetchBoxScore(game.gid, 'false', vTeamAbb, hTeamAbb);
+    //     init = false;
+    //     fetchBoxScore(game.gid, init, vTeamAbb, hTeamAbb);
 
     //     if (!gameSpread) {
     //       this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
@@ -91,7 +92,6 @@ class BoxScore extends React.Component {
           <Table 
             compact 
             celled
-            // style={{marginBottom: 20}}
             attached='top'
           >
             <Table.Header>
@@ -112,29 +112,23 @@ class BoxScore extends React.Component {
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell> {boxScore.final ? 'FINAL' : `Q${boxScore.period}, ${boxScore.clock}`} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="2"> GAME PACE:  {boxScore.totals ? (boxScore.totals.t?.pace ? boxScore.totals.t.pace.toFixed(2) : null ) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q1 | PACE: {boxScore.q1 != null ? (boxScore.q1.t?.pace ? boxScore.q1.t.pace.toFixed(2) : null) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q2 | PACE: {boxScore.q2 != null ? boxScore.q2.t?.pace.toFixed(2) : null} </Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q3 | PACE: {boxScore.q3 != null ? boxScore.q3.t?.pace.toFixed(2) : null}</Table.HeaderCell>
-                <Table.HeaderCell colSpan="3"> Q4 | PACE: {boxScore.q4 != null ? boxScore.q4.t?.pace.toFixed(2) : null}</Table.HeaderCell>
+                <Table.HeaderCell colSpan="2">
+                  GAME PACE: {boxScore.totals?.t?.pace?.toFixed(2) ?? null}
+                </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3">
+                  Q1 | PACE: {boxScore.q1?.t?.pace?.toFixed(2) ?? null}
+                </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3">
+                  Q2 | PACE: {boxScore.q2?.t?.pace?.toFixed(2) ?? null}
+                </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3">
+                  Q3 | PACE: {boxScore.q3?.t?.pace?.toFixed(2) ?? null}
+                </Table.HeaderCell>
+                <Table.HeaderCell colSpan="3">
+                  Q4 | PACE: {boxScore.q4?.t?.pace?.toFixed(2) ?? null}
+                </Table.HeaderCell>
               </Table.Row>
-              <Table.Row>
-                <Table.HeaderCell> Teams </Table.HeaderCell>
-                <Table.HeaderCell> score </Table.HeaderCell>
-                <Table.HeaderCell> fg% </Table.HeaderCell>
-                <Table.HeaderCell> pts </Table.HeaderCell>
-                <Table.HeaderCell> fg% </Table.HeaderCell>
-                <Table.HeaderCell> fouls </Table.HeaderCell>
-                <Table.HeaderCell> pts </Table.HeaderCell>
-                <Table.HeaderCell> fg% </Table.HeaderCell>
-                <Table.HeaderCell> fouls </Table.HeaderCell>
-                <Table.HeaderCell> pts </Table.HeaderCell>
-                <Table.HeaderCell> fg% </Table.HeaderCell>
-                <Table.HeaderCell> fouls </Table.HeaderCell>
-                <Table.HeaderCell> pts </Table.HeaderCell>
-                <Table.HeaderCell> fg% </Table.HeaderCell>
-                <Table.HeaderCell> fouls </Table.HeaderCell>
-              </Table.Row>
+              <BoxScoreHeader />
             </Table.Header>
             <Table.Body>
               <Table.Row>
@@ -180,13 +174,11 @@ class BoxScore extends React.Component {
 }
 
 const mapStateToProps = state => {
-  // console.log('state in mapStateToProps is ', state);
-
   return {
     gambleCast: state.gambleCast,
     activeGames: state.activeGames,
-    completedGames: state.completedGames,
-    teamStats: state.week.teamStats
+    completedGames: state.completedGames
+    // teamStats: state.week.teamStats
   }
 }
 
