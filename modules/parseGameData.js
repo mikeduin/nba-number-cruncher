@@ -65,12 +65,12 @@ const parseGameData = async (boxScore) => {
           });
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
-          // await knex("box_scores_v2").where({gid: gid}).update({ // REACTIVATE
-          //   final: true
-          // }); 
-          // await knex("schedule").where({gid: gid}).update({ // REACTIVATE
-          //   stt: "Final"
-          // }); 
+          await knex("box_scores_v2").where({gid: gid}).update({
+            final: true
+          }); 
+          await knex("schedule").where({gid: gid}).update({
+            stt: "Final"
+          }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
           console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid} -- just updating player stats`);

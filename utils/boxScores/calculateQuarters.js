@@ -4,8 +4,6 @@ import { calcEndOfQuarterPace, calcQuarterPace, calcFgPct } from "./calculateRat
 const calcDiff = (current, previous) => parseInt(current) - (parseInt(previous) ?? 0);
 
 const calcQuarterPoss = (hTotals, vTotals, prevTotals) => {
-  // console.log('fga is ', calcDiff(parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted), prevTotals?.t?.fga))
-
   const fga = calcDiff(parseInt(hTotals.fieldGoalsAttempted) + parseInt(vTotals.fieldGoalsAttempted), prevTotals?.t?.fga || 0);
   const to = calcDiff(parseInt(hTotals.turnovers) + parseInt(vTotals.turnovers), prevTotals?.t?.to || 0);
   const fta = calcDiff(parseInt(hTotals.freeThrowsAttempted) + parseInt(vTotals.freeThrowsAttempted), prevTotals?.t?.fta || 0);
@@ -17,8 +15,6 @@ const calcQuarterPoss = (hTotals, vTotals, prevTotals) => {
 // this method calculates the stats for a quarter, using the previous totals from earlier Qs
 export const compileQuarterStats = (hTotals, vTotals, prevTotals, period, gameSecs) => {
   const quarterPoss = calcQuarterPoss(hTotals, vTotals, prevTotals)
-
-  // console.log('hTotals is ', hTotals, ' vTotals is ', vTotals, ' prevTotals is ', prevTotals, ' period is ', period, ' gameSecs is ', gameSecs)
 
   // NOTE: ONCE YOU HAVE CONFIRMED PREVTOTALS ARE NOT GOING IN AS INTEGERS, YOU CAN REMOVE PARSEINTS
   return {

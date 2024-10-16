@@ -59,18 +59,14 @@ function delay(ms) {
 
 // dbBuilders.buildGameStintsDb();
 
-const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
-
 // const testToday = moment().set({'year': 2024, 'month': 3, 'date': 27, 'timezone': 'America/Los_Angeles'}).format('YYYY-MM-DD');
 // console.log('testToday is ', testToday);
 // let activeGames = await getActiveGames(testToday);
 // let completedGames = await getCompletedGameGids(testToday);
 
-// console.log('testToday is ', today);
+const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
 let activeGames = await getActiveGames(today);
 let completedGames = await getCompletedGameGids(today);
-
-console.log('today in index is ', today);
 
 let rule = new schedule.RecurrenceRule();
 rule.tz = 'America/Los_Angeles';
@@ -265,6 +261,7 @@ setInterval(() => {
 }, 3000)
 
 router.get("/api/fetchDailyBoxScores", async (req, res) => {
+  const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
   const todaysGames = await getTodaysGames(today);
   const todayGids = todaysGames.map(game => game.gid);
   const completedGames = await Db.BoxScores()
@@ -278,6 +275,7 @@ router.get("/api/fetchDailyBoxScores", async (req, res) => {
 })
 
 router.get("/api/fetchActiveBoxScores", async (req, res) => {
+  const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
   const activeGames = await getActiveGames(today);
 
   const activeBoxScores = async () => {
@@ -314,8 +312,6 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
   
         const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, homeTeam.statistics, awayTeam.statistics, period, gameSecs);
 
-        // console.log('currentQuarter is ', currentQuarter);
-
         const inDb = await knex("box_scores_v2").where({gid: gid});
 
         const q1 = (inDb[0]?.q1?.[0]) || (period === 1 ? currentQuarter : null);
@@ -326,34 +322,11 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
 
         const thru_period = inDb[0]?.period_updated ?? 0;
   
-        // // <-- If Initial Box Score Load --> //
-        // if (period !== 1) {
-        // // if (init == 'true' && period !== 1) {
-        //   try {
-        //     // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
-        //     // const playerStatsInDb = JSON.parse(inDb[0]?.player_stats ?? []);
-  
-        //     return initialBoxScoreResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
-        //   } catch (e) {
-        //     console.log('error send box score response is ', e);
-        //   }
-        // }
-    
-        // // <-- If at End of Period, or if Game is Over --> //
-        // if (isEndOfPeriod || gameOver) {
-        //   try {
-        //     return endOfQuarterResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
-        //   } catch (e) {
-        //     console.log('error setting end of game q totals is ', e);
-        //   } 
-        // } else {
-          // <-- Quarter in Progress --> //
-          try {
-            return quarterInProgressResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
-          } catch (e) {
-            console.log('error sending quarter in progress response is ', e);
-          }
-        // }
+        try {
+          return quarterInProgressResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats);
+        } catch (e) {
+          console.log('error sending quarter in progress response is ', e);
+        }
       } else {
         console.log(gid, ' has not started, sending back gid ref and active: false, gameStatus is ', gameStatus);
         return {
@@ -370,133 +343,9 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
   res.send(prepActiveBoxScores);
 })
 
-// router.get("/fetchBoxScore/:date/:gid/:init/:vAbb/:hAbb", async (req, res) => {
-//   const { gid, init, vAbb, hAbb } = req.params;
 
-//   // <-- If Game Is Final --> //
-//   if (completedGames.indexOf(parseInt(gid)) !== -1) {
-//     const inDb = await knex("box_scores_v2").where({gid: gid});
-//     let ot = inDb[0].ot?.[0] ?? null;
-
-//     res.send({
-//       gid: gid,
-//       q1: inDb[0].q1[0],
-//       q2: inDb[0].q2[0],
-//       q3: inDb[0].q3[0],
-//       q4: inDb[0].q4[0],
-//       ot,
-//       totals: inDb[0].totals[0],
-//       final: true
-//     })
-//     return;
-//   };
-
-//   let q1 = null;
-//   let thru_period = 0;
-//   let boxScore;
-
-//   try {
-//     const response = await fetchBoxScore(vAbb, hAbb, gid);
-//     boxScore = response.props.pageProps.game;
-//   } catch (e) {
-//     console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
-//     return res.status(400).send({
-//       message: `error attempting to fetch box score for ${gid} is ${e}`
-//    });
-//   }
-
-//   const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
-//   const isGameActivated = gameStatus > 1;
-//   const { clock, fullClock } = getClocks(gameClock);
-//   const gameSecs = getGameSecs((parseInt(period)-1), clock);
-
-//   // <-- If Game Has Begun --> //
-//   if (isGameActivated) {
-//     const hTeam = homeTeam.statistics;
-//     const vTeam = awayTeam.statistics;
-//     const poss = calcGamePoss(hTeam, vTeam);
-//     const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
-
-//     const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
-
-//     const gameOver = gameStatusText === 'Final';
-//     const isEndOfPeriod = fullClock === '00:00:00';
-
-//     // <-- If Initial Box Score Load --> //
-//     if (init == 'true' && period !== 1) {
-//       try {
-//         let inDb = await knex("box_scores_v2").where({gid: gid});
-
-//         // <-- If Game Is Found in DB (e.g., Q1 or later) --> //
-//         q1 = inDb[0].q1[0];
-//         thru_period = inDb[0].period_updated;
-
-//         const q2 = inDb[0].q2?.[0] ?? period === 2 ? currentQuarter : null;
-//         const q3 = inDb[0].q3?.[0] ?? period === 3 ? currentQuarter : null;
-//         const q4 = inDb[0].q4?.[0] ?? period === 4 ? currentQuarter : null;
-//         const ot = inDb[0].ot?.[0] ?? period > 4 ? currentQuarter : null;
-//         const playerStatsInDb = JSON.parse(inDb[0].player_stats);
-
-//         res.send(initialBoxScoreResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStatsInDb));
-//       } catch (e) {
-//         console.log('error send box score response is ', e);
-//       }
-//     }
-
-//     const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
-//     const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
-//     const playerStats = [ ...hPlayerStats, ...vPlayerStats];
-
-//     // <-- If at End of Period, or if Game is Over --> //
-//     if (isEndOfPeriod || gameOver) {
-//       try {
-//       res.send(endOfQuarterResponse(gid, clock, period, thru_period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats));
-//       } catch (e) {
-//         console.log('error setting end of game q totals is ', e);
-//       } 
-//     } else {
-//       // <-- Quarter in Progress --> //
-//       try {
-//         res.send(quarterInProgressResponse(gid, clock, period, gameSecs, poss, totalsObj, {prevQuarters, currentQuarter}, playerStats));
-//       } catch (e) {
-//         console.log('error sending quarter in progress response is ', e);
-//       }
-//     }
-//   } else {
-//     console.log(gid, ' has not started, sending back gid ref and active: false');
-//     res.send({
-//       gid: gid,
-//       active: false
-//     })
-//   }
-// })
-
-// how best to use this?
-// router.get("/fetchStarters", (req, res, next) => {
-//   axios.get('https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2018/scores/gamedetail/0021800848_gamedetail.json').then(game => {
-//     const h = game.data.g.hls;
-//     const v = game.data.g.vls;
-//     const home = {
-//       tid: h.tid,
-//       starters: h.pstsg.slice(0,5).map(player => player.pid),
-//       bench: h.pstsg.slice(5, h.pstsg.length).map(player => player.pid)
-//     };
-//
-//     const vis = {
-//       tid: v.tid,
-//       starters: v.pstsg.slice(0,5).map(player => player.pid),
-//       bench: v.pstsg.slice(5, v.pstsg.length).map(player => player.pid)
-//     };
-//
-//     const rosters = {
-//       h: home,
-//       v: vis
-//     };
-//
-//     console.log(rosters)
-//   })
-// })
-
+// UPDATE THIS TO ONLY SEND POSTSEASON IF IN POSTSEASON! 
+// ALSO UPDATE FE TO ONLY DISPLAY POSTSEASON BUTTON IF IN POSTSEASON
 router.get("/api/getPlayerMetadata", async (req, res, next) => {
   const players = await knex("player_data")
     .orderBy('min_full', 'desc')

@@ -33,7 +33,3 @@ export const getCompletedGameResponse = (boxScore: BoxScoreModel): BoxScoreRespo
     playerStats: JSON.parse(player_stats),
   }
 }
-
-// export const getGameActiveResponse = (boxScore: BoxScoreModel): BoxScoreResponse => {
-
-// }

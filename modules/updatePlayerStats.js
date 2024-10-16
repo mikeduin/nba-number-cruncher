@@ -35,8 +35,8 @@ export const updatePlayerBoxScoresByPeriod = async (gdte) => {
         const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, gameCompleted);
         const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, gameCompleted);
 
-        await insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode);
-        await insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode);
+        insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode);
+        insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode);
       } else {
         console.log('stats found for game ', gid, ' and period ', period, ' so not fetching');
       }

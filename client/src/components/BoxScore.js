@@ -182,4 +182,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect (mapStateToProps, { fetchBoxScore }) (BoxScore);
+export default connect (mapStateToProps, null) (BoxScore);

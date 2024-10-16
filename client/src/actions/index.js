@@ -1,10 +1,7 @@
 import axios from 'axios';
 import moment from 'moment-timezone';
-import _, { update } from 'lodash';
-import { getGameSecs } from '../modules/gameTimeFuncs';
-import { calcFgPct, calcPoss, calcQuarterPace } from '../utils/boxScoreHelpers';
+import _ from 'lodash';
 
-// let today = moment().subtract(8, 'hours').format('YYYY-MM-DD');
 let today = moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
 
 export const fetchNetRatings = () => async dispatch => {
@@ -15,18 +12,14 @@ export const fetchNetRatings = () => async dispatch => {
 }
 
 export const fetchWeek = (date = today) => async (dispatch, getState) => {
-  const digitDate = moment(date).format('YYYYMMDD'); // UPDATE
-  // const digitDate = moment(date).format('20240427');
+  const digitDate = moment(date).format('YYYYMMDD');
   const response = await fetch(`/api/fetchWeek/${digitDate}`);
   const data = await response.json();
-
-  console.log('data in fetchWeek is ', data);
 
   const updated = {...data, today};
 
   const todaysGames = data.weekGames.filter(game => {
     return game.gdte === today;
-    // return game.gdte === '2024-04-27'; // UPDATE
   });
 
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
@@ -44,7 +37,6 @@ export const fetchPlayerProps = () => async (dispatch) => {
 
 export const checkActiveGames = () => async (dispatch, getState) => {
   const response = await axios.get('/todayGameStatus');
-  // console.log('checkActiveGames response is ', response)
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
   const clientActive = getState().activeGames;
@@ -153,7 +145,7 @@ export const setActiveDay = date => async (dispatch, getState) => {
   dispatch ({ type: 'SET_SCHED_DAY_GAMES', payload: dayGames });
 }
 
-export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
+export const changeSchedWeek = (week, dir) => async (dispatch) => {
   const url = window.location.href;
   const urlDateMatch = url.match(/\/schedule\/(\d{4}-\d{2}-\d{2})/);
   let urlDate;
@@ -178,132 +170,20 @@ export const changeSchedWeek = (week, dir) => async (dispatch, getState) => {
   dispatch({ type: 'SET_ACTIVE_DAY', payload: urlDate });
 }
 
-const updateGamblecast = (game) => async (dispatch, getState) => {
-  if (game.final) {
-    console.log('sending final payload for game.gid ', game);
-    dispatch({ type: 'SET_FINAL_BOX_SCORE', payload: game });
-  }
-
-  // if (game.init) {
-  //   dispatch({ type: 'INITIALIZE_BOX_SCORE', payload: game });
-  // }
-
-  // console.log('game in updateGamblecast is ', game);
-
-  if (game.live) {
-    // const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period, currentQuarter } = game;
-
-    // const liveData = {
-    //   gid: game.gid,
-    //   active: true,
-    //   period,
-    //   endOfPeriod: false,
-    //   gameSecs,
-    //   clock,
-    //   pace,
-    //   totals,
-    //   playerStats
-    // };
-
-    // if (game.quarterEnd) {
-    //   let perToUpdate = thru_period;
-    //   let endOfQuarterData = game.quarter;
-
-    //   if (getState().gambleCast[`live_${game.gid}`]) {
-    //     const perToUpdPts = endOfQuarterData.t.pts;
-    //     if (perToUpdPts !== 0) {
-    //       // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-    //       const snapshot = { ...liveData, perToUpdate, endOfQuarterData};
-    //       dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
-    //     }
-    //   }
-    // } else {
-      // const inQuarter = {
-      //   ...liveData,
-      //   // perToUpdate: period,
-      //   // quarterData: period === 1 ? totals : currentQuarter,
-      //   // [`q${period}`]: period === 1 ? totals : currentQuarter
-      // };
-
-      dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: game})
-    // }
-  }
+const updateGamblecast = (game) => async (dispatch) => {
+  dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: game})
 }
 
 export const fetchDailyBoxScores = () => async (dispatch) => {
   const dailyBoxScores = await axios.get('/api/fetchDailyBoxScores');
-  // console.log('dailyBoxScores are ', dailyBoxScores.data);
   dailyBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });
 }
  
-export const fetchActiveBoxScores = () => async (dispatch, getState) => {
-  const activeGames = getState().activeGames;
-  // console.log('active games in fetchActiveBoxScores are ', activeGames);
+export const fetchActiveBoxScores = () => async (dispatch) => {
   const activeBoxScores = await axios.get('/api/fetchActiveBoxScores');
-  // console.log('activeBoxScores are ', activeBoxScores);
   activeBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });
-}
-
-export const fetchBoxScore = (gid, init, vAbb, hAbb) => async (dispatch, getState) => {
-  // // For testing
-  // // let todayInt = '20190314';
-  // let todayInt = moment().tz("America/Los_Angeles").format('YYYYMMDD');
-  // const game = await axios.get(`/fetchBoxScore/${todayInt}/${gid}/${init}/${vAbb}/${hAbb}`);
-  // const response = game.data;
-
-  // if (response.final) {
-  //   dispatch ({ type: 'SET_FINAL_BOX_SCORE', payload: response });
-  //   return;
-  // }
-
-  // if (response.init) {
-  //   dispatch ({ type: 'INITIALIZE_BOX_SCORE', payload: response });
-  //   return;
-  // }
-
-  // if (response.live) {
-  //   const { totals, period, clock, poss, pace, playerStats, gameSecs, thru_period, currentQuarter } = response;
-    
-  //   let liveData = {
-  //     gid,
-  //     active: true,
-  //     period,
-  //     endOfPeriod: false,
-  //     gameSecs,
-  //     clock,
-  //     poss,
-  //     pace,
-  //     totals,
-  //     playerStats
-  //   };
-
-  //   if (response.quarterEnd) { // at end of quarter
-  //     let perToUpdate = thru_period;
-  //     let endOfQuarterData = response.quarter;
-  //     // let prevQuarters = response.prevQuarters;
-
-  //     if (getState().gambleCast[`live_${gid}`]) {
-  //       const perToUpdPts = endOfQuarterData.t.pts;
-  //       if (perToUpdPts !== 0) {
-  //         // REMEMBER TO ACCOUNT FOR OT HERE! NOT SURE WHAT THAT READS, as far as perToUpdate goes
-  //         // let snapshot = { ...liveData, gid, totals, perToUpdate, endOfQuarterData, prevQuarters};
-  //         let snapshot = { ...liveData, perToUpdate, endOfQuarterData};
-  //         dispatch ({ type: 'ADD_SNAPSHOT', payload: snapshot})
-  //       }
-  //     }
-  //   } else { // quarter in progress
-  //     const inQuarter = {
-  //       ...liveData,
-  //       perToUpdate: period,
-  //       quarterData: period === 1 ? totals : currentQuarter,
-  //       [`q${perToUpdate}`]: period === 1 ? totals : currentQuarter
-  //     };
-
-  //     dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: inQuarter})
-  //   };
-  // }
 }
