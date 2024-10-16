@@ -22,8 +22,8 @@ const parseGameData = async (boxScore) => {
     const poss = calcGamePoss(hTeam, vTeam);
     const totalsObj = compileGameStats(hTeam, vTeam, poss, period, gameSecs);
 
-    const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
-    const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
+    const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
+    const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
     const playerStats = [ ...hPlayerStats, ...vPlayerStats];
 
     const qTotals = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);

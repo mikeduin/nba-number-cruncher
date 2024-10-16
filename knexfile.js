@@ -1,44 +1,17 @@
+// OLD CODE
 // const pg = require('pg')
-// pg.defaults.ssl = {
-//    rejectUnauthorized: false,
-// }
-
 // require('dotenv').config();
-// const parse = require("pg-connection-string").parse;
+// END OLD CODE
 
-// // const pgconfig = parse(process.env.MAIN_DB_URI);
-// const pgconfig = parse(process.env.DATABASE_URL_TEST_NEW);
-// // const pgconfig = parse(process.env.TEST_MAIN_DB_2);
-
-// // Add SSL setting to default environment variable
-// pgconfig.ssl = { rejectUnauthorized: false };
-
-// module.exports = {
-//   development: {
-//     client: 'pg',
-//     // connection: process.env.DATABASE_URL
-//     connection: pgconfig
-//   },
-//   production: {
-//     client: 'postgresql',
-//     connection: process.env.DATABASE_URL
-//     // connection: process.env.DATABASE_URL_TEST_NEW
-//   }
-// };
-
+// NEW CODE
 import { config as dotenvConfig } from 'dotenv';
 import pg from 'pg';
-
 dotenvConfig();
+// END NEW CODE
 
 pg.defaults.ssl = {
    rejectUnauthorized: false,
 }
-
-// const parse = require("pg-connection-string").parse;
-// const pgconfig = parse(process.env.TEST_DB_URL);
-
-// console.log(process.env);
 
 const knexfile = {
   development: {
@@ -61,4 +34,10 @@ const knexfile = {
   }
 };
 
+// NEW CODE
 export default knexfile;
+// END NEW CODE
+
+// OLD CODE
+// module.exports = knexfile;
+// END OLD CODE

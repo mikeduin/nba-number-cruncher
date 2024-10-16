@@ -19,6 +19,7 @@ class App extends React.Component {
     this.props.getPlayerMetadata();
     this.props.checkActiveGames();
     this.props.fetchDailyBoxScores();
+    this.props.fetchActiveBoxScores();
     setInterval(()=>{
       this.props.checkActiveGames();
       this.props.fetchActiveBoxScores();

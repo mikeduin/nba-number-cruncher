@@ -32,8 +32,8 @@ export const updatePlayerBoxScoresByPeriod = async (gdte) => {
         const { boxScoreTraditional } = boxScorePeriod.data;
         const { homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid } = boxScoreTraditional;
         const gameCompleted = true;
-        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, gameCompleted);
-        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, gameCompleted);
+        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics, gameCompleted);
+        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics, gameCompleted);
 
         insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode);
         insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode);

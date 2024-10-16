@@ -306,8 +306,8 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
         const gameOver = gameStatusText === 'Final';
         const isEndOfPeriod = fullClock === '00:00:00';
   
-        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode);
-        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode);
+        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
+        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
         const playerStats = [ ...hPlayerStats, ...vPlayerStats];
   
         const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, homeTeam.statistics, awayTeam.statistics, period, gameSecs);

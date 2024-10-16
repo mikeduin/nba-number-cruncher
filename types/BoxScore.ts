@@ -44,3 +44,9 @@ export interface BoxScoreResponse {
   totals: BoxScore;
 }
 
+export interface UsageStats {
+  fga: number;
+  fta: number;
+  tov: number; // turnovers
+  min: number;
+}
