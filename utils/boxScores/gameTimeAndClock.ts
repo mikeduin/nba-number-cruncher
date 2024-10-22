@@ -159,7 +159,9 @@ export const convertPlayingTime = (timeStr: string): string => {
   // Extract minutes and seconds using a regular expression
   const match = timeStr.match(/PT(\d+)M(\d+\.\d+)S/);
   if (!match) {
-    throw new Error('Invalid time format');
+    // throw new Error('Invalid time format');
+    console.log('invalid time format is ', timeStr);
+    return '0:00';
   }
 
   const minutes = parseInt(match[1], 10);

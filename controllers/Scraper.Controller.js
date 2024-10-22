@@ -49,25 +49,37 @@ export const scrapeBovada = async (gameUrl) => {
         const content = await page.content();
         const $ = cheerio.load(content);
   
-        $('sp-alternate').each(function (i, elem) {
-          const market = parseBovadaLines($(elem).find('h3.league-header').text());
   
+        $('sp-alternate').each(function(i, elem) {
+          const market = parseBovadaLines($(elem).find('h3.league-header').text());
+
           // console.log('market is ', market);
   
           if (market) {
             const over = $(elem).find('ul.market-type').find('span.bet-price').first().text().trim();
-            // Continue with the rest of the function logic...
+            const under = $(elem).find('ul.market-type').find('span.bet-price').eq(1).text().trim()
+  
+            market.line = parseFloat($(elem).find('ul.spread-header').children().first().text().trim());
+            // console.log('line for ', market.player, market.market, ' is ', market.line);
+            market.over = over 
+              ? over === 'EVEN' ? 100 : parseFloat(over)
+              : null;
+            market.under = under 
+            ? under === 'EVEN' ? 100 : parseFloat(under)
+            : null;
+            props.push(market);
           }
-        });
-      } catch (error) {
-        console.error('Error extracting content:', error);
+        })
+      } catch (e) {
+        console.log('error scraping bovada props for ', gameUrl, ' and error is ', e);
       }
-    } catch (error) {
-      console.error('Error launching browser:', error);
-    } finally {
-      if (browser) {
-        await browser.close();
-      }
+
+      // Close the browser when you're done
+      await browser.close();
+  
+      return props;
+    } catch (e) {
+      console.log('OUTER error scraping bovada props for ', gameUrl, ' and error is ', e);
     }
   } else {
     console.log('No gameUrl provided');

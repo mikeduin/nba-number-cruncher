@@ -117,11 +117,11 @@ rule.second = 48;
 //   setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
 // })()
 
-// if (process.env.NODE_ENV !== 'production') {
-//   setInterval(async () => {
-//     await fetchDailyGameProps();
-//   }, 8000)
-// }
+if (process.env.NODE_ENV !== 'production') {
+  setInterval(async () => {
+    await fetchDailyGameProps();
+  }, 8000)
+}
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
