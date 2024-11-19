@@ -1,9 +1,5 @@
 import knex from "../db/knex.js";
-import { getClocks, getGameSecs } from '../utils/boxScores/gameTimeAndClock.js';
-import { getCurrentAndPrevQuarterStats } from "../utils/boxScores/calculateQuarters.js";
-import { calcGamePoss } from "../utils/boxScores/calculateRateStats.js";
-import { compileGameStats } from "../utils/boxScores/calculateGame.js";
-import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
+import { getClocks, getGameSecs, getCurrentAndPrevQuarterStats, calcGamePoss, compileGameStats, mapPlayerStatistics } from '../utils';
 
 const parseGameData = async (boxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;

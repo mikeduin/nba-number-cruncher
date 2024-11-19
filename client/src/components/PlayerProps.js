@@ -44,7 +44,8 @@ class PlayerProps extends React.Component {
     lastUpdated: null,
     activeProp: 'pts',
     activeTimeframe: 'full',
-    bovadaUrl: ''
+    bovadaUrl: '',
+    betssonUrl: '',
   };
 
   componentDidMount () {
@@ -60,17 +61,18 @@ class PlayerProps extends React.Component {
     }
   }
 
-  updateBovadaUrl = async () => {
+  updateSportsbookUrl = async (sportsbook) => {
     const gid = this.props.game.gid;
-    if (this.state.bovadaUrl.length) {
-      const response = await axios.post('/api/updateBovadaUrl', {gid, url: this.state.bovadaUrl});
+    const sportsbookUrl = sportsbook === 'bovada' ? this.state.bovadaUrl : this.state.betssonUrl;
+    if (sportsbookUrl.length) {
+      const response = await axios.post('/api/updateSportsbookUrl', {gid, sportsbook, url: sportsbookUrl});
       if (response.status === 200) {
         toast({
           type: 'warning',
           icon: 'check circle',
           color: 'violet',
           title: 'URL updated',
-          description: `Bovada URL has been successfully updated`,
+          description: `Sportsbook URL has been successfully updated`,
           animation: 'slide down',
           time: 3000
         });
@@ -81,7 +83,7 @@ class PlayerProps extends React.Component {
         icon: 'exclamation',
         color: 'red',
         title: 'URL Not Updated',
-        description: `No URL was input, Bovada URL was not updated`,
+        description: `No URL was input, Sportsbook URL was not updated`,
         animation: 'slide down',
         time: 3000
       });
@@ -117,10 +119,16 @@ class PlayerProps extends React.Component {
           attached='top'
           textAlign='right'
         >
-          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
+          {/* <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
             <div style={{marginRight: 10}}><i>BOVADA URL:</i></div>
             <Input placeholder={game.bovada_url} style={{width: 700}} onChange={(e) => {this.setState({bovadaUrl: e.target.value})}}/>
-            <Button primary style={{marginLeft: 10}} onClick={() => this.updateBovadaUrl()}>Update URL</Button>
+            <Button primary style={{marginLeft: 10}} onClick={() => this.updateSportsbookUrl('bovada')}>Update URL</Button>
+            <Button color='red' style={{marginLeft: 10}} onClick={() => this.removeDuplicateProps()}>Remove Dups</Button>
+          </div> */}
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
+            <div style={{marginRight: 10}}><i>BETSSON URL:</i></div>
+            <Input placeholder={game.betsson_url} style={{width: 700}} onChange={(e) => {this.setState({betssonUrl: e.target.value})}}/>
+            <Button primary style={{marginLeft: 10}} onClick={() => this.updateSportsbookUrl('betsson')}>Update URL</Button>
             <Button color='red' style={{marginLeft: 10}} onClick={() => this.removeDuplicateProps()}>Remove Dups</Button>
           </div>
           <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>

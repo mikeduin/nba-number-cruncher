@@ -1,7 +1,7 @@
 import { mapSportsbookMarketToDbColumn, propMarketMappers } from '../../modules/dbMappers.js';
 import { SportsbookName } from '../../types';
 
-const   buildActivePropsMap = (players, dbColumns) => {
+const buildActivePropsMap = (players, dbColumns) => {
   const activePropsMap = {};
 
   players.forEach(player => {
@@ -21,7 +21,8 @@ const findPlayerTeam = (propPlayerName: string, dailyPlayers) => {
 }
 
 export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersInDb, dailyPlayers, sportsbook: SportsbookName) => {
-  const dbColumns = Object.values(propMarketMappers(sportsbook));
+  const sportsbookMarkets = propMarketMappers(sportsbook);
+  const dbColumns = Object.values(sportsbookMarkets);
   const playerPropsMap = new Map();
   const activePropsMap = buildActivePropsMap(gamePropPlayersInDb, dbColumns);
 
@@ -67,9 +68,6 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
       }
     })
   
-    // console.log('playerPropsMap is ', playerPropsMap);
-    // console.log('activePropsMap is ', activePropsMap);
-  
     // loop through the playerPropsMap. Each player name is the key. For each player name, find that player in the activePropsMap, then add all the values he has in the activePropsMap to his entry in the playerPropsMap
     // problem is that if a player is not in the playerPropsMap, their data stays stale ... when in actuality, it should be turned to 'inactive' for each prop ...
     for (const [player, props] of playerPropsMap) {
@@ -79,8 +77,6 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
         ...activeProps,
       })
     }
-
-    // console.log('playerPropsMap is ', playerPropsMap);
 
     // loop through the keys of the activePropsMap. Each key represents a player name. If that player name is NOT in the playerPropsMap, then add it to the playerPropsMap with all the values from the activePropsMap
     for (const player of Object.keys(activePropsMap)) {

@@ -1,4 +1,5 @@
-import { getCurrentSeasonStartYearInt } from "../../utils";
+import { getCurrentSeasonStartYearInt } from "..";
+// import { GAME_LOGS_HEADERS } from "../../constants";
 
 const formKey = (label, period) => {
   switch (period) {
@@ -12,7 +13,6 @@ const formKey = (label, period) => {
       return label;
   }
 }
-
 
 export const formPlayerBaseStatsBuild = (headers, player, period, seasonType) => {
   let baseInsert = {

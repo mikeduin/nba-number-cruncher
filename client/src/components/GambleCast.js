@@ -22,16 +22,8 @@ class GambleCast extends React.Component {
   }
 
   renderBoxScores = () => {
-    const { activeGames, gambleCast, games, playerProps, playersMetadata} = this.props;
-    // console.log('playerProps are ', playerProps);
-    // console.log('playersMetadata in gamblecast are ', playersMetadata);
-
-    console.log('activeGames in gamblecast are ', activeGames, ' and games are ', games);
-
-    const checkActive = (gid) => {
-      return activeGames.indexOf(gid) !== -1
-    };
-
+    const { gambleCast, games, playersMetadata} = this.props;
+    console.log('games are ', games);
     if (games[0]) {
       return games.map(game => {
         const hTid = game.h[0].tid;

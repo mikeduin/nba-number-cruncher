@@ -35,9 +35,9 @@ export const scrapeBovada = async (gameUrl) => {
   
       // Navigate to the URL
       // await page.goto(gameUrl, { waitUntil: 'domcontentloaded' }); // This wasn't working pregame, but might need to be used for live games?
-      // await page.goto(gameUrl);
+      await page.goto(gameUrl);
       // await page.goto('https://www.unibet.com/betting/sports/event/live/1021435931');
-      await page.goto('https://www.betsson.com/en/sportsbook/live/basketball?eventId=f-7hHH7c6YRU6WrnG6SJKZRQ&eti=0&mtg=6&fs=true');
+      // await page.goto('https://www.betsson.com/en/sportsbook/live/basketball?eventId=f-7hHH7c6YRU6WrnG6SJKZRQ&eti=0&mtg=6&fs=true');
 
       // await page.waitForSelector(buttonSelector);
   

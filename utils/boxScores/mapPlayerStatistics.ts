@@ -2,7 +2,7 @@ import { UsageStats } from '../../types';
 import { NbaBoxScorePlayerTraditional, NbaBoxScoreStatsTraditional } from '../../models';
 import { calcUsage, convertMinutesToDecimal, convertPlayingTime, getPlayerBoxScoreMinutes } from './';
 
-const mapPlayerStatistics = (
+export const mapPlayerStatistics = (
   players: NbaBoxScorePlayerTraditional[],
   teamId: number,
   teamAbb: string, // teamTriCode
@@ -62,5 +62,3 @@ const mapPlayerStatistics = (
     usg: decimalPlayerMinutes > 0 ? calcUsage(playerUsageStats, teamUsageStats) : 0,
   }
 });
-
-export default mapPlayerStatistics;

@@ -79,8 +79,6 @@ class BoxScore extends React.Component {
     let game = this.props.game;
     let boxScore = this.props.gambleCast[`live_${game.gid}`];
 
-    console.log('boxScore is ', boxScore);
-
     if (!boxScore || !boxScore.totals ) {
       if (!game) {
         return <div> loading ... </div>

@@ -1,8 +1,9 @@
 export * from './formApiCallParams';
-export * from './formPlayerAdvancedStatsBuild';
+export * from './formPlayerBaseGameLogsBuild';
 export * from './formPlayerBaseStatsBuild';
-export * from './formTeamAdvancedStatsBuild';
+export * from './formPlayerAdvancedStatsBuild';
 export * from './formTeamBaseStatsBuild';
+export * from './formTeamAdvancedStatsBuild';
 export * from './getLeagueScheduleUrl';
 export * from './requestHeaders';
 

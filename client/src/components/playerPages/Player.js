@@ -1,10 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { fetchPlayerData } from '../../actions';
-import { Header, Image, Tab, TabPane, Grid } from 'semantic-ui-react';
+import { Header, Image, Tab, Grid } from 'semantic-ui-react';
 import ProfileTable from './ProfileTable';
-import GameStints from './GameStints';
-import BoxScoresByQuarter from './BoxScoresByQuarter';
+import playerPanes from './PlayerPanes';
 import logos from '../../modules/logos';
 
 class Player extends React.Component {
@@ -17,16 +16,7 @@ class Player extends React.Component {
       return <div> Loading . . . </div>
     } else {
       const player = this.props.playerData;
-      const panes = [
-        {
-          menuItem: 'Stats by Quarter',
-          render: () => <BoxScoresByQuarter boxScores={player.boxScoresByQuarter} team={player.mappedData.team_abbreviation}/>,
-        },
-        {
-          menuItem: 'Rotation Patterns',
-          render: () => <GameStints player={player} />,
-        }
-      ]
+      const panes = playerPanes(player);
 
       return (
         <div>

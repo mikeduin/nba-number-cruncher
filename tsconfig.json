@@ -14,7 +14,7 @@
     //   "@constants/*": ["constants/*"]
     // }
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "routes/index.js"],
   "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,

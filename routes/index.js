@@ -9,33 +9,39 @@ import cheerio from 'cheerio';
 import _ from 'lodash';
 
 import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1Builds, updateQ2Builds, updateQ3Builds, updateQ4Builds } from "../modules/updateTeamStats.js";
-import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod } from "../modules/updatePlayerStats.js";
+import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod, updatePlayerGameLogs } from "../modules/updatePlayerStats.js";
 import { addGameStints } from "../modules/dbBuilders.js";
 import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
 import { fetchCurrentSeason, fetchSeasonName } from "../modules/dateFilters.js";
-import { compileGameStats } from "../utils/boxScores/calculateGame.js";
-import { endOfQuarterResponse, initialBoxScoreResponse, quarterInProgressResponse } from "../utils/boxScores/responseObjects.js";
-import mapPlayerStatistics from "../utils/boxScores/mapPlayerStatistics.js";
-import { getCurrentAndPrevQuarterStats } from "../utils/boxScores/calculateQuarters.js";
+import {
+  calcGamePoss,
+  compileGameStats,
+  convertIntDateToDashedDate,
+  gameSecsToClockAndQuarter as gameSecsToGameTime,
+  getClocks,
+  getCurrentAndPrevQuarterStats,
+  getCurrentSeasonStartYearInt,
+  getCurrentSeasonStage,
+  getGameSecs,
+  getGameWeek,
+  getWeekIntDateArray,
+  mapPlayerStatistics,
+  quarterInProgressResponse,
+} from "../utils";
+import { SeasonNameAbb, SportsbookName } from "../types";
 
 import parseGameData from '../modules/parseGameData.js';
-
-import { clockReturner, getClocks, getGameSecs } from '../utils/boxScores/gameTimeAndClock.js';
-import { gameSecsToClockAndQuarter as gameSecsToGameTime } from "../utils/boxScores/gameTimeAndClock.js";
-import { calcGamePoss, calcGamePace } from "../utils/boxScores/calculateRateStats.js";
 
 import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
 import { buildSchedule, getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
-import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.ts";
-import { getGameWeek, getCurrentSeasonStartYearInt, getCurrentSeasonStage, getWeekIntDateArray } from "../utils";
-import { convertIntDateToDashedDate } from "../utils";
-import { SeasonNameAbb } from "../types/Season.ts";
+import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.js";
 import { scrapeBetsson } from "../controllers/Scraper.Controller.js";
-import { SportsbookName } from "../types/SportsbookName.ts";
+import { deleteDuplicateProps } from "../controllers/Props.Controller.js";
 
 (async () => {
-  await fetchDailyGameProps(SportsbookName.Betsson);
+  // await fetchDailyGameProps(SportsbookName.Betsson);
+  // await updatePlayerGameLogs('203999');
 })();
 
 function delay(ms) {
@@ -103,12 +109,13 @@ rule.second = 48;
     // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 3000);
     // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 5000);
     // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 7000);
-    // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+    // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
     // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    // setTimeout(()=>{mapFullPlayerData()}, 10000);
-    // // setTimeout(()=>{addGameStints()}, 1000);
-    // // setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
-    // setTimeout(()=>{mapSegmentedPlayerData()}, 18000);
+    // setTimeout(()=>{mapFullPlayerData()}, 160000);
+    // setTimeout(()=>{addGameStints()}, 1000);
+    // setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
+    // setTimeout(()=>{mapSegmentedPlayerData()}, 200000);
+    setTimeout(() => updatePlayerGameLogs(), 1000);
   // }) 
 })()
 
@@ -123,15 +130,14 @@ rule.second = 48;
 
 // if (process.env.NODE_ENV !== 'production') {
 //   setInterval(async () => {
-//     await fetchDailyGameProps();
-//   }, 8000)
+//     await fetchDailyGameProps(SportsbookName.Betsson);
+//   }, 20000)
 // }
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
-  // completedGames = await getCompletedGameGids(testToday); // UPDATE
-  activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD')); // UPDATE
-  // activeGames = await getActiveGames(testToday); // UPDATE
+  activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD'));
+  // activeGames = await getActiveGames('2024-11-18'); // UPDATE
 }, 10000)
 
 // This function pulls in odds
@@ -160,7 +166,7 @@ router.get("/todayGameStatus", (req, res) => {
 router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
   const gid = req.params.gid;
   try {
-    await PropsController.deleteDuplicateProps(gid);
+    await deleteDuplicateProps(gid);
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating bovada url for ', gid, ' is ', e);
@@ -168,10 +174,11 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
   }
 })
 
-router.post("/api/updateBovadaUrl", async (req, res, next) => {
-  const { gid, url } = req.body;
+router.post("/api/updateSportsbookUrl", async (req, res, next) => {
+  const { gid, sportsbook, url } = req.body;
+  const sportsbookField = sportsbook === SportsbookName.Bovada ? 'bovada_url' : 'betsson_url';
   try {
-    await knex("schedule").where({gid: gid}).update({bovada_url: url});
+    await knex("schedule").where({gid: gid}).update(sportsbookField, url);
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating bovada url for ', gid, ' is ', e);
@@ -181,6 +188,7 @@ router.post("/api/updateBovadaUrl", async (req, res, next) => {
 
 router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
   const pid = req.params.pid;
+  const season = getCurrentSeasonStartYearInt();
 
   const emptyBoxScore = {
     min: 0,
@@ -201,19 +209,21 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
   const mappedData = await knex("player_data as pd")
     .innerJoin("teams as t", "pd.team_id", "=", "t.tid")
-    .where({player_id: pid})
+    .where({player_id: pid, season})
     .select("t.color", "t.color_2", "pd.*");
 
   const gameStints = await knex("player_game_stints as pgs")
     .innerJoin("schedule as s", "pgs.gid", "=", "s.gid")
     .where('pgs.player_id', pid)
     .where('pgs.gdte', '>', '2021-10-10')
+    .where({season })
     .orderBy('pgs.gdte', 'desc')
     .select('s.*', "pgs.game_stints");
 
   const boxScoresByQuarter = await knex("player_boxscores_by_q as pbs")
     .innerJoin("schedule as s", "pbs.gid", "=", "s.gid")
     .where('pbs.player_id', pid)
+    .where({ season })
     .orderBy('s.gdte', 'desc')
     .select('s.gdte', 's.h', 's.v', "pbs.*");
 
@@ -244,6 +254,7 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 router.get('/api/fetchPlayerProps', async (req, res, next) => {
   // console.log('player props being fetched from server');
   const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
+  // const today = '2024-11-18'; // REVERT
   const dailyProps = await knex("player_props").where({gdte: today});
   res.send(dailyProps);
 })
@@ -266,6 +277,7 @@ setInterval(() => {
 
 router.get("/api/fetchDailyBoxScores", async (req, res) => {
   const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
+  // const today = '2024-11-18'; // REVERT
   const todaysGames = await getTodaysGames(today);
   const todayGids = todaysGames.map(game => game.gid);
   const completedGames = await Db.BoxScores()
@@ -305,11 +317,8 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
         const poss = calcGamePoss(homeTeam.statistics, awayTeam.statistics);
         const totalsObj = compileGameStats(homeTeam.statistics, awayTeam.statistics, poss, period, gameSecs);
   
-        console.log('gameStatusText is ', gameStatusText); // "Half" when game at half
-
-        const gameOver = gameStatusText === 'Final';
+        // console.log('gameStatusText is ', gameStatusText); // "Half" when game at half
         const isEndOfPeriod = fullClock === '00:00:00';
-  
         const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
         const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
         const playerStats = [ ...hPlayerStats, ...vPlayerStats];
@@ -351,9 +360,11 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
 // UPDATE THIS TO ONLY SEND POSTSEASON IF IN POSTSEASON! 
 // ALSO UPDATE FE TO ONLY DISPLAY POSTSEASON BUTTON IF IN POSTSEASON
 router.get("/api/getPlayerMetadata", async (req, res, next) => {
+  const season = getCurrentSeasonStartYearInt();
   const players = await knex("player_data")
+    .where({ season })
     .orderBy('min_full', 'desc')
-    .select('player_id', 'player_name', 'team_abbreviation', 'team_id', 'min_full', 'net_rtg_full', 
+    .select('player_id', 'player_name', 'team_abbreviation', 'team_id', 'min_full', 'net_rtg_full', 'gp_full', 'gp_l5',
     'min_l5', 'ppg_full', 'ppg_l5', 'rpg_full', 'rpg_l5', 'apg_full', 'apg_l5', 'spg_full',
     'spg_l5', 'bpg_full', 'bpg_l5', '3pg_full', '3pg_l5', '3pa_full', '3pa_l5', 'topg_full', 'topg_l5', 'ppg_3q_full', 
     'ppg_3q_l5', 'rpg_3q_full', 'rpg_3q_l5', 'apg_3q_full', 'apg_3q_l5', 'spg_3q_full', 'spg_3q_l5',
@@ -362,10 +373,11 @@ router.get("/api/getPlayerMetadata", async (req, res, next) => {
     'bpg_4q_full', 'bpg_4q_l5', '3pg_4q_full', '3pg_4q_l5', '3pa_4q_full', '3pa_4q_l5', 'topg_4q_full', 'topg_4q_l5', 'min_4q_full', 'min_4q_l5',
     'fgm_full', 'fgm_l5', 'fgm_3q_full', 'fgm_3q_l5', 'fgm_4q_full', 'fgm_4q_l5', 'fga_full', 'fga_l5', 'fga_3q_full', 'fga_3q_l5', 'fga_4q_full', 'fga_4q_l5',
     'ftm_full', 'ftm_l5', 'ftm_3q_full', 'ftm_3q_l5', 'ftm_4q_full', 'ftm_4q_l5', 'fta_full', 'fta_l5', 'fta_3q_full', 'fta_3q_l5', 'fta_4q_full', 'fta_4q_l5',
-    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5', 'min_post', 'fgm_post', 'fga_post', '3pg_post', '3pa_post', 'ftm_post', 'fta_post',
-    'topg_post', 'ppg_post', 'rpg_post', 'apg_post', 'spg_post', 'bpg_post', 'min_3q_post', 'fgm_3q_post', 'fga_3q_post', '3pg_3q_post', '3pa_3q_post', 'ftm_3q_post', 
-    'fta_3q_post', 'topg_3q_post', 'ppg_3q_post', 'rpg_3q_post', 'apg_3q_post', 'spg_3q_post', 'bpg_3q_post', 'min_4q_post', 'fgm_4q_post', 'fga_4q_post', '3pg_4q_post', 
-    '3pa_4q_post', 'ftm_4q_post', 'fta_4q_post', 'topg_4q_post', 'ppg_4q_post', 'rpg_4q_post', 'apg_4q_post', 'spg_4q_post', 'bpg_4q_post');
+    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5');
+    // 'min_post', 'fgm_post', 'fga_post', '3pg_post', '3pa_post', 'ftm_post', 'fta_post',
+    // 'topg_post', 'ppg_post', 'rpg_post', 'apg_post', 'spg_post', 'bpg_post', 'min_3q_post', 'fgm_3q_post', 'fga_3q_post', '3pg_3q_post', '3pa_3q_post', 'ftm_3q_post', 
+    // 'fta_3q_post', 'topg_3q_post', 'ppg_3q_post', 'rpg_3q_post', 'apg_3q_post', 'spg_3q_post', 'bpg_3q_post', 'min_4q_post', 'fgm_4q_post', 'fga_4q_post', '3pg_4q_post', 
+    // '3pa_4q_post', 'ftm_4q_post', 'fta_4q_post', 'topg_4q_post', 'ppg_4q_post', 'rpg_4q_post', 'apg_4q_post', 'spg_4q_post', 'bpg_4q_post');
 
   res.send({players});
 })
@@ -397,7 +409,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
   }
   
   query
-    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url')
+    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url', 's.betsson_url')
     .orderBy('s.etm')
     .then(async (games) => {
       // const teamStats = await knex("teams_full_base");

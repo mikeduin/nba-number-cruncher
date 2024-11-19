@@ -61,6 +61,7 @@ export const mapFullPlayerData = () => {
       "fga",
       "ftm",
       "fta",
+      "usg_pct",
       "min_3q",
       "fg3m_3q",
       "fg3a_3q",
@@ -115,6 +116,7 @@ export const mapFullPlayerData = () => {
               'ftm_full': player.ftm,
               'fta_full': player.fta,
               topg_full: player.tov,
+              usg_full: player.usg_pct,
               ppg_3q_full: player.pts_3q,
               rpg_3q_full: player.reb_3q,
               apg_3q_full: player.ast_3q,
@@ -168,6 +170,7 @@ export const mapFullPlayerData = () => {
               'ftm_full': player.ftm,
               'fta_full': player.fta,
               topg_full: player.tov,
+              usg_full: player.usg_pct,
               ppg_3q_full: player.pts_3q,
               rpg_3q_full: player.reb_3q,
               apg_3q_full: player.ast_3q,
@@ -273,6 +276,7 @@ export const mapSegmentedPlayerData = () => {
   knex("players_l5")
     .where({ season })
     .select("player_id",
+      "player_name",
       "gp",
       "min",
       "off_rating",
@@ -291,6 +295,7 @@ export const mapSegmentedPlayerData = () => {
       "fga",
       "ftm",
       "fta",
+      "usg_pct",
       "min_3q",
       "fg3m_3q",
       "fg3a_3q",
@@ -319,93 +324,101 @@ export const mapSegmentedPlayerData = () => {
       "pts_4q")
     .then(players => {
       players.forEach(player => {
-        knex("player_data").where({player_id: player.player_id, season}).update({
-          gp_l5: player.gp,
-          min_l5: player.min,
-          net_rtg_l5: player.net_rating,
-          off_rtg_l5: player.off_rating,
-          def_rtg_l5: player.def_rating,
-          pace_l5: player.pace,
-          ppg_l5: player.pts,
-          rpg_l5: player.reb,
-          apg_l5: player.ast,
-          spg_l5: player.stl,
-          bpg_l5: player.blk,
-          '3pg_l5': player.fg3m,
-          '3pa_l5': player.fg3a,
-          'fgm_l5': player.fgm,
-          'fga_l5': player.fga,
-          'ftm_l5': player.ftm,
-          'fta_l5': player.fta,
-          topg_l5: player.tov,
-          ppg_3q_l5: player.pts_3q,
-          rpg_3q_l5: player.reb_3q,
-          apg_3q_l5: player.ast_3q,
-          spg_3q_l5: player.stl_3q,
-          bpg_3q_l5: player.blk_3q,
-          '3pg_3q_l5': player.fg3m_3q,
-          '3pa_3q_l5': player.fg3a_3q,
-          'fgm_3q_l5': player.fgm_3q,
-          'fga_3q_l5': player.fga_3q,
-          'ftm_3q_l5': player.ftm_3q,
-          'fta_3q_l5': player.fta_3q,
-          topg_3q_l5: player.tov_3q,
-          min_3q_l5: player.min_3q,
-          ppg_4q_l5: player.pts_4q,
-          rpg_4q_l5: player.reb_4q,
-          apg_4q_l5: player.ast_4q,
-          spg_4q_l5: player.stl_4q,
-          bpg_4q_l5: player.blk_4q,
-          '3pg_4q_l5': player.fg3m_4q,
-          '3pa_4q_l5': player.fg3a_4q,
-          'fgm_4q_l5': player.fgm_4q,
-          'fga_4q_l5': player.fga_4q,
-          'ftm_4q_l5': player.ftm_4q,
-          'fta_4q_l5': player.fta_4q,
-          topg_4q_l5: player.tov_4q,
-          min_4q_l5: player.min_4q,
-          updated_at: new Date()
-        }, '*').then(updated => {
-          console.log(updated[0].player_name, ' updated for l5 in player data');
-        })
+        if (player.player_name) {
+          knex("player_data").where({player_id: player.player_id, season}).update({
+            gp_l5: player.gp,
+            min_l5: player.min,
+            net_rtg_l5: player.net_rating,
+            off_rtg_l5: player.off_rating,
+            def_rtg_l5: player.def_rating,
+            pace_l5: player.pace,
+            ppg_l5: player.pts,
+            rpg_l5: player.reb,
+            apg_l5: player.ast,
+            spg_l5: player.stl,
+            bpg_l5: player.blk,
+            '3pg_l5': player.fg3m,
+            '3pa_l5': player.fg3a,
+            'fgm_l5': player.fgm,
+            'fga_l5': player.fga,
+            'ftm_l5': player.ftm,
+            'fta_l5': player.fta,
+            topg_l5: player.tov,
+            'usg_l5': player.usg_pct,
+            ppg_3q_l5: player.pts_3q,
+            rpg_3q_l5: player.reb_3q,
+            apg_3q_l5: player.ast_3q,
+            spg_3q_l5: player.stl_3q,
+            bpg_3q_l5: player.blk_3q,
+            '3pg_3q_l5': player.fg3m_3q,
+            '3pa_3q_l5': player.fg3a_3q,
+            'fgm_3q_l5': player.fgm_3q,
+            'fga_3q_l5': player.fga_3q,
+            'ftm_3q_l5': player.ftm_3q,
+            'fta_3q_l5': player.fta_3q,
+            topg_3q_l5: player.tov_3q,
+            min_3q_l5: player.min_3q,
+            ppg_4q_l5: player.pts_4q,
+            rpg_4q_l5: player.reb_4q,
+            apg_4q_l5: player.ast_4q,
+            spg_4q_l5: player.stl_4q,
+            bpg_4q_l5: player.blk_4q,
+            '3pg_4q_l5': player.fg3m_4q,
+            '3pa_4q_l5': player.fg3a_4q,
+            'fgm_4q_l5': player.fgm_4q,
+            'fga_4q_l5': player.fga_4q,
+            'ftm_4q_l5': player.ftm_4q,
+            'fta_4q_l5': player.fta_4q,
+            topg_4q_l5: player.tov_4q,
+            min_4q_l5: player.min_4q,
+            updated_at: new Date()
+          }, '*').then(updated => {
+            console.log(updated[0].player_name, ' updated for l5 in player data');
+          })
+        }
       })
     });
 
   knex("players_l10")
     .where({ season })
-    .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+    .select("player_id", "player_name", "gp", "min", "off_rating", "def_rating", "net_rating", "pace", "usg_pct")
     .then(players => {
       players.forEach(player => {
-        knex("player_data").where({player_id: player.player_id, season}).update({
-          gp_l10: player.gp,
-          min_l10: player.min,
-          net_rtg_l10: player.net_rating,
-          off_rtg_l10: player.off_rating,
-          def_rtg_l10: player.def_rating,
-          pace_l10: player.pace,
-          updated_at: new Date()
-        }, '*').then(updated => {
-          console.log(updated[0].player_name, ' updated for l10 in player data');
-        })
+        if (player.player_name) {
+          knex("player_data").where({player_id: player.player_id, season}).update({
+            gp_l10: player.gp,
+            min_l10: player.min,
+            usg_l10: player.usg_pct,
+            net_rtg_l10: player.net_rating,
+            off_rtg_l10: player.off_rating,
+            def_rtg_l10: player.def_rating,
+            pace_l10: player.pace,
+            updated_at: new Date()
+          }, '*').then(updated => {
+            console.log(updated[0].player_name, ' updated for l10 in player data');
+          })
+        }
       })
     });
 
     knex("players_l15")
       .where({ season })
-      .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
+      .select("player_id", "player_name", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
       .then(players => {
         players.forEach(player => {
-          knex("player_data").where({player_id: player.player_id, season}).update({
-            gp_l15: player.gp,
-            min_l15: player.min,
-            net_rtg_l15: player.net_rating,
-            off_rtg_l15: player.off_rating,
-            def_rtg_l15: player.def_rating,
-            pace_l15: player.pace,
-            updated_at: new Date()
-          }, '*').then(updated => {
-            console.log(updated[0].player_name, ' updated for l15 in player data');
-          })
+          if (player.player_name) {
+            knex("player_data").where({player_id: player.player_id, season}).update({
+              gp_l15: player.gp,
+              min_l15: player.min,
+              net_rtg_l15: player.net_rating,
+              off_rtg_l15: player.off_rating,
+              def_rtg_l15: player.def_rating,
+              pace_l15: player.pace,
+              updated_at: new Date()
+            }, '*').then(updated => {
+              console.log(updated[0].player_name, ' updated for l15 in player data');
+            })
+          }
         })
       });
 };

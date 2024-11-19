@@ -9,11 +9,12 @@ import {
   formTeamAdvancedStatsBuild,
   formTeamBaseStatsBuild,
 } from "../utils";
+import { NbaApiMeasureType, NbaApiSeasonType } from "../types";
 
 export const fetchLineupParams = (games, lineup) => {
   return {
     LastNGames: games,
-    MeasureType: "Advanced",
+    MeasureType: NbaApiMeasureType.Advanced,
     Month: 0,
     OpponentTeamID: 0,
     PaceAdjust: "N",
@@ -22,7 +23,7 @@ export const fetchLineupParams = (games, lineup) => {
     Period: 0,
     Rank: "N",
     Season: getCurrentSeasonDisplayYear(),
-    SeasonType: "Regular Season",
+    SeasonType: NbaApiSeasonType.RegularSeason,
     StarterBench: lineup
   };
 }; 
@@ -74,11 +75,31 @@ export const addGameStints = async () => {
 
 // },
 
+export const updatePlayerGameLogsInDb = async (playerId, mappedGameLogs) => {
+    const season = getCurrentSeasonStartYearInt();
+    const checkExist = await knex('player_data').where({ player_id: playerId, season });
+    if (!checkExist.length) {
+      console.log(`player ${playerId} not found in player_data table, not updating game logs`);
+      return;
+    };
+    try {
+      const gameLogsInsert = await knex("player_data")
+        .where({ player_id: playerId, season })
+        .update({ 
+          game_logs_l10: mappedGameLogs,
+          updated_at: new Date(),
+        }, '*');
+      console.log(`game logs updated for ${gameLogsInsert[0].player_name}`);
+    } catch (e) {
+      console.log(`error updating game logs for player ${playerId} in player_data table is ${e}`);
+    }   
+}
+
 export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonType) => {
   const season = getCurrentSeasonStartYearInt();
   arrayData.forEach(async player => {
     const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')], season });
-    if (!checkExist.length) {
+    if (!checkExist.length && player.player_name) {
       try {
         const insert = await knex(db)
           .insert(
@@ -109,7 +130,7 @@ export const updatePlayerDbAdvancedStats = (db, arrayData, headers) => {
   const season = getCurrentSeasonStartYearInt();
   arrayData.forEach(async player => {
     const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')], season });
-    if (!checkExist.length) {
+    if (!checkExist.length && player.player_name) {
       try {
         const insert = await knex(db)
           .insert(

@@ -40,7 +40,7 @@ export const fetchDailyGameProps = async (sportsbook: SportsbookName) => {
   const sportsbookUrl = sportsbook === SportsbookName.Bovada ? 'bovada_url' : 'betsson_url';
 
   const dailyGames = await Schedule()
-    .where({gdte: today})
+    .where({gdte: today, fetchProps: true})
     .whereNot({stt: 'Final'})
     .select('gid', 'etm', 'h', 'v', sportsbookUrl);
   const dailyProps = await PlayerProps().where({gdte: today});

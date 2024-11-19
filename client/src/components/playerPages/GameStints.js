@@ -39,6 +39,7 @@ const GameStints = ({ player }) => {
   return (
     <VictoryChart
       theme={VictoryTheme.material}
+      // height={"auto"} // doesn't work
       padding={{
         right: 15,
         top: 15,
@@ -74,7 +75,7 @@ const GameStints = ({ player }) => {
         }
         style={{
           tickLabels: {
-            fontSize: 3,
+            fontSize: 6,
             padding: 3
           }
         }}
