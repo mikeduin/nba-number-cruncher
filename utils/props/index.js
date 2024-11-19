@@ -1,3 +1,4 @@
 export * from './formBovadaUrl';
-export * from './getPlayerPropMap';
+export * from './getPlayerPropsMap';
+export * from './getReadablePrice';
 export * from './parseBovadaLines';

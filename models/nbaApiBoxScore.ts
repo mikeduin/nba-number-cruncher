@@ -25,14 +25,20 @@ export interface NbaBoxScoreTeamAdvanced extends NbaBoxScoreTeam {
 }
 
 export interface NbaBoxScorePlayer {
+  status?: string; // live -- "ACTIVE"
+  order?: number; // live -- 1, 2, etc. (sequential)
   personId: number;
+  jerseyNum: string;
+  position: string; // "F"
+  starter?: string; // live -- check if postgame
+  oncourt?: string; // live -- "0"
+  played?: string; // live -- "0"
+  name?: string; // live -- "Brandon Miller" -- check if postgame
+  nameI: string; // "B. Miller"
   firstName: string; // "Brandon"
   familyName: string; // "Miller"
-  nameI: string; // "B. Miller"
-  playerSlug: string; // "brandon-miller"
-  position: string; // "F"
-  comment: string; // ""
-  jerseyNum: string; // ""
+  playerSlug?: string; // "brandon-miller" -- NOT in live
+  comment?: string; // "" -- NOT in live
 }
 
 export interface NbaBoxScorePlayerTraditional extends NbaBoxScorePlayer {
@@ -44,26 +50,39 @@ export interface NbaBoxScorePlayerAdvanced extends NbaBoxScorePlayer {
 }
 
 export interface NbaBoxScoreStatsTraditional {
-  minutes: string; // "9:26" (... but where does the 'PT' come from sometimes?)
-  fieldGoalsMade: number;
-  fieldGoalsAttempted: number;
-  fieldGoalsPercentage: number;
-  threePointersMade: number;
-  threePointersAttempted: number;
-  threePointersPercentage: number;
-  freeThrowsMade: number;
-  freeThrowsAttempted: number;
-  freeThrowsPercentage: number;
-  reboundsOffensive: number;
-  reboundsDefensive: number;
-  reboundsTotal: number;
   assists: number;
-  steals: number;
   blocks: number;
-  turnovers: number;
+  blocksReceived?: number;
+  fieldGoalsAttempted: number;
+  fieldGoalsMade: number;
+  fieldGoalsPercentage: number;
+  foulsOffensive?: number;
+  foulsDrawn?: number;
   foulsPersonal: number;
-  points: number;
+  foulsTechnical?: number;
+  freeThrowsAttempted: number;
+  freeThrowsMade: number;
+  freeThrowsPercentage: number;
+  minus?: number; // for plus minus, so points against
+  minutes: string; // "9:26" (postgame I think?) // "PT27M05.97S" in-game
+  minutesCalculated?: string; // "PT27M" in-game
+  plus?: number; // for plus minus, so points for
   plusMinusPoints: number;
+  points: number;
+  pointsFastBreak?: number;
+  pointsInThePaints?: number;
+  pointsSecondChance?: number;
+  reboundsDefensive: number;
+  reboundsOffensive: number;
+  reboundsTotal: number;
+  steals: number;
+  threePointersAttempted: number;
+  threePointersMade: number;
+  threePointersPercentage: number;
+  turnovers: number;
+  twoPointersAttempted?: number;
+  twoPointersMade?: number;
+  twoPointersPercentage?: number;
 }
 
 export interface NbaBoxScoreStatsAdvanced {

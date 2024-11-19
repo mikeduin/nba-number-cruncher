@@ -1,13 +1,16 @@
 import axios from 'axios';
 import knex from '../db/knex.js';
 import _ from 'lodash';
-import { checkPeriodStart, getGameSecs, startPeriodSec } from '../utils/boxScores/gameTimeAndClock.js';
+import { getCurrentSeasonStartYearInt, checkPeriodStart, getGameSecs, startPeriodSec } from '../utils';
 
 function Schedule() {return knex('schedule')}
 
 export const buildSubData = async (gid) => {
-  const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/scores/pbp/00${gid}_full_pbp.json`;
-  const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/2023/scores/gamedetail/00${gid}_gamedetail.json`;
+  const season = getCurrentSeasonStartYearInt();
+
+  const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${season}/scores/pbp/00${gid}_full_pbp.json`;
+  const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${season}/scores/gamedetail/00${gid}_gamedetail.json`;
+
 
   const gDetail = await axios.get(gameDetailUrl);
   const gcode = gDetail.data.g.gcode;
@@ -131,18 +134,22 @@ export const buildSubData = async (gid) => {
 
   // Add final checkouts at end of game for players with open last arrays
     allPlayers.forEach(player => {
-      // First look for players whose last time array has no check-out
-      if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length == 1) {
-        // Then, starting with the last period, and moving backwards through the game
-        for (var i = periodPlayers.length-1; i > -1; i--) {
-          // If that player's player ID is found in the last period
-          if (periodPlayers[i].indexOf(player) !== -1) {
-            // Push the start value of the next period in as their last exit time
-            // Note that in the case of the last period of game, this value is equivalent to end of game
-            gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
-            break;
-          };
+      try {
+        // First look for players whose last time array has no check-out
+        if (gameStints[`pid_${player}`][(gameStints[`pid_${player}`]?.length)-1].length == 1) {
+          // Then, starting with the last period, and moving backwards through the game
+          for (var i = periodPlayers.length-1; i > -1; i--) {
+            // If that player's player ID is found in the last period
+            if (periodPlayers[i].indexOf(player) !== -1) {
+              // Push the start value of the next period in as their last exit time
+              // Note that in the case of the last period of game, this value is equivalent to end of game
+              gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].push(startPeriodSec(i+1));
+              break;
+            };
+          }
         }
+      } catch (e) {
+        console.log('error adding final checkouts for player ', player, ' in game ', gid, ' is ', e);
       }
     });
 
@@ -156,6 +163,7 @@ export const buildSubData = async (gid) => {
       gcode: gcode,
       gdte: gdte,
       game_stints: stints,
+      season,
       updated_at: new Date()
     }, '*').then(inserted => {
       console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
@@ -172,6 +180,7 @@ export const buildSubData = async (gid) => {
       gcode: gcode,
       gdte: gdte,
       game_stints: stints,
+      season,
       updated_at: new Date()
     }, '*').then(inserted => {
       console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);

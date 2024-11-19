@@ -5,8 +5,6 @@ export const calcFgPct = (fgm, fga) => {
 };
 
 export const calcUsage = (player: UsageStats, team: UsageStats) => {
-  console.log('stats in calcUsage:', player, team);
-  console.log('calcUsage returning ', 100 * ((player.fga + (0.44 * player.fta) + player.tov) * (team.min / 5)) / ( player.min * (team.fga + (0.44 * team.fta) + team.tov)));
   return (
     100 * ((player.fga + (0.44 * player.fta) + player.tov) * (team.min / 5)) / ( player.min * (team.fga + (0.44 * team.fta) + team.tov))
   )

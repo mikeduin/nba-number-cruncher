@@ -160,7 +160,7 @@ export const convertPlayingTime = (timeStr: string): string => {
   const match = timeStr.match(/PT(\d+)M(\d+\.\d+)S/);
   if (!match) {
     // throw new Error('Invalid time format');
-    console.log('invalid time format is ', timeStr);
+    // console.log('invalid time format is ', timeStr);
     return '0:00';
   }
 

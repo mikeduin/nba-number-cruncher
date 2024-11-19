@@ -1,3 +1,5 @@
+import { getCurrentSeasonStartYearInt } from "../../utils";
+
 const formKey = (label, period) => {
   switch (period) {
     case 0:
@@ -29,6 +31,7 @@ export const formPlayerBaseStatsBuild = (headers, player, period, seasonType) =>
     [`${formKey('stl', period)}`]: player[headers.indexOf('STL')],
     [`${formKey('blk', period)}`]: player[headers.indexOf('BLK')],
     [`${formKey('pts', period)}`]: player[headers.indexOf('PTS')],
+    season: getCurrentSeasonStartYearInt(),
     updated_at: new Date()
   }
 

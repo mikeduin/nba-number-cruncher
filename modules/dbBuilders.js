@@ -1,7 +1,7 @@
 import knex from "../db/knex.js";
 import moment from "moment";
 import _ from 'lodash';
-import { getCurrentSeasonDisplayYear } from "../utils";
+import { getCurrentSeasonDisplayYear, getCurrentSeasonStartYearInt } from "../utils";
 import { buildSubData } from "./buildGameStints.js";
 import {
   formPlayerAdvancedStatsBuild,
@@ -42,11 +42,13 @@ export const buildGameStintsDb = async () => {
 }; 
 
 export const addGameStints = async () => {
+  const season = getCurrentSeasonStartYearInt();
+
   // This is the in-season function to add game stints each night after games conclude
   let games = await knex("schedule")
     .pluck("gid")
     .whereNotNull("gweek")
-    .where({ stt: "Final" })
+    .where({ stt: "Final", season_year: season })
     .whereNull("game_stints");
 
   games.forEach(game => {
@@ -73,8 +75,9 @@ export const addGameStints = async () => {
 // },
 
 export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonType) => {
+  const season = getCurrentSeasonStartYearInt();
   arrayData.forEach(async player => {
-    const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')] });
+    const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')], season });
     if (!checkExist.length) {
       try {
         const insert = await knex(db)
@@ -90,7 +93,7 @@ export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonTy
     } else {
       try {
         const update = await knex(db)
-          .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
+          .where({ player_id: player[headers.indexOf('PLAYER_ID')], season })
           .update({
             ...formPlayerBaseStatsBuild(headers, player, period, seasonType),
           }, '*');
@@ -103,8 +106,9 @@ export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonTy
 };
 
 export const updatePlayerDbAdvancedStats = (db, arrayData, headers) => {
+  const season = getCurrentSeasonStartYearInt();
   arrayData.forEach(async player => {
-    const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')] });
+    const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')], season });
     if (!checkExist.length) {
       try {
         const insert = await knex(db)
@@ -122,7 +126,7 @@ export const updatePlayerDbAdvancedStats = (db, arrayData, headers) => {
     } else {
       try {
         const update = await knex(db)
-          .where({ player_id: player[headers.indexOf('PLAYER_ID')] })
+          .where({ player_id: player[headers.indexOf('PLAYER_ID')], season })
           .update({
             ...formPlayerAdvancedStatsBuild(headers, player),
           }, '*');
@@ -201,6 +205,7 @@ export const updateTeamDbAdvancedStats = (db, arrayData, headers) => {
 };
 
 export const insertPlayerBoxScoresByPeriod = (gid, period, playerStats, teamAbb) => {
+  const season = getCurrentSeasonStartYearInt();
   playerStats.forEach(async player => {
     const { player_id, player_name, min, pts, reb, ast, stl, blk, tov, fg3m, fg3a, fgm, fga, ftm, fta, fouls } = player;
     await knex('player_boxscores_by_q')
@@ -224,6 +229,7 @@ export const insertPlayerBoxScoresByPeriod = (gid, period, playerStats, teamAbb)
         ftm,
         fta,
         fouls,
+        season,
         updated_at: new Date(),
         created_at: new Date()
       });

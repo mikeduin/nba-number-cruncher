@@ -1,4 +1,4 @@
-const parseBovadaLines = (inputString) => {
+export const parseBovadaLines = (inputString) => {
     // Define a regular expression to capture the three parts
     const regex = /([^-]+) - ([^(]+) \(([^)]+)\)/;
 
@@ -23,5 +23,3 @@ const parseBovadaLines = (inputString) => {
       return null;
     }
 }
-
-export default parseBovadaLines;

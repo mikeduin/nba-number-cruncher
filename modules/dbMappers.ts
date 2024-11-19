@@ -1,22 +1,43 @@
 import knex from "../db/knex.js";
+import { SportsbookName } from "../types";
+import { getCurrentSeasonStartYearInt } from "../utils";
 
 const marketMappers = {
-  'Total Points': 'pts',
-  'Total Rebounds': 'reb',
-  'Total Assists': 'ast',
-  'Total Steals': 'stl',
-  'Total Blocks': 'blk',
-  'Total Turnovers': 'tov',
-  'Total Made 3 Points Shots': 'fg3m',
-  'Total Points, Rebounds and Assists': 'pts+reb+ast',
-  'Total Points and Rebounds': 'pts+reb',
-  'Total Points and Assists': 'pts+ast',
-  'Total Rebounds and Assists': 'reb+ast'
+  Bovada: {
+    'Total Points': 'pts', // Bovada + Betsson
+    'Total Rebounds': 'reb', // Bovada + Betsson
+    'Total Assists': 'ast', // Bovada + Betsson
+    'Total Steals': 'stl',
+    'Total Blocks': 'blk',
+    'Total Turnovers': 'tov',
+    'Total Made 3 Points Shots': 'fg3m', // Bovada
+    'Total Points, Rebounds and Assists': 'pts+reb+ast', // Bovada
+    'Total Points and Rebounds': 'pts+reb', // Bovada
+    'Total Points and Assists': 'pts+ast', // Bovada
+    'Total Rebounds and Assists': 'reb+ast', // Bovada
+  },
+  Betsson: {
+    'Total Points': 'pts', // Bovada + Betsson
+    'Total Rebounds': 'reb', // Bovada + Betsson
+    'Total Assists': 'ast', // Bovada + Betsson
+    "Total Three's Made": 'fg3m', // Betsson
+    'Total Points + Assists + Rebounds': 'pts+reb+ast', // Betsson
+    'Total Points + Rebounds': 'pts+reb', // Betsson
+    'Total Points + Assists': 'pts+ast', // Betsson
+    'Total Assists + Rebounds': 'reb+ast', // Betsson
+  }
+}
+
+export const propMarketMappers = (sportsbook: SportsbookName) => marketMappers[sportsbook];
+export const mapSportsbookMarketToDbColumn = (sportsbook: SportsbookName, market: string) => {
+  if (Object.keys(marketMappers[sportsbook]).includes(market)) {
+    return marketMappers[sportsbook][market];
+  }
 };
-export const propMarketMappers = () => marketMappers;
-export const mapBovadaMarketToDbColumn = (market) => marketMappers[market];
 export const mapFullPlayerData = () => {
+  const season = getCurrentSeasonStartYearInt();
   knex("players_full")
+    .where({ season })
     .select(
       "player_id",
       "player_name",
@@ -69,7 +90,7 @@ export const mapFullPlayerData = () => {
     )
     .then(players => {
       players.forEach(player => {
-        knex("player_data").where({player_id: player.player_id}).then(res => {
+        knex("player_data").where({player_id: player.player_id, season}).then(res => {
           if (!res[0]) {
             knex("player_data").insert({
               player_id: player.player_id,
@@ -120,12 +141,13 @@ export const mapFullPlayerData = () => {
               'fta_4q_full': player.fta_4q,
               topg_4q_full: player.tov_4q,
               min_4q_full: player.min_4q,
+              season,
               updated_at: new Date()
             }, '*').then(updated => {
               console.log(updated[0].player_name, ' added to player data');
             })
           } else {
-            knex("player_data").where({player_id: player.player_id}).update({
+            knex("player_data").where({player_id: player.player_id, season}).update({
               team_id: player.team_id,
               team_abbreviation: player.team_abbreviation,
               gp_full: player.gp,
@@ -183,11 +205,12 @@ export const mapFullPlayerData = () => {
 };
 
 export const mapPlayerPlayoffData = async () => {
-  const playoffData = await knex("players_playoffs");
+  const season = getCurrentSeasonStartYearInt();
+  const playoffData = await knex("players_playoffs").where({ season });
   playoffData.forEach(player => {
     // console.log('player is ', player);
     try {
-      knex("player_data").where({player_id: player.player_id}).update({
+      knex("player_data").where({player_id: player.player_id, season}).update({
         gp_post: player.gp,
         min_post: player.min,
         'fgm_post': player.fgm,
@@ -246,7 +269,9 @@ export const mapPlayerPlayoffData = async () => {
 };
 
 export const mapSegmentedPlayerData = () => {
+  const season = getCurrentSeasonStartYearInt();
   knex("players_l5")
+    .where({ season })
     .select("player_id",
       "gp",
       "min",
@@ -294,7 +319,7 @@ export const mapSegmentedPlayerData = () => {
       "pts_4q")
     .then(players => {
       players.forEach(player => {
-        knex("player_data").where({player_id: player.player_id}).update({
+        knex("player_data").where({player_id: player.player_id, season}).update({
           gp_l5: player.gp,
           min_l5: player.min,
           net_rtg_l5: player.net_rating,
@@ -347,10 +372,11 @@ export const mapSegmentedPlayerData = () => {
     });
 
   knex("players_l10")
+    .where({ season })
     .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
     .then(players => {
       players.forEach(player => {
-        knex("player_data").where({player_id: player.player_id}).update({
+        knex("player_data").where({player_id: player.player_id, season}).update({
           gp_l10: player.gp,
           min_l10: player.min,
           net_rtg_l10: player.net_rating,
@@ -365,10 +391,11 @@ export const mapSegmentedPlayerData = () => {
     });
 
     knex("players_l15")
+      .where({ season })
       .select("player_id", "gp", "min", "off_rating", "def_rating", "net_rating", "pace")
       .then(players => {
         players.forEach(player => {
-          knex("player_data").where({player_id: player.player_id}).update({
+          knex("player_data").where({player_id: player.player_id, season}).update({
             gp_l15: player.gp,
             min_l15: player.min,
             net_rtg_l15: player.net_rating,

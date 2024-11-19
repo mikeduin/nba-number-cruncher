@@ -1,3 +1,5 @@
+import { getCurrentSeasonStartYearInt } from "../schedule";
+
 export const formPlayerAdvancedStatsBuild = (headers, player) => ({
     team_id: player[headers.indexOf('TEAM_ID')],
     team_abbreviation: player[headers.indexOf('TEAM_ABBREVIATION')],
@@ -70,5 +72,6 @@ export const formPlayerAdvancedStatsBuild = (headers, player) => ({
     fgm_pg_rank: player[headers.indexOf('FGM_PG_RANK')],
     fga_pg_rank: player[headers.indexOf('FGA_PG_RANK')],
     fg_pct_rank: player[headers.indexOf('FG_PCT_RANK')],
+    season: getCurrentSeasonStartYearInt(),
     updated_at: new Date()
 });

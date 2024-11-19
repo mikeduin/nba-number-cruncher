@@ -31,9 +31,11 @@ import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore
 import { getGameWeek, getCurrentSeasonStartYearInt, getCurrentSeasonStage, getWeekIntDateArray } from "../utils";
 import { convertIntDateToDashedDate } from "../utils";
 import { SeasonNameAbb } from "../types/Season.ts";
+import { scrapeBetsson } from "../controllers/Scraper.Controller.js";
+import { SportsbookName } from "../types/SportsbookName.ts";
 
 (async () => {
-  await fetchDailyGameProps();
+  await fetchDailyGameProps(SportsbookName.Betsson);
 })();
 
 function delay(ms) {
@@ -77,36 +79,38 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-// (async () => { 
-// // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-06-05')) {
-//     await updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(3000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
+(async () => { 
+// schedule.scheduleJob(rule, async () => {
+  // let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+  // while (moment(yesterday).isAfter('2024-10-20')) {
+  //   await updatePlayerBoxScoresByPeriod(yesterday);
+  //   await delay(3000);
+  //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  // }
+    // Team Stat Updaters
+    // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+    // setTimeout(()=>{updateStarterBuilds()}, 10000);15
+    // setTimeout(()=>{updateBenchBuilds()}, 20000);
+    // setTimeout(()=>{updateQ1Builds()}, 30000);
+    // setTimeout(()=>{updateQ2Builds()}, 40000);
+    // setTimeout(()=>{updateQ3Builds()}, 50000);
+    // setTimeout(()=>{updateQ4Builds()}, 60000);
+    // setTimeout(()=>{mapTeamNetRatings()}, 70000);
+    // setTimeout(()=>{mapTeamPace()}, 80000);
 
-//     setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-//     setTimeout(()=>{updateStarterBuilds()}, 10000);15
-//     setTimeout(()=>{updateBenchBuilds()}, 20000);
-//     setTimeout(()=>{updateQ1Builds()}, 30000);
-//     setTimeout(()=>{updateQ2Builds()}, 40000);
-//     setTimeout(()=>{updateQ3Builds()}, 50000);
-//     setTimeout(()=>{updateQ4Builds()}, 60000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 70000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 80000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 90000);
-//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 100000);
-//     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 111000);
-//     // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-//     setTimeout(()=>{addGameStints()}, 120000);
-//     setTimeout(()=>{mapTeamNetRatings()}, 140000);
-//     setTimeout(()=>{mapTeamPace()}, 160000);
-//     setTimeout(()=>{mapFullPlayerData()}, 180000);
-//     setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
-//     setTimeout(()=>{mapSegmentedPlayerData()}, 220000);
-//   // }) 
-// })()
+    // Player Stat Updaters
+    // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 1000);
+    // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 3000);
+    // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 5000);
+    // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 7000);
+    // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+    // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+    // setTimeout(()=>{mapFullPlayerData()}, 10000);
+    // // setTimeout(()=>{addGameStints()}, 1000);
+    // // setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
+    // setTimeout(()=>{mapSegmentedPlayerData()}, 18000);
+  // }) 
+})()
 
 // (async () => {
 //   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
@@ -117,11 +121,11 @@ rule.second = 48;
 //   setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
 // })()
 
-if (process.env.NODE_ENV !== 'production') {
-  setInterval(async () => {
-    await fetchDailyGameProps();
-  }, 8000)
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   setInterval(async () => {
+//     await fetchDailyGameProps();
+//   }, 8000)
+// }
 
 // this function manages a day's active and completed games for the GambleCast
 setInterval(async () => {
