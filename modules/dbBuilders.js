@@ -97,9 +97,10 @@ export const updatePlayerGameLogsInDb = async (playerId, mappedGameLogs) => {
 
 export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonType) => {
   const season = getCurrentSeasonStartYearInt();
+  // console.log('arrayData is ', arrayData);
   arrayData.forEach(async player => {
     const checkExist = await knex(db).where({ player_id: player[headers.indexOf('PLAYER_ID')], season });
-    if (!checkExist.length && player.player_name) {
+    if (!checkExist.length) {
       try {
         const insert = await knex(db)
           .insert(
@@ -107,6 +108,7 @@ export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonTy
               ...formPlayerBaseStatsBuild(headers, player, period, seasonType),
               created_at: new Date()
             },"*");
+          // console.log('insert is ', insert);
         console.log(`${insert[0].player_name} entered into ${db} in base stats build`);
       } catch (e) {
         console.log(`error inserting player into DB for ${seasonType} stats in base stats build is ${e}`);

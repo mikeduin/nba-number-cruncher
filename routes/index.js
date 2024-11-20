@@ -95,7 +95,7 @@ rule.second = 48;
   // }
     // Team Stat Updaters
     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-    // setTimeout(()=>{updateStarterBuilds()}, 10000);15
+    // setTimeout(()=>{updateStarterBuilds()}, 10000);
     // setTimeout(()=>{updateBenchBuilds()}, 20000);
     // setTimeout(()=>{updateQ1Builds()}, 30000);
     // setTimeout(()=>{updateQ2Builds()}, 40000);
@@ -106,16 +106,16 @@ rule.second = 48;
 
     // Player Stat Updaters
     // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 1000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 3000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 5000);
-    // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 7000);
-    // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
-    // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    // setTimeout(()=>{mapFullPlayerData()}, 160000);
+    // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+    // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+    // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+    // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+    // // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+    // setTimeout(()=>{mapFullPlayerData()}, 100000);
     // setTimeout(()=>{addGameStints()}, 1000);
-    // setTimeout(()=>{mapPlayerPlayoffData()}, 200000);
-    // setTimeout(()=>{mapSegmentedPlayerData()}, 200000);
-    setTimeout(() => updatePlayerGameLogs(), 1000);
+    // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
+    // setTimeout(()=>{mapSegmentedPlayerData()}, 100000);
+    // // setTimeout(() => updatePlayerGameLogs(), 1000);
   // }) 
 })()
 
