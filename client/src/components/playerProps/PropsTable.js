@@ -37,6 +37,7 @@ const statMapper = {
   'fga': 'fga',
   'ftm': 'ftm',
   'fta': 'fta',
+  'gp': 'gp',
 }
 
 function getPlayerStat(playerStats, market, live = true, phase = null, games = 'full') {
@@ -215,24 +216,29 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
               <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
             </>}      
             <Table.Cell textAlign='center'> {livePlayerStats?.fouls} </Table.Cell>
+            {/* Season */}
+            <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'gp', false, null, timeframe)} </Table.Cell>
             <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'min', false, null, timeframe)} </Table.Cell>
             <Table.Cell style={{fontSize: 18}}> 
                 <b>{ market === 'fg3m' 
                 ? `${getPlayerStat(seasonPlayerStats, market, false, null, timeframe)} - ${getPlayerStat(seasonPlayerStats, 'fg3a', false, null, timeframe)}`
                 : getPlayerStat(seasonPlayerStats, market, false, null, timeframe) }</b> 
               </Table.Cell>
+            {/* 2H  */}
             <Table.Cell style={{fontSize: 16}}> 
               {(Math.round((getPlayerStat(seasonPlayerStats, 'min', false, '3q', timeframe) + getPlayerStat(seasonPlayerStats, 'min', false, '4q', timeframe)) * 10) / 10)}
             </Table.Cell>
             <Table.Cell style={{fontSize: 16}}> 
               <b>{(Math.round((getPlayerStat(seasonPlayerStats, market, false, '3q', timeframe) + getPlayerStat(seasonPlayerStats, market, false, '4q', timeframe)) * 10) / 10)}</b> 
             </Table.Cell>
+            {/* 3Q */}
             <Table.Cell> {getPlayerStat(seasonPlayerStats, 'min', false, '3q', timeframe)} </Table.Cell>
             <Table.Cell style={{fontSize: 16}}> <b>{getPlayerStat(seasonPlayerStats, market, false, '3q', timeframe)}</b> </Table.Cell>
             { market === 'pts' && <>
               <ShootingCell value={fga3q} percentage={fgPct3q} color={colorFga(fgPct3q)} />
               <ShootingCell value={fta3q} percentage={ftPct3q} color={colorFta(ftPct3q)} />
             </>}
+            {/* 4Q */}
             <Table.Cell> {getPlayerStat(seasonPlayerStats, 'min', false, '4q', timeframe)} </Table.Cell>
             <Table.Cell style={{fontSize: 16}}> <b>{getPlayerStat(seasonPlayerStats, market, false, '4q', timeframe)}</b> </Table.Cell>
             { market === 'pts' && <>
@@ -262,7 +268,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
             : market === 'ast' ? 4
             : 3
             } textAlign='center'> Live </Table.HeaderCell>
-          <Table.HeaderCell colSpan="2"> {timeframeText} </Table.HeaderCell>
+          <Table.HeaderCell colSpan="3" textAlign='center'> {timeframeText} </Table.HeaderCell>
           <Table.HeaderCell colSpan="2" textAlign='center' style={{backgroundColor: '#959EE7'}}> 2H </Table.HeaderCell>
           <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#C793ED'}}> Q3 </Table.HeaderCell>
           <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#E79595'}}> Q4 </Table.HeaderCell>
@@ -280,6 +286,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
           </>}
           <Table.HeaderCell> PF </Table.HeaderCell>
           {/* season */}
+          <Table.HeaderCell> GP </Table.HeaderCell>
           <Table.HeaderCell> MIN </Table.HeaderCell>
           <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
           {/* 2H */}

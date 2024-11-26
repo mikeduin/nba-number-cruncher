@@ -106,6 +106,22 @@ class PlayerProps extends React.Component {
     }
   }
 
+  updateProps = async (url) => {
+    const gid = this.props.game.gid;
+    const response = await axios.post(`/api/updateProps`, {gid});
+    if (response.status === 200) {
+      toast({
+        type: 'warning',
+        icon: 'check circle',
+        color: 'violet',
+        title: 'Props updated',
+        description: `Props have been updated for for game ${gid}`,
+        animation: 'slide down',
+        time: 3000
+      });
+    }
+  }
+
   render () {
     const { boxScore, game, playersMetadata } = this.props;
     const { activeProp, activeTimeframe, playerProps } = this.state;
@@ -130,6 +146,7 @@ class PlayerProps extends React.Component {
             <Input placeholder={game.betsson_url} style={{width: 700}} onChange={(e) => {this.setState({betssonUrl: e.target.value})}}/>
             <Button primary style={{marginLeft: 10}} onClick={() => this.updateSportsbookUrl('betsson')}>Update URL</Button>
             <Button color='red' style={{marginLeft: 10}} onClick={() => this.removeDuplicateProps()}>Remove Dups</Button>
+            <Button color='green' style={{marginLeft: 10}} onClick={() => this.updateProps()}>Update Props</Button>
           </div>
           <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
             <div style={{marginRight: 10}}><i>MARKET:</i></div>

@@ -1,7 +1,7 @@
 import { getCurrentSeasonStartYearInt } from "..";
 // import { GAME_LOGS_HEADERS } from "../../constants";
 
-const formKey = (label, period) => {
+const formKey = (label: string, period: number) => {
   switch (period) {
     case 0:
       return label;

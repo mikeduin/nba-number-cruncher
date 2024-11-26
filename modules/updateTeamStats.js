@@ -1,13 +1,11 @@
 import axios from 'axios';
 import { updateTeamDbBaseStats, updateTeamDbAdvancedStats } from "../modules/dbBuilders.js";
-import { formApiCallParams } from "../utils/nbaApi/formApiCallParams.js";
-import { requestHeaders } from "../utils/nbaApi/requestHeaders.js";
-
-const teamStatsUrl = 'https://stats.nba.com/stats/leaguedashteamstats';
+import { getStatRequestParams, requestHeaders } from "../utils";
+import { TEAM_STATS_URL } from '../constants';
 
 const updateBaseTeamBuild = (games, db, period) => {
-  axios.get(teamStatsUrl, {
-    params: formApiCallParams(games, period, "Regular Season", "Base"),
+  axios.get(TEAM_STATS_URL, {
+    params: getStatRequestParams(games, period, "Regular Season", "Base"),
     headers: requestHeaders()
   })
     .then(response => {
@@ -19,8 +17,8 @@ const updateBaseTeamBuild = (games, db, period) => {
 };
 
 const updateFullTeamBuild = (games, db, period) => {
-  axios.get(teamStatsUrl, {
-    params: formApiCallParams(games, period, "Regular Season", "Advanced"),
+  axios.get(TEAM_STATS_URL, {
+    params: getStatRequestParams(games, period, "Regular Season", "Advanced"),
     headers: requestHeaders()
   })
     .then(response => {
@@ -32,8 +30,8 @@ const updateFullTeamBuild = (games, db, period) => {
 };
 
 const updatePartialTeamBuild = (games, db, lineup) => {
-  axios.get(teamStatsUrl, {
-    params: formApiCallParams(games, 0, "Regular Season", "Advanced", lineup),
+  axios.get(TEAM_STATS_URL, {
+    params: getStatRequestParams(games, 0, "Regular Season", "Advanced", lineup),
     headers: requestHeaders()
   })
     .then(response => {

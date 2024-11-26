@@ -9,7 +9,7 @@ import cheerio from 'cheerio';
 import _ from 'lodash';
 
 import { updateFullTeamBuilds, updateStarterBuilds, updateBenchBuilds, updateQ1Builds, updateQ2Builds, updateQ3Builds, updateQ4Builds } from "../modules/updateTeamStats.js";
-import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod, updatePlayerGameLogs } from "../modules/updatePlayerStats.js";
+import { updatePlayerBaseStatBuilds, updatePlayerAdvancedStatBuilds, updatePlayerBaseStatBuildsPlayoffs, updatePlayerBoxScoresByPeriod, updatePlayerGameLogs, updatePlayerPositions } from "../modules/updatePlayerStats.js";
 import { addGameStints } from "../modules/dbBuilders.js";
 import { mapTeamNetRatings, mapTeamPace, mapFullPlayerData, mapPlayerPlayoffData, mapSegmentedPlayerData } from "../modules/dbMappers.js";
 import { fetchCurrentSeason, fetchSeasonName } from "../modules/dateFilters.js";
@@ -37,7 +37,7 @@ import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
 import { buildSchedule, getTodaysGames, getActiveGames, getCompletedGameGids } from "../controllers/Schedule.Controller.js";
 import { fetchBoxScore, getCompletedGameResponse } from "../controllers/BoxScore.Controller.js";
 import { scrapeBetsson } from "../controllers/Scraper.Controller.js";
-import { deleteDuplicateProps } from "../controllers/Props.Controller.js";
+import { deleteDuplicateProps, updateSingleGameProps } from "../controllers/Props.Controller.js";
 
 (async () => {
   // await fetchDailyGameProps(SportsbookName.Betsson);
@@ -85,53 +85,50 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-(async () => { 
-// schedule.scheduleJob(rule, async () => {
-  // let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-  // while (moment(yesterday).isAfter('2024-10-20')) {
-  //   await updatePlayerBoxScoresByPeriod(yesterday);
-  //   await delay(3000);
-  //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-  // }
-    // Team Stat Updaters
-    // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-    // setTimeout(()=>{updateStarterBuilds()}, 10000);
-    // setTimeout(()=>{updateBenchBuilds()}, 20000);
-    // setTimeout(()=>{updateQ1Builds()}, 30000);
-    // setTimeout(()=>{updateQ2Builds()}, 40000);
-    // setTimeout(()=>{updateQ3Builds()}, 50000);
-    // setTimeout(()=>{updateQ4Builds()}, 60000);
-    // setTimeout(()=>{mapTeamNetRatings()}, 70000);
-    // setTimeout(()=>{mapTeamPace()}, 80000);
+// (async () => { 
+// // schedule.scheduleJob(rule, async () => {
+//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+//   while (moment(yesterday).isAfter('2024-11-20')) {
+//     await updatePlayerBoxScoresByPeriod(yesterday);
+//     await delay(3000);
+//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   }
+//     // Team Stat Updaters
+//     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+//     // setTimeout(()=>{updateStarterBuilds()}, 10000);
+//     // setTimeout(()=>{updateBenchBuilds()}, 20000);
+//     // setTimeout(()=>{updateQ1Builds()}, 30000);
+//     // setTimeout(()=>{updateQ2Builds()}, 40000);
+//     // setTimeout(()=>{updateQ3Builds()}, 50000); 
+//     // setTimeout(()=>{updateQ4Builds()}, 60000);
+//     // setTimeout(()=>{mapTeamNetRatings()}, 70000);
+//     // setTimeout(()=>{mapTeamPace()}, 80000);
 
-    // Player Stat Updaters
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 1000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
-    // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-    // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
-    // // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    // setTimeout(()=>{mapFullPlayerData()}, 100000);
-    // setTimeout(()=>{addGameStints()}, 1000);
-    // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
-    // setTimeout(()=>{mapSegmentedPlayerData()}, 100000);
-    // // setTimeout(() => updatePlayerGameLogs(), 1000);
-  // }) 
-})()
-
-// (async () => {
-//   // setTimeout(()=>{updateTeamStats.updateQ1Builds()}, 1000);
-//   // setTimeout(()=>{updateTeamStats.updateFullTeamBuilds()}, 1000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerAdvancedStatBuilds()}, 1000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuilds(0)}, 1000);
-//   // setTimeout(()=>{updatePlayerStats.updatePlayerBaseStatBuildsPlayoffs()}, 1000);
-//   setTimeout(()=>{dbMappers.mapPlayerPlayoffData()}, 1000);
+//     // Player Stat Updaters
+//     setTimeout(()=>{updatePlayerPositions(), 500);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+//     // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+//     // // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
+//     setTimeout(()=>{mapFullPlayerData()}, 100000);
+//     setTimeout(()=>{addGameStints()}, 120000);
+//     // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
+//     setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
+//     setTimeout(() => updatePlayerGameLogs(), 180000);
+//   // }) 
 // })()
 
 // if (process.env.NODE_ENV !== 'production') {
-//   setInterval(async () => {
+//   const fetchWithRandomInterval = async () => {
 //     await fetchDailyGameProps(SportsbookName.Betsson);
-//   }, 20000)
+//     const randomDelay = Math.floor(Math.random() * (45000 - 35000 + 1)) + 10000; // Random delay between 10000ms (10s) and 20000ms (20s)
+//     setTimeout(fetchWithRandomInterval, randomDelay);
+//   };
+
+//   // Start the first fetch
+//   fetchWithRandomInterval();
 // }
 
 // this function manages a day's active and completed games for the GambleCast
@@ -170,6 +167,17 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating bovada url for ', gid, ' is ', e);
+    res.send({message: 'error'});
+  }
+})
+
+router.post("/api/updateProps", async (req, res, next) => {
+  const { gid } = req.body;
+  try {
+    await updateSingleGameProps(gid, SportsbookName.Betsson);
+    res.send({message: 'success'});
+  } catch (e) {
+    console.log('error updating props for ', gid, ' is ', e);
     res.send({message: 'error'});
   }
 })
@@ -259,21 +267,23 @@ router.get('/api/fetchPlayerProps', async (req, res, next) => {
   res.send(dailyProps);
 })
 
-setInterval(() => {
-  activeGames.forEach(async (game) => {
-    const hAbb = game.h[0].ta;
-    const vAbb = game.v[0].ta;
-    const gid = game.gid;
+if (process.env.NODE_ENV === 'production') {
+  setInterval(() => {
+    activeGames.forEach(async (game) => {
+      const hAbb = game.h[0].ta;
+      const vAbb = game.v[0].ta;
+      const gid = game.gid;
 
-    try {
-      const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
-      const boxScore = response.props.pageProps.game;
-      await parseGameData(boxScore); // write to DB if quarter is over
-    } catch (e) {
-      console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
-    }
-  })
-}, 3000)
+      try {
+        const response = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
+        const boxScore = response.props.pageProps.game;
+        await parseGameData(boxScore); // write to DB if quarter is over
+      } catch (e) {
+        console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
+      }
+    })
+  }, 3000)
+}
 
 router.get("/api/fetchDailyBoxScores", async (req, res) => {
   const today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
@@ -298,7 +308,7 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
     const boxScorePromises = activeGames.map(async (game) => {
       const hAbb = game.h[0].ta;
       const vAbb = game.v[0].ta;
-      const gid = game.gid;
+      const { gid, inactives, inactives_set } = game;
       let boxScore;
   
       try {
@@ -312,6 +322,12 @@ router.get("/api/fetchActiveBoxScores", async (req, res) => {
       const isGameActivated = gameStatus > 1;
   
       if (isGameActivated) {
+        const hInactives = homeTeam.inactives;
+        const vInactives = awayTeam.inactives;
+
+        // console.log('hInactives are ', hInactives);
+        // console.log('vInactives are ', vInactives);
+
         const { clock, fullClock } = getClocks(gameClock);
         const gameSecs = getGameSecs((parseInt(period)-1), clock);
         const poss = calcGamePoss(homeTeam.statistics, awayTeam.statistics);

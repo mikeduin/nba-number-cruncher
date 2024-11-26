@@ -54,7 +54,7 @@ const GameStints = ({ player }) => {
           cursorLabelOffset={{x: -50, y: -10}}
           cursorLabel={
             (d) => {
-              return `${gameSecsToClockAndQuarter(d.x)}`
+              return `${gameSecsToClockAndQuarter(d.datum.x)}`
             }
           }
         />
@@ -75,7 +75,7 @@ const GameStints = ({ player }) => {
         }
         style={{
           tickLabels: {
-            fontSize: 6,
+            fontSize: 5,
             padding: 3
           }
         }}

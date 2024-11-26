@@ -7,33 +7,60 @@ import {
   updatePlayerGameLogsInDb,
 } from "./dbBuilders.js";
 import {
-  formApiCallParams,
+  getBoxScoreRequestParams,
+  getGameLogsRequestParams,
+  getPlayerIndexRequestParams,
+  getStatRequestParams,
   formPlayerBaseGameLogsBuild,
-  getCurrentSeasonDisplayYear,
   getCurrentSeasonStartYearInt,
   mapPlayerStatistics,
   requestHeaders,
 } from "../utils";
 import { NbaApiMeasureType, NbaApiSeasonType } from '../types';
+import { BOX_SCORE_STATS_URL, GAME_LOGS_URL, PLAYER_INDEX_URL, PLAYER_STATS_URL } from '../constants/index.js';
 
-const advancedPlayerStats = 'https://stats.nba.com/stats/leaguedashplayerstats';
-const boxScoreStats = 'https://stats.nba.com/stats/boxscoretraditionalv3';
-const gameLogs = 'https://stats.nba.com/stats/playergamelogs';
+export const updatePlayerPositions = async () => {
+  const season = getCurrentSeasonStartYearInt();
+
+  const playerIndexRequest = await axios.get(PLAYER_INDEX_URL, {
+    params: getPlayerIndexRequestParams(),
+    headers: requestHeaders()
+  });
+
+  const existingPlayerIds = await knex('player_data').where({ season }).pluck('player_id');
+
+  const headers = playerIndexRequest.data.resultSets[0].headers;
+  const players = playerIndexRequest.data.resultSets[0].rowSet;
+
+  players.forEach(player => {
+    const playerData = headers.reduce((acc, header, i) => {
+      acc[header] = player[i];
+      return acc;
+    }, {});
+
+    if (existingPlayerIds.includes(playerData.PERSON_ID)) {
+      knex('player_data').where({ player_id: playerData.PERSON_ID, season }).update({
+        position: playerData.POSITION,
+        updated_at: new Date()
+      }).then(() => console.log('updated player ', playerData.PERSON_ID, ' with position ', playerData.POSITION));
+    } else {
+      knex('player_data').insert({
+        player_id: playerData.PERSON_ID,
+        player_name: `${playerData.PLAYER_FIRST_NAME} ${playerData.PLAYER_LAST_NAME}`,
+        team_id: playerData.TEAM_ID,
+        season,
+        position: playerData.POSITION,
+        team_abbreviation: playerData.TEAM_ABBREVIATION,
+        updated_at: new Date()
+      }).then(() => console.log(`inserted player ${playerData.PLAYER_FIRST_NAME} ${playerData.PLAYER_LAST_NAME} with position ${playerData.POSITION}`));
+    }
+  })
+}
 
 export const updatePlayerGameLogs = async () => {
   const season = getCurrentSeasonStartYearInt();
-  const gameLogsRequest = async (playerId: string, measureType: NbaApiMeasureType) => await axios.get(gameLogs, {
-    params: {
-      LastNGames: 10,
-      LeagueID: '00',
-      MeasureType: measureType,
-      PerMode: 'Totals',
-      Period: 0, // full game
-      PlayerID: playerId,
-      Season: getCurrentSeasonDisplayYear(),
-      // SeasonType: 'Regular Season',
-      PaceAdjust: 'N',
-    },
+  const gameLogsRequest = async (playerId: string, measureType: NbaApiMeasureType) => await axios.get(GAME_LOGS_URL, {
+    params: getGameLogsRequestParams(playerId, measureType),
     headers: requestHeaders()
   });
 
@@ -52,9 +79,14 @@ export const updatePlayerGameLogs = async () => {
       const mappedGameLogs = await traditionalLogs.data.resultSets[0].rowSet.map((game: any) => {
         const gameLog = formPlayerBaseGameLogsBuild(game, traditionalHeaders);
         
-        const usg = advancedLogs.data.resultSets[0].rowSet.find(
-          (row: any) => row[advancedHeaders.indexOf('GAME_ID')] === gameLog.gid)[advancedHeaders.indexOf('USG_PCT')];
-    
+        let usg = null;
+        try {
+          usg = advancedLogs.data.resultSets[0].rowSet.find(
+            (row: any) => row[advancedHeaders.indexOf('GAME_ID')] === gameLog.gid)[advancedHeaders.indexOf('USG_PCT')];
+        } catch (e) {
+          console.log('e calculating usage for ', playerId, ' and game ', gameLog.gid, ' and error is ', e);
+        }
+
         return {
           ...gameLog,
           usg
@@ -66,7 +98,7 @@ export const updatePlayerGameLogs = async () => {
   });
 }
 
-export const updatePlayerBoxScoresByPeriod = async (gdte) => {
+export const updatePlayerBoxScoresByPeriod = async (gdte: string) => {
   const yesterdayGames = await knex('schedule').where({ gdte }).pluck('gid');
   for (const gid of yesterdayGames) {
     await Promise.all([1, 2, 3, 4].map(async (period) => {
@@ -74,16 +106,8 @@ export const updatePlayerBoxScoresByPeriod = async (gdte) => {
 
       if (!periodChecker.length) {
         console.log('stats not found for game ', gid, ' and period ', period, ' so fetching now');
-        const boxScorePeriod = await axios.get(boxScoreStats, {
-          params: {
-            GameID: `00${gid}`,
-            LeagueID: '00',
-            endPeriod: period,
-            endRange: 28800,
-            rangeType: 1,
-            startPeriod: period,
-            startRange: 0,
-          },
+        const boxScorePeriod = await axios.get(BOX_SCORE_STATS_URL, {
+          params: getBoxScoreRequestParams(gid, period),
           headers: requestHeaders()
         });
 
@@ -103,8 +127,8 @@ export const updatePlayerBoxScoresByPeriod = async (gdte) => {
 };
 
 const updatePlayerAdvancedStats = (games, db) => {
-  axios.get(advancedPlayerStats, {
-    params: formApiCallParams(games, 0, NbaApiSeasonType.RegularSeason, NbaApiMeasureType.Advanced),
+  axios.get(PLAYER_STATS_URL, {
+    params: getStatRequestParams(games, 0, NbaApiSeasonType.RegularSeason, NbaApiMeasureType.Advanced),
     headers: requestHeaders()
   })
     .then(response => {
@@ -116,8 +140,8 @@ const updatePlayerAdvancedStats = (games, db) => {
 };
 
 const updatePlayerBaseStats = (games, db, period, seasonType) => {
-  axios.get(advancedPlayerStats, {
-    params: formApiCallParams(games, period, seasonType, NbaApiMeasureType.Traditional),
+  axios.get(PLAYER_STATS_URL, {
+    params: getStatRequestParams(games, period, seasonType, NbaApiMeasureType.Traditional),
     headers: requestHeaders()
   })
     .then(response => {

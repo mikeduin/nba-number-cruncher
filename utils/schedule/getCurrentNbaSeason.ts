@@ -1,7 +1,5 @@
 import moment from 'moment-timezone';
-import { convertIntDateToDashedDate } from '../dates';
 import { SEASON_DATES } from '../../constants';
-import { SeasonNameFull } from '../../types';
 
 export const getCurrentSeasonDisplayYear = (): string => {
   if (moment().isBefore('2024-09-01')) {

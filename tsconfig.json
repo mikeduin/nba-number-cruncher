@@ -14,7 +14,7 @@
     //   "@constants/*": ["constants/*"]
     // }
   },
-  "include": ["**/*.ts", "routes/index.js"],
+  "include": ["**/*.ts", "routes/index.js", "utils/nbaApi/getBoxScoreRequestParams.js"],
   "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,

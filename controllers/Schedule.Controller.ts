@@ -1,13 +1,12 @@
 import moment from 'moment-timezone';
 import axios from 'axios';
 import * as Db from './Db.Controller.js';
-import { SEASON_DATES } from '../constants';
+import { LEAGUE_SCHEDULE_URL, SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
 import {
   formBovadaUrl,
   getCurrentSeasonDisplayYear,
   getCurrentSeasonStartYearInt,
-  getLeagueScheduleUrl,
   getSeasonNameAbb,
   getSeasonNameFull,
 } from '../utils';
@@ -19,16 +18,6 @@ const getPrePostGameWeek = (gameDate: string, dashedDateWeeks: string[][]) => {
 export const getTodaysGames = async (today: string) => await Db.Schedule().where({gdte: today});
 
 export const getActiveGames = async (date: string) => {
-  let testMoment = moment().set({
-    'year': 2024,
-    'month': 3,
-    'date': 27,
-    'hour': 19,
-    'minute': 20,
-    'second': 0,
-    // 'timezone': 'America/Los_Angeles'
-  }); // 7pm on 4/27/2024
-
   const todayGames = await Db.Schedule()
     .where({
       gdte: date,
@@ -37,10 +26,7 @@ export const getActiveGames = async (date: string) => {
       stt: 'Final'
     });
 
-  // console.log('todayGames are ', todayGames);
-
   return todayGames.filter(game => moment(game.etm).diff(moment()) <= 0);
-  // return todayGames.filter(game => moment(game.etm).diff(testMoment, 'minutes') <= 0);
 };
 
 export const getCompletedGameGids = async (date: string) => await Db.Schedule()
@@ -99,7 +85,7 @@ export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string)
 export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: SeasonNameAbb) => {
   const seasonYear = getCurrentSeasonStartYearInt();
   const currentSeasonDates = SEASON_DATES.find(season => season.yearInt === seasonYear);
-  const schedulePull = await axios.get(getLeagueScheduleUrl());
+  const schedulePull = await axios.get(LEAGUE_SCHEDULE_URL(seasonYear));
   const leagueSchedule = schedulePull.data.lscd;
 
   const parsedSchedule = monthFilter

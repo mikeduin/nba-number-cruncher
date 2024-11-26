@@ -36,43 +36,10 @@ class BoxScore extends React.Component {
   }
 
   componentDidMount () {
-    // console.log('this.props in BoxScore are ', this.props);
     const { game, teamStats, fetchBoxScore, gambleCast } = this.props;
     const { hNormal, final, gameSpread } = this.state;
     this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full, game.total_full);
     this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q, game.total_1q);
-
-    // const hTeamAbb = game.h[0].ta;
-    // const vTeamAbb = game.v[0].ta;
-
-    // let init = 'true';
-    // fetchBoxScore(game.gid, init, vTeamAbb, hTeamAbb);
-
-    // setInterval(() => {
-    //   // console.log('activeGames are ', this.props.activeGames, ' and final for game.gid is ', final);
-    //   if (teamStats && hNormal == null) {
-    //     const hNormal = teamStats.filter(team => team.team_id === game.h[0].tid)[0];
-    //     const vNormal = teamStats.filter(team => team.team_id === game.v[0].tid)[0];
-
-    //     this.setState({ hNormal, vNormal });
-    //   }
-
-    //   if (this.props.activeGames.indexOf(game.gid) !== -1 && !final) {
-    //     init = false;
-    //     fetchBoxScore(game.gid, init, vTeamAbb, hTeamAbb);
-
-    //     if (!gameSpread) {
-    //       this.checkSpread('gameSpread', game.home_spread_full, game.away_spread_full);
-    //       this.checkSpread('q1Spread', game.home_spread_1q, game.away_spread_1q);
-    //     };
-
-    //     if (gambleCast[`live_${game.gid}`]) {
-    //       if (gambleCast[`live_${game.gid}`].final == true) {
-    //         this.setState({final: true})
-    //       }
-    //     }
-    //   }
-    // }, 5000);
   }
 
   render () {
