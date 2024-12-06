@@ -132,7 +132,7 @@ const formatJuice = (value) => {
 
 const getShotPct = (fgm, fga) => fga > 0 ? ((fgm / fga) * 100).toFixed(0) : '0.0';
 
-const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timeframe, timeframeText, setActivePropMarket }) => {
+const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timeframe, timeframeText, setActivePropMarket, teamFilter }) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [playerData, setPlayerData] = useState({});
 
@@ -163,7 +163,9 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
   }
 
   const renderPropRows = () => {
-    return playerProps
+    const filteredProps = teamFilter ? playerProps.filter(prop => prop.team === teamFilter) : playerProps;
+
+    return filteredProps
       .sort((a, b) => {
         if (b[market] === a[market]) {
           return a[`${market}_over`] - b[`${market}_over`];
