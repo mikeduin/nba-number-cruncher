@@ -30,8 +30,11 @@ const playerNameMismatches = {
     'Wendell Carter Jr': 'Wendell Carter Jr.',
   },
   Betsson: {
+    'Andre Jackson': 'Andre Jackson Jr.',
+    'Bogdan Bogdanovic': 'Bogdan Bogdanović',
     'Cameron Thomas': 'Cam Thomas',
     'Dennis Schroder': 'Dennis Schröder',
+    'KJ Martin Jr.': 'KJ Martin',
     'Luka Doncic': 'Luka Dončić',
     'Nicolas Claxton': 'Nic Claxton',
     'Nikola Jokic': 'Nikola Jokić',
@@ -40,7 +43,8 @@ const playerNameMismatches = {
     'Jonas Valanciunas': 'Jonas Valančiūnas',
     'Moussa Diabate': 'Moussa Diabaté',
     'PJ Washington': 'P.J. Washington',
-    
+    'Tidjane Salaun': 'Tidjane Salaün',
+    'Vasilije Micic': 'Vasilije Micić'
   }
 }
 
@@ -72,7 +76,7 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
       player = playerNameMismatches[sportsbook][player];
     }
     
-    const playerPropsExists = dailyProps.filter(prop => prop.player_name === player).length;
+    const playerPropsExists = dailyProps.filter(prop => prop.player_name.trim() === player.trim()).length;
 
     if (playerPropsExists) {
       // update the entry

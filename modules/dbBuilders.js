@@ -2,60 +2,43 @@ import knex from "../db/knex.js";
 import moment from "moment";
 import _ from 'lodash';
 import { getCurrentSeasonDisplayYear, getCurrentSeasonStartYearInt } from "../utils";
-import { buildSubData } from "./buildGameStints.js";
 import {
   formPlayerAdvancedStatsBuild,
   formPlayerBaseStatsBuild,
   formTeamAdvancedStatsBuild,
   formTeamBaseStatsBuild,
 } from "../utils";
-import { NbaApiMeasureType, NbaApiSeasonType } from "../types";
 
-export const fetchLineupParams = (games, lineup) => {
-  return {
-    LastNGames: games,
-    MeasureType: NbaApiMeasureType.Advanced,
-    Month: 0,
-    OpponentTeamID: 0,
-    PaceAdjust: "N",
-    PerMode: "PerGame",
-    PlusMinus: "N",
-    Period: 0,
-    Rank: "N",
-    Season: getCurrentSeasonDisplayYear(),
-    SeasonType: NbaApiSeasonType.RegularSeason,
-    StarterBench: lineup
-  };
-}; 
+// export const buildGameStintsDb = async () => {
+//   // This is the initial function to populate the game_stints DB from games already played during season
+//   let games = await knex("schedule")
+//     .pluck("gid")
+//     .whereNotNull("gweek")
+//     .whereNull("game_stints")
+//     .where({ stt: "Final" })
+//     .limit(40);
 
-export const buildGameStintsDb = async () => {
-  // This is the initial function to populate the game_stints DB from games already played during season
-  let games = await knex("schedule")
-    .pluck("gid")
-    .whereNotNull("gweek")
-    .whereNull("game_stints")
-    .where({ stt: "Final" })
-    .limit(40);
+//   games.forEach(game => {
+//     buildSubData(game);
+//   });
+// }; 
 
-  games.forEach(game => {
-    buildSubData(game);
-  });
-}; 
 
-export const addGameStints = async () => {
-  const season = getCurrentSeasonStartYearInt();
+// ** Moved to Controller **
+// export const addGameStints = async () => {
+//   const season = getCurrentSeasonStartYearInt();
 
-  // This is the in-season function to add game stints each night after games conclude
-  let games = await knex("schedule")
-    .pluck("gid")
-    .whereNotNull("gweek")
-    .where({ stt: "Final", season_year: season })
-    .whereNull("game_stints");
+//   // This is the in-season function to add game stints each night after games conclude
+//   let games = await knex("schedule")
+//     .pluck("gid")
+//     .whereNotNull("gweek")
+//     .where({ stt: "Final", season_year: season })
+//     .whereNull("game_stints");
 
-  games.forEach(game => {
-    buildSubData(game);
-  });
-};
+//   games.forEach(game => {
+//     buildSubData(game);
+//   });
+// };
 
 // export const updateBovadaUrls = () => {
 //   axios.get(leagueScheduleUrl).then(response => {
@@ -75,25 +58,28 @@ export const addGameStints = async () => {
 
 // },
 
-export const updatePlayerGameLogsInDb = async (playerId, mappedGameLogs) => {
-    const season = getCurrentSeasonStartYearInt();
-    const checkExist = await knex('player_data').where({ player_id: playerId, season });
-    if (!checkExist.length) {
-      console.log(`player ${playerId} not found in player_data table, not updating game logs`);
-      return;
-    };
-    try {
-      const gameLogsInsert = await knex("player_data")
-        .where({ player_id: playerId, season })
-        .update({ 
-          game_logs_l10: mappedGameLogs,
-          updated_at: new Date(),
-        }, '*');
-      console.log(`game logs updated for ${gameLogsInsert[0].player_name}`);
-    } catch (e) {
-      console.log(`error updating game logs for player ${playerId} in player_data table is ${e}`);
-    }   
-}
+
+// Remove this later -- not using gameLogs. Also, delete column from DB
+
+// export const updatePlayerGameLogsInDb = async (playerId, mappedGameLogs) => {
+//     const season = getCurrentSeasonStartYearInt();
+//     const checkExist = await knex('player_data').where({ player_id: playerId, season });
+//     if (!checkExist.length) {
+//       console.log(`player ${playerId} not found in player_data table, not updating game logs`);
+//       return;
+//     };
+//     try {
+//       const gameLogsInsert = await knex("player_data")
+//         .where({ player_id: playerId, season })
+//         .update({ 
+//           game_logs_l10: mappedGameLogs,
+//           updated_at: new Date(),
+//         }, '*');
+//       console.log(`game logs updated for ${gameLogsInsert[0].player_name}`);
+//     } catch (e) {
+//       console.log(`error updating game logs for player ${playerId} in player_data table is ${e}`);
+//     }   
+// }
 
 export const updatePlayerDbBaseStats = (db, arrayData, headers, period, seasonType) => {
   const season = getCurrentSeasonStartYearInt();
@@ -227,60 +213,38 @@ export const updateTeamDbAdvancedStats = (db, arrayData, headers) => {
   });  
 };
 
-export const insertPlayerBoxScoresByPeriod = (gid, period, playerStats, teamAbb) => {
-  const season = getCurrentSeasonStartYearInt();
-  playerStats.forEach(async player => {
-    const { player_id, player_name, min, pts, reb, ast, stl, blk, tov, fg3m, fg3a, fgm, fga, ftm, fta, fouls } = player;
-    await knex('player_boxscores_by_q')
-      .insert({
-        player_id,
-        player_name,
-        team: teamAbb,
-        gid,
-        period,
-        min,
-        pts,
-        reb,
-        ast,
-        stl,
-        blk,
-        tov,
-        fg3m,
-        fg3a,
-        fgm,
-        fga,
-        ftm,
-        fta,
-        fouls,
-        season,
-        updated_at: new Date(),
-        created_at: new Date()
-      });
-    console.log('player stats inserted for ', player_name, ' for period ', period, ' of game ', gid);
-  });
-};
 
-export const buildGameWeekArrays = () => {
-  let day = moment()
-    .set("year", 2021)
-    .set("month", 9)
-    .set("date", 10);
-  let week = [];
-
-  const dayAdder = () => {
-    while (moment(day).isBefore("2022-04-14")) {
-      day = moment(day).add(1, "days");
-      let digitDay = moment(day).format("YYYYMMDD");
-      if (week.length < 7) {
-        week.push(parseInt(digitDay));
-      } else {
-        digitSched.push(week);
-        week = [];
-        week.push(parseInt(digitDay));
-      }
-    }
-  };
-
-  dayAdder();
-  return digitSched;
-};
+// ** Moved to Repository ** // 
+// export const insertPlayerBoxScoresByPeriod = (gid, period, playerStats, teamAbb) => {
+//   const season = getCurrentSeasonStartYearInt();
+//   playerStats.forEach(async player => {
+//     const { player_id, player_name, min, pts, reb, ast, stl, blk, tov, fg3m, fg3a, fgm, fga, ftm, fta, fouls, usg } = player;
+//     await knex('player_boxscores_by_q')
+//       .insert({
+//         player_id,
+//         player_name,
+//         team: teamAbb,
+//         gid,
+//         period,
+//         min,
+//         pts,
+//         reb,
+//         ast,
+//         stl,
+//         blk,
+//         tov,
+//         fg3m,
+//         fg3a,
+//         fgm,
+//         fga,
+//         ftm,
+//         fta,
+//         fouls,
+//         usg,
+//         season,
+//         updated_at: new Date(),
+//         created_at: new Date()
+//       });
+//     console.log('player stats inserted for ', player_name, ' for period ', period, ' of game ', gid);
+//   });
+// };

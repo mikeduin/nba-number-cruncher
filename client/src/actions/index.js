@@ -19,15 +19,17 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
   const updated = {...data, today};
 
   const todaysGames = data.weekGames.filter(game => {
-    return game.gdte === today;
+    return game.gdte === date;
   });
 
   dispatch({ type: 'TODAY_GAMES', payload: todaysGames });
   dispatch({ type: 'FETCH_WEEK', payload: updated });
 }
 
-export const fetchPlayerProps = () => async (dispatch) => {
-  const response = await axios.get('/api/fetchPlayerProps');
+export const fetchPlayerProps = () => async (dispatch, getState) => {
+  const activeDay = getState().activeDay;
+  console.log('activeDay in fetchPlayerProps is ', activeDay);
+  const response = await axios.get(`/api/fetchPlayerProps/${activeDay}`);
   const data = response.data;
   dispatch({ type: 'FETCH_PLAYER_PROPS', payload: { 
     data,
@@ -36,7 +38,8 @@ export const fetchPlayerProps = () => async (dispatch) => {
 }
 
 export const checkActiveGames = () => async (dispatch, getState) => {
-  const response = await axios.get('/todayGameStatus');
+  const activeDay = getState().activeDay ?? moment().format("YYYY-MM-DD");
+  const response = await axios.get(`/todayGameStatus/${activeDay}`);
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
   const clientActive = getState().activeGames;
@@ -174,15 +177,18 @@ const updateGamblecast = (game) => async (dispatch) => {
   dispatch ({ type: 'UPDATE_LIVE_SCORE', payload: game})
 }
 
-export const fetchDailyBoxScores = () => async (dispatch) => {
-  const dailyBoxScores = await axios.get('/api/fetchDailyBoxScores');
+export const fetchDailyBoxScores = () => async (dispatch, getState) => {
+  const activeDay = getState().activeDay;
+  console.log('activeDay in fetchDailyBoxScores', activeDay);
+  const dailyBoxScores = await axios.get(`/api/fetchDailyBoxScores/${activeDay}`);
   dailyBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });
 }
  
-export const fetchActiveBoxScores = () => async (dispatch) => {
-  const activeBoxScores = await axios.get('/api/fetchActiveBoxScores');
+export const fetchActiveBoxScores = () => async (dispatch, getState) => {
+  const activeDay = getState().activeDay;
+  const activeBoxScores = await axios.get(`/api/fetchActiveBoxScores/${activeDay}`);
   activeBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });

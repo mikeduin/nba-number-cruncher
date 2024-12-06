@@ -1,18 +1,32 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import moment from "moment";
 import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
 import PlayerProps from './PlayerProps';
 import { Header } from 'semantic-ui-react';
-import { fetchPlayerProps } from '../actions';
+import { checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, fetchWeek, setActiveDay } from '../actions';
 
 class GambleCast extends React.Component {
   componentDidMount () {
-    const { fetchPlayerProps } = this.props;
-    fetchPlayerProps();
+    console.log('activeDay in Gamblecast init is ', this.props.activeDay);
+    let effectiveDay = moment().format('YYYY-MM-DD')
+    if (!this.props.match.params.date) {
+      this.props.setActiveDay(effectiveDay);
+    } else {
+      effectiveDay = this.props.match.params.date;
+      this.props.setActiveDay(this.props.match.params.date);
+    }
+    this.props.fetchWeek(effectiveDay);
+    this.props.checkActiveGames();
+    this.props.fetchDailyBoxScores();
+    this.props.fetchActiveBoxScores();
+    this.props.fetchPlayerProps();
     setInterval(() => {
-      fetchPlayerProps();
-    }, 7000)
+      this.props.checkActiveGames();
+      this.props.fetchActiveBoxScores();
+      this.props.fetchPlayerProps();
+    }, 5000)
   }
 
   componentDidUpdate (prevProps) {
@@ -23,7 +37,6 @@ class GambleCast extends React.Component {
 
   renderBoxScores = () => {
     const { gambleCast, games, playersMetadata} = this.props;
-    console.log('games are ', games);
     if (games[0]) {
       return games.map(game => {
         const hTid = game.h[0].tid;
@@ -49,6 +62,7 @@ class GambleCast extends React.Component {
     if (this.props.activeDay.length < 1) {
       return <div> Loading ... </div>
     } else {
+      console.log('this.props.activeDay in GambleCast render is ', this.props.activeDay);
       return (
         <div style={{paddingBottom: 150}} className='gamblecast-main'>
           <Header size='huge'> Today's Games </Header>
@@ -70,4 +84,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect (mapStateToProps, { fetchPlayerProps }) (GambleCast);
+export default connect (mapStateToProps, { fetchWeek, checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, setActiveDay }) (GambleCast);

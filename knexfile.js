@@ -16,8 +16,8 @@ pg.defaults.ssl = {
 const knexfile = {
   development: {
     client: 'pg',
-    // connection: process.env.DATABASE_URL,
-    connection: process.env.DATABASE_URL_TEST_NEW,
+    connection: process.env.DATABASE_URL,
+    // connection: process.env.DATABASE_URL_TEST_NEW,
     acquireConnectionTimeout: 1000000,
     // connection: pgconfig,
     ssl: {

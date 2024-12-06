@@ -13,3 +13,8 @@ export enum NbaApiMeasureType {
   Scoring = 'Scoring',
   usage = 'Usage',
 }
+
+export enum NbaApiLineupType { // confirm these are only two
+  Starters = 'Starters',
+  Bench = 'Bench'
+}

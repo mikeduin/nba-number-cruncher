@@ -1,5 +1,5 @@
 import * as DB from '../../controllers/Db.Controller';
-import { calcEndOfQuarterPace, calcQuarterPace, calcFgPct } from "./calculateRateStats";
+import { calcQuarterPace, calcFgPct } from "./calculateRateStats";
 
 const calcDiff = (current, previous) => parseInt(current) - (parseInt(previous) ?? 0);
 

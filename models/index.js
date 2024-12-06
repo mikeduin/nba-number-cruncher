@@ -1,2 +1,2 @@
-export * from './boxScores';
+export * from './boxScore';
 export * from './nbaApiBoxScore';

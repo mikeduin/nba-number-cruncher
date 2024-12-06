@@ -42,6 +42,7 @@ export interface BoxScoreResponse {
   quarterEnd?: boolean;
   thru_period?: number;
   totals: BoxScore;
+  inactives: any; // TODO: Update
 }
 
 export interface UsageStats {

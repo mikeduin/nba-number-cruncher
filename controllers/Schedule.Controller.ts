@@ -3,6 +3,8 @@ import axios from 'axios';
 import * as Db from './Db.Controller.js';
 import { LEAGUE_SCHEDULE_URL, SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
+import { fetchBoxScore } from './BoxScore.Controller.js';
+import { getExistingSeasonGames } from '../repositories';
 import {
   formBovadaUrl,
   getCurrentSeasonDisplayYear,
@@ -15,8 +17,27 @@ const getPrePostGameWeek = (gameDate: string, dashedDateWeeks: string[][]) => {
   return dashedDateWeeks.findIndex((week: string[]) => week.includes(gameDate));
 }
 
-export const getTodaysGames = async (today: string) => await Db.Schedule().where({gdte: today});
+const buildTeamObject = (team) => {
+  return {
+    tid: team.tid,
+    re: team.re,
+    ta: team.ta,
+    tn: team.tn,
+    tc: team.tc,
+    s: team.s
+  };
+}
 
+/**
+ * Retrieves the active games for a given date.
+ * 
+ * This function queries the database for games scheduled on the specified date
+ * that have not yet reached the 'Final' status. It then filters the games to 
+ * return only those whose start time is less than or equal to the current time.
+ * 
+ * @param {string} date - The date for which to retrieve active games, in the format 'YYYY-MM-DD'.
+ * @returns {Promise<Array>} A promise that resolves to an array of active games.
+ */
 export const getActiveGames = async (date: string) => {
   const todayGames = await Db.Schedule()
     .where({
@@ -28,10 +49,6 @@ export const getActiveGames = async (date: string) => {
 
   return todayGames.filter(game => moment(game.etm).diff(moment()) <= 0);
 };
-
-export const getCompletedGameGids = async (date: string) => await Db.Schedule()
-  .where({gdte: date, stt: 'Final'})
-  .pluck('gid');
 
 export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string) => {
   // Remember that in dashedDates and intDates, array indices correspond to LITERAL GAME WEEKS.
@@ -82,6 +99,7 @@ export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string)
   return {dashedDateWeeks, intDateWeeks};
 }
 
+// this looks like it's also functioning to update schedule?
 export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: SeasonNameAbb) => {
   const seasonYear = getCurrentSeasonStartYearInt();
   const currentSeasonDates = SEASON_DATES.find(season => season.yearInt === seasonYear);
@@ -92,54 +110,45 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
     ? leagueSchedule.filter((month) => month.mscd.mon === monthFilter)
     : leagueSchedule;
 
+  const existingGameMap = await getExistingSeasonGames(seasonYear);
+  const mappedGids = existingGameMap.map(game => game.gid);
+
   parsedSchedule.forEach(month => {
     month.mscd.g.forEach(async game => {
+      const { gid, gcode, gdte, an, ac, as, etm, stt, v, h } = game;
+
       // if game does not exist, insert game
-      const existingGame = await Db.Schedule().where({ gid: game.gid.slice(2) });
+      const existingGame = mappedGids.includes(gid.slice(2)); // NBA gids have two leading zeroes, my DB gids do not
 
-      if (!existingGame.length) {
-        console.log('game is not found in schedule, adding ', game.gid);
+      if (!existingGame) {
+        console.log('game is not found in schedule, adding ', gid);
 
-        if (game.etm === 'TBD') {
-          console.log('start time is TBD for game.gid ', game.gid);
+        if (etm === 'TBD') {
+          console.log('start time is TBD for gid ', gid);
           return;
         }
 
-        const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(game.gdte, currentSeasonDates.seasons.RegularSeason);
-        const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(game.gdte, currentSeasonDates.seasons.RegularSeason);
-        const gweek = game.gweek ?? getPrePostGameWeek(game.gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
+        const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
+        const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
+        const gweek = game.gweek ?? getPrePostGameWeek(gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
     
-        let hObj = {
-          tid: game.h.tid,
-          re: game.h.re,
-          ta: game.h.ta,
-          tn: game.h.tn,
-          tc: game.h.tc,
-          s: game.h.s
-        };
-        let vObj = {
-          tid: game.v.tid,
-          re: game.v.re,
-          ta: game.v.ta,
-          tn: game.v.tn,
-          tc: game.v.tc,
-          s: game.v.s
-        };
+        const hObj = buildTeamObject(h);
+        const vObj = buildTeamObject(v);
   
         if (!seasonStageFilter || seasonStageFilter === seasonNameAbb) {
           await Db.Schedule().insert(
             {
-              gid: game.gid,
-              gcode: game.gcode,
-              gdte: game.gdte,
-              an: game.an,
-              ac: game.ac,
-              as: game.as,
-              etm: moment(game.etm).subtract(3, 'hours'),
+              gid,
+              gcode,
+              gdte,
+              an,
+              ac,
+              as,
+              etm: moment(etm).subtract(3, 'hours'),
               gweek,
               h: [hObj],
               v: [vObj],
-              stt: game.stt,
+              stt: stt,
               season_year: seasonYear,
               season_name: seasonNameAbb,
               display_year: getCurrentSeasonDisplayYear(),
@@ -150,9 +159,9 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
           console.log(game.gcode, " entered in DB");
         }
       } else {
-        const existingGameIdentical = game.gdte === existingGame[0].gdte && game.etm !== existingGame[0].etm;
+        const gameDateOrTimeChanged = game.gdte !== existingGame[0].gdte || game.etm !== existingGame[0].etm;
 
-        if (!existingGameIdentical) {
+        if (gameDateOrTimeChanged) {
           await Db.Schedule().where({ gid: game.gid.slice(2) }).update({
             gdte: game.gdte,
             etm: moment(game.etm).subtract(3, 'hours'),
@@ -166,7 +175,75 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
   });
 }; 
 
+export const prepareInactives = async (inactives, teamAbbs: string[]) => {
+
+  const gamePlayers = await Db.Players()
+    .where({season: getCurrentSeasonStartYearInt()})
+    .whereIn('team_abbreviation', [ ...teamAbbs ])
+    .select('player_id', 'player_name', 'team_abbreviation', 'position', 'min_full')
+
+  const preparedInactives = inactives.map(player => {
+    const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
+    if (!dbPlayer) {console.log('no dbPlayer found for ', player.personId, player.firstName, player.familyName)}
+    return {
+      ...player,
+      position: dbPlayer?.position,
+      min: dbPlayer?.min_full
+    }
+  })
+
+  return preparedInactives;
+}
+
+
+// This method is used to mass-update inactives that have not previously been set in the schedule
+
+export const updatePastScheduleForInactivesAndResult = async () => {
+  const season = getCurrentSeasonStartYearInt();
+  const inactiveGames = await Db.Schedule().where({ 
+    season_year: season, 
+    inactives_set: false,
+    stt: 'Final'
+  }).select('gid', 'h', 'v');
+  
+  inactiveGames.forEach(async game => {
+    const hAbb = game.h[0].ta;
+    const vAbb = game.v[0].ta;
+
+    const response = await fetchBoxScore(vAbb, hAbb, game.gid); // pull live NBA.com data, convert to JSON
+    const boxScore = response.props.pageProps.game;
+
+    const { homeTeam, awayTeam } = boxScore;
+
+    const hInactives = await prepareInactives(homeTeam.inactives, [hAbb]);
+    const vInactives = await prepareInactives(awayTeam.inactives, [vAbb]);
+
+    const hScore = homeTeam.score;
+    const vScore = awayTeam.score;
+
+    const inactives = {
+      h: hInactives,
+      v: vInactives
+    };
+
+    const result = `${vAbb} ${vScore} @ ${hAbb} ${hScore}`
+
+    // console.log('inactives are ', inactives, ' and result is ', result)
+
+    await Db.Schedule().where({gid: game.gid}).update({
+      inactives,
+      inactives_set: true,
+      result
+    });
+
+    console.log('inactives and result have been set for gid ', game.gid);
+  })
+}
+
+
+
 // DELETE THIS BELOW AFTER 2024 POSTSEASON PROCESSES CORRECTLY
+// Or ... add to db Utils to use in future? What did I use this for?
 
 // export const updatePlayoffScnedule = () => {
 //   console.log('updating playoff schedule');
@@ -191,22 +268,8 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
 //             return;
 //           }
 
-//           let hObj = {
-//             tid: game.h.tid,
-//             re: game.h.re,
-//             ta: game.h.ta,
-//             tn: game.h.tn,
-//             tc: game.h.tc,
-//             s: game.h.s
-//           };
-//           let vObj = {
-//             tid: game.v.tid,
-//             re: game.v.re,
-//             ta: game.v.ta,
-//             tn: game.v.tn,
-//             tc: game.v.tc,
-//             s: game.v.s
-//           };
+//           let hObj = buildTeamObject(game.h);
+//           let vObj = buildTeamObject(game.v);
 
 //           try {
 //             await knex("schedule")

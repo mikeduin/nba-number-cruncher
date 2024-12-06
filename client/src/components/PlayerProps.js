@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { Accordion, Button, Input, Segment } from 'semantic-ui-react';
+import { Accordion, Button, Input, Segment, Image } from 'semantic-ui-react';
 import PropsTable from './playerProps/PropsTable';
 import { toast } from 'react-semantic-toasts';
+import logos from '../modules/logos';
 import { findKey } from 'lodash';
 
-const marketMappers = {
+export const marketMappers = {
   'Total Points': 'pts',
   'Total Rebounds': 'reb',
   'Total Assists': 'ast',
@@ -46,6 +47,7 @@ class PlayerProps extends React.Component {
     activeTimeframe: 'full',
     bovadaUrl: '',
     betssonUrl: '',
+    teamFilter: null,
   };
 
   componentDidMount () {
@@ -122,6 +124,14 @@ class PlayerProps extends React.Component {
     }
   }
 
+  setActivePropMarket = (market) => {
+    this.setState({ activeProp: market })
+  }
+
+  setTeamFilter = (teamAbb) => {
+    this.setState({ teamFilter: })
+  }
+
   render () {
     const { boxScore, game, playersMetadata } = this.props;
     const { activeProp, activeTimeframe, playerProps } = this.state;
@@ -153,7 +163,7 @@ class PlayerProps extends React.Component {
             {Object.values(marketMappers).map(market => 
               <Button 
                 color='black'
-                onClick={() =>  this.setState({ activeProp: market })}
+                onClick={() => this.setActivePropMarket(market)}
                 basic={activeProp !== market}
                 key={market}
               >
@@ -163,6 +173,21 @@ class PlayerProps extends React.Component {
           </div>
 
           <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
+            <div style={{marginRight: 40, display: 'inline-flex', alignItems: 'center'}}>
+              <i>FILTER BY TEAM:</i>
+              <Button
+                basic
+                style={{maxWidth: 60, maxHeight: 60, padding: 0, display: 'flex', alignItems: 'center'}}
+              > 
+                <Image src={logos[game.v[0].ta]} /> 
+              </Button>
+              <Button
+                basic
+                style={{maxWidth: 60, maxHeight: 60, padding: 0, display: 'flex', alignItems: 'center'}}
+              > 
+                <Image src={logos[game.h[0].ta]} /> 
+              </Button>
+            </div>
             <div style={{marginRight: 10}}><i>SHOW AVERAGES FOR:</i></div>
             {Object.keys(timeMappers).map(timeframe => 
               <Button 
@@ -184,6 +209,7 @@ class PlayerProps extends React.Component {
           market={activeProp}
           timeframe={activeTimeframe}
           timeframeText={findKeyByValue(timeMappers, activeTimeframe)}
+          setActivePropMarket={this.setActivePropMarket}
         />
       </div>
     )

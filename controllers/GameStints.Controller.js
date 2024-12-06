@@ -1,23 +1,31 @@
 import axios from 'axios';
-import knex from '../db/knex.js';
 import _ from 'lodash';
 import { getCurrentSeasonStartYearInt, checkPeriodStart, getGameSecs, startPeriodSec } from '../utils';
+import { GAME_DETAIL_URL, PLAY_BY_PLAY_URL } from '../constants';
+import {
+  getCompletedGamesWithNoGameStints,
+  getScheduleGame,
+  insertPlayerGameStint,
+  setGameStintsUpdated
+} from '../repositories';
 
-function Schedule() {return knex('schedule')}
+export const addGameStints = async () => {
+  const season = getCurrentSeasonStartYearInt();
+  const games = await getCompletedGamesWithNoGameStints(season)
 
-export const buildSubData = async (gid) => {
+  games.forEach(game => {
+    buildGameStints(game);
+  });
+};
+
+export const buildGameStints = async (gid) => {
   const season = getCurrentSeasonStartYearInt();
 
-  const pbpUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${season}/scores/pbp/00${gid}_full_pbp.json`;
-  const gameDetailUrl = `https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/${season}/scores/gamedetail/00${gid}_gamedetail.json`;
-
-
-  const gDetail = await axios.get(gameDetailUrl);
+  const gDetail = await axios.get(GAME_DETAIL_URL(season, gid));
   const gcode = gDetail.data.g.gcode;
   const gdte = gDetail.data.g.gdte;
-  const date = gcode.slice(0, 8);
 
-  const gameInDb = await Schedule().where({gid});
+  const gameInDb = await getScheduleGame(gid);
 
   const hTid = gameInDb[0].h_tid;
   const vTid = gameInDb[0].a_tid;
@@ -26,21 +34,21 @@ export const buildSubData = async (gid) => {
   const vPlayers = gDetail.data.g.vls.pstsg.filter(player => player.totsec > 0).map(player => player.pid);
 
   const allPlayers = hPlayers.concat(vPlayers);
-  let starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
-  let gameStints = {};
+  const starters = hPlayers.slice(0, 5).concat(vPlayers.slice(0, 5));
+  const gameStints = {};
   starters.forEach(player => {
     gameStints[`pid_${player}`] = [[0]];
   });
 
-  let pbp = await axios.get(pbpUrl);
+  const pbp = await axios.get(PLAY_BY_PLAY_URL(season, gid));
 
   // Need to compile active players for each Q in case player enters early, leaves outside of Q, and never comes back
-  let periodPlayers = [];
+  const periodPlayers = [];
   const periods = pbp.data.g.pd.length;
   pbp.data.g.pd.forEach((period, i) => {
-    let subEvents = period.pla.filter(play => play.etype === 8);
+    const subEvents = period.pla.filter(play => play.etype === 8);
 
-    let iPlayers = _.uniq(period.pla
+    const iPlayers = _.uniq(period.pla
       .filter(play => allPlayers.includes(parseInt(play.epid)) || allPlayers.includes(parseInt(play.pid))))
       .reduce((players, filteredPlays) => {
         players.push(parseInt(filteredPlays.pid));
@@ -51,7 +59,7 @@ export const buildSubData = async (gid) => {
     periodPlayers.push(_.pull(iPlayers, hTid, vTid));
 
     subEvents.forEach(event => {
-      let secs = getGameSecs(i, event.cl)
+      const secs = getGameSecs(i, event.cl)
 
       // SUBSTITUTION REFERENCE IN PLAY-BY-PLAY LOGS:
       // player entering = event.epid
@@ -99,7 +107,7 @@ export const buildSubData = async (gid) => {
     })
   })
 
-  let tempPlayer = 0;
+  let tempPlayer;
   // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
   try {
     periodPlayers[periodPlayers.length-1].forEach(player => {
@@ -109,8 +117,8 @@ export const buildSubData = async (gid) => {
         // get second value for beginning of last period
         gameStints[`pid_${player}`] = [[startPeriodSec(periodPlayers.length-1)]];
       };
-      let lastExitSecs = gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1];
-      let lastExitPer = checkPeriodStart(lastExitSecs);
+      const lastExitSecs = gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1][1];
+      const lastExitPer = checkPeriodStart(lastExitSecs);
       if (
         // If they have complete checkin/checkout array ...
         gameStints[`pid_${player}`][(gameStints[`pid_${player}`].length)-1].length === 2
@@ -153,45 +161,18 @@ export const buildSubData = async (gid) => {
       }
     });
 
-  hPlayers.forEach(player => {
-    let stints = gameStints[`pid_${player}`];
-
-    knex("player_game_stints").insert({
-      player_id: player,
-      team_id: hTid,
-      gid: gid,
-      gcode: gcode,
-      gdte: gdte,
-      game_stints: stints,
-      season,
-      updated_at: new Date()
-    }, '*').then(inserted => {
-      console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-    });
+  hPlayers.forEach(async player => {
+    const stints = gameStints[`pid_${player}`];
+    await insertPlayerGameStint(player, hTid, gid, gcode, gdte, stints, season);
+    console.log('pid ', player.player_id, ' game stints updated for gid ', gid);
   });
 
-  vPlayers.forEach((player, i) => {
-    let stints = gameStints[`pid_${player}`];
-
-    knex("player_game_stints").insert({
-      player_id: player,
-      team_id: vTid,
-      gid: gid,
-      gcode: gcode,
-      gdte: gdte,
-      game_stints: stints,
-      season,
-      updated_at: new Date()
-    }, '*').then(inserted => {
-      console.log('pid ', inserted[0].player_id, ' game stints updated for gid ', gid);
-      if (i === vPlayers.length - 1) {
-        knex("schedule").where({ gid: gid }).update({
-          game_stints: true,
-          updated_at: new Date()
-        }).then((res) => {
-          console.log(gid, ' game stint updates have concluded');
-        })
-      }
-    });
+  vPlayers.forEach(async (player, i) => {
+    const stints = gameStints[`pid_${player}`];
+    await insertPlayerGameStint(player, vTid, gid, gcode, gdte, stints, season);
+    console.log('pid ', player.player_id, ' game stints updated for gid ', gid);
   })
+
+  await setGameStintsUpdated(gid);
+  console.log('game stints have been updated for gid ', gid);
 }

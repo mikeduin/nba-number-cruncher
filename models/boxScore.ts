@@ -17,3 +17,7 @@ export interface BoxScoreModel {
   final: boolean;
   player_stats: string;
 }
+
+export interface CompletedBoxScoreModel extends BoxScoreModel {
+  inactives: any
+}

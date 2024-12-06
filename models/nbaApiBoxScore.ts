@@ -1,27 +1,46 @@
-export interface NbaApiBoxScore {
-  gameId: string;
+export interface NbaApiBoxScore { // this is fetchBoxScoreResponse.props.pageProps.game
+  gameId: string; // "0022300403"
+  gameCode: string; // "20231225/BOSLAL"
+  gameStatus: number;
+  gameStatusText: string; // "Half", "END Q4", "Q2 :00.5", etc
+  period: number;
+  gameClock: string; // "PT00M00.50S"
+  gameTimeUTC: string; // "2023-12-25T22:00:00Z"
+  gameEt: string; // "2023-12-25T17:00:00-05:00"
   awayTeamId: number;
   homeTeamId: number;
-  homeTeam: NbaBoxScoreTeam;
-  awayTeam: NbaBoxScoreTeam;
+  duration: number;
+  attendance: number;
+  homeTeam: NbaBoxScoreTeamTraditional;
+  awayTeam: NbaBoxScoreTeamTraditional;
+  // incomplete, there is so much other stuff, see mocks
 }
 
 export interface NbaBoxScoreTeam {
   teamId: number;
   teamCity: string; // "Los Angeles"
   teamName: string; // "Lakers"
-  teamTriCode: string; // "LAL"
+  teamTricode: string; // "LAL"
   teamSlug: string; // "lakers"
+  teamWins: number;
+  teamLosses: number;
+  score: number;
+  inBonus: string; // "1"
+  timeoutsRemaining: number;
+  seed: number;
 }
 
 export interface NbaBoxScoreTeamTraditional extends NbaBoxScoreTeam {
   players: NbaBoxScorePlayerTraditional[];
   statistics: NbaBoxScoreStatsTraditional;
+  periods: NbaBoxScorePeriod[];
+  inactives: NbaBoxScoreInactivePlayer[];
 }
 
 export interface NbaBoxScoreTeamAdvanced extends NbaBoxScoreTeam {
   players: NbaBoxScorePlayerAdvanced[];
   statistics: NbaBoxScoreStatsAdvanced;
+  // ... these might also have periods/inactives/others
 }
 
 export interface NbaBoxScorePlayer {
@@ -109,5 +128,18 @@ export interface NbaBoxScoreStatsAdvanced {
   pacePer40: number;
   possessions: number;
   PIE: number;
+  // ... ?
+}
 
+interface NbaBoxScorePeriod {
+  period: number;
+  periodType: string; // "REGULAR"
+  score: number;
+}
+
+export interface NbaBoxScoreInactivePlayer {
+  personId: number;
+  firstName: string;
+  familyName: string;
+  jerseyNum: string; // "17  ", so would want to trim this
 }

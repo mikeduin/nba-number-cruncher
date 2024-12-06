@@ -14,7 +14,7 @@
     //   "@constants/*": ["constants/*"]
     // }
   },
-  "include": ["**/*.ts", "routes/index.js", "utils/nbaApi/getBoxScoreRequestParams.js"],
+  "include": ["**/*.ts", "routes/index.js", "utils/nbaApi/getBoxScoreRequestParams.js", "controllers/GameStints.Controller.js"],
   "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,

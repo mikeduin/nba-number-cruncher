@@ -92,6 +92,36 @@ const colorFta = (pct) => {
   }
 }
 
+const stylePf = (pf) => {
+  if (pf === 3) {
+    return {
+      backgroundColor: '#FE8D01',
+      fontWeight: 500,
+      fontSize: 18
+    } 
+  } else if (pf === 4) {
+    return {
+      backgroundColor: '#E3242B',
+      fontWeight: 800,
+      fontSize: 18
+    } 
+  } else if (pf === 5) {
+    return {
+      backgroundColor: '#B90E0A',
+      fontWeight: 800,
+      fontSize: 18
+    } 
+  } else if (pf === 6) {
+    return {
+      backgroundColor: '#420C09',
+      fontWeight: 800,
+      fontSize: 18
+    } 
+  } else {
+    return {color: 'black'}
+  }
+}
+
 const formatJuice = (value) => {
   if (parseInt(value) > 1) {
     return `+${value}`;
@@ -102,13 +132,12 @@ const formatJuice = (value) => {
 
 const getShotPct = (fgm, fga) => fga > 0 ? ((fgm / fga) * 100).toFixed(0) : '0.0';
 
-const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timeframe, timeframeText }) => {
+const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timeframe, timeframeText, setActivePropMarket }) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [playerData, setPlayerData] = useState({});
 
   const toggleRow = (playerId) => {
     setExpandedRows((prevState) => ({
-      ...prevState,
       [playerId]: !prevState[playerId],
     }));
   };
@@ -124,8 +153,8 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
     toggleRow(playerId);
   }
 
-  const getPlayerDataRow = (playerId) => {
-    const panes = playerPanes(playerData[playerId]);
+  const getPlayerDataRow = ({ playerId, livePropLine, liveStat }) => {
+    const panes = playerPanes(playerData[playerId], market, setActivePropMarket, livePropLine, liveStat);
     return <Table.Row>
       <Table.Cell colSpan="20">
         <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
@@ -215,7 +244,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
               <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.fgm} - {livePlayerStats?.fga} </Table.Cell>
               <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
             </>}      
-            <Table.Cell textAlign='center'> {livePlayerStats?.fouls} </Table.Cell>
+            <Table.Cell textAlign='center' style={stylePf(livePlayerStats?.fouls)}> {livePlayerStats?.fouls} </Table.Cell>
             {/* Season */}
             <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'gp', false, null, timeframe)} </Table.Cell>
             <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'min', false, null, timeframe)} </Table.Cell>
@@ -246,7 +275,11 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
               <ShootingCell value={fta4q} percentage={ftPct4q} color={colorFta(ftPct4q)} />
             </>}
           </Table.Row>
-          {expandedRows[prop.player_id] && getPlayerDataRow(prop.player_id)}
+          {expandedRows[prop.player_id] && getPlayerDataRow({
+            playerId: prop.player_id,
+            livePropLine: prop[market],
+            liveStat: getPlayerStat(livePlayerStats, market, true),
+          })}
           </React.Fragment>
         )
       }) 
@@ -262,7 +295,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
-          <Table.HeaderCell rowSpan="2"> Bov Line </Table.HeaderCell>
+          <Table.HeaderCell rowSpan="2"> Live Prop Line </Table.HeaderCell>
           <Table.HeaderCell colSpan={
             market === 'pts' ? 6 
             : market === 'ast' ? 4

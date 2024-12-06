@@ -1,15 +1,11 @@
 exports.up = function(knex, Promise) {
   return knex.schema.alterTable('schedule', (t) => {
-    t.text('inactives');
-    t.boolean('inactives_set').defaultTo(false);
-    t.text('notes');
+    t.string('result')
   })
 };
 
 exports.down = function(knex, Promise) {
   return knex.schema.alterTable('schedule', (t) => {
-    t.dropColumn('inactives');
-    t.dropColumn('inactives_set');
-    t.dropColumn('notes');
+    t.dropColumn('result')
   })
 };

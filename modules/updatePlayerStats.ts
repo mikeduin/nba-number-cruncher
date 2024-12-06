@@ -1,10 +1,8 @@
 import knex from '../db/knex.js';
 import axios from 'axios';
 import {
-  insertPlayerBoxScoresByPeriod,
   updatePlayerDbAdvancedStats,
   updatePlayerDbBaseStats,
-  updatePlayerGameLogsInDb,
 } from "./dbBuilders.js";
 import {
   getBoxScoreRequestParams,
@@ -17,6 +15,7 @@ import {
   requestHeaders,
 } from "../utils";
 import { NbaApiMeasureType, NbaApiSeasonType } from '../types';
+import { insertPlayerBoxScoresByPeriod } from '../repositories'; 
 import { BOX_SCORE_STATS_URL, GAME_LOGS_URL, PLAYER_INDEX_URL, PLAYER_STATS_URL } from '../constants/index.js';
 
 export const updatePlayerPositions = async () => {
@@ -57,51 +56,58 @@ export const updatePlayerPositions = async () => {
   })
 }
 
-export const updatePlayerGameLogs = async () => {
-  const season = getCurrentSeasonStartYearInt();
-  const gameLogsRequest = async (playerId: string, measureType: NbaApiMeasureType) => await axios.get(GAME_LOGS_URL, {
-    params: getGameLogsRequestParams(playerId, measureType),
-    headers: requestHeaders()
-  });
 
-  const currentSeasonPlayerIds = await knex('player_data').where({ season }).pluck('player_id'); // instead of doing for everyone, maybe just players who have not had game logs updated?
 
-  currentSeasonPlayerIds.forEach(async (playerId, i) => {
-    setTimeout(async () => {
-      const [traditionalLogs, advancedLogs] = await Promise.all([
-        gameLogsRequest(playerId, NbaApiMeasureType.Traditional),
-        gameLogsRequest(playerId, NbaApiMeasureType.Advanced)
-      ]);
+// export const updatePlayerGameLogs = async () => {
+//   const season = getCurrentSeasonStartYearInt();
+//   const gameLogsRequest = async (playerId: string, measureType: NbaApiMeasureType) => await axios.get(GAME_LOGS_URL, {
+//     params: getGameLogsRequestParams(playerId, measureType),
+//     headers: requestHeaders()
+//   });
+
+//   const currentSeasonPlayerIds = await knex('player_data')
+//     .where({ season })
+//     .andWhere('gp_full', '>', 0)
+//     .pluck('player_id'); // instead of doing for everyone, maybe just players who have not had game logs updated?
+
+//   currentSeasonPlayerIds.forEach(async (playerId, i) => {
+//     setTimeout(async () => {
+//       const [traditionalLogs, advancedLogs] = await Promise.all([
+//         gameLogsRequest(playerId, NbaApiMeasureType.Traditional),
+//         gameLogsRequest(playerId, NbaApiMeasureType.Advanced)
+//       ]);
     
-      const traditionalHeaders = traditionalLogs.data.resultSets[0].headers;
-      const advancedHeaders = advancedLogs.data.resultSets[0].headers;
+//       const traditionalHeaders = traditionalLogs.data.resultSets[0].headers;
+//       const advancedHeaders = advancedLogs.data.resultSets[0].headers;
     
-      const mappedGameLogs = await traditionalLogs.data.resultSets[0].rowSet.map((game: any) => {
-        const gameLog = formPlayerBaseGameLogsBuild(game, traditionalHeaders);
+//       const mappedGameLogs = await traditionalLogs.data.resultSets[0].rowSet.map((game: any) => {
+//         const gameLog = formPlayerBaseGameLogsBuild(game, traditionalHeaders);
         
-        let usg = null;
-        try {
-          usg = advancedLogs.data.resultSets[0].rowSet.find(
-            (row: any) => row[advancedHeaders.indexOf('GAME_ID')] === gameLog.gid)[advancedHeaders.indexOf('USG_PCT')];
-        } catch (e) {
-          console.log('e calculating usage for ', playerId, ' and game ', gameLog.gid, ' and error is ', e);
-        }
+//         let usg = null;
+//         try {
+//           usg = advancedLogs.data.resultSets[0].rowSet.find(
+//             (row: any) => row[advancedHeaders.indexOf('GAME_ID')] === gameLog.gid)[advancedHeaders.indexOf('USG_PCT')];
+//         } catch (e) {
+//           console.log('e calculating usage for ', playerId, ' and game ', gameLog.gid, ' and error is ', e);
+//         }
 
-        return {
-          ...gameLog,
-          usg
-        }
-      });
+//         return {
+//           ...gameLog,
+//           usg
+//         }
+//       });
     
-      updatePlayerGameLogsInDb(playerId, mappedGameLogs);
-    }, i * 1000);
-  });
-}
+//       updatePlayerGameLogsInDb(playerId, mappedGameLogs);
+//     }, i * 3000);
+//   });
+// }
 
 export const updatePlayerBoxScoresByPeriod = async (gdte: string) => {
   const yesterdayGames = await knex('schedule').where({ gdte }).pluck('gid');
+  const season = getCurrentSeasonStartYearInt();
   for (const gid of yesterdayGames) {
-    await Promise.all([1, 2, 3, 4].map(async (period) => {
+    // period of 5 provided to fetch full game stats 
+    await Promise.all([1, 2, 3, 4, 5].map(async (period) => {
       const periodChecker = await knex('player_boxscores_by_q').where({ gid, period });
 
       if (!periodChecker.length) {
@@ -117,8 +123,8 @@ export const updatePlayerBoxScoresByPeriod = async (gdte: string) => {
         const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics, gameCompleted);
         const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics, gameCompleted);
 
-        insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode);
-        insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode);
+        insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode, season);
+        insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode, season);
       } else {
         console.log('stats found for game ', gid, ' and period ', period, ' so not fetching');
       }

@@ -2,7 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer, VictoryLegend } from 'victory';
 import _ from 'lodash';
-import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
+import { gameSecsToClockAndQuarter } from '../../utils/gameTimeHelpers';
 
 const gameStintRenderer = (player) => {
   return player.gameStints.map(game => {

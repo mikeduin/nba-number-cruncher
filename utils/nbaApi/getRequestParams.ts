@@ -1,14 +1,17 @@
-import { NbaApiMeasureType, NbaApiSeasonType } from '../../types';
+import { NbaApiLineupType, NbaApiMeasureType, NbaApiSeasonType } from '../../types';
 import { getCurrentSeasonDisplayYear } from '../schedule';
 
 export const getBoxScoreRequestParams = (gid: number, period: number) => {
+  // period modifiers here configured to fetch full game stats when period of '5' is provided
+  const startPeriod = period < 5 ? period : 1;
+  const endPeriod = period < 5 ? period : 4;
   return {
     GameID: `00${gid}`,
     LeagueID: '00',
-    endPeriod: period,
+    endPeriod,
     endRange: 28800,
     rangeType: 1,
-    startPeriod: period,
+    startPeriod,
     startRange: 0,
   }
 }
@@ -56,3 +59,21 @@ export const getStatRequestParams = (games, period, seasonType, statsType, start
     TwoWay: 0,
   };
 }
+
+// Doesn't look like this is being used anywhere
+export const getLineupParams = (games: number, lineup: NbaApiLineupType) => {
+  return {
+    LastNGames: games,
+    MeasureType: NbaApiMeasureType.Advanced,
+    Month: 0,
+    OpponentTeamID: 0,
+    PaceAdjust: "N",
+    PerMode: "PerGame",
+    PlusMinus: "N",
+    Period: 0,
+    Rank: "N",
+    Season: getCurrentSeasonDisplayYear(),
+    SeasonType: NbaApiSeasonType.RegularSeason,
+    StarterBench: lineup
+  };
+}; 

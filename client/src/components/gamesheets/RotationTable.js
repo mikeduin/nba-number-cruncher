@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { Table } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { gameSecsToClockAndQuarter } from '../../modules/gameTimeFuncs';
+import { gameSecsToClockAndQuarter } from '../../utils';
 
 class RotationTable extends React.Component {
   state = {

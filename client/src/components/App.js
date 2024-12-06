@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 import ToastContainer from './ToastContainer';
+import { Container } from 'semantic-ui-react';
 
 import { fetchWeek, getPlayerMetadata, checkActiveGames, fetchDailyBoxScores, fetchActiveBoxScores } from '../actions';
 
@@ -17,13 +18,14 @@ class App extends React.Component {
   componentDidMount () {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
-    this.props.checkActiveGames();
-    this.props.fetchDailyBoxScores();
-    this.props.fetchActiveBoxScores();
-    setInterval(()=>{
-      this.props.checkActiveGames();
-      this.props.fetchActiveBoxScores();
-    }, 5000);
+    // this.props.checkActiveGames();
+    // console.log('activeDay in App is ', this.props.activeDay);
+    // this.props.fetchDailyBoxScores();
+    // this.props.fetchActiveBoxScores();
+    // setInterval(()=>{
+    //   this.props.checkActiveGames();
+    //   this.props.fetchActiveBoxScores();
+    // }, 5000);
   }
 
   render () {
@@ -31,7 +33,7 @@ class App extends React.Component {
       return <div> Loading App ... </div>
     } else {
       return (
-        <div className="ui container">
+        <div style={{marginLeft: '19%', marginRight: '19%'}}>
           <BrowserRouter>
             <div>
               <Header players={this.props.players} />
@@ -42,6 +44,7 @@ class App extends React.Component {
               <Route path='/netratings' exact component={NetRatings} />
               <Route path='/gamesheet/:gid' component={GameSheet} />
               <Route path='/gamblecast' component={GambleCast} />
+              <Route path='/gamblecast/:date' component={GambleCast} />
               <Route path='/player/:pid' component={Player} />
               <TodaysGames />
             </div>
@@ -54,6 +57,7 @@ class App extends React.Component {
 
 const mapStateToProps = state => {
   return {
+    activeDay: state.activeDay,
     players: state.playersMetadata
   }
 }
