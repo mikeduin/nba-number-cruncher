@@ -53,7 +53,7 @@ class BoxScore extends React.Component {
 
     // console.log('game in boxScores is ', game);
 
-    if (!boxScore || !boxScore.totals ) {
+    if (!boxScore || !boxScore.totals || !game ) {
       if (!game) {
         return <div> loading ... </div>
       } else {
@@ -108,7 +108,7 @@ class BoxScore extends React.Component {
               <Table.Row>
                 <Table.Cell> 
                   <div style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Image size="mini" circular src={logos[game.v[0].ta]} /> {game.v[0].tn}
+                    <Image size="mini" circular src={game?.v[0] ? logos[game?.v[0].ta] : null} /> {game.v[0].tn}
                   </div>
                 </Table.Cell>
                 <Table.Cell> {boxScore.totals.v?.pts}  </Table.Cell>
@@ -125,12 +125,12 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.pts : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fouls : null} </Table.Cell>
-                <Table.Cell> <Inactives logo={logos[game.v[0].ta]} players={boxScore.inactives.v.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
+                <Table.Cell> <Inactives logo={game?.v[0] ? logos[game?.v[0].ta] : null} players={boxScore.inactives.v.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell> 
                   <div style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Image size="mini" circular src={logos[game.h[0].ta]} /> {game.h[0].tn}
+                    <Image size="mini" circular src={game?.h[0] ? logos[game.h[0].ta] : null} /> {game.h[0].tn}
                   </div>
                 </Table.Cell>
                 <Table.Cell> {boxScore.totals.h?.pts}  </Table.Cell>
@@ -147,7 +147,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.pts : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fouls : null} </Table.Cell>
-                <Table.Cell> <Inactives logo={logos[game.h[0].ta]} players={boxScore.inactives.h.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
+                <Table.Cell> <Inactives logo={game?.h[0] ? logos[game.h[0].ta] : null} players={boxScore.inactives.h.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table>

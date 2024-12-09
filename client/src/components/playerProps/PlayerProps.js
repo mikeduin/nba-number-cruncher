@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { Accordion, Button, Input, Segment, Image } from 'semantic-ui-react';
-import PropsTable from './playerProps/PropsTable';
+import PropsTable from './PropsTable';
 import { toast } from 'react-semantic-toasts';
-import logos from '../modules/logos';
+import logos from '../../modules/logos';
 
 export const marketMappers = {
   'Total Points': 'pts',
@@ -38,14 +38,14 @@ function findKeyByValue(obj, targetValue) {
 }
 
 const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
-  console.log('allPlayerProps are ', allPlayerProps);
   const [playerProps, setPlayerProps] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [activeProp, setActiveProp] = useState('pts');
-  const [activeTimeframe, setActiveTimeframe] = useState(null);
+  const [activeTimeframe, setActiveTimeframe] = useState('full');
   const [bovadaUrl, setBovadaUrl] = useState('');
   const [betssonUrl, setBetssonUrl] = useState('');
   const [teamFilter, setTeamFilter] = useState(null);
+  const [sortProps, setSortProps] = useState(true); 
 
   useEffect(() => {
     setPlayerProps(allPlayerProps.data.filter(prop => prop.gid === game.gid));
@@ -113,7 +113,10 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     }
   }
 
-  const setActivePropMarket = (market) => setActiveProp(market);
+  const setActivePropMarket = ({ market, sort = true }) => {
+    setActiveProp(market);
+    setSortProps(sort);
+  };
   const handleTeamFilter = (teamAbb) => {
     setTeamFilter(teamFilter === teamAbb ? null : teamAbb);
   }
@@ -145,7 +148,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
           {Object.values(marketMappers).map(market => 
             <Button 
               color='black'
-              onClick={() => setActivePropMarket(market)}
+              onClick={() => setActivePropMarket({ market })}
               basic={activeProp !== market}
               key={market}
             >
@@ -156,7 +159,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
 
         <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
           <div style={{marginRight: 40, display: 'inline-flex', alignItems: 'center'}}>
-            <i>FILTER BY TEAM:</i>
+          <div style={{marginRight: 10}}><i>FILTER BY TEAM:</i></div>
             <Button
               color='black'
               basic={teamFilter !== game.v[0].ta}
@@ -197,6 +200,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
         timeframeText={findKeyByValue(timeMappers, activeTimeframe)}
         setActivePropMarket={setActivePropMarket}
         teamFilter={teamFilter}
+        sortProps={sortProps}
       />
     </div>
   )

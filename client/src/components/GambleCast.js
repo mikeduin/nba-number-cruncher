@@ -1,76 +1,88 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import moment from "moment";
 import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
-import PlayerProps from './PlayerProps';
-import { Header } from 'semantic-ui-react';
+import PlayerProps from './playerProps/PlayerProps';
+import { Header, Icon } from 'semantic-ui-react';
 import { checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, fetchWeek, setActiveDay } from '../actions';
 
-class GambleCast extends React.Component {
-  componentDidMount () {
-    console.log('activeDay in Gamblecast init is ', this.props.activeDay);
-    let effectiveDay = moment().format('YYYY-MM-DD')
-    if (!this.props.match.params.date) {
-      this.props.setActiveDay(effectiveDay);
+const GambleCast = (props) => {
+  const [playerProps, setPlayerProps] = React.useState(props.playerProps);
+
+  useEffect(() => {
+    let effectiveDay = moment().format('YYYY-MM-DD');
+    if (!props.match.params.date) {
+      props.setActiveDay(effectiveDay);
     } else {
-      effectiveDay = this.props.match.params.date;
-      this.props.setActiveDay(this.props.match.params.date);
+      effectiveDay = props.match.params.date;
+      props.setActiveDay(props.match.params.date);
     }
-    this.props.fetchWeek(effectiveDay);
-    this.props.checkActiveGames();
-    this.props.fetchDailyBoxScores();
-    this.props.fetchActiveBoxScores();
-    this.props.fetchPlayerProps();
-    setInterval(() => {
-      this.props.checkActiveGames();
-      this.props.fetchActiveBoxScores();
-      this.props.fetchPlayerProps();
-    }, 5000)
-  }
+    props.fetchWeek(effectiveDay);
+    props.checkActiveGames();
+    props.fetchDailyBoxScores();
+    props.fetchActiveBoxScores();
+    props.fetchPlayerProps();
+    const intervalId = setInterval(() => {
+      props.checkActiveGames();
+      props.fetchActiveBoxScores();
+      props.fetchPlayerProps();
+    }, 5000);
 
-  componentDidUpdate (prevProps) {
-    if (prevProps.playerProps !== this.props.playerProps) {
-      this.setState({ playerProps: this.props.playerProps });
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, [props.match.params.date]);
+
+  useEffect(() => {
+    if (props.playerProps !== playerProps) {
+      setPlayerProps(props.playerProps);
     }
-  }
+  }, [props.playerProps]);
 
-  renderBoxScores = () => {
-    const { gambleCast, games, playersMetadata} = this.props;
+  const renderBoxScores = () => {
+    const { gambleCast, games, playersMetadata } = props;
     if (games[0]) {
       return games.map(game => {
         const hTid = game.h[0].tid;
         const vTid = game.v[0].tid;
         return (
           <div key={game.gid}>
-            <BoxScore game={game}/>
-            <PlayerProps 
-              key={`props-${game.gid}`} 
+            <BoxScore game={game} />
+            <PlayerProps
+              key={`props-${game.gid}`}
               game={game}
               playersMetadata={playersMetadata.filter(player => player.team_id == hTid || player.team_id == vTid)}
               boxScore={gambleCast[`live_${game.gid}`]}
             />
           </div>
-        )
-      })
+        );
+      });
     } else {
-      return 'no games today'
+      return 'no games today';
     }
+  };
+
+  if (!props.activeDay) {
+    return <div> Loading ... </div>
+  } else {
+    return (
+      <div style={{paddingBottom: 150}} className='gamblecast-main'>
+        <Header size='huge'>
+          <div style={{display: 'inline'}}>
+            <Link to={`/gamblecast/${moment(props.activeDay).subtract(1, 'days').format('YYYY-MM-DD')}`}>
+              <Icon className="column" name='angle left' size='large'/>
+            </Link>
+            Games of {moment(props.activeDay).format('MM/DD')}
+            <Link to={`/gamblecast/${moment(props.activeDay).add(1, 'days').format('YYYY-MM-DD')}`}>
+              <Icon className="column" name='angle right' size='large'/>
+            </Link>
+          </div> 
+        </Header>
+        {renderBoxScores()}
+      </div>
+    )
   }
 
-  render() {
-    if (this.props.activeDay.length < 1) {
-      return <div> Loading ... </div>
-    } else {
-      console.log('this.props.activeDay in GambleCast render is ', this.props.activeDay);
-      return (
-        <div style={{paddingBottom: 150}} className='gamblecast-main'>
-          <Header size='huge'> Today's Games </Header>
-          {this.renderBoxScores()}
-        </div>
-      )
-    }
-  }
 }
 
 const mapStateToProps = state => {
@@ -84,4 +96,11 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect (mapStateToProps, { fetchWeek, checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, setActiveDay }) (GambleCast);
+export default connect(mapStateToProps, {
+  checkActiveGames,
+  fetchActiveBoxScores,
+  fetchDailyBoxScores,
+  fetchPlayerProps,
+  fetchWeek,
+  setActiveDay,
+})(GambleCast);

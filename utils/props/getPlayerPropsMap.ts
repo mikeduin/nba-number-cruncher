@@ -1,5 +1,6 @@
 import { mapSportsbookMarketToDbColumn, propMarketMappers } from '../../modules/dbMappers.js';
 import { SportsbookName } from '../../types';
+import { playerNameMismatches } from '../../controllers/Props.Controller.js';
 
 const buildActivePropsMap = (players, dbColumns) => {
   const activePropsMap = {};
@@ -15,8 +16,11 @@ const buildActivePropsMap = (players, dbColumns) => {
   return activePropsMap;
 }
 
-const findPlayerTeam = (propPlayerName: string, dailyPlayers) => {
-  const player = dailyPlayers.find(player => player.player_name === propPlayerName);
+const findPlayerTeam = (propPlayerName: string, dailyPlayers, sportsbook: SportsbookName) => {
+  let player = dailyPlayers.find(player => player.player_name === propPlayerName);
+  if (!player && sportsbook === SportsbookName.Betsson) {
+    player = dailyPlayers.find(player => player.player_name === playerNameMismatches[SportsbookName.Betsson][propPlayerName])
+  }
   return player ? player.team_abbreviation : null;
 }
 
@@ -34,7 +38,7 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
       if (dbColumn) {
         const playerTeam = sportsbook === SportsbookName.Bovada 
         ? prop.team
-        : findPlayerTeam(playerName, dailyPlayers);
+        : findPlayerTeam(playerName, dailyPlayers, sportsbook);
 
         if (!playerTeam) {
           console.log('player team not found for ', playerName, ' ... skipping team assignment');

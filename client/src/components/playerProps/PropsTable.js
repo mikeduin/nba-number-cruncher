@@ -6,39 +6,10 @@ import '../styles/gamblecast.css';
 // find and import player logo image references
 import logos from '../../modules/logos';
 import playerPanes from '../playerPages/PlayerPanes';
+import { colorFga, colorFta, formatJuice, getShotPct, styleFouls} from './Props.helpers';
+import { PropsTableHeader } from './PropsTableHeader';
+import { statMapper, headerMappers } from './Props.constants';
 import ShootingCell from './ShootingCell';
-
-const headerMappers = {
-  'pts': 'PTS',
-  'reb': 'REB',
-  'ast': 'AST',
-  'stl': 'STL',
-  'blk': 'BLK',
-  'tov': 'TO',
-  'fg3m': 'FG3M',
-  'pts+reb+ast': 'P+R+A',
-  'pts+reb': 'PTS+REB',
-  'pts+ast': 'PTS+AST',
-  'reb+ast': 'REB+AST'
-};
-
-const statMapper = {
-  // market : db column prefix (e.g., ppg_3q_full has 'ppg' as the prefix)
-  'pts': 'ppg',
-  'reb': 'rpg',
-  'ast': 'apg',
-  'stl': 'spg',
-  'blk': 'bpg',
-  'tov': 'topg',
-  'fg3m': '3pg',
-  'fg3a': '3pa',
-  'min': 'min',
-  'fgm': 'fgm',
-  'fga': 'fga',
-  'ftm': 'ftm',
-  'fta': 'fta',
-  'gp': 'gp',
-}
 
 function getPlayerStat(playerStats, market, live = true, phase = null, games = 'full') {
   if (!playerStats) return null;
@@ -72,67 +43,9 @@ function getPlayerStat(playerStats, market, live = true, phase = null, games = '
   }
 }
 
-const colorFga = (pct) => {
-  if (pct < 42) {
-    return '#db2828';
-  } else if (pct > 48) {
-    return 'green';
-  } else {
-    return 'black'; // Default color if the value is between 0.42 and 0.48
-  }
-}
-
-const colorFta = (pct) => {
-  if (pct < 70) {
-    return '#db2828';
-  } else if (pct > 79) {
-    return 'green';
-  } else {
-    return 'black'; // Default color if the value is between 0.42 and 0.48
-  }
-}
-
-const stylePf = (pf) => {
-  if (pf === 3) {
-    return {
-      backgroundColor: '#FE8D01',
-      fontWeight: 500,
-      fontSize: 18
-    } 
-  } else if (pf === 4) {
-    return {
-      backgroundColor: '#E3242B',
-      fontWeight: 800,
-      fontSize: 18
-    } 
-  } else if (pf === 5) {
-    return {
-      backgroundColor: '#B90E0A',
-      fontWeight: 800,
-      fontSize: 18
-    } 
-  } else if (pf === 6) {
-    return {
-      backgroundColor: '#420C09',
-      fontWeight: 800,
-      fontSize: 18
-    } 
-  } else {
-    return {color: 'black'}
-  }
-}
-
-const formatJuice = (value) => {
-  if (parseInt(value) > 1) {
-    return `+${value}`;
-  } else {
-    return value;
-  }
-}
-
-const getShotPct = (fgm, fga) => fga > 0 ? ((fgm / fga) * 100).toFixed(0) : '0.0';
-
-const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timeframe, timeframeText, setActivePropMarket, teamFilter }) => {
+const PropsTable = ({ 
+  market, playerProps, playerStats, playersMetadata, setActivePropMarket, sortProps, teamFilter, timeframe, timeframeText
+}) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [playerData, setPlayerData] = useState({});
 
@@ -164,14 +77,16 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
 
   const renderPropRows = () => {
     const filteredProps = teamFilter ? playerProps.filter(prop => prop.team === teamFilter) : playerProps;
+    const sortedProps = sortProps 
+      ? filteredProps.sort((a, b) => {
+          if (b[market] === a[market]) {
+            return a[`${market}_over`] - b[`${market}_over`];
+          }
+          return b[market] - a[market];
+        })
+      : filteredProps;
 
-    return filteredProps
-      .sort((a, b) => {
-        if (b[market] === a[market]) {
-          return a[`${market}_over`] - b[`${market}_over`];
-        }
-        return b[market] - a[market];
-      })
+    return sortedProps
       .map(prop => { 
         const livePlayerStats = playerStats ? playerStats.filter(player => player.player_id === prop.player_id)[0] : null;
         const seasonPlayerStats = playersMetadata ? playersMetadata.filter(player => player.player_id === prop.player_id)[0] : null;
@@ -246,7 +161,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
               <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.fgm} - {livePlayerStats?.fga} </Table.Cell>
               <Table.Cell style={{whiteSpace: 'nowrap'}}> {livePlayerStats?.ftm} - {livePlayerStats?.fta} </Table.Cell>
             </>}      
-            <Table.Cell textAlign='center' style={stylePf(livePlayerStats?.fouls)}> {livePlayerStats?.fouls} </Table.Cell>
+            <Table.Cell textAlign='center' style={styleFouls(livePlayerStats?.fouls)}> {livePlayerStats?.fouls} </Table.Cell>
             {/* Season */}
             <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'gp', false, null, timeframe)} </Table.Cell>
             <Table.Cell textAlign='center'> {getPlayerStat(seasonPlayerStats, 'min', false, null, timeframe)} </Table.Cell>
@@ -294,55 +209,7 @@ const PropsTable = ({ market, playerProps, playerStats, playersMetadata, timefra
       celled
       style={{marginBottom: 20}}
     >
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
-          <Table.HeaderCell rowSpan="2"> Live Prop Line </Table.HeaderCell>
-          <Table.HeaderCell colSpan={
-            market === 'pts' ? 6 
-            : market === 'ast' ? 4
-            : 3
-            } textAlign='center'> Live </Table.HeaderCell>
-          <Table.HeaderCell colSpan="3" textAlign='center'> {timeframeText} </Table.HeaderCell>
-          <Table.HeaderCell colSpan="2" textAlign='center' style={{backgroundColor: '#959EE7'}}> 2H </Table.HeaderCell>
-          <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#C793ED'}}> Q3 </Table.HeaderCell>
-          <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#E79595'}}> Q4 </Table.HeaderCell>
-        </Table.Row>
-        <Table.Row>
-          {/* live */}
-          <Table.HeaderCell> MIN </Table.HeaderCell>
-          <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
-          {(market === 'pts' || market == 'ast') && <>
-            <Table.HeaderCell> USG </Table.HeaderCell>
-          </>}
-          { market === 'pts' && <>
-            <Table.HeaderCell> FG </Table.HeaderCell>
-            <Table.HeaderCell> FT </Table.HeaderCell>
-          </>}
-          <Table.HeaderCell> PF </Table.HeaderCell>
-          {/* season */}
-          <Table.HeaderCell> GP </Table.HeaderCell>
-          <Table.HeaderCell> MIN </Table.HeaderCell>
-          <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
-          {/* 2H */}
-          <Table.HeaderCell style={{backgroundColor: '#BCC7F0'}}> MIN </Table.HeaderCell>
-          <Table.HeaderCell style={{backgroundColor: '#BCC7F0'}}> {headerMappers[market]} </Table.HeaderCell>
-          {/* 3Q */}
-          <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> MIN </Table.HeaderCell>
-          <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> {headerMappers[market]} </Table.HeaderCell>
-          { market === 'pts' && <>
-            <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> FGA </Table.HeaderCell>
-            <Table.HeaderCell style={{backgroundColor: '#D3BFE6'}}> FTA </Table.HeaderCell>
-          </>}
-          {/* 4Q */}
-          <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> MIN </Table.HeaderCell>
-          <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> {headerMappers[market]} </Table.HeaderCell>
-          { market === 'pts' && <>
-            <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> FGA </Table.HeaderCell>
-            <Table.HeaderCell style={{backgroundColor: '#E3C0C0'}}> FTA </Table.HeaderCell>
-          </>}
-        </Table.Row>
-      </Table.Header>
+      <PropsTableHeader market={market} timeframeText={timeframeText}/>
       <Table.Body>
         {renderPropRows()}
       </Table.Body>

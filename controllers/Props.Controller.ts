@@ -4,7 +4,7 @@ import { scrapeBetsson, scrapeBovada } from './Scraper.Controller.js';
 import { Players, PlayerProps, Schedule } from './Db.Controller.js';
 import { SportsbookName } from '../types';
 
-const playerNameMismatches = {
+export const playerNameMismatches = {
   Bovada: {
     // Bovada name : DB name
     'Bruce Brown Jr.': 'Bruce Brown',

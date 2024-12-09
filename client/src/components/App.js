@@ -43,7 +43,7 @@ class App extends React.Component {
               <Route path='/schedule/:date' component={Schedule} />
               <Route path='/netratings' exact component={NetRatings} />
               <Route path='/gamesheet/:gid' component={GameSheet} />
-              <Route path='/gamblecast' component={GambleCast} />
+              <Route path='/gamblecast' exact component={GambleCast} />
               <Route path='/gamblecast/:date' component={GambleCast} />
               <Route path='/player/:pid' component={Player} />
               <TodaysGames />

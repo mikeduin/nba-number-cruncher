@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { Button, Segment } from 'semantic-ui-react';
-import { marketMappers } from '../PlayerProps';
+import { marketMappers } from '../playerProps/PlayerProps';
 import { sumQuarterStats } from '../../utils';
 import { VictoryChart, VictoryBar, VictoryLine, VictoryStack, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer, VictoryLegend } from 'victory';
 
@@ -76,7 +76,7 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
               color='black'
               onClick={() => {
                 setChartMarket(market);
-                setActivePropMarket(market);
+                setActivePropMarket({market, sort: false});
               }}
               basic={market !== chartMarket}
               key={market}
