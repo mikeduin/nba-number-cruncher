@@ -46,7 +46,7 @@ export const EmptyBoxScore = props => {
               fontSize: '10px',
               padding: 0
             }}>
-              <Table.HeaderCell textAlign="right"> <i>Odds -></i> </Table.HeaderCell>
+              <Table.HeaderCell textAlign="right"> <i>Odds &rarr;</i> </Table.HeaderCell>
               <Table.HeaderCell colSpan="2"> {spread}{game.total_full == null ? null : `, O/U ${game.total_full}`} </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> </Table.HeaderCell>
               <Table.HeaderCell colSpan="3"> </Table.HeaderCell>

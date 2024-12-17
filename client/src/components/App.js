@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 import ToastContainer from './ToastContainer';
-import { Container } from 'semantic-ui-react';
 
 import { fetchWeek, getPlayerMetadata, checkActiveGames, fetchDailyBoxScores, fetchActiveBoxScores } from '../actions';
 
@@ -18,14 +17,6 @@ class App extends React.Component {
   componentDidMount () {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
-    // this.props.checkActiveGames();
-    // console.log('activeDay in App is ', this.props.activeDay);
-    // this.props.fetchDailyBoxScores();
-    // this.props.fetchActiveBoxScores();
-    // setInterval(()=>{
-    //   this.props.checkActiveGames();
-    //   this.props.fetchActiveBoxScores();
-    // }, 5000);
   }
 
   render () {

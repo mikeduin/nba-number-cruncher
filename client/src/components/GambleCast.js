@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import moment from "moment";
 import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
-import PlayerProps from './playerProps/PlayerProps';
+import { BoxScoreAccordion } from './BoxScoreAccordion';
 import { Header, Icon } from 'semantic-ui-react';
 import { checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, fetchWeek, setActiveDay } from '../actions';
 
@@ -42,14 +42,14 @@ const GambleCast = (props) => {
   const renderBoxScores = () => {
     const { gambleCast, games, playersMetadata } = props;
     if (games[0]) {
-      return games.map(game => {
+      return games.map((game, i) => {
         const hTid = game.h[0].tid;
         const vTid = game.v[0].tid;
         return (
           <div key={game.gid}>
             <BoxScore game={game} />
-            <PlayerProps
-              key={`props-${game.gid}`}
+            <BoxScoreAccordion
+              key={`props-${game.gid}-${i}]`} 
               game={game}
               playersMetadata={playersMetadata.filter(player => player.team_id == hTid || player.team_id == vTid)}
               boxScore={gambleCast[`live_${game.gid}`]}

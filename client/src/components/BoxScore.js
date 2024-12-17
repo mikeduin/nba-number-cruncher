@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { fetchBoxScore } from '../actions';
 import { Image, Table } from 'semantic-ui-react';
 import { EmptyBoxScore, BoxScoreHeader, Inactives } from './boxscores';
 import logos from '../modules/logos';
@@ -125,7 +124,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.pts : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.v?.fouls : null} </Table.Cell>
-                <Table.Cell> <Inactives logo={game?.v[0] ? logos[game?.v[0].ta] : null} players={boxScore.inactives.v.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
+                <Table.Cell> <Inactives logo={game?.v[0] ? logos[game?.v[0].ta] : null} players={boxScore.inactives?.v.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell> 
@@ -147,7 +146,7 @@ class BoxScore extends React.Component {
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.pts : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fgPct : null} </Table.Cell>
                 <Table.Cell> {boxScore.q4 ? boxScore.q4.h?.fouls : null} </Table.Cell>
-                <Table.Cell> <Inactives logo={game?.h[0] ? logos[game.h[0].ta] : null} players={boxScore.inactives.h.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
+                <Table.Cell> <Inactives logo={game?.h[0] ? logos[game.h[0].ta] : null} players={boxScore.inactives?.h.filter(player => player.min >= this.state.inactivesFilter)}/></Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table>

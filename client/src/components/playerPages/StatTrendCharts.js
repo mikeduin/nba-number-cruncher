@@ -1,19 +1,44 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import { Button, Segment } from 'semantic-ui-react';
-import { marketMappers } from '../playerProps/PlayerProps';
-import { sumQuarterStats } from '../../utils';
-import { VictoryChart, VictoryBar, VictoryLine, VictoryStack, VictoryTheme, VictoryAxis, VictoryLabel, VictoryTooltip, VictoryCursorContainer, VictoryLegend } from 'victory';
+import { marketMappers } from '../PlayerProps';
+import { findKeyByValue, gameTimeToMinutes, maxArrayValue, sumQuarterStats } from '../../utils';
+import { 
+  VictoryAxis,
+  VictoryBar,
+  VictoryChart,
+  VictoryCursorContainer, 
+  VictoryGroup,
+  VictoryTheme,
+  VictoryLabel, 
+  VictoryLine,
+  VictoryScatter, 
+  VictoryStack,
+  VictoryTooltip,
+  VictoryLegend,
+} from 'victory';
 
-const domains = {
-  'pts': { y: [0, 40] }
+const domainMax = {
+  'pts': 20,
+  'reb': 10,
+  'ast': 10,
+  'stl': 5,
+  'blk': 5,
+  'tov': 8,
+  'fg3m': 8,
+  'pts+reb+ast': 40,
+  'pts+reb': 30,
+  'pts+ast': 30,
+  'reb+ast': 20,
 }
 
 const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, liveStat }) => {
   const [chartMarket, setChartMarket] = useState(market);
   const [activePeriod, setActivePeriod] = useState(4); // 4 = TOTAL STATS
 
-  const chartData = () => {
+  console.log('gameData ', gameData);
+
+  const chartData = useMemo(() => { // this is still not preventing component from rerendering
     if (activePeriod !== 4) {
       return {
         data: gameData.map(game => ({
@@ -24,45 +49,60 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
     } else {
       const firstHalfData = [];
       const secondHalfData = [];
+      const fullGameData = [];
+      const minutesData = [];
       const labels = [];
       gameData.forEach(game => {
         const firstHalfStats = sumQuarterStats(game.periods.slice(0, 2));
         const secondHalfStats = sumQuarterStats(game.periods.slice(2, 4));
+        const fullGameStats = game.periods[4];
+        const fullGameMinutes = Math.round(gameTimeToMinutes(fullGameStats.min));
+        const xAxis = { x: moment(game.gdte).format("MM/DD") };
+
+        minutesData.push({
+          ...xAxis,
+          y: fullGameMinutes
+        })
         firstHalfData.push({
-          x: moment(game.gdte).format("MM/DD"),
+          ...xAxis,
           y: firstHalfStats[market]
         })
         secondHalfData.push({
-          x: moment(game.gdte).format("MM/DD"),
+          ...xAxis,
           y: secondHalfStats[market]
         })
+        fullGameData.push({
+          ...xAxis,
+          y: fullGameStats[market]
+        })
         labels.push({
-          x: moment(game.gdte).format("MM/DD"),
+          ...xAxis,
           y: 0,
           label: firstHalfStats[market] + secondHalfStats[market]
         })
       })
       return {
-        data: [firstHalfData, secondHalfData],
+        stat: [firstHalfData, secondHalfData],
+        fullGameStat: fullGameData,
+        minutes: minutesData,
         labels
       };
     }
-  }
+  }, [gameData, market, activePeriod, livePropLine, liveStat]);
 
-  // console.log('chartData', chartData());
-  const livePropLineData = () => {
-    if (activePeriod !== 4) {
-      return chartData().data.map(d => ({x: d.x, y: livePropLine}))
-    } else {
-      return chartData().data[0].map(d => ({x: d.x, y: livePropLine}))
-    }
-  }
-
+  console.log('chartData ', chartData);
 
   const styles = [
     { data: { fill: "#f3d437", stroke: "#d1b322", strokeWidth: 1 } },
-    { data: { fill: "#0ca340", stroke: "#0ca340", strokeWidth: 1 } },
+    // { data: { fill: "#0ca340", stroke: "#0ca340", strokeWidth: 1 } },
+    { data: { fill: "#979ee2", stroke: "#bec7ed", strokeWidth: 1 } },
+    // { data: { fill: "#9dbaf4", stroke: "#5084f2", strokeWidth: 1 } },
+    // { data: { fill: "#a8d9f9", stroke: "#77c7f9", strokeWidth: 1 } },
   ];
+
+  const maxMarketStat = maxArrayValue(chartData.fullGameStat.map(d => d.y));
+  const derivedMax = maxMarketStat > domainMax[market] ? maxMarketStat : domainMax[market];
+  const marketDomain = { y: [0, derivedMax] }
 
   return (
     <>
@@ -86,108 +126,161 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
           )}
         </div>
       </div>
-
-      <VictoryChart
+      <svg viewBox="0 0 450 350">
+        <VictoryLegend
+          standalone={false}
+          x={360}
+          y={5}
+          orientation="horizontal"
+          style={{
+            border: { stroke: "grey" },
+            labels: { fontSize: 8 }
+          }}
+          data={[
+            {
+              name: "1H",
+              symbol: { fill: styles[0].data.fill },
+            },
+            {
+              name: "2H",
+              symbol: { fill: styles[1].data.fill },
+            },
+          ]}
           theme={VictoryTheme.clean}
-          domain={domains[chartMarket]}
-          domainPadding={{ x: 15 }}
-        >
-          <VictoryAxis 
-            crossAxis 
-            style={{
-              tickLabels: { fontSize: 8, padding: 4 },
-            }}
-          />
-          <VictoryAxis dependentAxis />
-          <VictoryAxis
-            dependentAxis
-            orientation="right"
-            tickValues={[livePropLine, liveStat]}
-            tickFormat={(tick) => {
-              if (tick === livePropLine) {
-                return `${tick} PROP`
-              }
-              if (tick === liveStat) {
-                return `${tick} LIVE`
-              }
-            }}
-            style={{
-              tickLabels: { fontSize: 8, padding: 4 },
-              grid: {
-                stroke: ({ tick }) =>
-                  tick === livePropLine
-                    ? "#2d7ff9"
-                    : "#CFD8DC",
-                strokeDasharray: "10, 5",
-              },
-            }}
-            // tickFormat={tickFormat(
-            //   tempRange,
-            // )}
-            // style={{
-            //   axis: {
-            //     stroke: tempAxisColor,
-            //   },
-            //   ticks: {
-            //     stroke: tempAxisColor,
-            //   },
-            //   tickLabels: {
-            //     fill: tempAxisColor,
-            //   },
-            // }}
-          />
-          {/* <VictoryAxis
-            dependentAxis
+        />
+        {activePeriod === 4 
+        ?
+          <g>
+            {/* Date Axis */}
+            <VictoryAxis 
+              crossAxis
+              domainPadding={{ x: 15 }}
+              standalone={false} // required to render in <g> instead of <svg>
+              tickValues={chartData.minutes.map(d => d.x)}
               style={{
+                tickLabels: { fontSize: 8, padding: 0 }, // dates
+              }}
+            />
+            {/* Primary Stat/Market Axis */}
+            <VictoryAxis 
+              dependentAxis
+              orientation="left"
+              standalone={false} // required to render in <g> instead of <svg>
+              domain={marketDomain}
+              label={findKeyByValue(marketMappers, chartMarket)} 
+              style={{
+                tickLabels: { fontSize: 12, padding: 4 },
+              }}
+            />
+            {/* Axis for Live Prop Line and Live Stat */}
+            <VictoryAxis
+              dependentAxis
+              orientation="left"
+              standalone={false} // required to render in <g> instead of <svg>
+              domain={marketDomain}
+              tickLabelComponent={<VictoryLabel dx={395} />} // dx attribute moves label to far right (for prop price / live stat labels)
+              tickValues={[livePropLine, liveStat]}
+              tickFormat={(tick) => {
+                if (tick === livePropLine) {
+                  return `${tick} PROP`
+                }
+                if (tick === liveStat) {
+                  return `${tick} LIVE`
+                }
+              }}
+              style={{
+                tickLabels: { fontSize: 8, padding: 4 },
                 grid: {
                   stroke: ({ tick }) =>
-                    tick === 5
+                    tick === livePropLine
                       ? "#2d7ff9"
                       : "#CFD8DC",
                   strokeDasharray: "10, 5",
                 },
               }}
-            /> */}
-          {activePeriod === 4 
-            ? <VictoryStack>
-                {chartData().data.map((d, i) => (
-                  <VictoryBar
-                    key={i}
-                    style={{ 
-                      labels: { fill: "white" },
-                      ...styles[i]
-                    }}
-                    data={d}
-                    labels={({ datum }) => datum.y}
-                    labelComponent={<VictoryLabel dy={20} />}
-                  />
-                ))}
-                <VictoryBar barRatio={0.25} data={chartData().labels} />
-              </VictoryStack>
-            : 
-              <VictoryBar 
-                data={chartData.data()}
-                labels={({ datum }) => datum.y}
-              />
-            }
-          {/* <VictoryLine
-            data={livePropLineData()}
-            style={{
-              data: {
-                stroke: "#CFD8DC",
-                strokeDasharray: "10, 5",
+            />
+            {/* Minutes Axis */}
+            <VictoryAxis 
+              dependentAxis
+              orientation="right"
+              standalone={false} // required to render in <g> instead of <svg>
+              domain={[0, 48]}
+              // label={findKeyByValue(marketMappers, chartMarket)} 
+              style={{
+                tickLabels: { fontSize: 12, padding: 4 },
+              }}
+            />
+            {/* Game Log Bar Charts */}
+            <VictoryStack 
+              domainPadding={{ x: 15 }}
+              standalone={false}
+            >
+              {chartData.stat.map((d, i) => (
+                <VictoryBar
+                  theme={VictoryTheme.clean}
+                  domain={marketDomain}
+                  key={i}
+                  style={{ 
+                    labels: { fill: "white" },
+                    ...styles[i]
+                  }}
+                  data={d}
+                  labels={({ datum }) => datum.y > 0 ? datum.y : ''} // only show label in bar if value > 0
+                  labelComponent={
+                    <VictoryLabel 
+                      dy={12} 
+                      style={{fontSize: 12}}
+                    />
+                  }
+                />
+              ))}
+              {/* Full Game Stat Labels */}
+              <VictoryBar standalone={false}  barRatio={0.25} data={chartData.labels} />
+            </VictoryStack>
+            {/* Minutes Line Chart -- keep this on bottom to keep on top of the visibility stack*/}
+            <VictoryLine 
+              theme={VictoryTheme.clean}
+              standalone={false}
+              domain={{
+                y: [0, 48]
+              }}  
+              domainPadding={{ x: 15 }}
+              // labels={({ datum }) => datum.y} // diabling these in favor of tooltips
+              interpolation="monotoneX" // smooths lines between data points
+              data={chartData.minutes}
+              style={{ data: { stroke: "#2d7ff9", strokeWidth: 2 } }}
+            />
+            {/* Minutes Scatter */}
+            <VictoryScatter
+              size={3}
+              standalone={false}
+              data={chartData.minutes}
+              domain={{
+                y: [0, 48]
+              }} 
+              domainPadding={{ x: 15 }}
+              labels={({ datum }) => datum.y}
+              labelComponent={
+                <VictoryTooltip dy={-10} />
               }
-            }}
-            // labelComponent={
-            //   <VictoryLabel
-            //     dx={20}
-            //     textAnchor="start"
-            //     verticalAnchor="middle"
-            //   />
-            // }
-          /> */}
-      </VictoryChart>
-      
+              // symbol={symbols[i]}
+              style={{
+                data: {
+                  fill: "#2d7ff9"
+                },
+              }}
+            />
+          </g>
+        : 
+        <g>
+          <VictoryBar 
+            data={chartData.data()}
+            labels={({ datum }) => datum.y}
+          />
+        </g>
+          
+        }
+      </svg>
     </>
   );
 }

@@ -99,8 +99,7 @@ export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string)
   return {dashedDateWeeks, intDateWeeks};
 }
 
-// this looks like it's also functioning to update schedule?
-export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: SeasonNameAbb) => {
+export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: SeasonNameAbb) => {
   const seasonYear = getCurrentSeasonStartYearInt();
   const currentSeasonDates = SEASON_DATES.find(season => season.yearInt === seasonYear);
   const schedulePull = await axios.get(LEAGUE_SCHEDULE_URL(seasonYear));
@@ -110,17 +109,14 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
     ? leagueSchedule.filter((month) => month.mscd.mon === monthFilter)
     : leagueSchedule;
 
-  const existingGameMap = await getExistingSeasonGames(seasonYear);
-  const mappedGids = existingGameMap.map(game => game.gid);
-
   parsedSchedule.forEach(month => {
     month.mscd.g.forEach(async game => {
       const { gid, gcode, gdte, an, ac, as, etm, stt, v, h } = game;
 
       // if game does not exist, insert game
-      const existingGame = mappedGids.includes(gid.slice(2)); // NBA gids have two leading zeroes, my DB gids do not
+      const existingGame = await Db.Schedule().where({ gid: gid.slice(2) }).select('gid', 'gdte', 'etm'); // need to pull fields to check gdte and etm later
 
-      if (!existingGame) {
+      if (!existingGame.length) {
         console.log('game is not found in schedule, adding ', gid);
 
         if (etm === 'TBD') {
@@ -156,10 +152,11 @@ export const buildSchedule = async (monthFilter?: Month, seasonStageFilter?: Sea
               updated_at: new Date()
             }
           );
-          console.log(game.gcode, " entered in DB");
+          console.log(game.gcode, " added to schedule in DB");
         }
       } else {
-        const gameDateOrTimeChanged = game.gdte !== existingGame[0].gdte || game.etm !== existingGame[0].etm;
+        const gameDateOrTimeChanged = game.gdte !== existingGame[0].gdte
+          || moment(game.etm).subtract(3, 'hours').format("hh:mm:ss a") !== moment(existingGame[0].etm).format("hh:mm:ss a");
 
         if (gameDateOrTimeChanged) {
           await Db.Schedule().where({ gid: game.gid.slice(2) }).update({
@@ -198,7 +195,7 @@ export const prepareInactives = async (inactives, teamAbbs: string[]) => {
 
 // This method is used to mass-update inactives that have not previously been set in the schedule
 
-export const updatePastScheduleForInactivesAndResult = async () => {
+export const updatePastScheduleForInactives = async () => {
   const season = getCurrentSeasonStartYearInt();
   const inactiveGames = await Db.Schedule().where({ 
     season_year: season, 
@@ -218,25 +215,45 @@ export const updatePastScheduleForInactivesAndResult = async () => {
     const hInactives = await prepareInactives(homeTeam.inactives, [hAbb]);
     const vInactives = await prepareInactives(awayTeam.inactives, [vAbb]);
 
-    const hScore = homeTeam.score;
-    const vScore = awayTeam.score;
-
     const inactives = {
       h: hInactives,
       v: vInactives
     };
 
-    const result = `${vAbb} ${vScore} @ ${hAbb} ${hScore}`
-
-    // console.log('inactives are ', inactives, ' and result is ', result)
-
     await Db.Schedule().where({gid: game.gid}).update({
       inactives,
       inactives_set: true,
-      result
     });
 
-    console.log('inactives and result have been set for gid ', game.gid);
+    console.log('inactives have been set for gid ', game.gid);
+  })
+}
+
+export const updatePastScheduleForResults = async () => {
+  const season = getCurrentSeasonStartYearInt();
+  const gamesWithNoResults = await Db.Schedule().where({ 
+    season_year: season, 
+    result: null,
+    stt: 'Final'
+  }).select('gid', 'h', 'v');
+
+  gamesWithNoResults.forEach(async game => {
+    const hAbb = game.h[0].ta;
+    const vAbb = game.v[0].ta;
+
+    const response = await fetchBoxScore(vAbb, hAbb, game.gid); // pull live NBA.com data, convert to JSON
+    const boxScore = response.props.pageProps.game;
+
+    const { homeTeam, awayTeam } = boxScore;
+
+    const hScore = homeTeam.score;
+    const vScore = awayTeam.score;
+
+    const result = `${vAbb} ${vScore} @ ${hAbb} ${hScore}`
+
+    await Db.Schedule().where({gid: game.gid}).update({result});
+
+    console.log('result have been set for gid ', game.gid);
   })
 }
 

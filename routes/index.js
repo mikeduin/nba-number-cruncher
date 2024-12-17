@@ -33,7 +33,7 @@ import { EMPTY_BOX_SCORE } from "../constants";
 
 import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
-import { buildSchedule, getActiveGames, updatePastScheduleForInactivesAndResult } from "../controllers/Schedule.Controller.js";
+import { updateSchedule, getActiveGames, updatePastScheduleForInactives, updatePastScheduleForResults } from "../controllers/Schedule.Controller.js";
 import { fetchBoxScore, getCompletedGameResponse, parseGameData } from "../controllers/BoxScore.Controller.js";
 import { scrapeBetsson } from "../controllers/Scraper.Controller.js";
 import { deleteDuplicateProps, updateSingleGameProps } from "../controllers/Props.Controller.js";
@@ -43,15 +43,6 @@ import { getDailyGames, getCompletedGameGids } from "../repositories";
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// getActiveGames('2024-04-27');
-
-// console.log('current season stage', getCurrentSeasonStage('2024-10-24'));
-
-// getGameWeek('2024-10-12');
-
-// getGameWeekDateArray('2024-10-12');
-
 
 // STEP 1: BUILD NBA SCHEDULE
 // dbBuilders.buildSchedule();
@@ -77,40 +68,40 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-(async () => { 
-  // await updatePastScheduleForInactivesAndResult();
+// (async () => { 
+//   await updatePastScheduleForResults();
 // // schedule.scheduleJob(rule, async () => {
-  // let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-  // while (moment(yesterday).isAfter('2024-10-20')) {
-  //   await updatePlayerBoxScoresByPeriod(yesterday);
-  //   await delay(1000);
-  //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-  // }
-    // Team Stat Updaters
-    // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-    // setTimeout(()=>{updateStarterBuilds()}, 10000);
-    // setTimeout(()=>{updateBenchBuilds()}, 20000);
-    // setTimeout(()=>{updateQ1Builds()}, 30000);
-    // setTimeout(()=>{updateQ2Builds()}, 40000);
-    // setTimeout(()=>{updateQ3Builds()}, 50000); 
-    // setTimeout(()=>{updateQ4Builds()}, 60000);
-    // setTimeout(()=>{mapTeamNetRatings()}, 70000);
-    // setTimeout(()=>{mapTeamPace()}, 80000);
+//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+//   while (moment(yesterday).isAfter('2024-12-09')) {
+//     await updatePlayerBoxScoresByPeriod(yesterday);
+//     await delay(1000);
+//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   }
+//     // Team Stat Updaters
+//     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+//     // setTimeout(()=>{updateStarterBuilds()}, 10000);
+//     // setTimeout(()=>{updateBenchBuilds()}, 20000);
+//     // setTimeout(()=>{updateQ1Builds()}, 30000);
+//     // setTimeout(()=>{updateQ2Builds()}, 40000);
+//     // setTimeout(()=>{updateQ3Builds()}, 50000); 
+//     // setTimeout(()=>{updateQ4Builds()}, 60000);
+//     // setTimeout(()=>{mapTeamNetRatings()}, 70000);
+//     // setTimeout(()=>{mapTeamPace()}, 80000);
 
-    // Player Stat Updaters
-    // setTimeout(()=>{updatePlayerPositions()}, 500);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
-    // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
-    // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-    // // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
-    // // // setTimeout(()=>{dbBuilders.updateSchedule()}, 240000); // not working for playoffs
-    // setTimeout(()=>{mapFullPlayerData()}, 100000);
-    // setTimeout(()=>{addGameStints()}, 120000);
-    // // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
-    // setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
-  // }) 
-})()
+//     // Player Stat Updaters
+//     setTimeout(()=>{updatePlayerPositions()}, 500);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+//     // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+//     setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
+//     setTimeout(()=>{mapFullPlayerData()}, 100000);
+//     setTimeout(()=>{addGameStints()}, 120000);
+//     // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
+//     setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
+//   // }) 
+// })()
 
 // if (process.env.NODE_ENV !== 'production') {
 //   const fetchWithRandomInterval = async () => {
@@ -122,12 +113,6 @@ rule.second = 48;
 //   // Start the first fetch
 //   fetchWithRandomInterval();
 // }
-
-// this function manages a day's active and completed games for the GambleCast
-// setInterval(async () => {
-//   activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD'));
-//   // activeGames = await getActiveGames('2024-11-18'); // UPDATE
-// }, 10000)
 
 // This function pulls in odds
 // setInterval(()=>{
@@ -312,8 +297,8 @@ router.get("/api/fetchActiveBoxScores/:activeDay", async (req, res) => {
             const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
             return {
               ...player,
-              position: gamePlayers.find(p => p.player_id === player.personId).position,
-              min: dbPlayer.min_full
+              position: gamePlayers.find(p => p.player_id === player.personId)?.position,
+              min: dbPlayer?.min_full
             }
           })
 
@@ -322,8 +307,8 @@ router.get("/api/fetchActiveBoxScores/:activeDay", async (req, res) => {
 
             return {
               ...player,
-              position: dbPlayer.position,
-              min: dbPlayer.min_full
+              position: dbPlayer?.position,
+              min: dbPlayer?.min_full
             }
           })
   

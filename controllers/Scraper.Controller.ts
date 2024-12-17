@@ -127,21 +127,36 @@ export const scrapeBetsson = async (gameUrl: string) => {
       const page = await browser.newPage();
 
       // If GameURL does not have "&mtg=6" at the end, add it
-      if (!gameUrl.includes('&mtg=6')) {
-        gameUrl += '&mtg=6';
+      if (!gameUrl.includes('&mtg=25')) {
+        gameUrl += '&mtg=25';
       }
   
       // Navigate to the URL
       await page.goto(gameUrl);
+
+      console.log('has gone to gameUrl');
   
       const props = [];
   
       try {
+        console.log('waiting for selector');
         // You might need to wait for a specific element or some time for the dynamic content to load
         await page.waitForSelector('.obg-m-event-markets-content-column');
 
+        // console.log('page is ', page);
+
+        const closedAccordionSelector = '.obg-uiuplift-accordion-item-close';
+        const closedAccordions = await page.$$(closedAccordionSelector);
+
+        console.log('closedAccordions are ', closedAccordions);
+
+        for (const accordion of closedAccordions) {
+          await accordion.click();
+        }
+
         const buttonSelector = '.obg-show-more-less-button';
         const buttons = await page.$$(buttonSelector);
+        console.log('buttons are ', buttons);
         for (const button of buttons) {
           await button.click();
           // Optionally, you can wait for some time between clicks
@@ -151,14 +166,19 @@ export const scrapeBetsson = async (gameUrl: string) => {
         // Extract the content
         const content = await page.content();
         const $ = cheerio.load(content);
-  
+
+        // console.log('content is ', content);
+
+        // $('.obg-m-event-player-props-market-group').each(function(i, elem) {
         $('obg-m-event-market-group').each(function(i, elem) {
           const market = $(elem).find('div.obg-m-event-market-group-header').text().trim();
 
           // in each market, loop through the instances of <obg-uiuplift-accordion class="obg-m-event-player-props-market-group"/>
           // and extract the player, line, over, and under
           $(elem).find('obg-uiuplift-accordion.obg-m-event-player-props-market-group').each(function(j, elem) {
+            console.log('elem is ', elem);
             const player = $(elem).find('span.obg-selection-v2-label.group-label').first().text().trim();
+            console.log('player is ', player);
             const line = $(elem).find('span.obg-selection-v2-label:not(.group-label)').first().text().trim().split(' ')[1]; // "Over 25.5" ... get value after space
             const over = $(elem).find('span.obg-numeric-change-container-odds-value').first().text();
             const under = $(elem).find('span.obg-numeric-change-container-odds-value').eq(1).text();

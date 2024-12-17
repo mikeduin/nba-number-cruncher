@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { Accordion, Button, Input, Segment, Image } from 'semantic-ui-react';
-import PropsTable from './PropsTable';
+import { Button, Input, Segment, Image } from 'semantic-ui-react';
+import PropsTable from './playerProps/PropsTable';
 import { toast } from 'react-semantic-toasts';
-import logos from '../../modules/logos';
+import logos from '../modules/logos';
 
 export const marketMappers = {
   'Total Points': 'pts',
@@ -121,10 +121,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     setTeamFilter(teamFilter === teamAbb ? null : teamAbb);
   }
 
-  const homeTeamName = game.h[0].tn;
-  const awayTeamName = game.v[0].tn;
-
-  const Level1Content = (
+  return (
     <div style={{width: '100%'}}>
       <Segment 
         attached='top'
@@ -204,20 +201,6 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
       />
     </div>
   )
-
-  const rootPanels = [
-    { key: 'panel-1', title: `${awayTeamName} @ ${homeTeamName} PROPS`, content: { content: Level1Content } },
-  ]
-
-  return (
-    <Accordion 
-      panels={rootPanels} 
-      styled 
-      fluid
-      attached='bottom'
-      style={{marginBottom: 20}}
-    />
-  )  
 }
 
 const mapStateToProps = state => {

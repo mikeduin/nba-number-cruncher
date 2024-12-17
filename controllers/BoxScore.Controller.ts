@@ -2,7 +2,8 @@ import axios from "axios";
 import cheerio from "cheerio";
 import knex from "../db/knex.js";
 import { getClocks, getGameSecs, getCurrentAndPrevQuarterStats, calcGamePoss, compileGameStats, mapPlayerStatistics } from '../utils';
-import { CompletedBoxScoreModel, NbaApiBoxScore } from "../models"
+import { CompletedBoxScoreModel, NbaApiBoxScore, UpdateBoxScore } from "../models"
+import { updateGameBoxScore } from "../repositories";
 import { BoxScoreResponse } from "../types"
 import { GAME_BOX_SCORE_URL } from "../constants";
 
@@ -61,19 +62,23 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
     const qTotals = await getCurrentAndPrevQuarterStats(gid, hTeam, vTeam, period, gameSecs);
     const currentQuarter = qTotals?.currentQuarter;
 
+    const baseUpdatePayload: UpdateBoxScore = {
+      period_updated: period,
+      clock_last_updated: gameSecs,
+      totals: [totalsObj],
+      player_stats: JSON.stringify(playerStats),
+    }
+
     if (period === 1) {
       try {
         const entry = await knex("box_scores_v2").where({gid});
         if (!entry[0]) {
           await knex("box_scores_v2").insert({
+            ...baseUpdatePayload,
             gid: gid,
             h_tid: hTid,
             v_tid: vTid,
-            period_updated: 1,
-            clock_last_updated: gameSecs,
-            totals: [totalsObj],
             q1: [totalsObj],
-            player_stats: JSON.stringify(playerStats),
             updated_at: new Date()
           });
           console.log('Q1 stats inserted for ', gid);
@@ -87,29 +92,37 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
       try {
         const qTest = await knex("box_scores_v2").where({gid}).pluck(`${qVariable}`);
         if (qTest[0] == null) {
-          await knex("box_scores_v2").where({gid}).update({
-            period_updated: period,
-            clock_last_updated: gameSecs,
-            totals: [totalsObj],
+          const updatePayload: UpdateBoxScore = {
+            ...baseUpdatePayload,
             [qVariable]: [currentQuarter],
-            player_stats: JSON.stringify(playerStats),
-            updated_at: new Date()
-          });
+          }
+          await updateGameBoxScore(gid, updatePayload);
+          // await knex("box_scores_v2").where({gid}).update({
+          //   period_updated: period,
+          //   clock_last_updated: gameSecs,
+          //   totals: [totalsObj],
+          //   [qVariable]: [currentQuarter],
+          //   player_stats: JSON.stringify(playerStats),
+          // });
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
-          await knex("box_scores_v2").where({gid: gid}).update({
-            final: true
-          }); 
-          await knex("schedule").where({gid: gid}).update({
-            stt: "Final",
-            result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
-          }); 
+          await updateGameBoxScore(gid, {final: true})
+          // await knex("box_scores_v2").where({gid: gid}).update({
+          //   final: true
+          // }); 
+
+          // this below doesn't look like it's working, delete when stt and result are confirmed set properly
+          // await knex("schedule").where({gid: gid}).update({
+          //   stt: "Final",
+          //   result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
+          // }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
           console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid} -- just updating player stats`);
-          await knex("box_scores_v2").where({gid}).update({
-            player_stats: JSON.stringify(playerStats),
-          });
+          await updateGameBoxScore(gid, {player_stats: JSON.stringify(playerStats)});
+          // await knex("box_scores_v2").where({gid}).update({
+          //   player_stats: JSON.stringify(playerStats),
+          // });
         }
       } catch (e) {
         console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
@@ -120,17 +133,24 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
       // if (qTest[0] == null && !isGameActivated) {
       if (gameOver) {
         try {
-          await knex("box_scores_v2").where({gid: gid}).update({
-            period_updated: period,
-            clock_last_updated: gameSecs,
-            totals: [totalsObj],
+          const updatePayload: UpdateBoxScore = {
+            ...baseUpdatePayload,
             ot: [currentQuarter],
-            player_stats: JSON.stringify(playerStats),
             final: true,
-            updated_at: new Date()
-          });
+          }
+          await updateGameBoxScore(gid, updatePayload);
+          // await knex("box_scores_v2").where({gid: gid}).update({
+          //   period_updated: period,
+          //   clock_last_updated: gameSecs,
+          //   totals: [totalsObj],
+          //   ot: [currentQuarter],
+          //   player_stats: JSON.stringify(playerStats),
+          //   final: true,
+          //   updated_at: new Date()
+          // });
           await knex("schedule").where({gid: gid}).update({
-            stt: "Final"
+            stt: "Final",
+            result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
           }); 
           console.log('OT stats inserted for ', gid);
         } catch (e) {

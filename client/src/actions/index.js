@@ -28,7 +28,6 @@ export const fetchWeek = (date = today) => async (dispatch, getState) => {
 
 export const fetchPlayerProps = () => async (dispatch, getState) => {
   const activeDay = getState().activeDay;
-  console.log('activeDay in fetchPlayerProps is ', activeDay);
   const response = await axios.get(`/api/fetchPlayerProps/${activeDay}`);
   const data = response.data;
   dispatch({ type: 'FETCH_PLAYER_PROPS', payload: { 
@@ -179,7 +178,6 @@ const updateGamblecast = (game) => async (dispatch) => {
 
 export const fetchDailyBoxScores = () => async (dispatch, getState) => {
   const activeDay = getState().activeDay;
-  console.log('activeDay in fetchDailyBoxScores', activeDay);
   const dailyBoxScores = await axios.get(`/api/fetchDailyBoxScores/${activeDay}`);
   dailyBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
