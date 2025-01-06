@@ -2,7 +2,7 @@ import axios from "axios";
 import cheerio from "cheerio";
 import knex from "../db/knex.js";
 import { getClocks, getGameSecs, getCurrentAndPrevQuarterStats, calcGamePoss, compileGameStats, mapPlayerStatistics } from '../utils';
-import { CompletedBoxScoreModel, NbaApiBoxScore, UpdateBoxScore } from "../models"
+import { CompletedBoxScoreDb, NbaApiBoxScore, UpdateBoxScore } from "../models"
 import { updateGameBoxScore } from "../repositories";
 import { BoxScoreResponse } from "../types"
 import { GAME_BOX_SCORE_URL } from "../constants";
@@ -22,7 +22,7 @@ export const fetchBoxScore = async (vAbb: string, hAbb: string, gid: number) => 
   }
 };
 
-export const getCompletedGameResponse = (boxScore: CompletedBoxScoreModel): BoxScoreResponse => {
+export const getCompletedGameResponse = (boxScore: CompletedBoxScoreDb): BoxScoreResponse => {
   const { gid, final, q1, q2, q3, q4, ot, totals, player_stats, inactives } = boxScore;
   return {
     gid,

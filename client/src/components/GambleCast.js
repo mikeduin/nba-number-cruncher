@@ -49,7 +49,7 @@ const GambleCast = (props) => {
           <div key={game.gid}>
             <BoxScore game={game} />
             <BoxScoreAccordion
-              key={`props-${game.gid}-${i}]`} 
+              // key={`props-${game.gid}-${i}]`} 
               game={game}
               playersMetadata={playersMetadata.filter(player => player.team_id == hTid || player.team_id == vTid)}
               boxScore={gambleCast[`live_${game.gid}`]}

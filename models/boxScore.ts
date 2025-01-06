@@ -1,6 +1,6 @@
 import { BoxScore } from "../types/BoxScore";
 
-export interface BoxScoreModel {
+export interface BoxScoreDb {
   id: string;
   gid: number;
   h_tid: number;
@@ -18,7 +18,7 @@ export interface BoxScoreModel {
   player_stats: string;
 }
 
-export interface CompletedBoxScoreModel extends BoxScoreModel {
+export interface CompletedBoxScoreDb extends BoxScoreDb {
   inactives: any
 }
 

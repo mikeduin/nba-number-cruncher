@@ -49,7 +49,9 @@ export const scrapeBovada = async (gameUrl) => {
         // await page.waitForSelector('.league-header');
 
         // await page.waitForSelector('.KambiBC-event-page-component__columns');
-        await page.waitForSelector('.obg-m-event-markets-content-column');
+        // await page.waitForSelector('.obg-m-event-markets-content-column');
+        // await page.waitForSelector('.obg-m-event-tabs-container');
+        await page.waitForSelector('.obg-m-event-market-group-live');
 
         const buttonSelector = '.obg-show-more-less-button';
         const buttons = await page.$$(buttonSelector);
@@ -128,7 +130,9 @@ export const scrapeBetsson = async (gameUrl: string) => {
 
       // If GameURL does not have "&mtg=6" at the end, add it
       if (!gameUrl.includes('&mtg=25')) {
+      // if (!gameUrl.includes('&mtg=6')) {
         gameUrl += '&mtg=25';
+        // gameUrl += '&mtg=6';
       }
   
       // Navigate to the URL

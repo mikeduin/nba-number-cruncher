@@ -67,6 +67,12 @@ export const getPlayerMetadata = () => async dispatch => {
   dispatch({ type: 'LOAD_PLAYER_METADATA', payload: players.data.players })
 }
 
+export const getTeamNotes = () => async dispatch => {
+  let teamNotes = await axios.get('/api/getTeamNotes');
+
+  dispatch({ type: 'SET_TEAM_NOTES', payload: teamNotes.data })
+}
+
 export const fetchGame = ({gid}) => async dispatch => {
   let response = await fetch(`/api/fetchGame/${gid}`);
   let data = await response.json();

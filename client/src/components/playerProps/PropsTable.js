@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';  
-import { Image, Tab, Table } from 'semantic-ui-react';
+import { Icon, Image, Popup, Tab, Table } from 'semantic-ui-react';
 import '../styles/gamblecast.css';
 // find and import player logo image references
 import logos from '../../modules/logos';
@@ -48,6 +48,8 @@ const PropsTable = ({
 }) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [playerData, setPlayerData] = useState({});
+
+  console.log('playerstats:', playerStats);
 
   const toggleRow = (playerId) => {
     setExpandedRows((prevState) => ({
@@ -116,6 +118,13 @@ const PropsTable = ({
             <Table.Cell style={{position: 'relative'}}>
               <div style={{ position: 'absolute', top: 0, right: 5, height: '30px', width: '30px', display: 'inline-block'}}>
                 <Image size="mini" circular src={logos[prop.team]} />
+              </div>
+              <div style={{ position: 'absolute', bottom: 0, right: -5, height: '30px', width: '30px', display: 'inline-block'}}>
+                <Popup
+                  trigger={livePlayerStats?.starter === '1' ? <Icon name='stripe s' color='green'/> : <Icon name='bold' color='grey'/>}
+                  content={livePlayerStats?.starter === '1' ? "Starter" : "Bench"}
+                  basic
+                />
               </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Link to={`/player/${prop.player_id}`} className='player-link'>

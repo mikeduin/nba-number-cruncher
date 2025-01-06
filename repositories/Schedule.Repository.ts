@@ -26,3 +26,15 @@ export const setGameStintsUpdated = async (gid: number) => {
     updated_at: new Date()
   })
 }
+
+export const updateScheduleGame = async (gid: number, payload: any) => {
+  try {
+    await Schedule().where({ gid }).update({
+      ...payload,
+      updated_at: new Date()
+    });
+    console.log('updated schedule game for game ', gid);
+  } catch (error) {
+    console.error('Error updating schedule game:', error);
+  }
+}

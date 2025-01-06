@@ -4,7 +4,7 @@ import * as Db from './Db.Controller.js';
 import { LEAGUE_SCHEDULE_URL, SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
 import { fetchBoxScore } from './BoxScore.Controller.js';
-import { getExistingSeasonGames } from '../repositories';
+import { getBoxScore, getExistingSeasonGames, updateGameBoxScore, updateScheduleGame } from '../repositories';
 import {
   formBovadaUrl,
   getCurrentSeasonDisplayYear,
@@ -12,6 +12,7 @@ import {
   getSeasonNameAbb,
   getSeasonNameFull,
 } from '../utils';
+import { update } from 'lodash';
 
 const getPrePostGameWeek = (gameDate: string, dashedDateWeeks: string[][]) => {
   return dashedDateWeeks.findIndex((week: string[]) => week.includes(gameDate));
@@ -52,7 +53,7 @@ export const getActiveGames = async (date: string) => {
 
 export const buildSeasonGameWeekArray = (seasonStart: string, seasonEnd: string) => {
   // Remember that in dashedDates and intDates, array indices correspond to LITERAL GAME WEEKS.
-  // So dashedDates[1] will be the first week of Survivor play, and dashedDates[0] will be the week BEFORE the game begins
+  // So dashedDates[1] will be the first week of the schedule, and dashedDates[0] will be the week BEFORE games begin
   let dashedDateWeeks = [];
   let intDateWeeks = [];
   let mondayAfterLastWeek = null;
@@ -173,7 +174,6 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
 }; 
 
 export const prepareInactives = async (inactives, teamAbbs: string[]) => {
-
   const gamePlayers = await Db.Players()
     .where({season: getCurrentSeasonStartYearInt()})
     .whereIn('team_abbreviation', [ ...teamAbbs ])
@@ -185,6 +185,7 @@ export const prepareInactives = async (inactives, teamAbbs: string[]) => {
     return {
       ...player,
       position: dbPlayer?.position,
+      fullName: `${player.firstName} ${player.familyName}`,
       min: dbPlayer?.min_full
     }
   })
@@ -192,9 +193,73 @@ export const prepareInactives = async (inactives, teamAbbs: string[]) => {
   return preparedInactives;
 }
 
+export const checkForMissingInactives = async () => {
+  const season = getCurrentSeasonStartYearInt();
+
+  const gamesWithInactivesSet = await Db.Schedule().where({ 
+    gdte: '2024-12-25', // temp
+    season_year: season, 
+    inactives_set: true
+  }).select('gid', 'h', 'v', 'inactives');
+
+  gamesWithInactivesSet.forEach(async game => {
+    const hAbb = game.h[0].ta;
+    const vAbb = game.v[0].ta;
+
+    // get the players on each team who average more than 6 MPG
+    const relevantPlayers = await Db.Players()
+      .where({season})
+      .where('min_full', '>', 6)
+      .whereIn('team_abbreviation', [hAbb, vAbb])
+      .select('player_id', 'min_full', 'position');
+
+    // get boxScore from DB  
+    const boxScore = await getBoxScore(game.gid);
+
+    if (!boxScore) {
+      console.log('no boxScore found for gid ', game.gid);
+      return;
+    }
+
+    const { h_tid, v_tid, player_stats: playerStats } = boxScore;
+
+    const existingInactives = JSON.parse(game.inactives);
+
+    const playersWithNoMins = JSON.parse(playerStats).filter(player => 
+      player.min === 0 && relevantPlayers
+        .map(player => player.player_id)
+        .includes(player.player_id));
+
+    const prepInactive = (player) => ({
+      personId: player.player_id,
+      fullName: player.player_name,
+      teamId: player.team_id,
+      min: relevantPlayers.find(p => p.player_id === player.player_id)?.min_full,
+      position: relevantPlayers.find(p => p.player_id === player.player_id)?.position
+    })
+
+    const updatedInactives = {
+      ...existingInactives,
+      h: [
+        ...existingInactives.h,
+        ...playersWithNoMins
+          .filter(player => player.team_id === h_tid)
+          .map(player => prepInactive(player))
+      ],  
+      v: [
+        ...existingInactives.v,
+        ...playersWithNoMins
+          .filter(player => player.team_id === v_tid)
+          .map(player => prepInactive(player))
+      ]
+    }
+
+    await updateScheduleGame(game.gid, {inactives: JSON.stringify(updatedInactives)});
+  })
+}
+
 
 // This method is used to mass-update inactives that have not previously been set in the schedule
-
 export const updatePastScheduleForInactives = async () => {
   const season = getCurrentSeasonStartYearInt();
   const inactiveGames = await Db.Schedule().where({ 
@@ -228,6 +293,8 @@ export const updatePastScheduleForInactives = async () => {
     console.log('inactives have been set for gid ', game.gid);
   })
 }
+
+// add column for inactives_finalized, then run above op
 
 export const updatePastScheduleForResults = async () => {
   const season = getCurrentSeasonStartYearInt();

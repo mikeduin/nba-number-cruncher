@@ -33,7 +33,7 @@ import { EMPTY_BOX_SCORE } from "../constants";
 
 import * as Db from '../controllers/Db.Controller.js';
 import { fetchDailyGameProps } from "../controllers/Props.Controller.js";
-import { updateSchedule, getActiveGames, updatePastScheduleForInactives, updatePastScheduleForResults } from "../controllers/Schedule.Controller.js";
+import { updateSchedule, getActiveGames, updatePastScheduleForInactives, updatePastScheduleForResults, checkForMissingInactives } from "../controllers/Schedule.Controller.js";
 import { fetchBoxScore, getCompletedGameResponse, parseGameData } from "../controllers/BoxScore.Controller.js";
 import { scrapeBetsson } from "../controllers/Scraper.Controller.js";
 import { deleteDuplicateProps, updateSingleGameProps } from "../controllers/Props.Controller.js";
@@ -65,6 +65,8 @@ rule.tz = 'America/Los_Angeles';
 rule.hour = 0o2;
 rule.minute = 19;
 rule.second = 48;
+
+// checkForMissingInactives();
 
 // dbBuilders.updatePlayoffSchedule();
 
@@ -158,6 +160,17 @@ router.post("/api/updateProps", async (req, res, next) => {
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating props for ', gid, ' is ', e);
+    res.send({message: 'error'});
+  }
+})
+
+router.post("/api/updateTeamNotes", async (req, res, next) => {
+  const { gid, notes } = req.body;
+  try {
+    await knex("schedule").where({gid: gid}).update({notes: notes});
+    res.send({message: 'success'});
+  } catch (e) {
+    console.log('error updating notes for ', gid, ' is ', e);
     res.send({message: 'error'});
   }
 })

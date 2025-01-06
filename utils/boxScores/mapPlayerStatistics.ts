@@ -10,7 +10,7 @@ export const mapPlayerStatistics = (
   gameCompleted: boolean = false,
 ) => players.map(player => {
   const { minutes: teamMin, fieldGoalsAttempted: teamFga, freeThrowsAttempted: teamFta, turnovers: teamTov } = teamStatistics;
-  const { oncourt } = player;
+  const { oncourt, starter } = player;
 
   const { 
     assists: ast,
@@ -54,6 +54,7 @@ export const mapPlayerStatistics = (
     min: !gameCompleted ? getPlayerBoxScoreMinutes(min) : min, // assume this means the PT notation also shows up while game in progress
     reb,
     oncourt,
+    starter,
     pts,
     stl,
     fg3m,
