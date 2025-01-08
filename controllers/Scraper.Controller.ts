@@ -49,9 +49,7 @@ export const scrapeBovada = async (gameUrl) => {
         // await page.waitForSelector('.league-header');
 
         // await page.waitForSelector('.KambiBC-event-page-component__columns');
-        // await page.waitForSelector('.obg-m-event-markets-content-column');
-        // await page.waitForSelector('.obg-m-event-tabs-container');
-        await page.waitForSelector('.obg-m-event-market-group-live');
+        await page.waitForSelector('.obg-m-event-markets-content-column');
 
         const buttonSelector = '.obg-show-more-less-button';
         const buttons = await page.$$(buttonSelector);
@@ -176,13 +174,14 @@ export const scrapeBetsson = async (gameUrl: string) => {
         // $('.obg-m-event-player-props-market-group').each(function(i, elem) {
         $('obg-m-event-market-group').each(function(i, elem) {
           const market = $(elem).find('div.obg-m-event-market-group-header').text().trim();
+          // console.log('market is ', market);
 
           // in each market, loop through the instances of <obg-uiuplift-accordion class="obg-m-event-player-props-market-group"/>
           // and extract the player, line, over, and under
           $(elem).find('obg-uiuplift-accordion.obg-m-event-player-props-market-group').each(function(j, elem) {
-            console.log('elem is ', elem);
+            // console.log('elem is ', elem);
             const player = $(elem).find('span.obg-selection-v2-label.group-label').first().text().trim();
-            console.log('player is ', player);
+            // console.log('player is ', player);
             const line = $(elem).find('span.obg-selection-v2-label:not(.group-label)').first().text().trim().split(' ')[1]; // "Over 25.5" ... get value after space
             const over = $(elem).find('span.obg-numeric-change-container-odds-value').first().text();
             const under = $(elem).find('span.obg-numeric-change-container-odds-value').eq(1).text();

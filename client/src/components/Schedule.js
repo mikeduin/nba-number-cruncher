@@ -11,8 +11,10 @@ import { fetchWeek, setActiveDay, changeSchedWeek } from "../actions";
 class Schedule extends React.Component {
   componentDidMount() {
     if (!this.props.match.params.date) {
+      console.log('setting active day to today');
       this.props.setActiveDay(moment().format('YYYY-MM-DD'));
     } else {
+      console.log('setting active day to match params', this.props.match.params.date);
       this.props.setActiveDay(this.props.match.params.date);
     }
   }

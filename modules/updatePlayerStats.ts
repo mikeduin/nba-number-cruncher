@@ -111,20 +111,24 @@ export const updatePlayerBoxScoresByPeriod = async (gdte: string) => {
       const periodChecker = await knex('player_boxscores_by_q').where({ gid, period });
 
       if (!periodChecker.length) {
-        console.log('stats not found for game ', gid, ' and period ', period, ' so fetching now');
-        const boxScorePeriod = await axios.get(BOX_SCORE_STATS_URL, {
-          params: getBoxScoreRequestParams(gid, period),
-          headers: requestHeaders()
-        });
-
-        const { boxScoreTraditional } = boxScorePeriod.data;
-        const { homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid } = boxScoreTraditional;
-        const gameCompleted = true;
-        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics, gameCompleted);
-        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics, gameCompleted);
-
-        insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode, season);
-        insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode, season);
+        try {
+          console.log('stats not found for game ', gid, ' and period ', period, ' so fetching now');
+          const boxScorePeriod = await axios.get(BOX_SCORE_STATS_URL, {
+            params: getBoxScoreRequestParams(gid, period),
+            headers: requestHeaders()
+          });
+  
+          const { boxScoreTraditional } = boxScorePeriod.data;
+          const { homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid } = boxScoreTraditional;
+          const gameCompleted = true;
+          const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics, gameCompleted);
+          const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics, gameCompleted);
+  
+          insertPlayerBoxScoresByPeriod(gid, period, hPlayerStats, homeTeam.teamTricode, season);
+          insertPlayerBoxScoresByPeriod(gid, period, vPlayerStats, awayTeam.teamTricode, season);
+        } catch (e) {
+          console.log('error trying to do box scores by period is ', e);
+        }
       } else {
         console.log('stats found for game ', gid, ' and period ', period, ' so not fetching');
       }

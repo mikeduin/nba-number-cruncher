@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route } from 'react-router-dom';
 import ToastContainer from './ToastContainer';
+import moment from 'moment';
 
 import { fetchWeek, getPlayerMetadata, getTeamNotes } from '../actions';
 
@@ -18,6 +19,8 @@ class App extends React.Component {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
     this.props.getTeamNotes();
+    let today = moment().format('YYYY-MM-DD');
+    this.props.setActiveDay(today);
   }
 
   render () {

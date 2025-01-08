@@ -39,6 +39,7 @@ export const playerNameMismatches = {
     'Lauri Markkanen': 'Lauri Markkanen',
     'Luka Doncic': 'Luka Dončić',
     'Nicolas Claxton': 'Nic Claxton',
+    'Nikola Jovic': 'Nikola Jokić',
     'Nikola Jokic': 'Nikola Jokić',
     'Nikola Vucevic': 'Nikola Vučević',
     'Jabari Smith': 'Jabari Smith Jr.',

@@ -147,6 +147,7 @@ export const changeTeamColor = (hv, colorObj) => async dispatch => {
 }
 
 export const setActiveDay = date => async (dispatch, getState) => {
+  console.log('date in setActiveDay is ', date);
   const dayGames = getState().week.weekGames.filter(game => game.gdte === date);
 
   dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });
