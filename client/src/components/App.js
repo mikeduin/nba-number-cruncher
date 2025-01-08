@@ -4,7 +4,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import ToastContainer from './ToastContainer';
 import moment from 'moment';
 
-import { fetchWeek, getPlayerMetadata, getTeamNotes } from '../actions';
+import { fetchWeek, getPlayerMetadata, getTeamNotes, setActiveDay } from '../actions';
 
 import NetRatings from './NetRatings';
 import Schedule from './Schedule';
@@ -57,4 +57,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata, getTeamNotes })(App);
+export default connect(mapStateToProps, { fetchWeek, getPlayerMetadata, getTeamNotes, setActiveDay })(App);

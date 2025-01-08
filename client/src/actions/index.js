@@ -68,9 +68,9 @@ export const getPlayerMetadata = () => async dispatch => {
 }
 
 export const getTeamNotes = () => async dispatch => {
-  let teamNotes = await axios.get('/api/getTeamNotes');
+  // let teamNotes = await axios.get('/api/getTeamNotes');
 
-  dispatch({ type: 'SET_TEAM_NOTES', payload: teamNotes.data })
+  // dispatch({ type: 'SET_TEAM_NOTES', payload: teamNotes.data })
 }
 
 export const fetchGame = ({gid}) => async dispatch => {
