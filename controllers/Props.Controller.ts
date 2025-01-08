@@ -48,7 +48,8 @@ export const playerNameMismatches = {
     'Moussa Diabate': 'Moussa Diabaté',
     'PJ Washington': 'P.J. Washington',
     'Tidjane Salaun': 'Tidjane Salaün',
-    'Vasilije Micic': 'Vasilije Micić'
+    'Vasilije Micic': 'Vasilije Micić',
+    'Vit Krejci': 'Vít Krejčí',
   }
 }
 

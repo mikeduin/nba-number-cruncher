@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import momentTz from 'moment-timezone';
 import ScheduleCard from './ScheduleCard';
 import './styles/schedule.css';
 import { Segment, Statistic, Grid, Icon } from "semantic-ui-react";
@@ -12,7 +13,7 @@ class Schedule extends React.Component {
   componentDidMount() {
     if (!this.props.match.params.date) {
       console.log('setting active day to today');
-      this.props.setActiveDay(moment().format('YYYY-MM-DD'));
+      this.props.setActiveDay(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD'));
     } else {
       console.log('setting active day to match params', this.props.match.params.date);
       this.props.setActiveDay(this.props.match.params.date);

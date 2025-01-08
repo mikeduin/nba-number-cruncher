@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { setActiveDay, fetchPlayerData } from '../actions';
 import _ from 'lodash';
 import moment from 'moment';
+import momentTz from 'moment-timezone';
 import logos from '../modules/logos';
 
 const resultRenderer = ({ player_name, player_id, team_abbreviation, min_full, net_rtg_full }) => {
@@ -54,7 +55,7 @@ class Header extends React.Component {
   }
 
   setActiveDay = () => {
-    let today = moment().format('YYYY-MM-DD');
+    let today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
     this.props.setActiveDay(today);
   }
 
