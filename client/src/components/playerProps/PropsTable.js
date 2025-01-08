@@ -49,7 +49,7 @@ const PropsTable = ({
   const [expandedRows, setExpandedRows] = useState({});
   const [playerData, setPlayerData] = useState({});
 
-  console.log('playerstats:', playerStats);
+  // console.log('playerstats:', playerStats);
 
   const toggleRow = (playerId) => {
     setExpandedRows((prevState) => ({

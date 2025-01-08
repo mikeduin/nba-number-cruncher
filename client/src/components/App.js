@@ -18,9 +18,9 @@ class App extends React.Component {
   componentDidMount () {
     this.props.fetchWeek();
     this.props.getPlayerMetadata();
-    this.props.getTeamNotes();
-    let today = moment().format('YYYY-MM-DD');
-    this.props.setActiveDay(today);
+    // this.props.getTeamNotes();
+    // let today = moment().format('YYYY-MM-DD');
+    // this.props.setActiveDay(today);
   }
 
   render () {

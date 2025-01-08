@@ -13,13 +13,13 @@ const GambleCast = (props) => {
 
   useEffect(() => {
     let effectiveDay = moment().format('YYYY-MM-DD');
+    props.fetchWeek(effectiveDay);
     if (!props.match.params.date) {
       props.setActiveDay(effectiveDay);
     } else {
       effectiveDay = props.match.params.date;
       props.setActiveDay(props.match.params.date);
     }
-    props.fetchWeek(effectiveDay);
     props.checkActiveGames();
     props.fetchDailyBoxScores();
     props.fetchActiveBoxScores();
