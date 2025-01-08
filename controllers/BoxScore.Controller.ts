@@ -41,6 +41,9 @@ export const getCompletedGameResponse = (boxScore: CompletedBoxScoreDb): BoxScor
 export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
+
+  console.log('parsing game data for ', gid);
+
   const isGameActivated = gameStatus > 1;
   const { clock, fullClock } = getClocks(gameClock);
   const qVariable = `q${period}`;
@@ -49,7 +52,9 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const gameOver = gameStatusText === 'Final' || gameStatus === 3;
   const isEndOfPeriod = fullClock === '00:00:00';
 
+  console.log(`isEndOfPeriod is ${isEndOfPeriod} and isGameActivated is ${isGameActivated} and gameOver is ${gameOver}`);
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
+    console.log(`updating box score for ${gid} because ((isEndOfPeriod && isGameActivated) || gameOver) is true.`);
     const hTeam = homeTeam.statistics;
     const vTeam = awayTeam.statistics;
     const poss = calcGamePoss(hTeam, vTeam);

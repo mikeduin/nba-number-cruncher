@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+// import dotenv from 'dotenv';
 import axios from 'axios';
 import knex from '../db/knex.js';
 import schedule from 'node-schedule';
@@ -40,6 +41,10 @@ import { deleteDuplicateProps, updateSingleGameProps } from "../controllers/Prop
 import { addGameStints } from "../controllers/GameStints.Controller.js"
 import { getDailyGames, getCompletedGameGids } from "../repositories";
 
+// dotenv.config();
+
+const app = express();
+
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -70,40 +75,40 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-// (async () => { 
-//   await updatePastScheduleForResults();
-// // schedule.scheduleJob(rule, async () => {
-//   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-12-09')) {
-//     await updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(1000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
-//     // Team Stat Updaters
-//     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-//     // setTimeout(()=>{updateStarterBuilds()}, 10000);
-//     // setTimeout(()=>{updateBenchBuilds()}, 20000);
-//     // setTimeout(()=>{updateQ1Builds()}, 30000);
-//     // setTimeout(()=>{updateQ2Builds()}, 40000);
-//     // setTimeout(()=>{updateQ3Builds()}, 50000); 
-//     // setTimeout(()=>{updateQ4Builds()}, 60000);
-//     // setTimeout(()=>{mapTeamNetRatings()}, 70000);
-//     // setTimeout(()=>{mapTeamPace()}, 80000);
+(async () => { 
+  await updatePastScheduleForResults();
+// schedule.scheduleJob(rule, async () => {
+  let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+  while (moment(yesterday).isAfter('2024-12-09')) {
+    await updatePlayerBoxScoresByPeriod(yesterday);
+    await delay(1000);
+    yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+  }
+    // Team Stat Updaters
+    // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+    // setTimeout(()=>{updateStarterBuilds()}, 10000);
+    // setTimeout(()=>{updateBenchBuilds()}, 20000);
+    // setTimeout(()=>{updateQ1Builds()}, 30000);
+    // setTimeout(()=>{updateQ2Builds()}, 40000);
+    // setTimeout(()=>{updateQ3Builds()}, 50000); 
+    // setTimeout(()=>{updateQ4Builds()}, 60000);
+    // setTimeout(()=>{mapTeamNetRatings()}, 70000);
+    // setTimeout(()=>{mapTeamPace()}, 80000);
 
-//     // Player Stat Updaters
-//     setTimeout(()=>{updatePlayerPositions()}, 500);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
-//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-//     // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
-//     setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
-//     setTimeout(()=>{mapFullPlayerData()}, 100000);
-//     setTimeout(()=>{addGameStints()}, 120000);
-//     // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
-//     setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
-//   // }) 
-// })()
+    // Player Stat Updaters
+    setTimeout(()=>{updatePlayerPositions()}, 500);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+    setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+    setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+    // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+    setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
+    setTimeout(()=>{mapFullPlayerData()}, 100000);
+    setTimeout(()=>{addGameStints()}, 120000);
+    // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
+    setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
+  // }) 
+})()
 
 // if (process.env.NODE_ENV !== 'production') {
 //   const fetchWithRandomInterval = async () => {
@@ -240,9 +245,12 @@ router.get('/api/fetchPlayerProps/:date', async (req, res) => {
   res.send(dailyProps);
 })
 
-if (process.env.NODE_ENV === 'production') {
-  const activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD'))
-  setInterval(() => {
+console.log('app.get("env") is ', app.get("env"));
+
+if (app.get("env") === 'production' || app.get("env") === 'development') {
+  setInterval(async () => {
+    const activeGames = await getActiveGames(momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD'));
+    console.log('active games in timed box score updater in index.js are ', activeGames.map(({ gid }) => gid));
     activeGames.forEach(async (game) => {
       const hAbb = game.h[0].ta;
       const vAbb = game.v[0].ta;
