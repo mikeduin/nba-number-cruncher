@@ -42,7 +42,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
 
-  console.log('parsing game data for ', gid);
+  // console.log('parsing game data for ', gid);
 
   const isGameActivated = gameStatus > 1;
   const { clock, fullClock } = getClocks(gameClock);
@@ -52,9 +52,9 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const gameOver = gameStatusText === 'Final' || gameStatus === 3;
   const isEndOfPeriod = fullClock === '00:00:00';
 
-  console.log(`isEndOfPeriod is ${isEndOfPeriod} and isGameActivated is ${isGameActivated} and gameOver is ${gameOver}`);
+  // console.log(`isEndOfPeriod is ${isEndOfPeriod} and isGameActivated is ${isGameActivated} and gameOver is ${gameOver}`);
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
-    console.log(`updating box score for ${gid} because ((isEndOfPeriod && isGameActivated) || gameOver) is true.`);
+    // console.log(`updating box score for ${gid} because ((isEndOfPeriod && isGameActivated) || gameOver) is true.`);
     const hTeam = homeTeam.statistics;
     const vTeam = awayTeam.statistics;
     const poss = calcGamePoss(hTeam, vTeam);
@@ -112,6 +112,10 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
           await updateGameBoxScore(gid, {final: true})
+          await knex("schedule").where({gid: gid}).update({
+            stt: "Final",
+            result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
+          }); 
           // await knex("box_scores_v2").where({gid: gid}).update({
           //   final: true
           // }); 

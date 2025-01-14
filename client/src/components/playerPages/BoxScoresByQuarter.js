@@ -128,7 +128,8 @@ const BoxScoresByQuarter = ({ boxScores, team }) => {
         </Table.Header>
         <Table.Body>
           {boxScores.map((boxScore, i) => {
-            const [aTeamAbb, , , hTeamAbb] = boxScore.summary.split(' ');
+            // console.log('boxScore is ', boxScore);
+            const [aTeamAbb, , , hTeamAbb] = boxScore.summary ? boxScore.summary.split(' ') : [null, null, null, null];
             const firstHalfStats = sumQuarterStats(boxScore.periods.slice(0, 2));
             const secondHalfStats = sumQuarterStats(boxScore.periods.slice(2, 4));
             const statsByHalf = [

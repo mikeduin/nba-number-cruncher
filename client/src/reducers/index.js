@@ -11,6 +11,7 @@ import playerData from './playerDataReducer';
 import playersMetadata from './playersReducer';
 import playerProps from './playerPropsReducer';
 import schedDayGames from './schedDayGameReducer';
+import teamNotes from './teamNotesReducer';
 import todaysGames from './todaysGamesReducer';
 import vColors from './vColorReducer';
 import vPlayers from './vPlayersReducer';
@@ -29,6 +30,7 @@ export default combineReducers ({
   playerProps,
   playersMetadata,
   schedDayGames,
+  teamNotes,
   todaysGames,
   vColors,
   vPlayers,

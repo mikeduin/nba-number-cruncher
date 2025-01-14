@@ -49,23 +49,14 @@ export const scrapeBovada = async (gameUrl) => {
         // await page.waitForSelector('.league-header');
 
         // await page.waitForSelector('.KambiBC-event-page-component__columns');
-        await page.waitForSelector('.obg-m-event-markets-content-column');
-
-        const buttonSelector = '.obg-show-more-less-button';
-        const buttons = await page.$$(buttonSelector);
-        console.log('buttons are ', buttons);
-        for (const button of buttons) {
-          await button.click();
-          // Optionally, you can wait for some time between clicks
-          // await page.waitForTimeout(1000); // Wait for 1 second
-        }
+        await page.waitForSelector('.league-header');
   
         // Extract the content
         const content = await page.content();
-        console.log('content is ', content);
+        // console.log('content is ', content);
         const $ = cheerio.load(content);
 
-        console.log('$ response from scraper is ', $);
+        // console.log('$ response from scraper is ', $);
   
   
         $('sp-alternate').each(function(i, elem) {

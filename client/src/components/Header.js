@@ -4,7 +4,6 @@ import { Menu, Search, Item } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { setActiveDay, fetchPlayerData } from '../actions';
 import _ from 'lodash';
-import moment from 'moment';
 import momentTz from 'moment-timezone';
 import logos from '../modules/logos';
 
@@ -84,9 +83,7 @@ class Header extends React.Component {
             value={value}
             resultRenderer={resultRenderer}
           />
-
         </Menu.Item>
-
       </Menu>
     )
   }

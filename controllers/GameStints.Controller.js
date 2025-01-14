@@ -12,6 +12,7 @@ import {
 export const addGameStints = async () => {
   const season = getCurrentSeasonStartYearInt();
   const games = await getCompletedGamesWithNoGameStints(season)
+  console.log('games are ', games); 
 
   games.forEach(game => {
     buildGameStints(game);

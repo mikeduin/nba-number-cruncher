@@ -301,7 +301,7 @@ export const updatePastScheduleForResults = async () => {
   const gamesWithNoResults = await Db.Schedule().where({ 
     season_year: season, 
     result: null,
-    stt: 'Final'
+    game_stints: true,
   }).select('gid', 'h', 'v');
 
   gamesWithNoResults.forEach(async game => {

@@ -37,7 +37,7 @@ export const fetchPlayerProps = () => async (dispatch, getState) => {
 }
 
 export const checkActiveGames = () => async (dispatch, getState) => {
-  const activeDay = getState().activeDay ?? moment().format("YYYY-MM-DD");
+  const activeDay = getState().activeDay ?? moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
   const response = await axios.get(`/todayGameStatus/${activeDay}`);
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;
@@ -45,32 +45,27 @@ export const checkActiveGames = () => async (dispatch, getState) => {
   const clientCompleted = getState().completedGames;
 
   if (!_.isEqual(_.sortBy(clientActive), _.sortBy(serverActive))) {
-    console.log('modifying active games');
     dispatch({ type: 'SET_ACTIVE_GAMES', payload: serverActive });
   }
 
   if (!_.isEqual(_.sortBy(clientCompleted), _.sortBy(serverCompleted))) {
-    console.log('modifying completed games');
     dispatch({ type: 'SET_COMPLETED_GAMES', payload: serverCompleted });
   }
 }
 
 export const fetchPlayerData = (pid) => async dispatch => {
   let playerData = await axios.get(`/api/fetchPlayerData/${pid}`);
-
   dispatch({ type: 'FETCH_PLAYER_DATA', payload: playerData.data })
 }
 
 export const getPlayerMetadata = () => async dispatch => {
   let players = await axios.get('/api/getPlayerMetadata');
-
   dispatch({ type: 'LOAD_PLAYER_METADATA', payload: players.data.players })
 }
 
 export const getTeamNotes = () => async dispatch => {
-  // let teamNotes = await axios.get('/api/getTeamNotes');
-
-  // dispatch({ type: 'SET_TEAM_NOTES', payload: teamNotes.data })
+  const teamNotesFetch = await axios.get('/api/getTeamNotes');
+  dispatch({ type: 'SET_TEAM_NOTES', payload: teamNotesFetch.data })
 }
 
 export const fetchGame = ({gid}) => async dispatch => {
@@ -147,7 +142,6 @@ export const changeTeamColor = (hv, colorObj) => async dispatch => {
 }
 
 export const setActiveDay = date => async (dispatch, getState) => {
-  console.log('date in setActiveDay is ', date);
   const dayGames = getState().week.weekGames.filter(game => game.gdte === date);
 
   dispatch ({ type: 'SET_ACTIVE_DAY', payload: date });

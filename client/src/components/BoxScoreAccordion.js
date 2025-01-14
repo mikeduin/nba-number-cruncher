@@ -1,28 +1,31 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Accordion } from 'semantic-ui-react';
 import PlayerProps from './PlayerProps';
 import { BoxScoreNotes } from './BoxScoreNotes';
 
-export const BoxScoreAccordion = ({ game, playersMetadata, boxScore }) => {
-  const homeTeamName = game.h[0].tn;
-  const awayTeamName = game.v[0].tn;
+const BoxScoreAccordion = ({ game, playersMetadata, boxScore, teamNotes }) => {
+  const { ta: hAbb, tn: hTeamName } = game.h[0];
+  const { ta: vAbb, tn: vTeamName } = game.v[0];
 
   const rootPanels = [
     { 
       key: 'notes',
-      title: `${awayTeamName} @ ${homeTeamName} NOTES`,
+      title: `${vTeamName} @ ${hTeamName} NOTES`,
       content: { content: <BoxScoreNotes 
         gid={game.gid}
-        hAbb={game.h[0].ta}
-        vAbb={game.v[0].ta}
-        hNotes={game.h[0].notes}
-        vNotes={game.v[0].notes}
+        hAbb={hAbb}
+        vAbb={vAbb}
+        teamNotes={{
+          [hAbb]: teamNotes?.find((team) => team.abb === hAbb) ?? '',
+          [vAbb]: teamNotes?.find((team) => team.abb === vAbb) ?? '',
+        }}
         /> 
       }
     },
     { 
       key: 'player-props',
-      title: `${awayTeamName} @ ${homeTeamName} PROPS`,
+      title: `${vTeamName} @ ${hTeamName} PROPS`,
       content: { content: <PlayerProps 
         game={game}
         playersMetadata={playersMetadata}
@@ -42,3 +45,11 @@ export const BoxScoreAccordion = ({ game, playersMetadata, boxScore }) => {
     />
   )  
 }
+
+const mapStateToProps = state => {
+  return {
+    teamNotes: state.teamNotes
+  }
+}
+
+export default connect (mapStateToProps) (BoxScoreAccordion);

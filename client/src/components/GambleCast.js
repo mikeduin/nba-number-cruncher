@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import moment from "moment";
+import moment from "moment-timezone";
 import './styles/gamblecast.css';
 import BoxScore from './BoxScore';
-import { BoxScoreAccordion } from './BoxScoreAccordion';
+import BoxScoreAccordion from './BoxScoreAccordion';
 import { Header, Icon } from 'semantic-ui-react';
 import { checkActiveGames, fetchActiveBoxScores, fetchDailyBoxScores, fetchPlayerProps, fetchWeek, setActiveDay } from '../actions';
 
@@ -12,13 +12,13 @@ const GambleCast = (props) => {
   const [playerProps, setPlayerProps] = React.useState(props.playerProps);
 
   useEffect(() => {
-    let effectiveDay = moment().format('YYYY-MM-DD');
-    props.fetchWeek(effectiveDay);
     if (!props.match.params.date) {
+      let effectiveDay = moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
       props.setActiveDay(effectiveDay);
+      props.fetchWeek(effectiveDay);
     } else {
-      effectiveDay = props.match.params.date;
       props.setActiveDay(props.match.params.date);
+      props.fetchWeek(props.match.params.date);
     }
     props.checkActiveGames();
     props.fetchDailyBoxScores();
