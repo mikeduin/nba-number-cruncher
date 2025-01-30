@@ -77,8 +77,7 @@ rule.second = 48;
 // dbBuilders.updatePlayoffSchedule();
 
 // (async () => { 
-  // await buildGameStints(22400505);
-//   await updatePastScheduleForResults();
+//   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
 //   while (moment(yesterday).isAfter('2024-12-09')) {
@@ -169,7 +168,8 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
 router.post("/api/updateProps", async (req, res, next) => {
   const { gid } = req.body;
   try {
-    await updateSingleGameProps(gid, SportsbookName.Betsson);
+    await updateSingleGameProps(gid, SportsbookName.Bovada);
+    // await updateSingleGameProps(gid, SportsbookName.Betsson);
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating props for ', gid, ' is ', e);

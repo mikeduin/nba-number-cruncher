@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import { Button, Segment } from 'semantic-ui-react';
 import { marketMappers } from '../PlayerProps';
-import { findKeyByValue, gameTimeToMinutes, maxArrayValue, sumQuarterStats } from '../../utils';
+import { findKeyByValue, gameTimeToMinutes, maxArrayValue, sumQuarterStats, transformSummaryScore } from '../../utils';
 import { 
   VictoryAxis,
   VictoryBar,
@@ -57,7 +57,7 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
         const secondHalfStats = sumQuarterStats(game.periods.slice(2, 4));
         const fullGameStats = game.periods[4];
         const fullGameMinutes = Math.round(gameTimeToMinutes(fullGameStats.min));
-        const xAxis = { x: moment(game.gdte).format("MM/DD") };
+        const xAxis = { x: `${moment(game.gdte).format("MM/DD")}\n${transformSummaryScore(game.summary)}` };
 
         minutesData.push({
           ...xAxis,
@@ -90,14 +90,9 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
     }
   }, [gameData, market, activePeriod, livePropLine, liveStat]);
 
-  console.log('chartData ', chartData);
-
   const styles = [
     { data: { fill: "#f3d437", stroke: "#d1b322", strokeWidth: 1 } },
-    // { data: { fill: "#0ca340", stroke: "#0ca340", strokeWidth: 1 } },
     { data: { fill: "#979ee2", stroke: "#bec7ed", strokeWidth: 1 } },
-    // { data: { fill: "#9dbaf4", stroke: "#5084f2", strokeWidth: 1 } },
-    // { data: { fill: "#a8d9f9", stroke: "#77c7f9", strokeWidth: 1 } },
   ];
 
   const maxMarketStat = maxArrayValue(chartData.fullGameStat.map(d => d.y));
@@ -148,7 +143,7 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
           ]}
           theme={VictoryTheme.clean}
         />
-        {activePeriod === 4 
+        {activePeriod === 4 // full game, since 1st period is 0
         ?
           <g>
             {/* Date Axis */}
@@ -160,6 +155,7 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
               style={{
                 tickLabels: { fontSize: 8, padding: 0 }, // dates
               }}
+              // tickFormat={(t) => `${moment(t).format("MM/DD")}\n`}
             />
             {/* Primary Stat/Market Axis */}
             <VictoryAxis 

@@ -1,5 +1,4 @@
 import React from 'react';
-import moment from 'moment';
 import GameStints from './GameStints';
 import BoxScoresByQuarter from './BoxScoresByQuarter';
 import StatTrendCharts from './StatTrendCharts';

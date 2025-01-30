@@ -117,6 +117,10 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
       // if game does not exist, insert game
       const existingGame = await Db.Schedule().where({ gid: gid.slice(2) }).select('gid', 'gdte', 'etm'); // need to pull fields to check gdte and etm later
 
+      const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
+      const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
+      const gweek = game.gweek ?? getPrePostGameWeek(gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
+
       if (!existingGame.length) {
         console.log('game is not found in schedule, adding ', gid);
 
@@ -124,10 +128,6 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
           console.log('start time is TBD for gid ', gid);
           return;
         }
-
-        const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
-        const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
-        const gweek = game.gweek ?? getPrePostGameWeek(gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
     
         const hObj = buildTeamObject(h);
         const vObj = buildTeamObject(v);
@@ -163,6 +163,8 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
           await Db.Schedule().where({ gid: game.gid.slice(2) }).update({
             gdte: game.gdte,
             etm: moment(game.etm).subtract(3, 'hours'),
+            gweek,
+            updated_at: new Date(),
           });
           console.log(game.gcode, " updated in DB");
         } else {

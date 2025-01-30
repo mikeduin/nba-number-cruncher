@@ -18,7 +18,11 @@ export const sumQuarterStats = (periods) => {
       blk: acc.blk + period.blk,
       tov: acc.tov + period.tov,
       fouls: acc.fouls + period.fouls,
-      pts: acc.pts + period.pts
+      pts: acc.pts + period.pts,
+      "pts+reb+ast": acc.pts + period.pts + acc.reb + period.reb + acc.ast + period.ast,
+      "pts+reb": acc.pts + period.pts + acc.reb + period.reb, 
+      "pts+ast": acc.pts + period.pts + acc.ast + period.ast,
+      "reb+ast": acc.reb + period.reb + acc.ast + period.ast
     }
   }, {
     min: 0,
@@ -36,4 +40,12 @@ export const sumQuarterStats = (periods) => {
     fouls: 0,
     pts: 0
   }) 
+}
+
+export function transformSummaryScore(input) {
+  if (!input) return '';
+  const [beforeAt, afterAt] = input.split('@');
+  const trimmedBeforeAt = beforeAt.trim();
+  const trimmedAfterAt = afterAt.trim();
+  return `${trimmedBeforeAt}\n${trimmedAfterAt}`;
 }

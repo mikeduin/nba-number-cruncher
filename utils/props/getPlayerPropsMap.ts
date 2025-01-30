@@ -32,7 +32,7 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
 
   if (gamePropsOnSportsbook) {
     gamePropsOnSportsbook.forEach((prop) => {
-      const playerName = prop.player;
+      const playerName = prop.player.trim();
       const dbColumn = mapSportsbookMarketToDbColumn(sportsbook, prop.market);
 
       if (dbColumn) {
