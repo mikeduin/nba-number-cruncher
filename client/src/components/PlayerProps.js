@@ -97,9 +97,9 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     }
   }
 
-  const updateProps = async () => {
+  const updateProps = async (sportsbook) => {
     const gid = game.gid;
-    const response = await axios.post(`/api/updateProps`, {gid});
+    const response = await axios.post(`/api/updateProps`, {gid, sportsbook});
     if (response.status === 200) {
       toast({
         type: 'warning',
@@ -138,7 +138,8 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
           <Input placeholder={game.betsson_url} style={{width: 700}} onChange={(e) => setBetssonUrl(e.target.value)}/>
           <Button primary style={{marginLeft: 10}} onClick={() => updateSportsbookUrl('betsson')}>Update URL</Button>
           <Button color='red' style={{marginLeft: 10}} onClick={() => removeDuplicateProps()}>Remove Dups</Button>
-          <Button color='green' style={{marginLeft: 10}} onClick={() => updateProps()}>Update Props</Button>
+          <Button color='green' style={{marginLeft: 10}} onClick={() => updateProps('Bovada')}>Update Props [BOV]</Button>
+          <Button color='green' style={{marginLeft: 10}} onClick={() => updateProps('Betsson')}>Update Props [BSN]</Button>
         </div>
         <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
           <div style={{marginRight: 10}}><i>MARKET:</i></div>

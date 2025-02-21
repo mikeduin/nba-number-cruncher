@@ -42,8 +42,6 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
 
-  // console.log('parsing game data for ', gid);
-
   const isGameActivated = gameStatus > 1;
   const { clock, fullClock } = getClocks(gameClock);
   const qVariable = `q${period}`;
@@ -52,9 +50,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
   const gameOver = gameStatusText === 'Final' || gameStatus === 3;
   const isEndOfPeriod = fullClock === '00:00:00';
 
-  // console.log(`isEndOfPeriod is ${isEndOfPeriod} and isGameActivated is ${isGameActivated} and gameOver is ${gameOver}`);
   if ((isEndOfPeriod && isGameActivated) || gameOver) {
-    // console.log(`updating box score for ${gid} because ((isEndOfPeriod && isGameActivated) || gameOver) is true.`);
     const hTeam = homeTeam.statistics;
     const vTeam = awayTeam.statistics;
     const poss = calcGamePoss(hTeam, vTeam);
@@ -102,13 +98,6 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
             [qVariable]: [currentQuarter],
           }
           await updateGameBoxScore(gid, updatePayload);
-          // await knex("box_scores_v2").where({gid}).update({
-          //   period_updated: period,
-          //   clock_last_updated: gameSecs,
-          //   totals: [totalsObj],
-          //   [qVariable]: [currentQuarter],
-          //   player_stats: JSON.stringify(playerStats),
-          // });
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
           await updateGameBoxScore(gid, {final: true})
@@ -116,22 +105,10 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
             stt: "Final",
             result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
           }); 
-          // await knex("box_scores_v2").where({gid: gid}).update({
-          //   final: true
-          // }); 
-
-          // this below doesn't look like it's working, delete when stt and result are confirmed set properly
-          // await knex("schedule").where({gid: gid}).update({
-          //   stt: "Final",
-          //   result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
-          // }); 
           console.log(`game ${gid} has been set to final in DB`)
         } else {
           console.log(`qTest for ${qVariable} does not equal null, and/or ${qVariable} already entered in gid ${gid} -- just updating player stats`);
           await updateGameBoxScore(gid, {player_stats: JSON.stringify(playerStats)});
-          // await knex("box_scores_v2").where({gid}).update({
-          //   player_stats: JSON.stringify(playerStats),
-          // });
         }
       } catch (e) {
         console.log(`${qVariable} insert failed for ${gid} error is ${e}`);
@@ -148,15 +125,6 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
             final: true,
           }
           await updateGameBoxScore(gid, updatePayload);
-          // await knex("box_scores_v2").where({gid: gid}).update({
-          //   period_updated: period,
-          //   clock_last_updated: gameSecs,
-          //   totals: [totalsObj],
-          //   ot: [currentQuarter],
-          //   player_stats: JSON.stringify(playerStats),
-          //   final: true,
-          //   updated_at: new Date()
-          // });
           await knex("schedule").where({gid: gid}).update({
             stt: "Final",
             result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,

@@ -17,6 +17,7 @@ const buildActivePropsMap = (players, dbColumns) => {
 }
 
 const findPlayerTeam = (propPlayerName: string, dailyPlayers, sportsbook: SportsbookName) => {
+  console.log('propPlayerName is ', propPlayerName);
   let player = dailyPlayers.find(player => player.player_name === propPlayerName);
   if (!player && sportsbook === SportsbookName.Betsson) {
     player = dailyPlayers.find(player => player.player_name === playerNameMismatches[SportsbookName.Betsson][propPlayerName])
@@ -33,7 +34,7 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
   if (gamePropsOnSportsbook) {
     gamePropsOnSportsbook.forEach((prop) => {
       const playerName = prop.player.trim();
-      const dbColumn = mapSportsbookMarketToDbColumn(sportsbook, prop.market);
+      const dbColumn = mapSportsbookMarketToDbColumn(sportsbook, prop.market.trim());
 
       if (dbColumn) {
         const playerTeam = sportsbook === SportsbookName.Bovada 

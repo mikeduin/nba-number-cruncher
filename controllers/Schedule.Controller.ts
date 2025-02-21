@@ -175,33 +175,48 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
   });
 }; 
 
-export const prepareInactives = async (inactives, teamAbbs: string[]) => {
-  const gamePlayers = await Db.Players()
-    .where({season: getCurrentSeasonStartYearInt()})
-    .whereIn('team_abbreviation', [ ...teamAbbs ])
-    .select('player_id', 'player_name', 'team_abbreviation', 'position', 'min_full')
+export const prepareInactives = async (inactives, teamAbb: string, teamId: number) => {
+  const season = getCurrentSeasonStartYearInt();
 
-  const preparedInactives = inactives.map(player => {
+  const gamePlayers = await Db.Players()
+    .where({season})
+    .andWhere('team_abbreviation', teamAbb)
+    .select('player_id', 'player_name', 'team_abbreviation', 'position', 'min_full', 'team_id');
+
+  const preparedInactives = await Promise.all(inactives.map(async player => {
     const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
-    if (!dbPlayer) {console.log('no dbPlayer found for ', player.personId, player.firstName, player.familyName)}
+    let tradedPlayer;
+
+    if (!dbPlayer) {
+      console.log('no dbPlayer found for ', player.personId, player.firstName, player.familyName)
+      tradedPlayer = await Db.Players().where({
+        player_id: player.personId,
+        season
+      }).select('player_name', 'team_abbreviation', 'position', 'min_full', 'team_id');
+    }
+
+    const position = dbPlayer?.position ?? tradedPlayer?.[0]?.position;
+    const min = dbPlayer?.min_full ?? tradedPlayer?.[0]?.min_full;
+
     return {
       ...player,
-      position: dbPlayer?.position,
+      position,
       fullName: `${player.firstName} ${player.familyName}`,
-      min: dbPlayer?.min_full
+      min,
+      teamId,
     }
-  })
+  }));
 
   return preparedInactives;
 }
 
-export const checkForMissingInactives = async () => {
+export const finalizeInactives = async () => {
   const season = getCurrentSeasonStartYearInt();
 
   const gamesWithInactivesSet = await Db.Schedule().where({ 
-    gdte: '2024-12-25', // temp
     season_year: season, 
-    inactives_set: true
+    inactives_set: true,
+    inactives_final: false,
   }).select('gid', 'h', 'v', 'inactives');
 
   gamesWithInactivesSet.forEach(async game => {
@@ -226,6 +241,7 @@ export const checkForMissingInactives = async () => {
     const { h_tid, v_tid, player_stats: playerStats } = boxScore;
 
     const existingInactives = JSON.parse(game.inactives);
+    const existingInactivesIds = existingInactives.h.map(player => player.personId).concat(existingInactives.v.map(player => player.personId));
 
     const playersWithNoMins = JSON.parse(playerStats).filter(player => 
       player.min === 0 && relevantPlayers
@@ -235,28 +251,51 @@ export const checkForMissingInactives = async () => {
     const prepInactive = (player) => ({
       personId: player.player_id,
       fullName: player.player_name,
+      firstName: player.player_name.split(' ')[0],
+      familyName: player.player_name.split(' ').slice(1).join(' '),
       teamId: player.team_id,
       min: relevantPlayers.find(p => p.player_id === player.player_id)?.min_full,
       position: relevantPlayers.find(p => p.player_id === player.player_id)?.position
     })
+
+    // console.log('updatedInactives are ', {
+    //   ...existingInactives,
+    //   h: [
+    //     ...existingInactives.h,
+    //     ...playersWithNoMins
+    //       .filter(player => player.team_id === h_tid && !existingInactivesIds.includes(player.player_id))
+    //       .map(player => prepInactive(player))
+    //   ],  
+    //   v: [
+    //     ...existingInactives.v,
+    //     ...playersWithNoMins
+    //       .filter(player => player.team_id === v_tid && !existingInactivesIds.includes(player.player_id))
+    //       .map(player => prepInactive(player))
+    //   ]
+    // });
 
     const updatedInactives = {
       ...existingInactives,
       h: [
         ...existingInactives.h,
         ...playersWithNoMins
-          .filter(player => player.team_id === h_tid)
+          .filter(player => player.team_id === h_tid && !existingInactivesIds.includes(player.player_id))
           .map(player => prepInactive(player))
       ],  
       v: [
         ...existingInactives.v,
         ...playersWithNoMins
-          .filter(player => player.team_id === v_tid)
+        .filter(player => player.team_id === v_tid && !existingInactivesIds.includes(player.player_id))
           .map(player => prepInactive(player))
       ]
     }
 
-    await updateScheduleGame(game.gid, {inactives: JSON.stringify(updatedInactives)});
+    await updateScheduleGame(game.gid, {
+      inactives: JSON.stringify(updatedInactives),
+      inactives_final: true,
+    });
+
+    console.log('inactives have been finalized for gid ', game.gid);
   })
 }
 
@@ -272,15 +311,17 @@ export const updatePastScheduleForInactives = async () => {
   
   inactiveGames.forEach(async game => {
     const hAbb = game.h[0].ta;
+    const hTid = game.h[0].tid;
     const vAbb = game.v[0].ta;
+    const vTid = game.v[0].tid;
 
     const response = await fetchBoxScore(vAbb, hAbb, game.gid); // pull live NBA.com data, convert to JSON
     const boxScore = response.props.pageProps.game;
 
     const { homeTeam, awayTeam } = boxScore;
 
-    const hInactives = await prepareInactives(homeTeam.inactives, [hAbb]);
-    const vInactives = await prepareInactives(awayTeam.inactives, [vAbb]);
+    const hInactives = await prepareInactives(homeTeam.inactives, hAbb, hTid);
+    const vInactives = await prepareInactives(awayTeam.inactives, vAbb, vTid);
 
     const inactives = {
       h: hInactives,

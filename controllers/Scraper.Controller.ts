@@ -118,9 +118,9 @@ export const scrapeBetsson = async (gameUrl: string) => {
       const page = await browser.newPage();
 
       // If GameURL does not have "&mtg=6" at the end, add it
-      if (!gameUrl.includes('&mtg=25')) {
+      if (!gameUrl.includes('&mtg=24')) {
       // if (!gameUrl.includes('&mtg=6')) {
-        gameUrl += '&mtg=25';
+        gameUrl += '&mtg=24';
         // gameUrl += '&mtg=6';
       }
   
@@ -134,7 +134,7 @@ export const scrapeBetsson = async (gameUrl: string) => {
       try {
         console.log('waiting for selector');
         // You might need to wait for a specific element or some time for the dynamic content to load
-        await page.waitForSelector('.obg-m-event-markets-content-column');
+        await page.waitForSelector('.obg-m-event-markets');
 
         // console.log('page is ', page);
 
@@ -165,12 +165,12 @@ export const scrapeBetsson = async (gameUrl: string) => {
         // $('.obg-m-event-player-props-market-group').each(function(i, elem) {
         $('obg-m-event-market-group').each(function(i, elem) {
           const market = $(elem).find('div.obg-m-event-market-group-header').text().trim();
-          // console.log('market is ', market);
+          console.log('market is ', market);
 
           // in each market, loop through the instances of <obg-uiuplift-accordion class="obg-m-event-player-props-market-group"/>
           // and extract the player, line, over, and under
           $(elem).find('obg-uiuplift-accordion.obg-m-event-player-props-market-group').each(function(j, elem) {
-            // console.log('elem is ', elem);
+            console.log('elem is ', elem);
             const player = $(elem).find('span.obg-selection-v2-label.group-label').first().text().trim();
             // console.log('player is ', player);
             const line = $(elem).find('span.obg-selection-v2-label:not(.group-label)').first().text().trim().split(' ')[1]; // "Over 25.5" ... get value after space

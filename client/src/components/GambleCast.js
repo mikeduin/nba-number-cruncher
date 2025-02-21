@@ -12,6 +12,7 @@ const GambleCast = (props) => {
   const [playerProps, setPlayerProps] = React.useState(props.playerProps);
 
   useEffect(() => {
+    console.log('props.match.params.date ', props.match.params.date);
     if (!props.match.params.date) {
       let effectiveDay = moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
       props.setActiveDay(effectiveDay);
@@ -25,7 +26,7 @@ const GambleCast = (props) => {
     props.fetchActiveBoxScores();
     props.fetchPlayerProps();
     const intervalId = setInterval(() => {
-      props.checkActiveGames();
+      props.checkActiveGames(); // this is currently making for three separate calls ...
       props.fetchActiveBoxScores();
       props.fetchPlayerProps();
     }, 5000);

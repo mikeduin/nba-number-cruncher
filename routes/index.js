@@ -73,6 +73,7 @@ rule.minute = 19;
 rule.second = 48;
 
 // checkForMissingInactives();
+// updatePastScheduleForInactives();
 
 // dbBuilders.updatePlayoffSchedule();
 
@@ -80,7 +81,7 @@ rule.second = 48;
 //   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2024-12-09')) {
+//   while (moment(yesterday).isAfter('2025-01-28')) {
 //     await updatePlayerBoxScoresByPeriod(yesterday);
 //     await delay(1000);
 //     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
@@ -104,6 +105,7 @@ rule.second = 48;
 //     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
 //     // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
 //     setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
+//     setTimeout(()=>{checkForMissingInactives()}, 70000);
 //     setTimeout(()=>{mapFullPlayerData()}, 100000);
 //     setTimeout(()=>{addGameStints()}, 120000);
 //     // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
@@ -122,11 +124,11 @@ rule.second = 48;
 //   fetchWithRandomInterval();
 // }
 
-if (app.get("env") === 'development') {
-  setTimeout(async () => {
-    await fetchDailyGameProps(SportsbookName.Bovada);
-  }, 1000);
-}
+// if (app.get("env") === 'development') {
+//   setTimeout(async () => {
+//     await fetchDailyGameProps(SportsbookName.Bovada);
+//   }, 1000);
+// }
 
 // This function pulls in odds
 // setInterval(()=>{
@@ -166,10 +168,11 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
 })
 
 router.post("/api/updateProps", async (req, res, next) => {
-  const { gid } = req.body;
+  const { gid, sportsbook } = req.body;
   try {
-    await updateSingleGameProps(gid, SportsbookName.Bovada);
+    // await updateSingleGameProps(gid, SportsbookName.Bovada);
     // await updateSingleGameProps(gid, SportsbookName.Betsson);
+    await updateSingleGameProps(gid, sportsbook);
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating props for ', gid, ' is ', e);
@@ -317,83 +320,93 @@ router.get("/api/fetchActiveBoxScores/:activeDay", async (req, res) => {
       } catch (e) {
         console.log('error attempt to fetch box score for gid ', gid, ' is ', e);
       }
+
+      if (boxScore) {
   
-      const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
-      const isGameActivated = gameStatus > 1;
+        const { period, gameClock, gameStatus, gameStatusText, homeTeam, awayTeam, homeTeamId: hTid, awayTeamId: vTid} = boxScore;
+        const isGameActivated = gameStatus > 1;
+    
+        if (isGameActivated) {
   
-      if (isGameActivated) {
-
-        if (!inactives_set) {
-          const hInactives = homeTeam.inactives;
-          const vInactives = awayTeam.inactives;
-
-          const gamePlayers = await Db.Players()
-            .where({season: getCurrentSeasonStartYearInt()})
-            .whereIn('team_abbreviation', [hAbb, vAbb])
-            .select('player_id', 'player_name', 'team_abbreviation', 'position', 'min_full')
-
-          const hInactivesWithPos = hInactives.map(player => {
-            const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
-            return {
-              ...player,
-              position: gamePlayers.find(p => p.player_id === player.personId)?.position,
-              min: dbPlayer?.min_full
+          if (!inactives_set) {
+            const hInactives = homeTeam.inactives;
+            const vInactives = awayTeam.inactives;
+  
+            const gamePlayers = await Db.Players()
+              .where({season: getCurrentSeasonStartYearInt()})
+              .whereIn('team_abbreviation', [hAbb, vAbb])
+              .select('player_id', 'player_name', 'team_abbreviation', 'position', 'min_full')
+  
+            const hInactivesWithPos = hInactives.map(player => {
+              const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
+              return {
+                ...player,
+                position: gamePlayers.find(p => p.player_id === player.personId)?.position,
+                min: dbPlayer?.min_full,
+                teamId: hTid,
+                fullName: `${player.firstName} ${player.familyName}`
+              }
+            })
+  
+            const vInactivesWithPos = vInactives.map(player => {
+              const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
+  
+              return {
+                ...player,
+                position: dbPlayer?.position,
+                min: dbPlayer?.min_full,
+                teamId: vTid,
+                fullName: `${player.firstName} ${player.familyName}`
+              }
+            })
+    
+            const gameInactives = {
+              h: hInactivesWithPos,
+              v: vInactivesWithPos
             }
-          })
-
-          const vInactivesWithPos = vInactives.map(player => {
-            const dbPlayer = gamePlayers.find(p => p.player_id === player.personId);
-
-            return {
-              ...player,
-              position: dbPlayer?.position,
-              min: dbPlayer?.min_full
-            }
-          })
-  
-          const gameInactives = {
-            h: hInactivesWithPos,
-            v: vInactivesWithPos
+            await knex("schedule").where({gid: gid}).update({inactives: gameInactives, inactives_set: true});
+            console.log('inactive players for gid ', gid, ' have been set as ', gameInactives);
           }
-          await knex("schedule").where({gid: gid}).update({inactives: gameInactives, inactives_set: true});
-          console.log('inactive players for gid ', gid, ' have been set as ', gameInactives);
-        }
-
-        const { clock, fullClock } = getClocks(gameClock);
-        const gameSecs = getGameSecs((parseInt(period)-1), clock);
-        const poss = calcGamePoss(homeTeam.statistics, awayTeam.statistics);
-        const totalsObj = compileGameStats(homeTeam.statistics, awayTeam.statistics, poss, period, gameSecs);
   
-        // console.log('gameStatusText is ', gameStatusText); // "Half" when game at half
-        const isEndOfPeriod = fullClock === '00:00:00';
-        const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
-        const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
-        const playerStats = [ ...hPlayerStats, ...vPlayerStats];
+          const { clock, fullClock } = getClocks(gameClock);
+          const gameSecs = getGameSecs((parseInt(period)-1), clock);
+          const poss = calcGamePoss(homeTeam.statistics, awayTeam.statistics);
+          const totalsObj = compileGameStats(homeTeam.statistics, awayTeam.statistics, poss, period, gameSecs);
+    
+          // console.log('gameStatusText is ', gameStatusText); // "Half" when game at half
+          const isEndOfPeriod = fullClock === '00:00:00';
+          const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
+          const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
+          const playerStats = [ ...hPlayerStats, ...vPlayerStats];
+    
+          const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, homeTeam.statistics, awayTeam.statistics, period, gameSecs);
   
-        const { currentQuarter, prevQuarters } = await getCurrentAndPrevQuarterStats(gid, homeTeam.statistics, awayTeam.statistics, period, gameSecs);
-
-        const inDb = await knex("box_scores_v2").where({gid: gid});
-
-        const q1 = (inDb[0]?.q1?.[0]) || (period === 1 ? currentQuarter : null);
-        const q2 = (inDb[0]?.q2?.[0]) || (period === 2 ? currentQuarter : null);
-        const q3 = (inDb[0]?.q3?.[0]) || (period === 3 ? currentQuarter : null);
-        const q4 = (inDb[0]?.q4?.[0]) || (period === 4 ? currentQuarter : null);
-        const ot = (inDb[0]?.ot?.[0]) || (period > 4 ? currentQuarter : null);
-
-        const thru_period = inDb[0]?.period_updated ?? 0;
+          const inDb = await knex("box_scores_v2").where({gid: gid});
   
-        try {
-          return quarterInProgressResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats, inactives);
-        } catch (e) {
-          console.log('error sending quarter in progress response is ', e);
+          const q1 = (inDb[0]?.q1?.[0]) || (period === 1 ? currentQuarter : null);
+          const q2 = (inDb[0]?.q2?.[0]) || (period === 2 ? currentQuarter : null);
+          const q3 = (inDb[0]?.q3?.[0]) || (period === 3 ? currentQuarter : null);
+          const q4 = (inDb[0]?.q4?.[0]) || (period === 4 ? currentQuarter : null);
+          const ot = (inDb[0]?.ot?.[0]) || (period > 4 ? currentQuarter : null);
+  
+          const thru_period = inDb[0]?.period_updated ?? 0;
+    
+          try {
+            return quarterInProgressResponse(gid, isEndOfPeriod, clock, period, gameSecs, thru_period, poss, totalsObj, q1, q2, q3, q4, ot, {prevQuarters, currentQuarter}, playerStats, inactives);
+          } catch (e) {
+            console.log('error sending quarter in progress response is ', e);
+          }
+        } else {
+          console.log(gid, ' has not started, sending back gid ref and active: false, gameStatus is ', gameStatus);
+          return {
+            gid: gid,
+            active: false
+          }
         }
       } else {
-        console.log(gid, ' has not started, sending back gid ref and active: false, gameStatus is ', gameStatus);
-        return {
-          gid: gid,
-          active: false
-        }
+        console.log('bos score data not updated -- no boxScore found for gid ', gid);
       }
+
     })
 
     return Promise.all(boxScorePromises);

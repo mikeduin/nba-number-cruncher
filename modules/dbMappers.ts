@@ -25,6 +25,14 @@ const marketMappers = {
     'Total Points + Rebounds': 'pts+reb', // Betsson
     'Total Points + Assists': 'pts+ast', // Betsson
     'Total Assists + Rebounds': 'reb+ast', // Betsson
+    'Player Total Points': 'pts', // Bovada + Betsson
+    'Player Total Rebounds': 'reb', // Bovada + Betsson
+    'Player Total Assists': 'ast', // Bovada + Betsson
+    "Player Total Three's Made": 'fg3m', // Betsson
+    'Player Total Points + Assists + Rebounds': 'pts+reb+ast', // Betsson
+    'Player Total Points + Rebounds': 'pts+reb', // Betsson
+    'Player Total Points + Assists': 'pts+ast', // Betsson
+    'Player Total Assists + Rebounds': 'reb+ast', // Betsson
   }
 }
 
