@@ -76,19 +76,19 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
-(async () => { 
-    setTimeout(()=>{updateSchedule()}, 1000); // not working for playoffs
-})()
+// (async () => { 
+//     setTimeout(()=>{updateSchedule()}, 1000); // not working for playoffs
+// })()
 
 // (async () => { 
 //   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2025-04-20')) {
-//     await updatePlayerBoxScoresByPeriod(yesterday);
-//     await delay(1000);
-//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   }
+//   // while (moment(yesterday).isAfter('2025-04-20')) {
+//   //   await updatePlayerBoxScoresByPeriod(yesterday);
+//   //   await delay(1000);
+//   //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   // }
 //     // Team Stat Updaters
 //     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
 //     // setTimeout(()=>{updateStarterBuilds()}, 10000);
