@@ -117,9 +117,13 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
       // if game does not exist, insert game
       const existingGame = await Db.Schedule().where({ gid: gid.slice(2) }).select('gid', 'gdte', 'etm'); // need to pull fields to check gdte and etm later
 
-      const seasonNameAbb = game.gweek ? SeasonNameAbb.RegularSeason : getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
-      const seasonNameFull = game.gweek ? SeasonNameFull.RegularSeason : getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
-      const gweek = game.gweek ?? getPrePostGameWeek(gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
+      const seasonNameAbb = getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
+      const seasonNameFull = getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
+      const gweek = seasonNameFull === SeasonNameFull.RegularSeason ? game.gweek : getPrePostGameWeek(gdte, currentSeasonDates.seasons[seasonNameFull].dashedDateWeeks);
+
+      // if (month.mscd.mon === 'May') {
+      //   console.log('gweek is ', gweek, ' for game ', gid);
+      // }
 
       if (!existingGame.length) {
         console.log('game is not found in schedule, adding ', gid);
@@ -169,6 +173,13 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
           console.log(game.gcode, " updated in DB");
         } else {
           console.log('game already exists in schedule with same time and date', game.gid);
+          if (existingGame[0].gweek !== gweek) {
+            await Db.Schedule().where({ gid: game.gid.slice(2) }).update({
+              gweek,
+              updated_at: new Date(),
+            });
+            console.log(game.gcode, " updated gweek in DB");
+          }
         }
       }
     });
@@ -210,7 +221,7 @@ export const prepareInactives = async (inactives, teamAbb: string, teamId: numbe
   return preparedInactives;
 }
 
-export const finalizeInactives = async () => {
+export const checkForMissingInactives = async () => {
   const season = getCurrentSeasonStartYearInt();
 
   const gamesWithInactivesSet = await Db.Schedule().where({ 
@@ -258,22 +269,6 @@ export const finalizeInactives = async () => {
       position: relevantPlayers.find(p => p.player_id === player.player_id)?.position
     })
 
-    // console.log('updatedInactives are ', {
-    //   ...existingInactives,
-    //   h: [
-    //     ...existingInactives.h,
-    //     ...playersWithNoMins
-    //       .filter(player => player.team_id === h_tid && !existingInactivesIds.includes(player.player_id))
-    //       .map(player => prepInactive(player))
-    //   ],  
-    //   v: [
-    //     ...existingInactives.v,
-    //     ...playersWithNoMins
-    //       .filter(player => player.team_id === v_tid && !existingInactivesIds.includes(player.player_id))
-    //       .map(player => prepInactive(player))
-    //   ]
-    // });
-
     const updatedInactives = {
       ...existingInactives,
       h: [
@@ -298,7 +293,6 @@ export const finalizeInactives = async () => {
     console.log('inactives have been finalized for gid ', game.gid);
   })
 }
-
 
 // This method is used to mass-update inactives that have not previously been set in the schedule
 export const updatePastScheduleForInactives = async () => {

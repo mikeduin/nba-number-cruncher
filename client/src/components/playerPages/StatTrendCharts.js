@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import { Button, Segment } from 'semantic-ui-react';
 import { marketMappers } from '../PlayerProps';
-import { findKeyByValue, gameTimeToMinutes, maxArrayValue, sumQuarterStats, transformSummaryScore } from '../../utils';
+import { findKeyByValue, gameTimeToMinutes, maxArrayValue, renderInactives, sumQuarterStats, transformSummaryScore } from '../../utils';
 import { 
   VictoryAxis,
   VictoryBar,
@@ -32,7 +32,7 @@ const domainMax = {
   'reb+ast': 20,
 }
 
-const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, liveStat }) => {
+const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, liveStat, teamId }) => {
   const [chartMarket, setChartMarket] = useState(market);
   const [activePeriod, setActivePeriod] = useState(4); // 4 = TOTAL STATS
 
@@ -57,7 +57,7 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
         const secondHalfStats = sumQuarterStats(game.periods.slice(2, 4));
         const fullGameStats = game.periods[4];
         const fullGameMinutes = Math.round(gameTimeToMinutes(fullGameStats.min));
-        const xAxis = { x: `${moment(game.gdte).format("MM/DD")}\n${transformSummaryScore(game.summary)}` };
+        const xAxis = { x: `${moment(game.gdte).format("MM/DD")}\n${transformSummaryScore(game.summary)}\n${renderInactives(game.periods[4].inactives, teamId)}` };
 
         minutesData.push({
           ...xAxis,
@@ -201,9 +201,15 @@ const StatTrendCharts = ({ gameData, market, setActivePropMarket, livePropLine, 
               orientation="right"
               standalone={false} // required to render in <g> instead of <svg>
               domain={[0, 48]}
-              // label={findKeyByValue(marketMappers, chartMarket)} 
+              label={"Minutes"}
+              axisLabelComponent={
+                <VictoryLabel 
+                  style={{fill: "#2d7ff9" }}
+                  dy={13}
+                />
+              }
               style={{
-                tickLabels: { fontSize: 12, padding: 4 },
+                tickLabels: { fontSize: 12, padding: 4, fill: "#2d7ff9" },
               }}
             />
             {/* Game Log Bar Charts */}
