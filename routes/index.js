@@ -27,7 +27,6 @@ import {
   getWeekIntDateArray,
   mapPlayerStatistics,
   quarterInProgressResponse,
-  updateGameInactives,
 } from "../utils";
 import { SeasonNameAbb, SportsbookName } from "../types";
 import { EMPTY_BOX_SCORE } from "../constants";
@@ -77,11 +76,15 @@ rule.second = 48;
 
 // dbBuilders.updatePlayoffSchedule();
 
+(async () => { 
+    setTimeout(()=>{updateSchedule()}, 1000); // not working for playoffs
+})()
+
 // (async () => { 
 //   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   while (moment(yesterday).isAfter('2025-01-28')) {
+//   while (moment(yesterday).isAfter('2025-04-20')) {
 //     await updatePlayerBoxScoresByPeriod(yesterday);
 //     await delay(1000);
 //     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
@@ -103,13 +106,13 @@ rule.second = 48;
 //     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
 //     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
 //     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-//     // // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 130000);
+//     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
 //     setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
 //     setTimeout(()=>{checkForMissingInactives()}, 70000);
 //     setTimeout(()=>{mapFullPlayerData()}, 100000);
 //     setTimeout(()=>{addGameStints()}, 120000);
-//     // setTimeout(()=>{mapPlayerPlayoffData()}, 220000);
-//     setTimeout(()=>{mapSegmentedPlayerData()}, 140000);
+//     setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
+//     setTimeout(()=>{mapSegmentedPlayerData()}, 160000);
 //   // }) 
 // })()
 
@@ -119,6 +122,7 @@ rule.second = 48;
 //     const randomDelay = Math.floor(Math.random() * (45000 - 35000 + 1)) + 10000; // Random delay between 10000ms (10s) and 20000ms (20s)
 //     setTimeout(fetchWithRandomInterval, randomDelay);
 //   };
+// }
 
 //   // Start the first fetch
 //   fetchWithRandomInterval();
@@ -433,11 +437,11 @@ router.get("/api/getPlayerMetadata", async (req, res, next) => {
     'bpg_4q_full', 'bpg_4q_l5', '3pg_4q_full', '3pg_4q_l5', '3pa_4q_full', '3pa_4q_l5', 'topg_4q_full', 'topg_4q_l5', 'min_4q_full', 'min_4q_l5',
     'fgm_full', 'fgm_l5', 'fgm_3q_full', 'fgm_3q_l5', 'fgm_4q_full', 'fgm_4q_l5', 'fga_full', 'fga_l5', 'fga_3q_full', 'fga_3q_l5', 'fga_4q_full', 'fga_4q_l5',
     'ftm_full', 'ftm_l5', 'ftm_3q_full', 'ftm_3q_l5', 'ftm_4q_full', 'ftm_4q_l5', 'fta_full', 'fta_l5', 'fta_3q_full', 'fta_3q_l5', 'fta_4q_full', 'fta_4q_l5',
-    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5');
-    // 'min_post', 'fgm_post', 'fga_post', '3pg_post', '3pa_post', 'ftm_post', 'fta_post',
-    // 'topg_post', 'ppg_post', 'rpg_post', 'apg_post', 'spg_post', 'bpg_post', 'min_3q_post', 'fgm_3q_post', 'fga_3q_post', '3pg_3q_post', '3pa_3q_post', 'ftm_3q_post', 
-    // 'fta_3q_post', 'topg_3q_post', 'ppg_3q_post', 'rpg_3q_post', 'apg_3q_post', 'spg_3q_post', 'bpg_3q_post', 'min_4q_post', 'fgm_4q_post', 'fga_4q_post', '3pg_4q_post', 
-    // '3pa_4q_post', 'ftm_4q_post', 'fta_4q_post', 'topg_4q_post', 'ppg_4q_post', 'rpg_4q_post', 'apg_4q_post', 'spg_4q_post', 'bpg_4q_post');
+    '3pa_full', '3pa_l5', '3pa_3q_full', '3pa_3q_l5', '3pa_4q_full', '3pa_4q_l5',
+    'min_post', 'fgm_post', 'fga_post', '3pg_post', '3pa_post', 'ftm_post', 'fta_post',
+    'topg_post', 'ppg_post', 'rpg_post', 'apg_post', 'spg_post', 'bpg_post', 'min_3q_post', 'fgm_3q_post', 'fga_3q_post', '3pg_3q_post', '3pa_3q_post', 'ftm_3q_post', 
+    'fta_3q_post', 'topg_3q_post', 'ppg_3q_post', 'rpg_3q_post', 'apg_3q_post', 'spg_3q_post', 'bpg_3q_post', 'min_4q_post', 'fgm_4q_post', 'fga_4q_post', '3pg_4q_post', 
+    '3pa_4q_post', 'ftm_4q_post', 'fta_4q_post', 'topg_4q_post', 'ppg_4q_post', 'rpg_4q_post', 'apg_4q_post', 'spg_4q_post', 'bpg_4q_post');
 
   res.send({players});
 })
@@ -449,13 +453,11 @@ router.get("/api/getNetRatings", (req, res, next) => {
 });
 
 router.get("/api/fetchWeek/:date", async (req, res, next) => {
-  console.log('date in fetchWeek is ', req.params.date);
   const { date } = req.params;
   const dashedDate = convertIntDateToDashedDate(date)
 
   const seasonYear = getCurrentSeasonStartYearInt();
   const week = getGameWeek(dashedDate);
-  // const weekArray = getGameWeekDateArray(date, week);
   const weekArray = getWeekIntDateArray(dashedDate);
   const seasonName = getCurrentSeasonStage(dashedDate);
 
@@ -472,12 +474,10 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
     .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url', 's.betsson_url')
     .orderBy('s.etm')
     .then(async (games) => {
-      // const teamStats = await knex("teams_full_base");
       res.send({
         week,
         weekArray: weekArray,
         weekGames: games,
-        // teamStats // this is terrible. split into own call -- Am I even using this?
       })
     });
 });

@@ -17,7 +17,8 @@ const buildActivePropsMap = (players, dbColumns) => {
 }
 
 const findPlayerTeam = (propPlayerName: string, dailyPlayers, sportsbook: SportsbookName) => {
-  console.log('propPlayerName is ', propPlayerName);
+  // console.log('propPlayerName is ', propPlayerName);
+  // console.log('dailyPlayers is ', dailyPlayers);
   let player = dailyPlayers.find(player => player.player_name === propPlayerName);
   if (!player && sportsbook === SportsbookName.Betsson) {
     player = dailyPlayers.find(player => player.player_name === playerNameMismatches[SportsbookName.Betsson][propPlayerName])

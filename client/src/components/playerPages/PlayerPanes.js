@@ -14,6 +14,7 @@ const PlayerPanes = (player, market, setActivePropMarket, livePropLine, liveStat
           setActivePropMarket={setActivePropMarket}
           livePropLine={livePropLine}
           liveStat={liveStat}
+          teamId={player.mappedData.team_id}
         />,
     },
     {

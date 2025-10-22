@@ -115,12 +115,12 @@ export const scrapeBetsson = async (gameUrl: string) => {
       //   executablePath: '/opt/homebrew/bin/chromium',
       //   args: ['--no-sandbox']
       // });
-      const page = await browser.newPage();
+      const page = await browser.newPage(); 
 
       // If GameURL does not have "&mtg=6" at the end, add it
-      if (!gameUrl.includes('&mtg=24')) {
+      if (!gameUrl.includes('&mtg=7')) {
       // if (!gameUrl.includes('&mtg=6')) {
-        gameUrl += '&mtg=24';
+        gameUrl += '&mtg=7';
         // gameUrl += '&mtg=6';
       }
   
@@ -134,7 +134,7 @@ export const scrapeBetsson = async (gameUrl: string) => {
       try {
         console.log('waiting for selector');
         // You might need to wait for a specific element or some time for the dynamic content to load
-        await page.waitForSelector('.obg-m-event-markets');
+        await page.waitForSelector('.obg-m-event-market-group');
 
         // console.log('page is ', page);
 
@@ -165,7 +165,8 @@ export const scrapeBetsson = async (gameUrl: string) => {
         // $('.obg-m-event-player-props-market-group').each(function(i, elem) {
         $('obg-m-event-market-group').each(function(i, elem) {
           const market = $(elem).find('div.obg-m-event-market-group-header').text().trim();
-          console.log('market is ', market);
+          // console.log('market is ', market);
+          // console.log('elem is ', elem);
 
           // in each market, loop through the instances of <obg-uiuplift-accordion class="obg-m-event-player-props-market-group"/>
           // and extract the player, line, over, and under

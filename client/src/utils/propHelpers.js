@@ -49,3 +49,13 @@ export function transformSummaryScore(input) {
   const trimmedAfterAt = afterAt.trim();
   return `${trimmedBeforeAt}\n${trimmedAfterAt}`;
 }
+
+export function renderInactives(inactives, teamId) {
+  if (!inactives) return '';
+  const parseInactives = JSON.parse(inactives);
+  const allInactives = [ ... parseInactives.h, ... parseInactives.v].sort((a, b) => a.familyName.localeCompare(b.familyName));
+
+  const teamInactives = allInactives.filter(inactive => inactive.teamId === teamId && inactive.min > 8);
+
+  return teamInactives.map(inactive => inactive.familyName).join(`\n`);
+}
