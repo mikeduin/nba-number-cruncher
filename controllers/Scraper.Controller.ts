@@ -4,7 +4,11 @@ import puppeteer from 'puppeteer';
 // import chromium from 'chrome-aws-lambda';
 import axios from 'axios';
 import cheerio from 'cheerio';
-import { getReadablePrice, parseBovadaLines } from '../utils';
+import fs from 'fs';
+import path from 'path';
+import { getReadablePrice } from '../utils/props/getReadablePrice.js';
+import { parseBovadaLines } from '../utils/props/parseBovadaLines.js';
+import { convertDecimalToAmerican } from '../utils/props/convertOdds.js';
 import { PlayerProp } from '../types';
 
 const app = express();
@@ -97,13 +101,16 @@ export const scrapeBetsson = async (gameUrl: string) => {
   // const executablePath = await chromium.executablePath;
 
   if (app.get('env') === 'development') {
-    // browser = await puppeteer.launch({
-    //   args: ['--no-sandbox']
-    // });
-    // } else {
     browser = await puppeteer.launch({
       executablePath: '/opt/homebrew/bin/chromium',
-      args: ['--no-sandbox']
+      headless: true, // Try with visible browser first to debug
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled', // Hide automation
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      ]
     });
   }
 
@@ -115,80 +122,262 @@ export const scrapeBetsson = async (gameUrl: string) => {
       //   executablePath: '/opt/homebrew/bin/chromium',
       //   args: ['--no-sandbox']
       // });
-      const page = await browser.newPage(); 
+      const page = await browser.newPage();
+      
+      // Set a realistic viewport
+      await page.setViewport({ width: 1920, height: 1080 });
+      
+      // Mask that we're using automation
+      await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
+      });
 
-      // If GameURL does not have "&mtg=6" at the end, add it
-      if (!gameUrl.includes('&mtg=7')) {
-      // if (!gameUrl.includes('&mtg=6')) {
-        gameUrl += '&mtg=7';
-        // gameUrl += '&mtg=6';
+      // If GameURL does not have "&mtg=4" at the end, add it
+      if (!gameUrl.includes('&mtg=4')) {
+        gameUrl += '&mtg=4';
       }
   
-      // Navigate to the URL
-      await page.goto(gameUrl);
+      // Navigate to the URL with longer timeout
+      await page.goto(gameUrl, { 
+        waitUntil: 'networkidle2',
+        timeout: 60000 
+      });
 
       console.log('has gone to gameUrl');
   
       const props = [];
   
       try {
-        console.log('waiting for selector');
-        // You might need to wait for a specific element or some time for the dynamic content to load
-        await page.waitForSelector('.obg-m-event-market-group');
+        console.log('⏳ Waiting for page to fully load...');
+        
+        // // Wait longer for JS-heavy sites
+        // await new Promise(resolve => setTimeout(resolve, 8000));
+        
+        // console.log('🔍 Analyzing page structure...');
+        
+        // // Comprehensive debugging and Shadow DOM traversal
+        // const debugInfo = await page.evaluate(() => {
+        //   // Helper function to recursively search through Shadow DOM
+        //   const findInShadowDom = (root: Document | ShadowRoot, selector: string): Element | null => {
+        //     // First try in current root
+        //     let element = root.querySelector(selector);
+        //     if (element) return element;
+            
+        //     // Then search in all shadow roots
+        //     const allElements = root.querySelectorAll('*');
+        //     for (const el of allElements) {
+        //       if ((el as any).shadowRoot) {
+        //         element = findInShadowDom((el as any).shadowRoot, selector);
+        //         if (element) return element;
+        //       }
+        //     }
+        //     return null;
+        //   };
+          
+        //   // Helper to get all classes from Shadow DOM
+        //   const getAllClassesFromShadowDom = (root: Document | ShadowRoot): string[] => {
+        //     const classes: string[] = [];
+        //     const elements = root.querySelectorAll('*');
+            
+        //     elements.forEach(el => {
+        //       if (el.className && typeof el.className === 'string') {
+        //         el.className.split(' ').forEach(c => {
+        //           if (c && c.includes('obg')) classes.push(c);
+        //         });
+        //       }
+              
+        //       if ((el as any).shadowRoot) {
+        //         classes.push(...getAllClassesFromShadowDom((el as any).shadowRoot));
+        //       }
+        //     });
+            
+        //     return classes;
+        //   };
+          
+        //   // Helper to get all elements matching selector from Shadow DOM
+        //   const getAllFromShadowDom = (root: Document | ShadowRoot, selector: string): Element[] => {
+        //     const results: Element[] = [];
+            
+        //     // Get from current root
+        //     const elements = root.querySelectorAll(selector);
+        //     results.push(...Array.from(elements));
+            
+        //     // Recursively search shadow roots
+        //     const allElements = root.querySelectorAll('*');
+        //     allElements.forEach(el => {
+        //       if ((el as any).shadowRoot) {
+        //         results.push(...getAllFromShadowDom((el as any).shadowRoot, selector));
+        //       }
+        //     });
+            
+        //     return results;
+        //   };
+          
+        //   // Collect debug information
+        //   const shadowHosts: string[] = [];
+        //   document.querySelectorAll('*').forEach(el => {
+        //     if ((el as any).shadowRoot) {
+        //       shadowHosts.push(el.tagName.toLowerCase());
+        //     }
+        //   });
+          
+        //   const obgClasses = getAllClassesFromShadowDom(document);
+        //   const marketGroups = getAllFromShadowDom(document, '.obg-m-event-market-group');
+          
+        //   return {
+        //     shadowHosts: shadowHosts.slice(0, 10),
+        //     obgClassCount: obgClasses.length,
+        //     obgClassesSample: obgClasses.slice(0, 20),
+        //     marketGroupsFound: marketGroups.length,
+        //     marketGroupClasses: marketGroups.slice(0, 3).map(el => el.className)
+        //   };
+        // });
+        
+        // console.log('📊 Debug Info:');
+        // console.log('  - Shadow DOM hosts:', debugInfo.shadowHosts);
+        // console.log('  - OBG classes found:', debugInfo.obgClassCount);
+        // console.log('  - Sample OBG classes:', debugInfo.obgClassesSample);
+        // console.log('  - Market groups found:', debugInfo.marketGroupsFound);
+        // console.log('  - Market group classes:', debugInfo.marketGroupClasses);
+        
+        // Save debug files
+        // const debugDir = path.join(process.cwd(), 'debug');
+        // if (!fs.existsSync(debugDir)) {
+        //   fs.mkdirSync(debugDir, { recursive: true });
+        // }
+        
+        // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        // const screenshotPath = path.join(debugDir, `betsson-${timestamp}.png`);
+        
+        // await page.screenshot({ path: screenshotPath, fullPage: true });
+        // console.log('✅ Screenshot saved to:', screenshotPath);
+        
+        // if (debugInfo.marketGroupsFound === 0) {
+        //   throw new Error(`No betting markets found in Shadow DOM. Found ${debugInfo.obgClassCount} obg classes but no market groups.`);
+        // }
+        
+        // console.log(`✅ Found ${debugInfo.marketGroupsFound} market groups in Shadow DOM!`);
 
-        // console.log('page is ', page);
-
-        const closedAccordionSelector = '.obg-uiuplift-accordion-item-close';
-        const closedAccordions = await page.$$(closedAccordionSelector);
-
-        console.log('closedAccordions are ', closedAccordions);
-
-        for (const accordion of closedAccordions) {
-          await accordion.click();
-        }
-
-        const buttonSelector = '.obg-show-more-less-button';
-        const buttons = await page.$$(buttonSelector);
-        console.log('buttons are ', buttons);
-        for (const button of buttons) {
-          await button.click();
-          // Optionally, you can wait for some time between clicks
-          // await page.waitForTimeout(1000); // Wait for 1 second
-        }
-  
-        // Extract the content
-        const content = await page.content();
-        const $ = cheerio.load(content);
-
-        // console.log('content is ', content);
-
-        // $('.obg-m-event-player-props-market-group').each(function(i, elem) {
-        $('obg-m-event-market-group').each(function(i, elem) {
-          const market = $(elem).find('div.obg-m-event-market-group-header').text().trim();
-          // console.log('market is ', market);
-          // console.log('elem is ', elem);
-
-          // in each market, loop through the instances of <obg-uiuplift-accordion class="obg-m-event-player-props-market-group"/>
-          // and extract the player, line, over, and under
-          $(elem).find('obg-uiuplift-accordion.obg-m-event-player-props-market-group').each(function(j, elem) {
-            console.log('elem is ', elem);
-            const player = $(elem).find('span.obg-selection-v2-label.group-label').first().text().trim();
-            // console.log('player is ', player);
-            const line = $(elem).find('span.obg-selection-v2-label:not(.group-label)').first().text().trim().split(' ')[1]; // "Over 25.5" ... get value after space
-            const over = $(elem).find('span.obg-numeric-change-container-odds-value').first().text();
-            const under = $(elem).find('span.obg-numeric-change-container-odds-value').eq(1).text();
-
-            const playerProp: PlayerProp = {
-              market,
-              player,
-              line: parseFloat(line),
-              over: parseFloat(over),
-              under: parseFloat(under)
-            }
-
-            props.push(playerProp);
-          })
-        })
+        console.log('🔓 Attempting to expand accordions and show-more buttons...');
+        
+        // Expand accordions and show-more buttons using Shadow DOM traversal
+        const expandResult = await page.evaluate(() => {
+          const clickInShadowDom = (root: Document | ShadowRoot, selector: string): number => {
+            let clickCount = 0;
+            
+            // Click in current root
+            const elements = root.querySelectorAll(selector);
+            elements.forEach(el => {
+              (el as HTMLElement).click();
+              clickCount++;
+            });
+            
+            // Recursively search shadow roots
+            const allElements = root.querySelectorAll('*');
+            allElements.forEach(el => {
+              if ((el as any).shadowRoot) {
+                clickCount += clickInShadowDom((el as any).shadowRoot, selector);
+              }
+            });
+            
+            return clickCount;
+          };
+          
+          const accordionClicks = clickInShadowDom(document, '.obg-uiuplift-accordion-item-close');
+          const buttonClicks = clickInShadowDom(document, '.obg-show-more-less-button');
+          
+          return { accordionClicks, buttonClicks };
+        });
+        
+        console.log(`  - Expanded ${expandResult.accordionClicks} accordions`);
+        console.log(`  - Clicked ${expandResult.buttonClicks} show-more buttons`);
+        
+        // Wait for animations to complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('📦 Extracting betting data from Shadow DOM...');
+        
+        // Extract the data directly from Shadow DOM (no Cheerio needed)
+        const extractedProps = await page.evaluate(() => {
+          const getAllFromShadowDom = (root: Document | ShadowRoot, selector: string): Element[] => {
+            const results: Element[] = [];
+            const elements = root.querySelectorAll(selector);
+            results.push(...Array.from(elements));
+            
+            const allElements = root.querySelectorAll('*');
+            allElements.forEach(el => {
+              if ((el as any).shadowRoot) {
+                results.push(...getAllFromShadowDom((el as any).shadowRoot, selector));
+              }
+            });
+            
+            return results;
+          };
+          
+          const propsData: any[] = [];
+          const marketGroups = getAllFromShadowDom(document, '.obg-m-event-market-group');
+          
+          console.log(`Found ${marketGroups.length} market groups to process`);
+          
+          marketGroups.forEach((marketGroupEl, idx) => {
+            const marketHeader = marketGroupEl.querySelector('.obg-m-event-market-group-header');
+            const market = marketHeader ? marketHeader.textContent?.trim() : 'Unknown';
+            
+            console.log(`Processing market ${idx + 1}: ${market}`);
+            
+            // Find all player prop accordions within this market group
+            const accordions = marketGroupEl.querySelectorAll('.obg-m-event-player-props-market-group');
+            console.log(`  Found ${accordions.length} player props`);
+            
+            accordions.forEach((accordion, propIdx) => {
+              try {
+                const playerLabel = accordion.querySelector('span.obg-selection-v2-label.group-label');
+                const player = playerLabel ? playerLabel.textContent?.trim() : '';
+                
+                const lineLabel = accordion.querySelector('span.obg-selection-v2-label:not(.group-label)');
+                const lineText = lineLabel ? lineLabel.textContent?.trim() : '';
+                const lineParts = lineText.split(' ');
+                const line = lineParts.length > 1 ? lineParts[1] : '';
+                
+                const oddsValues = accordion.querySelectorAll('span.obg-numeric-change-container-odds-value');
+                const over = oddsValues[0] ? oddsValues[0].textContent?.trim() : '';
+                const under = oddsValues[1] ? oddsValues[1].textContent?.trim() : '';
+                
+                if (player && line && over && under) {
+                  propsData.push({
+                    market,
+                    player,
+                    line: parseFloat(line),
+                    over: parseFloat(over),
+                    under: parseFloat(under)
+                  });
+                  console.log(`    Prop ${propIdx + 1}: ${player} ${line} (${over}/${under})`);
+                }
+              } catch (err) {
+                console.log(`    Error extracting prop ${propIdx + 1}:`, err);
+              }
+            });
+          });
+          
+          return propsData;
+        });
+        
+        console.log(`✅ Extracted ${extractedProps.length} player props`);
+        
+        // Convert European (decimal) odds to American (moneyline) odds
+        console.log('🔄 Converting European odds to American format...');
+        const convertedProps = extractedProps.map(prop => ({
+          ...prop,
+          over: convertDecimalToAmerican(prop.over),
+          under: convertDecimalToAmerican(prop.under)
+        }));
+        
+        console.log(`✅ Converted ${convertedProps.length} props to American odds format`);
+        
+        // Add converted props to our results
+        props.push(...convertedProps);
       } catch (e) {
         console.log('error scraping Betsson props for ', gameUrl, ' and error is ', e);
       }
