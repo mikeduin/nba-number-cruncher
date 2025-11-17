@@ -1,11 +1,9 @@
-import knex from "../db/knex.js";
+import { BoxScores } from "../controllers/Db.Controller.js";
 import { UpdateBoxScore } from "../models/boxScore.js";
 
-function GameBoxScores() {return knex("box_scores_v2")};
-
-export const getBoxScore = async (gid: number) => {
+export const getBoxScoreFromDb = async (gid: number) => {
   try {
-    const boxScore = await GameBoxScores()
+    const boxScore = await BoxScores()
       .where({gid})
       .first();
     return boxScore;
@@ -16,7 +14,7 @@ export const getBoxScore = async (gid: number) => {
 
 export const updateGameBoxScore = async (gid: number, payload: UpdateBoxScore) => {
   try {
-    await GameBoxScores()
+    await BoxScores()
       .where({gid})
       .update({
         ...payload,

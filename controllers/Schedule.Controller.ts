@@ -4,7 +4,7 @@ import * as Db from './Db.Controller.js';
 import { LEAGUE_SCHEDULE_URL, SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
 import { fetchBoxScore } from './BoxScore.Controller.js';
-import { getBoxScore, getExistingSeasonGames, updateGameBoxScore, updateScheduleGame } from '../repositories';
+import { getBoxScoreFromDb, getExistingSeasonGames, updateGameBoxScore, updateScheduleGame } from '../repositories';
 import {
   formBovadaUrl,
   getCurrentSeasonDisplayYear,
@@ -242,7 +242,7 @@ export const checkForMissingInactives = async () => {
       .select('player_id', 'min_full', 'position');
 
     // get boxScore from DB  
-    const boxScore = await getBoxScore(game.gid);
+    const boxScore = await getBoxScoreFromDb(game.gid);
 
     if (!boxScore) {
       console.log('no boxScore found for gid ', game.gid);

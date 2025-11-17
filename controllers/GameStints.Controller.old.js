@@ -25,6 +25,8 @@ export const addGameStints = async () => {
 export const buildGameStints = async (gid) => {
   const season = getCurrentSeasonStartYearInt();
 
+  console.log('season is ', season, ' gid is ', gid);
+
   // const gDetail = await axios.get(GAME_DETAIL_URL(season, gid));
   // const gcode = gDetail.data.g.gcode;
   // const gdte = gDetail.data.g.gdte;
@@ -69,8 +71,6 @@ export const buildGameStints = async (gid) => {
 
   console.log('starters are ', starters);
 
-  const allPlayers = [...hPlayers, ...vPlayers];
-
   const gameStints = {};
   starters.forEach(player => {
     gameStints[`pid_${player}`] = [[0]];
@@ -83,120 +83,73 @@ export const buildGameStints = async (gid) => {
 
   // console.log('2025 pbp actions is ', pbp.data.game.actions);
 
-  // Helper function to parse ISO 8601 duration format (PT7M3S) to MM:SS format
-  const parseIsoDuration = (isoDuration) => {
-    if (!isoDuration || isoDuration === '') return '0:00';
-    
-    // Remove PT prefix
-    let duration = isoDuration.replace('PT', '');
-    
-    // Extract minutes and seconds
-    const minutesMatch = duration.match(/(\d+)M/);
-    const secondsMatch = duration.match(/(\d+(?:\.\d+)?)S/);
-    
-    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-    const seconds = secondsMatch ? Math.floor(parseFloat(secondsMatch[1])) : 0;
-    
-    // Format as MM:SS or M:SS
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   // Need to compile active players for each Q in case player enters early, leaves outside of Q, and never comes back
   const periodPlayers = [];
-  
-  // Get all actions from the new flat structure
-  const actions = pbp.data.game.actions;
-  
-  // Find the maximum period number to determine number of periods
-  const periods = Math.max(...actions.map(action => action.period || 0));
-  
-  // Process each period
-  for (let i = 0; i < periods; i++) {
-    const periodNum = i + 1;
-    
-    // Get all actions for this period
-    const periodActions = actions.filter(action => action.period === periodNum);
-    
+  const periods = pbp.data.g.pd.length;
+  // pbp.data.g.pd.forEach((period, i) => {
+
     // collect all substitution events in period
-    const subEvents = periodActions.filter(action => action.actionType === 'substitution');
-    
+    const subEvents = period.pla.filter(play => play.etype === 8);
+
     // collect all players who played in period
-    const iPlayers = _.uniq(
-      periodActions
-        .filter(action => action.personId && allPlayers.includes(parseInt(action.personId)))
-        .map(action => parseInt(action.personId))
-    );
+    const iPlayers = _.uniq(period.pla
+      .filter(play => allPlayers.includes(parseInt(play.epid)) || allPlayers.includes(parseInt(play.pid))))
+      .reduce((players, filteredPlays) => {
+        players.push(parseInt(filteredPlays.pid));
+        players.push(parseInt(filteredPlays.epid));
+        return _.uniq(players).filter(player => !isNaN(player));
+      }, []);
 
     periodPlayers.push(_.pull(iPlayers, hTid, vTid));
 
-    // Group substitutions by time to match enter/exit pairs
-    const subsByTime = {};
     subEvents.forEach(event => {
-      const timeKey = event.clock;
-      if (!subsByTime[timeKey]) {
-        subsByTime[timeKey] = { in: [], out: [] };
-      }
-      if (event.subType === 'in') {
-        subsByTime[timeKey].in.push(event);
-      } else if (event.subType === 'out') {
-        subsByTime[timeKey].out.push(event);
-      }
-    });
+      const secs = getGameSecs(i, event.cl)
 
-    // Process substitutions
-    Object.keys(subsByTime).forEach(timeKey => {
-      const clock = parseIsoDuration(timeKey);
-      const secs = getGameSecs(i, clock);
-      const { in: entering, out: exiting } = subsByTime[timeKey];
+      // SUBSTITUTION REFERENCE IN PLAY-BY-PLAY LOGS:
+      // player entering = event.epid
+      // player exiting = event.pid
 
-      // HANDLE ENTERING PLAYERS
-      entering.forEach(event => {
-        const playerId = event.personId;
-        
-        // first check to see if player has entered game yet by seeing if they exist in gameStints
-        if (Object.keys(gameStints).indexOf(`pid_${playerId}`) !== -1) {
-          // then check to see if player has not been logged as exiting due to subbing between quarters
-          // do this by checking to ensure last gameStint array has length of 2
-          if (
-            gameStints[`pid_${playerId}`][(gameStints[`pid_${playerId}`].length)-1].length === 1
-          ) {
-            // if length of 1, push value from beg of Q to complete last entry
-            gameStints[`pid_${playerId}`][(gameStints[`pid_${playerId}`].length)-1].push(startPeriodSec(i));
-            // then push current second value to new array to add new entry
-            gameStints[`pid_${playerId}`].push([secs]);
-          } else {
-            // if player exists in gameStints and last exit has been logged, push new entry array
-            gameStints[`pid_${playerId}`].push([secs]);
-          }
+      // HANDLE ENTERING PLAYER
+      // first check to see if player has entered game yet by seeing if they exist in gameStints
+      if (Object.keys(gameStints).indexOf(`pid_${event.epid}`) !== -1) {
+        // then check to see if player has not been logged as exiting due to subbing between quarters
+        // do this by checking to ensure last gameStint array has length of 2
+        if (
+          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].length === 1
+        ) {
+          // if length of 1, push value from beg of Q to complete last entry weekArray
+          // CHANGE THIS TO END OF LAST Q FOR WHICH THEY'D ENTERED
+          gameStints[`pid_${event.epid}`][(gameStints[`pid_${event.epid}`].length)-1].push(startPeriodSec(i));
+          // then push current second value to new array to add new entry
+          gameStints[`pid_${event.epid}`].push([secs]);
         } else {
-          // if player has not entered game, create key / push first entry array
-          gameStints[`pid_${playerId}`] = [[secs]];
+          // if player exists in gameStints and last exit has been logged, push new entry array
+          gameStints[`pid_${event.epid}`].push([secs]);
         }
-      });
+      } else {
+        // if player has not entered game, create key / push first entry array
+        gameStints[`pid_${event.epid}`] = [[secs]];
+      };
 
-      // HANDLE EXITING PLAYERS
-      exiting.forEach(event => {
-        const playerId = event.personId;
-        
-        // first check to see if player exists in gameStints; if not, they entered in between quarters
-        if (Object.keys(gameStints).indexOf(`pid_${playerId}`) !== -1) {
-          if (gameStints
-            [`pid_${playerId}`]
-            [(gameStints[`pid_${playerId}`].length)-1].length === 1
-          ) {
-            gameStints
-            [`pid_${playerId}`]
-            [(gameStints[`pid_${playerId}`].length)-1].push(secs);
-          } else {
-            gameStints[`pid_${playerId}`].push([startPeriodSec(i), secs]);
-          }
+      // HANDLE EXITING PLAYER
+      // first check to see if player exists in gameStints; if not, they entered in between quarters
+      if (Object.keys(gameStints).indexOf(`pid_${event.pid}`) !== -1) {
+        if (gameStints
+          [`pid_${event.pid}`]
+          [(gameStints[`pid_${event.pid}`].length)-1].length === 1
+        ) {
+          gameStints
+          [`pid_${event.pid}`]
+          [(gameStints[`pid_${event.pid}`].length)-1].push(secs);
         } else {
-          // player not yet in gameStints, add entry/exit for current period
-          gameStints[`pid_${playerId}`] = [[startPeriodSec(i), secs]];
+          gameStints[`pid_${event.pid}`].push([startPeriodSec(i), secs]);
         }
-      });
-    });
-  }
+      } else {
+        // player not yet in gameStints, add entry/exit for current period
+        gameStints[`pid_${event.pid}`] = [[startPeriodSec(i), secs]];
+      };
+    })
+  })
 
   let tempPlayer;
   // Compare players in last Q to ensure no one entered during pre-4Q/OT and never came out
@@ -255,13 +208,13 @@ export const buildGameStints = async (gid) => {
   hPlayers.forEach(async player => {
     const stints = gameStints[`pid_${player}`];
     await insertPlayerGameStint(player, hTid, gid, gcode, gdte, stints, season);
-    console.log('pid ', player, ' game stints updated for gid ', gid);
+    console.log('pid ', player.player_id, ' game stints updated for gid ', gid);
   });
 
   vPlayers.forEach(async (player, i) => {
     const stints = gameStints[`pid_${player}`];
     await insertPlayerGameStint(player, vTid, gid, gcode, gdte, stints, season);
-    console.log('pid ', player, ' game stints updated for gid ', gid);
+    console.log('pid ', player.player_id, ' game stints updated for gid ', gid);
   })
 
   await setGameStintsUpdated(gid);
