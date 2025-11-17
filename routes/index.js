@@ -84,11 +84,11 @@ rule.second = 48;
 //   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 // // schedule.scheduleJob(rule, async () => {
 //   let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//   // while (moment(yesterday).isAfter('2025-04-20')) {
-//   //   await updatePlayerBoxScoresByPeriod(yesterday);
-//   //   await delay(1000);
-//   //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//   // }
+//   while (moment(yesterday).isAfter('2025-10-18')) {
+//     await updatePlayerBoxScoresByPeriod(yesterday);
+//     await delay(1000);
+//     yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+//   }
 //     // Team Stat Updaters
 //     // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
 //     // setTimeout(()=>{updateStarterBuilds()}, 10000);
@@ -96,23 +96,23 @@ rule.second = 48;
 //     // setTimeout(()=>{updateQ1Builds()}, 30000);
 //     // setTimeout(()=>{updateQ2Builds()}, 40000);
 //     // setTimeout(()=>{updateQ3Builds()}, 50000); 
-//     // setTimeout(()=>{updateQ4Builds()}, 60000);
+//     // setTimeout(()=>{updateQ4Builds()}, 60000);XX
 //     // setTimeout(()=>{mapTeamNetRatings()}, 70000);
 //     // setTimeout(()=>{mapTeamPace()}, 80000);
 
 //     // Player Stat Updaters
-//     setTimeout(()=>{updatePlayerPositions()}, 500);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
-//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
-//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-//     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
-//     setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
-//     setTimeout(()=>{checkForMissingInactives()}, 70000);
-//     setTimeout(()=>{mapFullPlayerData()}, 100000);
-//     setTimeout(()=>{addGameStints()}, 120000);
-//     setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
-//     setTimeout(()=>{mapSegmentedPlayerData()}, 160000);
+//     // setTimeout(()=>{updatePlayerPositions()}, 500);
+//     // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
+//     // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+//     // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+//     // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+//     // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
+//     // setTimeout(()=>{updateSchedule()}, 60000); // not working for playoffs
+//     // setTimeout(()=>{checkForMissingInactives()}, 70000);
+//     // setTimeout(()=>{mapFullPlayerData()}, 100000);
+//     // setTimeout(()=>{addGameStints()}, 1000);
+//     // setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
+//     // setTimeout(()=>{mapSegmentedPlayerData()}, 170000);
 //   // }) 
 // })()
 

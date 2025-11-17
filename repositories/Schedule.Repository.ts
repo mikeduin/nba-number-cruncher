@@ -2,7 +2,14 @@ import knex from "../db/knex.js";
 
 function Schedule() {return knex('schedule')}
 
-export const getScheduleGame = async (gid: number) => await Schedule().where({ gid });
+/**
+ * Retrieve a single schedule game record by its game id.
+ *
+ * @param gid - The numeric game identifier to query for.
+ * @returns A Promise that resolves to the first matching schedule record, or `undefined` if no match is found.
+ * @throws Propagates any errors thrown by the underlying query builder or database driver.
+ */
+export const getScheduleGame = async (gid: number) => await Schedule().where({ gid }).first();
 
 export const getDailyGames = async (gdte: string) => await Schedule().where({ gdte });
 

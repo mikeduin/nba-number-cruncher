@@ -1,6 +1,6 @@
 import axios from "axios";
 import cheerio from "cheerio";
-import knex from "../db/knex.js";
+import { BoxScores, Schedule } from "../controllers/Db.Controller.js";
 import { getClocks, getGameSecs, getCurrentAndPrevQuarterStats, calcGamePoss, compileGameStats, mapPlayerStatistics } from '../utils';
 import { CompletedBoxScoreDb, NbaApiBoxScore, UpdateBoxScore } from "../models"
 import { updateGameBoxScore } from "../repositories";
@@ -72,9 +72,9 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
 
     if (period === 1) {
       try {
-        const entry = await knex("box_scores_v2").where({gid});
+        const entry = await BoxScores().where({gid});
         if (!entry[0]) {
-          await knex("box_scores_v2").insert({
+          await BoxScores().insert({
             ...baseUpdatePayload,
             gid: gid,
             h_tid: hTid,
@@ -91,7 +91,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
       }
     } else if (period === 2 || period === 3 || period === 4) {
       try {
-        const qTest = await knex("box_scores_v2").where({gid}).pluck(`${qVariable}`);
+        const qTest = await BoxScores().where({gid}).pluck(`${qVariable}`);
         if (qTest[0] == null) {
           const updatePayload: UpdateBoxScore = {
             ...baseUpdatePayload,
@@ -101,7 +101,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
           await updateGameBoxScore(gid, {final: true})
-          await knex("schedule").where({gid: gid}).update({
+          await Schedule().where({gid: gid}).update({
             stt: "Final",
             result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
           }); 
@@ -125,7 +125,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
             final: true,
           }
           await updateGameBoxScore(gid, updatePayload);
-          await knex("schedule").where({gid: gid}).update({
+          await Schedule().where({gid: gid}).update({
             stt: "Final",
             result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,
           }); 

@@ -34,3 +34,8 @@ export const insertPlayerBoxScoresByPeriod = (gid: string, period: number, playe
     console.log('player stats inserted for ', player_name, ' for period ', period, ' of game ', gid);
   });
 };
+
+export const getFinalPlayerBoxScoresForGame = async (gid: string) => {
+  return await PlayerBoxScores()
+    .where({ gid, period: 5 });
+}

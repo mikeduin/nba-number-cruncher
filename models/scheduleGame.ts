@@ -37,5 +37,5 @@ export interface ScheduleGame {
   // h?: Team[];
   // v?: Team[];
   // ...
-  playerStats:
+  playerStats?: any;
 }
