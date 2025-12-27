@@ -34,7 +34,14 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
 
   if (gamePropsOnSportsbook) {
     gamePropsOnSportsbook.forEach((prop) => {
-      const playerName = prop.player.trim();
+      let playerName = prop.player.trim();
+      
+      // Check if player name is formatted as "lastName, firstName" and reformat to "firstName lastName"
+      if (playerName.includes(',')) {
+        const [lastName, firstName] = playerName.split(',').map(part => part.trim());
+        playerName = `${firstName} ${lastName}`;
+      }
+      
       const dbColumn = mapSportsbookMarketToDbColumn(sportsbook, prop.market.trim());
 
       if (dbColumn) {

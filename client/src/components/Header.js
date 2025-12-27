@@ -55,6 +55,7 @@ class Header extends React.Component {
 
   setActiveDay = () => {
     let today = momentTz.tz('America/Los_Angeles').format('YYYY-MM-DD');
+    console.log('Setting active day to ', today);
     this.props.setActiveDay(today);
   }
 

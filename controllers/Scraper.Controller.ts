@@ -134,7 +134,7 @@ export const scrapeBetsson = async (gameUrl: string) => {
         });
       });
 
-      // If GameURL does not have "&mtg=4" at the end, add it
+      // If GameURL does not have "&mtg=3" at the end, add it
       if (!gameUrl.includes('&mtg=4')) {
         gameUrl += '&mtg=4';
       }
@@ -327,36 +327,59 @@ export const scrapeBetsson = async (gameUrl: string) => {
             
             console.log(`Processing market ${idx + 1}: ${market}`);
             
-            // Find all player prop accordions within this market group
-            const accordions = marketGroupEl.querySelectorAll('.obg-m-event-player-props-market-group');
-            console.log(`  Found ${accordions.length} player props`);
+            // Find all individual selection containers (each represents one bet - over or under)
+            const selections = marketGroupEl.querySelectorAll('obg-selection-container-v2[playerpropsvariant]');
+            console.log(`  Found ${selections.length} player prop selections`);
             
-            accordions.forEach((accordion, propIdx) => {
+            // Group selections by player (they come in pairs: over/under)
+            const playerProps = new Map();
+            
+            selections.forEach((selection, selIdx) => {
               try {
-                const playerLabel = accordion.querySelector('span.obg-selection-v2-label.group-label');
+                const playerLabel = selection.querySelector('span.obg-selection-v2-group-label');
                 const player = playerLabel ? playerLabel.textContent?.trim() : '';
                 
-                const lineLabel = accordion.querySelector('span.obg-selection-v2-label:not(.group-label)');
+                const lineLabel = selection.querySelector('span.obg-selection-v2-label:not(.obg-selection-v2-group-label)');
                 const lineText = lineLabel ? lineLabel.textContent?.trim() : '';
+                // lineText is like "Over 12.5" or "Under 12.5"
                 const lineParts = lineText.split(' ');
-                const line = lineParts.length > 1 ? lineParts[1] : '';
+                const direction = lineParts[0]; // "Over" or "Under"
+                const lineValue = lineParts.length > 1 ? lineParts[1] : '';
                 
-                const oddsValues = accordion.querySelectorAll('span.obg-numeric-change-container-odds-value');
-                const over = oddsValues[0] ? oddsValues[0].textContent?.trim() : '';
-                const under = oddsValues[1] ? oddsValues[1].textContent?.trim() : '';
+                const oddsElement = selection.querySelector('span.obg-numeric-change-container-odds-value');
+                const odds = oddsElement ? oddsElement.textContent?.trim() : '';
                 
-                if (player && line && over && under) {
-                  propsData.push({
-                    market,
-                    player,
-                    line: parseFloat(line),
-                    over: parseFloat(over),
-                    under: parseFloat(under)
-                  });
-                  console.log(`    Prop ${propIdx + 1}: ${player} ${line} (${over}/${under})`);
+                if (player && lineValue && odds) {
+                  // Create a unique key for this player/line combination
+                  const key = `${player}-${lineValue}`;
+                  
+                  if (!playerProps.has(key)) {
+                    playerProps.set(key, {
+                      market,
+                      player,
+                      line: parseFloat(lineValue),
+                      over: null,
+                      under: null
+                    });
+                  }
+                  
+                  const prop = playerProps.get(key);
+                  if (direction.toLowerCase() === 'over') {
+                    prop.over = parseFloat(odds);
+                  } else if (direction.toLowerCase() === 'under') {
+                    prop.under = parseFloat(odds);
+                  }
                 }
               } catch (err) {
-                console.log(`    Error extracting prop ${propIdx + 1}:`, err);
+                console.log(`    Error extracting selection ${selIdx + 1}:`, err);
+              }
+            });
+            
+            // Add completed props (those with both over and under)
+            playerProps.forEach((prop, key) => {
+              if (prop.over !== null && prop.under !== null) {
+                propsData.push(prop);
+                console.log(`    Prop: ${prop.player} ${prop.line} (${prop.over}/${prop.under})`);
               }
             });
           });

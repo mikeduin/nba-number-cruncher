@@ -186,6 +186,74 @@ export const updateSchedule = async (monthFilter?: Month, seasonStageFilter?: Se
   });
 }; 
 
+export const updateScheduleNewUrl = async () => {
+  const seasonYear = getCurrentSeasonStartYearInt();
+  const currentSeasonDates = SEASON_DATES.find(season => season.yearInt === seasonYear);
+  const schedulePull = await axios.get("https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json");
+  const { gameDates } = schedulePull.data.leagueSchedule;
+  const today = moment().format('MM/DD/YYYY');
+  const todayGames = gameDates.find((date) => date.gameDate.slice(0, 10) === today)?.games;
+  console.log('todayGames are ', todayGames);
+  todayGames.forEach(async (game) => {
+    const existingGame = await Db.Schedule().where({ gid: game.gameId.slice(2) }).select('gid');
+
+    if (!existingGame.length) {
+      console.log('game is not found in schedule, adding ', game.gameId);
+
+      if (game.gameTimeUTC === 'TBD') {
+        console.log('start time is TBD for game.gid ', game.gameId);
+        return;
+      }
+
+      const gdte = moment(game.gameDate).format('YYYY-MM-DD')
+
+      const seasonNameAbb = getSeasonNameAbb(gdte, currentSeasonDates.seasons.RegularSeason);
+      const seasonNameFull = getSeasonNameFull(gdte, currentSeasonDates.seasons.RegularSeason);
+
+      const hObj = {
+        tid: game.homeTeam.teamId,
+        re: null,
+        ta: game.homeTeam.teamTricode,
+        tn: game.homeTeam.teamName,
+        tc: game.homeTeam.teamCity,
+        s: null
+      };
+      const vObj = {
+        tid: game.awayTeam.teamId,
+        re: null,
+        ta: game.awayTeam.teamTricode,
+        tn: game.awayTeam.teamName,
+        tc: game.awayTeam.teamCity,
+        s: null
+      };
+
+      await Db.Schedule().insert(
+        {
+          gid: game.gameId,
+          gcode: game.gameCode,
+          gdte: moment(game.gameDate).format('YYYY-MM-DD'),
+          an: game.arenaName,
+          ac: game.arenaCity,
+          as: game.arenaState,
+          etm: moment(game.gameTimeUTC).subtract(3, 'hours'),
+          gweek: game.weekNumber, // need to figure this out
+          h: [hObj],
+          v: [vObj],
+          stt: game.gameStatusText,
+          season_year: getCurrentSeasonStartYearInt(),
+          season_name: seasonNameAbb, // need to figure this out
+          display_year: getCurrentSeasonDisplayYear(),
+          bovada_url: null, // need to figure this out
+          updated_at: new Date()
+        }
+      );
+      console.log(game.gameCode, " added to schedule in DB");
+    } else {
+      console.log('game already exists in schedule ', game.gameId);
+    }
+  });
+}
+
 export const prepareInactives = async (inactives, teamAbb: string, teamId: number) => {
   const season = getCurrentSeasonStartYearInt();
 

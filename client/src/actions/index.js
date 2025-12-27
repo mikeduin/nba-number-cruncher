@@ -38,6 +38,7 @@ export const fetchPlayerProps = () => async (dispatch, getState) => {
 
 export const checkActiveGames = () => async (dispatch, getState) => {
   const activeDay = getState().activeDay ?? moment().tz("America/Los_Angeles").format('YYYY-MM-DD');
+  dispatch({ type: 'SET_ACTIVE_DAY', payload: activeDay });
   const response = await axios.get(`/todayGameStatus/${activeDay}`);
   const serverActive = response.data.activeGames;
   const serverCompleted = response.data.completedGames;

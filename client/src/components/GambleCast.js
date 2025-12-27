@@ -18,7 +18,7 @@ const GambleCast = (props) => {
       props.setActiveDay(effectiveDay);
       props.fetchWeek(effectiveDay);
     } else {
-      props.setActiveDay(props.match.params.date);
+      // props.setActiveDay(props.match.params.date);
       props.fetchWeek(props.match.params.date);
     }
     props.checkActiveGames();
