@@ -173,15 +173,13 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
 })
 
 router.post("/api/updateProps", async (req, res, next) => {
-  const { gid, sportsbook } = req.body;
+  const { gid, sportsbook, pxContext } = req.body;
   try {
-    // await updateSingleGameProps(gid, SportsbookName.Bovada);
-    // await updateSingleGameProps(gid, SportsbookName.Betsson);
-    await updateSingleGameProps(gid, sportsbook);
+    await updateSingleGameProps(gid, sportsbook, pxContext);
     res.send({message: 'success'});
   } catch (e) {
     console.log('error updating props for ', gid, ' is ', e);
-    res.send({message: 'error'});
+    res.send({message: 'error', error: e.message});
   }
 })
 

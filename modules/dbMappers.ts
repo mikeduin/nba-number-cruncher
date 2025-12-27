@@ -33,6 +33,20 @@ const marketMappers = {
     'Player Total Points + Rebounds': 'pts+reb', // Betsson
     'Player Total Points + Assists': 'pts+ast', // Betsson
     'Player Total Assists + Rebounds': 'reb+ast', // Betsson
+  },
+  FanDuel: {
+    // FanDuel uses simple prop displays
+    'Points': 'pts',
+    'Rebounds': 'reb',
+    'Assists': 'ast',
+    'Steals': 'stl',
+    'Blocks': 'blk',
+    'Turnovers': 'tov',
+    'Made Threes': 'fg3m',
+    'Pts + Reb + Ast': 'pts+reb+ast',
+    'Pts + Reb': 'pts+reb',
+    'Pts + Ast': 'pts+ast',
+    'Reb + Ast': 'reb+ast',
   }
 }
 

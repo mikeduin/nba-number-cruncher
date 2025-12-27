@@ -1,8 +1,9 @@
 import moment from 'moment-timezone';
 import { getPlayerPropsMap, getCurrentSeasonStartYearInt } from '../utils';
-import { scrapeBetsson, scrapeBovada } from './Scraper.Controller.js';
+import { scrapeBetsson, scrapeBovada, scrapeFanDuel } from './Scraper.Controller.js';
 import { Players, PlayerProps, Schedule } from './Db.Controller.js';
 import { SportsbookName } from '../types';
+import { transformFanDuelPropsToWideFormat } from '../utils/props/transformFanDuelProps.js';
 
 export const playerNameMismatches = {
   Bovada: {
@@ -76,47 +77,100 @@ export const playerNameMismatches = {
     'Tidjane Salaun': 'Tidjane Salaün',
     'Vasilije Micic': 'Vasilije Micić',
     'Vit Krejci': 'Vít Krejčí',
+  },
+  FanDuel: {
+    // FanDuel typically has good name matching, but add exceptions as found
+    'Bogdan Bogdanovic': 'Bogdan Bogdanović',
+    'Cam Thomas': 'Cameron Thomas',
+    'Dennis Schroder': 'Dennis Schröder',
+    'Luka Doncic': 'Luka Dončić',
+    'Nikola Jokic': 'Nikola Jokić',
+    'Nikola Jovic': 'Nikola Jović',
+    'Nikola Vucevic': 'Nikola Vučević',
+    'Nic Claxton': 'Nicolas Claxton',
+    // Add more as you discover mismatches
   }
 }
 
-export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookName) => {
-  // const sportsbookUrl = sportsbook === SportsbookName.Bovada ? 'bovada_url' : 'betsson_url';
+export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookName, pxContext?: string) => {
   const season = getCurrentSeasonStartYearInt();
   const today = moment().format('YYYY-MM-DD');
 
   const game = await Schedule()
     .where({gid})
     .whereNot({stt: 'Final'})
-    .select('gid', 'etm', 'h', 'v', 'bovada_url', 'betsson_url');
+    .select('gid', 'etm', 'h', 'v', 'bovada_url', 'betsson_url', 'fanduel_event_id');
 
-  const dailyProps = await PlayerProps().where({gid});
+  // Get props for this specific sportsbook (for update/insert logic)
+  const dailyPropsForSportsbook = await PlayerProps().where({gid, sportsbook});
+  
+  // Load ALL players for the season (sportsbooks may show props for players from any team)
   const dailyPlayers = await Players()
     .where({ season })
-    .whereIn('team_id', [game[0].h[0].tid, game[0].v[0].tid])
     .select('player_id', 'player_name', 'team_id', 'team_abbreviation');
 
-  const gamesPropsOnBovada = sportsbook === SportsbookName.Bovada ? await scrapeBovada(game[0].bovada_url) : await scrapeBetsson(game[0].betsson_url);
-  const gamePropPlayersInDb = dailyProps
-    .filter(prop => prop.gid === gid)
-    .map(prop => prop.player_name);
+  let playerPropsMap: Map<string, any>;
 
-  const playerPropsMap = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb, dailyPlayers, sportsbook);
+  if (sportsbook === SportsbookName.FanDuel) {
+    // FanDuel requires event ID and PerimeterX context
+    const fanDuelEventId = game[0].fanduel_event_id;
+    
+    if (!fanDuelEventId) {
+      throw new Error(`FanDuel event ID not set for game ${gid}. Add it to the schedule table.`);
+    }
+    
+    if (!pxContext) {
+      throw new Error('FanDuel requires pxContext parameter. Get it from browser DevTools.');
+    }
+    
+    console.log(`Fetching FanDuel props for event ${fanDuelEventId}...`);
+    const scrapedProps = await scrapeFanDuel(fanDuelEventId, pxContext, 'NJ');
+    
+    // Convert to format matching Betsson/Bovada for use with getPlayerPropsMap
+    const formattedProps = scrapedProps.map(prop => ({
+      player: prop.playerName,
+      market: prop.propDisplay,
+      line: prop.line,
+      over: prop.overOdds,
+      under: prop.underOdds,
+      team: null // Will be resolved by getPlayerPropsMap
+    }));
+    
+    const gamePropPlayersInDb = dailyPropsForSportsbook
+      .filter(prop => prop.gid === gid)
+      .map(prop => prop.player_name);
+    
+    playerPropsMap = await getPlayerPropsMap(formattedProps, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    
+  } else {
+    // Betsson or Bovada
+    const gameUrl = sportsbook === SportsbookName.Bovada ? game[0].bovada_url : game[0].betsson_url;
+    const gamesPropsOnSportsbook = sportsbook === SportsbookName.Bovada 
+      ? await scrapeBovada(gameUrl) 
+      : await scrapeBetsson(gameUrl);
+    
+    const gamePropPlayersInDb = dailyPropsForSportsbook
+      .filter(prop => prop.gid === gid)
+      .map(prop => prop.player_name);
+
+    playerPropsMap = await getPlayerPropsMap(gamesPropsOnSportsbook, gamePropPlayersInDb, dailyPlayers, sportsbook);
+  }
   
   for (let [player, props] of playerPropsMap) {
     if (Object.keys(playerNameMismatches[sportsbook]).includes(player)) {
       player = playerNameMismatches[sportsbook][player];
     }
     
-    const playerPropsExists = dailyProps.filter(prop => prop.player_name.trim() === player.trim()).length;
+    const playerPropsExists = dailyPropsForSportsbook.filter(prop => prop.player_name.trim() === player.trim()).length;
 
     if (playerPropsExists) {
       // update the entry
       try {
-        await PlayerProps().where({player_name: player, gid}).update({
+        await PlayerProps().where({player_name: player, gid, sportsbook}).update({
           ...props,
           updated_at: new Date()
         });
-        console.log('updated player prop for ', player);
+        console.log('updated player prop for ', player, ' on ', sportsbook);
       } catch (e) {
         console.log('error updating player prop for ', player, ' and error is ', e, ' and props are ', props);
       }
@@ -130,10 +184,11 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
           player_id: dailyPlayers.filter(p => p.player_name === player.trim())[0].player_id,
           gid,
           gdte: today,
+          sportsbook,  // Track which sportsbook
           created_at: new Date(),
           updated_at: new Date()
         });
-        console.log('inserted new player prop for ', player);
+        console.log('inserted new player prop for ', player, ' on ', sportsbook);
       } catch (e) {
         console.log('error inserting new player prop for ', player, ' and error is ', e);
       }

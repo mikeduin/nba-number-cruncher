@@ -9,7 +9,16 @@ import path from 'path';
 import { getReadablePrice } from '../utils/props/getReadablePrice.js';
 import { parseBovadaLines } from '../utils/props/parseBovadaLines.js';
 import { convertDecimalToAmerican } from '../utils/props/convertOdds.js';
+import { 
+  parseFanDuelMarketName, 
+  mapFanDuelPropType 
+} from '../utils/props/parseFanDuelMarket.js';
 import { PlayerProp } from '../types';
+import { 
+  FanDuelEventPageResponse, 
+  FanDuelMarket, 
+  FanDuelProp 
+} from '../types/FanDuel.js';
 
 const app = express();
 
@@ -414,5 +423,152 @@ export const scrapeBetsson = async (gameUrl: string) => {
     }
   } else {
     console.log('No gameUrl provided');
+  }
+};
+
+/**
+ * Scrape player props from FanDuel
+ * 
+ * @param eventId - FanDuel event ID (e.g., 35085635)
+ * @param pxContext - PerimeterX authentication token (from x-px-context header)
+ * @param region - Sportsbook region (e.g., 'NJ', 'PA', 'MI')
+ * @returns Array of parsed FanDuel props
+ * 
+ * Usage:
+ * const props = await scrapeFanDuel('35085635', 'your-px-token', 'NJ');
+ * 
+ * Note: PerimeterX tokens expire after 5-30 minutes. 
+ * Get fresh token from browser DevTools when needed.
+ */
+export const scrapeFanDuel = async (
+  eventId: string,
+  pxContext: string,
+  region: string = 'NJ'
+): Promise<FanDuelProp[]> => {
+  console.log(`🎯 Scraping FanDuel props for event ${eventId}...`);
+  
+  // Build the API URL
+  const apiUrl = `https://api.sportsbook.fanduel.com/sbapi/event-page?_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=player-points&useCombinedTouchdownsVirtualMarket=true&usePulse=true&useQuickBets=true&useQuickBetsMLB=true`;
+  
+  // Configure axios client with FanDuel headers
+  const client = axios.create({
+    headers: {
+      'accept': 'application/json',
+      'accept-language': 'en-US,en;q=0.9',
+      'dnt': '1',
+      'origin': `https://${region.toLowerCase()}.sportsbook.fanduel.com`,
+      'priority': 'u=1, i',
+      'referer': `https://${region.toLowerCase()}.sportsbook.fanduel.com/`,
+      'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"macOS"',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-site',
+      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+      'x-px-context': pxContext,
+      'x-sportsbook-region': region.toUpperCase()
+    },
+    timeout: 30000
+  });
+  
+  try {
+    // Fetch event data
+    const response = await client.get<FanDuelEventPageResponse>(apiUrl);
+    console.log(`✅ Received response (${JSON.stringify(response.data).length} bytes)`);
+    
+    const { attachments } = response.data;
+    
+    if (!attachments || !attachments.markets) {
+      console.warn('⚠️  No markets found in FanDuel response');
+      return [];
+    }
+    
+    const markets = Object.values(attachments.markets);
+    console.log(`📊 Found ${markets.length} total markets`);
+    
+    // Filter for player prop markets (those with runners and player selections)
+    const playerPropMarkets = markets.filter((market: FanDuelMarket) => 
+      market.runners && 
+      market.runners.length > 0 &&
+      market.runners.some(r => r.isPlayerSelection)
+    );
+    
+    console.log(`👥 Found ${playerPropMarkets.length} player prop markets`);
+    
+    // Parse each market into our standardized format
+    const props: FanDuelProp[] = [];
+    
+    for (const market of playerPropMarkets) {
+      try {
+        // Parse player name from market name
+        const parsed = parseFanDuelMarketName(market.marketName);
+        if (!parsed) {
+          console.warn(`⚠️  Could not parse market name: ${market.marketName}`);
+          continue;
+        }
+        
+        // Get standardized prop type
+        const propType = mapFanDuelPropType(market.marketType, market.marketName);
+        
+        // Find over and under runners
+        const overRunner = market.runners.find(r => r.result.type === 'OVER');
+        const underRunner = market.runners.find(r => r.result.type === 'UNDER');
+        
+        if (!overRunner || !underRunner) {
+          console.warn(`⚠️  Missing over/under for ${market.marketName}`);
+          continue;
+        }
+        
+        // Extract odds
+        const overOdds = overRunner.winRunnerOdds?.americanDisplayOdds?.americanOddsInt;
+        const underOdds = underRunner.winRunnerOdds?.americanDisplayOdds?.americanOddsInt;
+        
+        if (overOdds === undefined || underOdds === undefined) {
+          console.warn(`⚠️  Missing odds for ${market.marketName}`);
+          continue;
+        }
+        
+        // Create standardized prop object
+        const prop: FanDuelProp = {
+          eventId: market.eventId,
+          playerName: parsed.player,
+          marketId: market.marketId,
+          marketType: market.marketType,
+          marketName: market.marketName,
+          propType,
+          line: overRunner.handicap,
+          overOdds,
+          underOdds,
+          overSelectionId: overRunner.selectionId,
+          underSelectionId: underRunner.selectionId,
+          marketStatus: market.marketStatus,
+          inPlay: market.inPlay,
+          marketTime: market.marketTime,
+          rawMarketData: JSON.stringify(market)
+        };
+        
+        props.push(prop);
+        
+      } catch (err) {
+        console.error(`❌ Error parsing market ${market.marketId}:`, err);
+      }
+    }
+    
+    console.log(`✅ Successfully parsed ${props.length} props`);
+    return props;
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('❌ FanDuel API error:', error.response.status, error.response.statusText);
+      
+      if (error.response.status === 403) {
+        console.error('⚠️  403 Forbidden: PerimeterX token may have expired. Get a fresh token from browser.');
+      }
+    } else {
+      console.error('❌ Error scraping FanDuel:', error);
+    }
+    
+    return [];
   }
 };
