@@ -447,8 +447,8 @@ export const scrapeFanDuel = async (
 ): Promise<FanDuelProp[]> => {
   console.log(`🎯 Scraping FanDuel props for event ${eventId}...`);
   
-  // Build the API URL
-  const apiUrl = `https://api.sportsbook.fanduel.com/sbapi/event-page?_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=player-points&useCombinedTouchdownsVirtualMarket=true&usePulse=true&useQuickBets=true&useQuickBetsMLB=true`;
+  // Build the API URL - remove tab parameter to get ALL markets
+  const apiUrl = `https://api.sportsbook.fanduel.com/sbapi/event-page?_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&useCombinedTouchdownsVirtualMarket=true&usePulse=true&useQuickBets=true&useQuickBetsMLB=true`;
   
   // Configure axios client with FanDuel headers
   const client = axios.create({
@@ -473,22 +473,36 @@ export const scrapeFanDuel = async (
   });
   
   try {
-    // Fetch event data
-    const response = await client.get<FanDuelEventPageResponse>(apiUrl);
-    console.log(`✅ Received response (${JSON.stringify(response.data).length} bytes)`);
+    // Fetch from multiple tabs to get all prop types
+    const tabs = ['player-points', 'player-rebounds', 'player-assists', 'player-threes', 'player-combos', 'player-defense'];
+    let allMarkets: FanDuelMarket[] = [];
     
-    const { attachments } = response.data;
+    console.log(`🔄 Fetching markets from ${tabs.length} tabs...`);
     
-    if (!attachments || !attachments.markets) {
-      console.warn('⚠️  No markets found in FanDuel response');
-      return [];
+    for (const tab of tabs) {
+      try {
+        const tabUrl = `https://api.sportsbook.fanduel.com/sbapi/event-page?_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}&useCombinedTouchdownsVirtualMarket=true&usePulse=true&useQuickBets=true&useQuickBetsMLB=true`;
+        const response = await client.get<FanDuelEventPageResponse>(tabUrl);
+        
+        if (response.data.attachments?.markets) {
+          const markets = Object.values(response.data.attachments.markets);
+          console.log(`  ✅ Tab "${tab}": ${markets.length} markets`);
+          allMarkets = allMarkets.concat(markets);
+        }
+      } catch (err) {
+        console.warn(`  ⚠️  Tab "${tab}" failed:`, err.message);
+      }
     }
     
-    const markets = Object.values(attachments.markets);
-    console.log(`📊 Found ${markets.length} total markets`);
+    // Deduplicate markets by marketId
+    const uniqueMarkets = Array.from(
+      new Map(allMarkets.map(m => [m.marketId, m])).values()
+    );
+    
+    console.log(`📊 Found ${allMarkets.length} total markets, ${uniqueMarkets.length} unique after deduplication`);
     
     // Filter for player prop markets (those with runners and player selections)
-    const playerPropMarkets = markets.filter((market: FanDuelMarket) => 
+    const playerPropMarkets = uniqueMarkets.filter((market: FanDuelMarket) => 
       market.runners && 
       market.runners.length > 0 &&
       market.runners.some(r => r.isPlayerSelection)
@@ -537,6 +551,7 @@ export const scrapeFanDuel = async (
           marketType: market.marketType,
           marketName: market.marketName,
           propType,
+          propDisplay: parsed.propDisplay,
           line: overRunner.handicap,
           overOdds,
           underOdds,
@@ -556,6 +571,14 @@ export const scrapeFanDuel = async (
     }
     
     console.log(`✅ Successfully parsed ${props.length} props`);
+    
+    // Log prop type distribution for debugging
+    const propTypeCount = {};
+    props.forEach(p => {
+      propTypeCount[p.propDisplay] = (propTypeCount[p.propDisplay] || 0) + 1;
+    });
+    console.log('📊 Prop types found:', propTypeCount);
+    
     return props;
     
   } catch (error) {

@@ -172,14 +172,127 @@ router.delete("/api/deleteDuplicateProps/:gid", async (req, res) => {
   }
 })
 
-router.post("/api/updateProps", async (req, res, next) => {
-  const { gid, sportsbook, pxContext } = req.body;
+router.post("/api/updateFanDuelEventId", async (req, res, next) => {
+  const { gid, curlCommand } = req.body;
   try {
-    await updateSingleGameProps(gid, sportsbook, pxContext);
+    // Extract event ID from cURL command
+    const eventIdMatch = curlCommand.match(/eventId=(\d+)/);
+    if (!eventIdMatch) {
+      return res.status(400).send({message: 'error', error: 'Could not find eventId in cURL command'});
+    }
+    const eventId = eventIdMatch[1];
+    
+    // Extract and save px-context if present
+    const pxContextMatch = curlCommand.match(/x-px-context[:'"\s]+([^'"\s]+)/);
+    if (pxContextMatch) {
+      const pxContext = pxContextMatch[1];
+      await knex('app_settings')
+        .insert({ 
+          setting_key: 'fanduel_px_context', 
+          setting_value: pxContext,
+          created_at: new Date(),
+          updated_at: new Date()
+        })
+        .onConflict('setting_key')
+        .merge({
+          setting_value: pxContext,
+          updated_at: new Date()
+        });
+      console.log('✅ Saved px-context to database');
+    }
+    
+    // Save event ID to schedule
+    await knex('schedule').where({ gid }).update({ fanduel_event_id: eventId });
+    
+    res.send({message: 'success', eventId});
+  } catch (e) {
+    console.log('error updating fanduel event id for ', gid, ' is ', e);
+    res.send({message: 'error', error: e.message});
+  }
+})
+
+router.post("/api/updateFanDuelPxContext", async (req, res, next) => {
+  const { pxContext } = req.body;
+  try {
+    if (!pxContext) {
+      return res.status(400).send({message: 'error', error: 'pxContext is required'});
+    }
+    
+    // Save or update px-context
+    await knex('app_settings')
+      .insert({ 
+        setting_key: 'fanduel_px_context', 
+        setting_value: pxContext,
+        created_at: new Date(),
+        updated_at: new Date()
+      })
+      .onConflict('setting_key')
+      .merge({
+        setting_value: pxContext,
+        updated_at: new Date()
+      });
+    
     res.send({message: 'success'});
   } catch (e) {
-    console.log('error updating props for ', gid, ' is ', e);
+    console.log('error updating fanduel px-context: ', e);
     res.send({message: 'error', error: e.message});
+  }
+})
+
+router.get("/api/getFanDuelPxContext", async (req, res, next) => {
+  try {
+    const setting = await knex('app_settings')
+      .where({ setting_key: 'fanduel_px_context' })
+      .first();
+    
+    if (!setting) {
+      return res.send({message: 'not_found', pxContext: null, updatedAt: null});
+    }
+    
+    res.send({
+      message: 'success',
+      pxContext: setting.setting_value,
+      updatedAt: setting.updated_at
+    });
+  } catch (e) {
+    console.log('error getting fanduel px-context: ', e);
+    res.send({message: 'error', error: e.message});
+  }
+})
+
+router.post("/api/updateProps", async (req, res, next) => {
+  let { gid, sportsbook, pxContext } = req.body;
+  try {
+    // For FanDuel, use stored px-context if not provided
+    if (sportsbook === 'FanDuel' && !pxContext) {
+      const setting = await knex('app_settings')
+        .where({ setting_key: 'fanduel_px_context' })
+        .first();
+      
+      if (setting?.setting_value) {
+        pxContext = setting.setting_value;
+        console.log('📦 Using stored px-context from database');
+      }
+    }
+    
+    const result = await updateSingleGameProps(gid, sportsbook, pxContext);
+    res.send({
+      message: 'success',
+      missingTeams: result?.missingTeams || []
+    });
+  } catch (e) {
+    console.log('error updating props for ', gid, ' is ', e);
+    
+    // If 403 error, suggest updating px-context
+    if (e.message && e.message.includes('403')) {
+      res.status(403).send({
+        message: 'error', 
+        error: 'PerimeterX token expired. Please paste a fresh cURL to update px-context.',
+        needsNewToken: true
+      });
+    } else {
+      res.send({message: 'error', error: e.message});
+    }
   }
 })
 
@@ -269,7 +382,74 @@ router.get("/api/fetchPlayerData/:pid", async (req, res, next) => {
 
 router.get('/api/fetchPlayerProps/:date', async (req, res) => {
   const dailyProps = await knex("player_props").where({gdte: req.params.date});
-  res.send(dailyProps);
+  
+  // Transform from long format (one row per sportsbook) to wide format (one row per player with all sportsbooks)
+  const playerPropsMap = {};
+  
+  dailyProps.forEach(prop => {
+    const key = `${prop.gid}_${prop.player_id}_${prop.player_name}`;
+    
+    if (!playerPropsMap[key]) {
+      playerPropsMap[key] = {
+        gid: prop.gid,
+        gdte: prop.gdte,
+        player_id: prop.player_id,
+        player_name: prop.player_name,
+        team: prop.team,
+        sportsbooks: {}
+      };
+    }
+    
+    // Store this sportsbook's props
+    playerPropsMap[key].sportsbooks[prop.sportsbook] = {
+      pts: prop.pts,
+      pts_over: prop.pts_over,
+      pts_under: prop.pts_under,
+      pts_active: prop.pts_active,
+      reb: prop.reb,
+      reb_over: prop.reb_over,
+      reb_under: prop.reb_under,
+      reb_active: prop.reb_active,
+      ast: prop.ast,
+      ast_over: prop.ast_over,
+      ast_under: prop.ast_under,
+      ast_active: prop.ast_active,
+      stl: prop.stl,
+      stl_over: prop.stl_over,
+      stl_under: prop.stl_under,
+      stl_active: prop.stl_active,
+      blk: prop.blk,
+      blk_over: prop.blk_over,
+      blk_under: prop.blk_under,
+      blk_active: prop.blk_active,
+      tov: prop.tov,
+      tov_over: prop.tov_over,
+      tov_under: prop.tov_under,
+      tov_active: prop.tov_active,
+      fg3m: prop.fg3m,
+      fg3m_over: prop.fg3m_over,
+      fg3m_under: prop.fg3m_under,
+      fg3m_active: prop.fg3m_active,
+      'pts+reb+ast': prop['pts+reb+ast'],
+      'pts+reb+ast_over': prop['pts+reb+ast_over'],
+      'pts+reb+ast_under': prop['pts+reb+ast_under'],
+      'pts+reb+ast_active': prop['pts+reb+ast_active'],
+      'pts+reb': prop['pts+reb'],
+      'pts+reb_over': prop['pts+reb_over'],
+      'pts+reb_under': prop['pts+reb_under'],
+      'pts+reb_active': prop['pts+reb_active'],
+      'pts+ast': prop['pts+ast'],
+      'pts+ast_over': prop['pts+ast_over'],
+      'pts+ast_under': prop['pts+ast_under'],
+      'pts+ast_active': prop['pts+ast_active'],
+      'reb+ast': prop['reb+ast'],
+      'reb+ast_over': prop['reb+ast_over'],
+      'reb+ast_under': prop['reb+ast_under'],
+      'reb+ast_active': prop['reb+ast_active']
+    };
+  });
+  
+  res.send(Object.values(playerPropsMap));
 })
 
 if (app.get("env") === 'production' || app.get("env") === 'development') {

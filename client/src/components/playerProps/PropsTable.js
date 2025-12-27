@@ -79,12 +79,30 @@ const PropsTable = ({
 
   const renderPropRows = () => {
     const filteredProps = teamFilter ? playerProps.filter(prop => prop.team === teamFilter) : playerProps;
+    
+    // Get all available sportsbooks from the data
+    const allSportsbooks = new Set();
+    filteredProps.forEach(prop => {
+      if (prop.sportsbooks) {
+        Object.keys(prop.sportsbooks).forEach(book => allSportsbooks.add(book));
+      }
+    });
+    const availableSportsbooks = Array.from(allSportsbooks).sort();
+    
     const sortedProps = sortProps 
       ? filteredProps.sort((a, b) => {
-          if (b[market] === a[market]) {
-            return a[`${market}_over`] - b[`${market}_over`];
+          // Sort by the first available sportsbook's line
+          const aSportsbook = availableSportsbooks.find(book => a.sportsbooks?.[book]?.[market]);
+          const bSportsbook = availableSportsbooks.find(book => b.sportsbooks?.[book]?.[market]);
+          const aLine = a.sportsbooks?.[aSportsbook]?.[market];
+          const bLine = b.sportsbooks?.[bSportsbook]?.[market];
+          
+          if (bLine === aLine) {
+            const aOver = a.sportsbooks?.[aSportsbook]?.[`${market}_over`] || 0;
+            const bOver = b.sportsbooks?.[bSportsbook]?.[`${market}_over`] || 0;
+            return aOver - bOver;
           }
-          return b[market] - a[market];
+          return (bLine || 0) - (aLine || 0);
         })
       : filteredProps;
 
@@ -110,11 +128,17 @@ const PropsTable = ({
         const ftm4q = getPlayerStat(seasonPlayerStats, 'ftm', false, '4q', timeframe);
         const fta4q = getPlayerStat(seasonPlayerStats, 'fta', false, '4q', timeframe);
         const ftPct4q = getShotPct(ftm4q, fta4q);
+        
+        // Determine if any sportsbook has an active prop for this market
+        const hasActiveProp = availableSportsbooks.some(book => 
+          prop.sportsbooks?.[book]?.[`${market}_active`] === true
+        );
+        
         return (
           <React.Fragment key={`${prop.player_name}-${market}`}>
           <Table.Row 
             onClick={() => handlePlayerRowClick(prop.player_id)}
-            style={{backgroundColor: prop[`${market}_active`] !== true ? '#D4D4D4' : 'white'}}>
+            style={{backgroundColor: !hasActiveProp ? '#D4D4D4' : 'white'}}>
             <Table.Cell style={{position: 'relative'}}>
               <div style={{ position: 'absolute', top: 0, right: 5, height: '30px', width: '30px', display: 'inline-block'}}>
                 <Image size="mini" circular src={logos[prop.team]} />
@@ -132,31 +156,54 @@ const PropsTable = ({
                 </Link>
               </div>
             </Table.Cell>
-            <Table.Cell 
-              style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'column',
-              fontSize: '22px',
-            }}> 
-              <div style={{marginBottom: '5px '}}>
-                <b>{prop[market]}</b> 
-              </div>
-              <div>
-                <Table compact celled>
-                  <Table.Header>
-                  <Table.Row style={{
-                      lineHeight: '3px',
-                      fontSize: '10px',
-                      padding: 0
+            {/* Sportsbook columns */}
+            {availableSportsbooks.map(book => {
+              const bookProps = prop.sportsbooks?.[book];
+              const line = bookProps?.[market];
+              const overOdds = bookProps?.[`${market}_over`];
+              const underOdds = bookProps?.[`${market}_under`];
+              const isActive = bookProps?.[`${market}_active`];
+              
+              return (
+                <Table.Cell 
+                  key={book}
+                  style={{
+                    textAlign: 'center',
+                    opacity: isActive ? 1 : 0.5,
+                    backgroundColor: isActive ? 'white' : '#f5f5f5'
+                  }}
+                > 
+                  {line !== null && line !== undefined ? (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexDirection: 'column',
+                      fontSize: '18px'
                     }}>
-                      <Table.HeaderCell>{formatJuice(prop[`${market}_over`])}</Table.HeaderCell>
-                      <Table.HeaderCell>{formatJuice(prop[`${market}_under`])}</Table.HeaderCell>
-                    </Table.Row>
-                  </Table.Header>
-                </Table>
-              </div>
-            </Table.Cell>
+                      <div style={{marginBottom: '5px'}}>
+                        <b>{line}</b> 
+                      </div>
+                      <div>
+                        <Table compact celled>
+                          <Table.Header>
+                          <Table.Row style={{
+                              lineHeight: '3px',
+                              fontSize: '10px',
+                              padding: 0
+                            }}>
+                              <Table.HeaderCell>{formatJuice(overOdds)}</Table.HeaderCell>
+                              <Table.HeaderCell>{formatJuice(underOdds)}</Table.HeaderCell>
+                            </Table.Row>
+                          </Table.Header>
+                        </Table>
+                      </div>
+                    </div>
+                  ) : (
+                    <span style={{color: '#ccc'}}>—</span>
+                  )}
+                </Table.Cell>
+              );
+            })}
             <Table.Cell> {livePlayerStats?.min} </Table.Cell>
             <Table.Cell style={{fontSize: '20px'}}> <b>
                 { market === 'fg3m' 
@@ -203,7 +250,11 @@ const PropsTable = ({
           </Table.Row>
           {expandedRows[prop.player_id] && getPlayerDataRow({
             playerId: prop.player_id,
-            livePropLine: prop[market],
+            livePropLine: (() => {
+              // Get line from first available sportsbook
+              const firstBook = availableSportsbooks.find(book => prop.sportsbooks?.[book]?.[market]);
+              return prop.sportsbooks?.[firstBook]?.[market];
+            })(),
             liveStat: getPlayerStat(livePlayerStats, market, true),
           })}
           </React.Fragment>
@@ -218,7 +269,21 @@ const PropsTable = ({
       celled
       style={{marginBottom: 20}}
     >
-      <PropsTableHeader market={market} timeframeText={timeframeText}/>
+      <PropsTableHeader 
+        market={market} 
+        timeframeText={timeframeText}
+        availableSportsbooks={(() => {
+          // Get all available sportsbooks from filtered props
+          const allSportsbooks = new Set();
+          const filteredProps = teamFilter ? playerProps.filter(prop => prop.team === teamFilter) : playerProps;
+          filteredProps.forEach(prop => {
+            if (prop.sportsbooks) {
+              Object.keys(prop.sportsbooks).forEach(book => allSportsbooks.add(book));
+            }
+          });
+          return Array.from(allSportsbooks).sort();
+        })()}
+      />
       <Table.Body>
         {renderPropRows()}
       </Table.Body>

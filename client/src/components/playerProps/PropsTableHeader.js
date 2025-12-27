@@ -2,10 +2,13 @@ import React from 'react';
 import { Table } from 'semantic-ui-react';
 import { headerMappers } from './Props.constants';
 
-export const PropsTableHeader = ({ market, timeframeText }) => <Table.Header>
+export const PropsTableHeader = ({ market, timeframeText, availableSportsbooks = [] }) => {
+  const sportsbookCount = availableSportsbooks.length || 1;
+  
+  return <Table.Header>
   <Table.Row>
     <Table.HeaderCell rowSpan="2"> Player </Table.HeaderCell>
-    <Table.HeaderCell rowSpan="2"> Live Prop Line </Table.HeaderCell>
+    <Table.HeaderCell colSpan={sportsbookCount} textAlign='center'> Prop Lines </Table.HeaderCell>
     <Table.HeaderCell colSpan={
       market === 'pts' ? 6 
       : market === 'ast' ? 4
@@ -17,6 +20,10 @@ export const PropsTableHeader = ({ market, timeframeText }) => <Table.Header>
     <Table.HeaderCell colSpan={market === 'pts' ? 4 : 2} textAlign='center' style={{backgroundColor: '#E79595'}}> Q4 </Table.HeaderCell>
   </Table.Row>
   <Table.Row>
+    {/* Sportsbook columns */}
+    {availableSportsbooks.map(book => (
+      <Table.HeaderCell key={book} style={{backgroundColor: '#f0f0f0'}}> {book} </Table.HeaderCell>
+    ))}
     {/* live */}
     <Table.HeaderCell> MIN </Table.HeaderCell>
     <Table.HeaderCell> {headerMappers[market]} </Table.HeaderCell>
@@ -51,3 +58,4 @@ export const PropsTableHeader = ({ market, timeframeText }) => <Table.Header>
     </>}
   </Table.Row>
 </Table.Header>
+}

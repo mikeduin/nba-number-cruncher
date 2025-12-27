@@ -119,6 +119,7 @@ export interface FanDuelProp {
   
   // Prop details
   propType: string; // Standardized: "pts", "reb", "ast", etc.
+  propDisplay: string; // Display name: "Points", "Rebounds", "Assists", etc.
   line: number;
   
   // Odds

@@ -83,6 +83,7 @@ export const playerNameMismatches = {
     'Bogdan Bogdanovic': 'Bogdan Bogdanović',
     'Cam Thomas': 'Cameron Thomas',
     'Dennis Schroder': 'Dennis Schröder',
+    'Jonas Valanciunas': 'Jonas Valančiūnas',
     'Luka Doncic': 'Luka Dončić',
     'Nikola Jokic': 'Nikola Jokić',
     'Nikola Jovic': 'Nikola Jović',
@@ -95,6 +96,7 @@ export const playerNameMismatches = {
 export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookName, pxContext?: string) => {
   const season = getCurrentSeasonStartYearInt();
   const today = moment().format('YYYY-MM-DD');
+  let missingTeamsAll: string[] = [];
 
   const game = await Schedule()
     .where({gid})
@@ -126,8 +128,57 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
     console.log(`Fetching FanDuel props for event ${fanDuelEventId}...`);
     const scrapedProps = await scrapeFanDuel(fanDuelEventId, pxContext, 'NJ');
     
+    console.log(`Scraped ${scrapedProps.length} total props, filtering to full-game only...`);
+    
+    // Filter to only full-game props (exclude quarters, halves, alt points, etc.)
+    const fullGameProps = scrapedProps.filter(prop => {
+      const displayLower = prop.propDisplay?.toLowerCase() || '';
+      const marketLower = prop.marketName?.toLowerCase() || '';
+      
+      // Exclude patterns
+      const excludePatterns = [
+        /\b1st\s*(quarter|qtr|q)\b/i,
+        /\b2nd\s*(quarter|qtr|q)\b/i,
+        /\b3rd\s*(quarter|qtr|q)\b/i,
+        /\b4th\s*(quarter|qtr|q)\b/i,
+        /\bfirst\s*(quarter|qtr|q)\b/i,
+        /\bsecond\s*(quarter|qtr|q)\b/i,
+        /\bthird\s*(quarter|qtr|q)\b/i,
+        /\bfourth\s*(quarter|qtr|q)\b/i,
+        /\bfirst\s*half\b/i,
+        /\bsecond\s*half\b/i,
+        /\b1st\s*half\b/i,
+        /\b2nd\s*half\b/i,
+        /\balt\s+/i,  // Alt Points, Alt Rebounds, etc.
+        /to score \d+\+/i,  // To Score 10+, To Score 25+, etc.
+        /top.*scorer/i,
+        /first.*basket/i,
+        /double.*double/i,
+        /triple.*double/i,
+      ];
+      
+      const shouldExclude = excludePatterns.some(pattern => 
+        pattern.test(displayLower) || pattern.test(marketLower)
+      );
+      
+      if (shouldExclude) {
+        console.log(`  ❌ Filtered out: ${prop.propDisplay} (${prop.marketName})`);
+      }
+      
+      return !shouldExclude;
+    });
+    
+    console.log(`Filtered to ${fullGameProps.length} full-game props`);
+    
+    // Log what prop types remain after filtering
+    const remainingTypes = {};
+    fullGameProps.forEach(p => {
+      remainingTypes[p.propDisplay] = (remainingTypes[p.propDisplay] || 0) + 1;
+    });
+    console.log('📊 Remaining prop types:', remainingTypes);
+    
     // Convert to format matching Betsson/Bovada for use with getPlayerPropsMap
-    const formattedProps = scrapedProps.map(prop => ({
+    const formattedProps = fullGameProps.map(prop => ({
       player: prop.playerName,
       market: prop.propDisplay,
       line: prop.line,
@@ -140,7 +191,9 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
       .filter(prop => prop.gid === gid)
       .map(prop => prop.player_name);
     
-    playerPropsMap = await getPlayerPropsMap(formattedProps, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    const result = await getPlayerPropsMap(formattedProps, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    playerPropsMap = result.playerPropsMap;
+    missingTeamsAll = result.missingTeams;
     
   } else {
     // Betsson or Bovada
@@ -153,7 +206,9 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
       .filter(prop => prop.gid === gid)
       .map(prop => prop.player_name);
 
-    playerPropsMap = await getPlayerPropsMap(gamesPropsOnSportsbook, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    const result = await getPlayerPropsMap(gamesPropsOnSportsbook, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    playerPropsMap = result.playerPropsMap;
+    missingTeamsAll = result.missingTeams;
   }
   
   for (let [player, props] of playerPropsMap) {
@@ -194,6 +249,8 @@ export const updateSingleGameProps = async (gid: string, sportsbook: SportsbookN
       }
     }
   }
+  
+  return { missingTeams: missingTeamsAll };
 }
 
 export const fetchDailyGameProps = async (sportsbook: SportsbookName) => {
@@ -219,7 +276,9 @@ export const fetchDailyGameProps = async (sportsbook: SportsbookName) => {
       .filter(prop => prop.gid === game.gid)
       .map(prop => prop.player_name);
 
-    const playerPropsMap = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    const result = await getPlayerPropsMap(gamesPropsOnBovada, gamePropPlayersInDb, dailyPlayers, sportsbook);
+    const playerPropsMap = result.playerPropsMap;
+    // Note: missingTeams tracked but not returned in bulk update
     
     for (let [player, props] of playerPropsMap) {
       if (Object.keys(playerNameMismatches[sportsbook]).includes(player)) {

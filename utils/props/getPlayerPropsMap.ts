@@ -20,9 +20,13 @@ const findPlayerTeam = (propPlayerName: string, dailyPlayers, sportsbook: Sports
   // console.log('propPlayerName is ', propPlayerName);
   // console.log('dailyPlayers is ', dailyPlayers);
   let player = dailyPlayers.find(player => player.player_name === propPlayerName);
-  if (!player && sportsbook === SportsbookName.Betsson) {
-    player = dailyPlayers.find(player => player.player_name === playerNameMismatches[SportsbookName.Betsson][propPlayerName])
+  
+  // If not found, check playerNameMismatches for this sportsbook
+  if (!player && playerNameMismatches[sportsbook] && playerNameMismatches[sportsbook][propPlayerName]) {
+    const dbPlayerName = playerNameMismatches[sportsbook][propPlayerName];
+    player = dailyPlayers.find(player => player.player_name === dbPlayerName);
   }
+  
   return player ? player.team_abbreviation : null;
 }
 
@@ -31,6 +35,7 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
   const dbColumns = Object.values(sportsbookMarkets);
   const playerPropsMap = new Map();
   const activePropsMap = buildActivePropsMap(gamePropPlayersInDb, dbColumns);
+  const missingTeams: string[] = [];
 
   if (gamePropsOnSportsbook) {
     gamePropsOnSportsbook.forEach((prop) => {
@@ -50,7 +55,10 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
         : findPlayerTeam(playerName, dailyPlayers, sportsbook);
 
         if (!playerTeam) {
-          console.log('player team not found for ', playerName, ' ... skipping team assignment');
+          console.log('⚠️  Player team not found for:', playerName);
+          if (!missingTeams.includes(playerName)) {
+            missingTeams.push(playerName);
+          }
         }
     
         if (playerPropsMap.has(playerName)) {
@@ -98,9 +106,13 @@ export const getPlayerPropsMap = async (gamePropsOnSportsbook, gamePropPlayersIn
       }
     }
     
-    return playerPropsMap;
+    if (missingTeams.length > 0) {
+      console.log(`\n⚠️  ${missingTeams.length} player(s) need name mapping:`, missingTeams);
+    }
+    
+    return { playerPropsMap, missingTeams };
   } else {
     console.log('NO GAME PROPS FOUND, likely timeout error (?) - returning empty object');
-    return playerPropsMap;
+    return { playerPropsMap, missingTeams: [] };
   }
 }

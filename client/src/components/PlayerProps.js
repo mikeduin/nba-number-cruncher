@@ -44,13 +44,34 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
   const [activeTimeframe, setActiveTimeframe] = useState('full');
   const [bovadaUrl, setBovadaUrl] = useState('');
   const [betssonUrl, setBetssonUrl] = useState('');
+  const [fanDuelCurl, setFanDuelCurl] = useState('');
+  const [storedPxContext, setStoredPxContext] = useState(null);
+  const [pxContextAge, setPxContextAge] = useState(null);
   const [teamFilter, setTeamFilter] = useState(null);
   const [sortProps, setSortProps] = useState(true); 
 
   useEffect(() => {
     setPlayerProps(allPlayerProps.data.filter(prop => prop.gid === game.gid));
     setLastUpdated(allPlayerProps.fetchedAt);
+    fetchStoredPxContext();
   }, [allPlayerProps.fetchedAt]);
+
+  // Auto-save px-context when cURL is pasted
+  useEffect(() => {
+    if (fanDuelCurl) {
+      const pxMatch = fanDuelCurl.match(/x-px-context[:'"]\s*([^'"\s]+)/);
+      if (pxMatch) {
+        // Silently save px-context in background
+        axios.post('/api/updateFanDuelPxContext', { pxContext: pxMatch[1] })
+          .then(() => {
+            fetchStoredPxContext();
+          })
+          .catch(err => {
+            console.error('Error auto-saving px-context:', err);
+          });
+      }
+    }
+  }, [fanDuelCurl]);
 
   const updateSportsbookUrl = async (sportsbook) => {
     const gid = game.gid;
@@ -97,16 +118,174 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     }
   }
 
+  const fetchStoredPxContext = async () => {
+    try {
+      const response = await axios.get('/api/getFanDuelPxContext');
+      if (response.data.message === 'success') {
+        setStoredPxContext(response.data.pxContext);
+        if (response.data.updatedAt) {
+          const age = Math.floor((new Date() - new Date(response.data.updatedAt)) / 60000);
+          setPxContextAge(age);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching px-context:', error);
+    }
+  };
+
+  const updatePxContextOnly = async () => {
+    try {
+      if (!fanDuelCurl) {
+        toast({
+          type: 'error',
+          icon: 'exclamation',
+          color: 'red',
+          title: 'Invalid cURL',
+          description: `Please paste a cURL command first`,
+          animation: 'slide down',
+          time: 3000
+        });
+        return;
+      }
+      
+      const pxMatch = fanDuelCurl.match(/x-px-context[:'"\\s]+([^'"\\s]+)/);
+      if (!pxMatch) {
+        toast({
+          type: 'error',
+          icon: 'exclamation',
+          color: 'red',
+          title: 'Invalid cURL',
+          description: `Could not find x-px-context in the cURL command`,
+          animation: 'slide down',
+          time: 3000
+        });
+        return;
+      }
+      
+      const response = await axios.post('/api/updateFanDuelPxContext', { pxContext: pxMatch[1] });
+      if (response.data.message === 'success') {
+        toast({
+          type: 'success',
+          icon: 'check circle',
+          color: 'green',
+          title: 'Token Updated',
+          description: 'px-context token has been saved globally',
+          animation: 'slide down',
+          time: 3000
+        });
+        fetchStoredPxContext();
+      }
+    } catch (error) {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'Error updating token',
+        description: error.response?.data?.error || error.message,
+        animation: 'slide down',
+        time: 3000
+      });
+    }
+  };
+
+  const saveFanDuelEventId = async () => {
+    if (!fanDuelCurl) {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'No cURL provided',
+        description: `Please paste a cURL command first`,
+        animation: 'slide down',
+        time: 3000
+      });
+      return;
+    }
+
+    const gid = game.gid;
+    try {
+      const response = await axios.post('/api/updateFanDuelEventId', {gid, curlCommand: fanDuelCurl});
+      if (response.data.message === 'success') {
+        toast({
+          type: 'success',
+          icon: 'check circle',
+          color: 'green',
+          title: 'Event ID & Token Saved',
+          description: `FanDuel event ID ${response.data.eventId} saved for game ${gid} (px-context also updated)`,
+          animation: 'slide down',
+          time: 4000
+        });
+        fetchStoredPxContext();
+      } else {
+        throw new Error(response.data.error || 'Unknown error');
+      }
+    } catch (error) {
+      const isTokenExpired = error.response?.status === 403 || error.response?.data?.needsNewToken;
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: isTokenExpired ? 'orange' : 'red',
+        title: isTokenExpired ? 'Token Expired' : 'Error updating props',
+        description: error.response?.data?.error || error.message,
+        animation: 'slide down',
+        time: isTokenExpired ? 8000 : 3000
+      });
+    }
+  }
+
   const updateProps = async (sportsbook) => {
     const gid = game.gid;
-    const response = await axios.post(`/api/updateProps`, {gid, sportsbook});
+    
+    // Extract pxContext from FanDuel cURL if sportsbook is FanDuel and cURL is provided
+    let pxContext = null;
+    if (sportsbook === 'FanDuel' && fanDuelCurl) {
+      const pxMatch = fanDuelCurl.match(/x-px-context[:']\s*([^'"]+)/);
+      if (pxMatch) {
+        pxContext = pxMatch[1];
+      }
+    }
+    
+    // If FanDuel but no px-context extracted and no stored one, show error
+    if (sportsbook === 'FanDuel' && !pxContext && !storedPxContext) {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'No px-context Available',
+        description: `Please paste a cURL command first to set px-context token`,
+        animation: 'slide down',
+        time: 3000
+      });
+      return;
+    }
+    
+    const response = await axios.post(`/api/updateProps`, {gid, sportsbook, pxContext});
     if (response.status === 200) {
+      const { missingTeams } = response.data;
+      
+      // Refresh stored px-context if we just used a new one
+      if (pxContext) {
+        fetchStoredPxContext();
+      }
+      
+      if (missingTeams && missingTeams.length > 0) {
+        toast({
+          type: 'warning',
+          icon: 'exclamation triangle',
+          color: 'orange',
+          title: 'Name Mismatches Found',
+          description: `${missingTeams.length} player(s) need name mapping: ${missingTeams.join(', ')}`,
+          animation: 'slide down',
+          time: 8000
+        });
+      }
+      
       toast({
         type: 'warning',
         icon: 'check circle',
         color: 'violet',
         title: 'Props updated',
-        description: `Props have been updated for for game ${gid}`,
+        description: `Props have been updated for game ${gid}`,
         animation: 'slide down',
         time: 3000
       });
@@ -141,6 +320,22 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
           <Button color='green' style={{marginLeft: 10}} onClick={() => updateProps('Bovada')}>Update Props [BOV]</Button>
           <Button color='green' style={{marginLeft: 10}} onClick={() => updateProps('Betsson')}>Update Props [BSN]</Button>
         </div>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
+          <div style={{marginRight: 10}}><i>FANDUEL cURL:</i></div>
+          <Input 
+            placeholder="Paste cURL command from FanDuel (token auto-saves)"
+            style={{width: 700}} 
+            onChange={(e) => setFanDuelCurl(e.target.value)}
+            value={fanDuelCurl}
+          />
+          <Button primary style={{marginLeft: 10}} onClick={saveFanDuelEventId}>Save Event ID</Button>
+          <Button color='orange' style={{marginLeft: 10}} onClick={() => updateProps('FanDuel')}>Update Props [FD]</Button>
+        </div>
+        {storedPxContext && (
+          <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: 5, fontSize: '11px', color: '#666'}}>
+            <i>✓ Token stored ({pxContextAge < 60 ? `${pxContextAge}min ago` : `${Math.floor(pxContextAge/60)}h ago`})</i>
+          </div>
+        )}
         <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
           <div style={{marginRight: 10}}><i>MARKET:</i></div>
           {Object.values(marketMappers).map(market => 

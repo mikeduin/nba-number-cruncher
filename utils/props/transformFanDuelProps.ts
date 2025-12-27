@@ -8,11 +8,12 @@
 import { FanDuelProp } from '../../types/FanDuel.js';
 
 /**
- * Filter to only full-game props (exclude quarters, halves, etc.)
+ * Filter to only full-game props (exclude quarters, halves, alt points, etc.)
  */
 export function filterFullGameProps(props: FanDuelProp[]): FanDuelProp[] {
-  // Exclude props with these keywords in the market name
+  // Exclude props with these keywords in the market name or prop display
   const excludePatterns = [
+    // Quarter-specific
     /1st.*qtr/i,
     /2nd.*qtr/i,
     /3rd.*qtr/i,
@@ -21,20 +22,36 @@ export function filterFullGameProps(props: FanDuelProp[]): FanDuelProp[] {
     /second.*quarter/i,
     /third.*quarter/i,
     /fourth.*quarter/i,
+    /1st quarter/i,
+    /2nd quarter/i,
+    /3rd quarter/i,
+    /4th quarter/i,
+    // Half-specific
     /first.*half/i,
     /second.*half/i,
     /1st.*half/i,
     /2nd.*half/i,
-    /to score 10\+/i,  // Special FanDuel markets
-    /to score 15\+/i,
-    /to score 20\+/i,
-    /to score 25\+/i,
-    /to score 30\+/i,
+    // Alt lines and special markets
+    /\balt\s+points\b/i,
+    /\balt\s+rebounds\b/i,
+    /\balt\s+assists\b/i,
+    /to score \d+\+/i,  // "To Score 10+", "To Score 25+", etc.
+    /top.*scorer/i,     // "Top Points Scorer"
+    /first.*basket/i,
+    /double.*double/i,
+    /triple.*double/i,
   ];
   
   return props.filter(prop => {
     const marketLower = prop.marketName.toLowerCase();
-    return !excludePatterns.some(pattern => pattern.test(marketLower));
+    const propDisplayLower = prop.propDisplay?.toLowerCase() || '';
+    
+    // Check both marketName and propDisplay
+    const shouldExclude = excludePatterns.some(pattern => 
+      pattern.test(marketLower) || pattern.test(propDisplayLower)
+    );
+    
+    return !shouldExclude;
   });
 }
 
