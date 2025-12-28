@@ -1,0 +1,1787 @@
+{
+  "skeleton": {
+    "eventIds": [
+      "f-Szzm4os3pkGPDAOZFWv3kg"
+    ],
+    "categories": [
+      {
+        "id": "4",
+        "label": "Basketball",
+        "slug": "basketball",
+        "competitions": [
+          {
+            "id": "87",
+            "label": "NBA"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": {
+    "markets": [
+      "?obg/sportsbook/transient/markets/f-Szzm4os3pkGPDAOZFWv3kg/(?:m-DC9F3546B740BBCE030612C241C675269F0219E5|m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3|m-45A5A0F379AB410982500404188CD2A930404BC7|m-F959C6F674C906BC4F9A7347DAB6F9633E02C867|m-34D09544350E61464E9D32595F889C8CAC26099C|m-C28C4675F46521E01494654C421552B84EF24D33|m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91|m-EC891874C9728DF6F264F53471EA9C94576F70D8|m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB|m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16|m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD|m-A9CE2ED166480DD140B01787E83227008A1F1A6D|m-A74D74BA6AB146E7D5604322B695D6F23662E5CD|m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697|m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171):.*/"
+    ],
+    "selections": [],
+    "events": [
+      "?obg/sportsbook/transient/events/f-Szzm4os3pkGPDAOZFWv3kg/fixture/"
+    ]
+  },
+  "topicsMap": {
+    "topicEventMap": {
+      "?obg/sportsbook/transient/events/f-Szzm4os3pkGPDAOZFWv3kg/fixture/": [
+        "f-Szzm4os3pkGPDAOZFWv3kg"
+      ],
+      "?obg/sportsbook/transient/markets/f-Szzm4os3pkGPDAOZFWv3kg/(?:m-DC9F3546B740BBCE030612C241C675269F0219E5|m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3|m-45A5A0F379AB410982500404188CD2A930404BC7|m-F959C6F674C906BC4F9A7347DAB6F9633E02C867|m-34D09544350E61464E9D32595F889C8CAC26099C|m-C28C4675F46521E01494654C421552B84EF24D33|m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91|m-EC891874C9728DF6F264F53471EA9C94576F70D8|m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB|m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16|m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD|m-A9CE2ED166480DD140B01787E83227008A1F1A6D|m-A74D74BA6AB146E7D5604322B695D6F23662E5CD|m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697|m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171):.*/": [
+        "f-Szzm4os3pkGPDAOZFWv3kg"
+      ]
+    },
+    "eventTopicMap": {
+      "f-Szzm4os3pkGPDAOZFWv3kg": [
+        "?obg/sportsbook/transient/events/f-Szzm4os3pkGPDAOZFWv3kg/fixture/",
+        "?obg/sportsbook/transient/markets/f-Szzm4os3pkGPDAOZFWv3kg/(?:m-DC9F3546B740BBCE030612C241C675269F0219E5|m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3|m-45A5A0F379AB410982500404188CD2A930404BC7|m-F959C6F674C906BC4F9A7347DAB6F9633E02C867|m-34D09544350E61464E9D32595F889C8CAC26099C|m-C28C4675F46521E01494654C421552B84EF24D33|m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91|m-EC891874C9728DF6F264F53471EA9C94576F70D8|m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB|m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16|m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD|m-A9CE2ED166480DD140B01787E83227008A1F1A6D|m-A74D74BA6AB146E7D5604322B695D6F23662E5CD|m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697|m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171):.*/"
+      ]
+    }
+  },
+  "data": {
+    "events": [
+      {
+        "globalId": "event.4.118.87.f-Szzm4os3pkGPDAOZFWv3kg",
+        "categoryId": "4",
+        "categoryName": "Basketball",
+        "categoryPopularityOrder": 145,
+        "regionId": "118",
+        "regionName": "NBA",
+        "competitionId": "87",
+        "competitionName": "NBA",
+        "competitionPopularityOrder": 103,
+        "slug": "basketball/nba/nba/oklahoma-city-thunder-philadelphia-76ers-",
+        "participants": [
+          {
+            "label": "Oklahoma City Thunder",
+            "id": "92951",
+            "sortOrder": 1,
+            "side": 1
+          },
+          {
+            "label": "Philadelphia 76ers ",
+            "id": "586",
+            "sortOrder": 2,
+            "side": 2
+          }
+        ],
+        "subParticipants": [
+          {
+            "id": "2525899",
+            "label": "Alex Caruso",
+            "side": 1
+          },
+          {
+            "id": "2865755",
+            "label": "Isaiah Hartenstein",
+            "side": 1
+          },
+          {
+            "id": "2897238",
+            "label": "Isaiah Joe",
+            "side": 1
+          },
+          {
+            "id": "2947274",
+            "label": "Branden Carlson",
+            "side": 1
+          },
+          {
+            "id": "2947527",
+            "label": "Chet Holmgren",
+            "side": 1
+          },
+          {
+            "id": "2948168",
+            "label": "Jaylin Williams",
+            "side": 1
+          },
+          {
+            "id": "2948625",
+            "label": "Brooks Barnhizer",
+            "side": 1
+          },
+          {
+            "id": "2965847",
+            "label": "Jalen Williams",
+            "side": 1
+          },
+          {
+            "id": "3347395",
+            "label": "Kenrich Williams",
+            "side": 1
+          },
+          {
+            "id": "3347401",
+            "label": "Aaron Wiggins",
+            "side": 1
+          },
+          {
+            "id": "3947477",
+            "label": "Ousmane Dieng",
+            "side": 1
+          },
+          {
+            "id": "4249180",
+            "label": "Cason Wallace",
+            "side": 1
+          },
+          {
+            "id": "4249537",
+            "label": "Ajay Mitchell",
+            "side": 1
+          },
+          {
+            "id": "5267840",
+            "label": "Luguentz Dort",
+            "side": 1
+          },
+          {
+            "id": "5267843",
+            "label": "Shai Gilgeous-Alexander",
+            "side": 1
+          },
+          {
+            "id": "7733559",
+            "label": "Chris Youngblood",
+            "side": 1
+          },
+          {
+            "id": "98956",
+            "label": "Eric Gordon",
+            "side": 2
+          },
+          {
+            "id": "98974",
+            "label": "Kyle Lowry",
+            "side": 2
+          },
+          {
+            "id": "161742",
+            "label": "Paul George",
+            "side": 2
+          },
+          {
+            "id": "171930",
+            "label": "Andre Drummond",
+            "side": 2
+          },
+          {
+            "id": "231668",
+            "label": "Joel Embiid",
+            "side": 2
+          },
+          {
+            "id": "2528402",
+            "label": "Tyrese Maxey",
+            "side": 2
+          },
+          {
+            "id": "2865719",
+            "label": "Kelly Oubre Jr.",
+            "side": 2
+          },
+          {
+            "id": "2881287",
+            "label": "Quentin Grimes",
+            "side": 2
+          },
+          {
+            "id": "2948143",
+            "label": "Johni Broome",
+            "side": 2
+          },
+          {
+            "id": "2948234",
+            "label": "Jabari Walker",
+            "side": 2
+          },
+          {
+            "id": "3317277",
+            "label": "Trendon Watford",
+            "side": 2
+          },
+          {
+            "id": "3947465",
+            "label": "Marjon Beauchamp",
+            "side": 2
+          },
+          {
+            "id": "4136726",
+            "label": "Dominick Barlow",
+            "side": 2
+          },
+          {
+            "id": "5532699",
+            "label": "Adem Bona",
+            "side": 2
+          },
+          {
+            "id": "5532767",
+            "label": "Justin Edwards",
+            "side": 2
+          },
+          {
+            "id": "5532882",
+            "label": "Jared McCain",
+            "side": 2
+          },
+          {
+            "id": "6027635",
+            "label": "VJ Edgecombe",
+            "side": 2
+          }
+        ],
+        "marketCount": 15,
+        "phase": "Prematch",
+        "hasLiveStreaming": false,
+        "hasLiveStatistics": true,
+        "hasLiveVisual": true,
+        "hasLivePlayerStats": false,
+        "startDate": "2025-12-28T20:35:00Z",
+        "popularityOrder": 33,
+        "eventType": "Fixture",
+        "categoryTrackingLabel": "basketball",
+        "competitionTrackingLabel": "nba",
+        "regionTrackingLabel": "nba",
+        "prematchStatisticsProviders": [
+          "Score24",
+          "BetRadar"
+        ],
+        "actualSubCategoryId": 87,
+        "marketCountUnique": 0,
+        "neutralPath": "basketball/nba/nba/oklahoma-city-thunder-philadelphia-76ers-",
+        "isFullScreenEnabled": false,
+        "tags": {
+          "sb-mt-basketball-4X12": {
+            "name": "sb-mt-basketball-4X12",
+            "attributes": {}
+          },
+          "sb-tg-alpha": {
+            "name": "sb-tg-alpha",
+            "attributes": {
+              "tg-routing": "sb-tg-alpha=1;"
+            }
+          },
+          "bc_bb_available": {
+            "name": "bc_bb_available",
+            "attributes": {}
+          },
+          "sb-traded-live": {
+            "name": "sb-traded-live",
+            "attributes": {}
+          },
+          "sb-traded-prematch": {
+            "name": "sb-traded-prematch",
+            "attributes": {}
+          }
+        },
+        "id": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "label": "Oklahoma City Thunder - Philadelphia 76ers ",
+        "isHomeTeam": false
+      }
+    ],
+    "markets": [
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          120,
+          53,
+          16,
+          134,
+          106,
+          104,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1182404",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 18.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Jalen Williams"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Jalen Williams",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-DC9F3546B740BBCE030612C241C675269F0219E5",
+        "label": "Player Total Points | Jalen Williams",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1057004",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 10.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Isaiah Hartenstein"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Isaiah Hartenstein",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3",
+        "label": "Player Total Points | Isaiah Hartenstein",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          120,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1408195",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 5.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Cason Wallace"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Cason Wallace",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-45A5A0F379AB410982500404188CD2A930404BC7",
+        "label": "Player Total Points | Cason Wallace",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          120,
+          53,
+          16,
+          134,
+          106,
+          104,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "697644",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 4.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Alex Caruso"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Alex Caruso",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-F959C6F674C906BC4F9A7347DAB6F9633E02C867",
+        "label": "Player Total Points | Alex Caruso",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1458807",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 7.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Jared McCain"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Jared McCain",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-34D09544350E61464E9D32595F889C8CAC26099C",
+        "label": "Player Total Points | Jared McCain",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1340238",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 9.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Ajay Mitchell"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Ajay Mitchell",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-C28C4675F46521E01494654C421552B84EF24D33",
+        "label": "Player Total Points | Ajay Mitchell",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          120,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1134693",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 8.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Luguentz Dort"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Luguentz Dort",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91",
+        "label": "Player Total Points | Luguentz Dort",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          53,
+          16,
+          134,
+          106,
+          104,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1067856",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 30.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Shai Gilgeous-Alexander"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Shai Gilgeous-Alexander",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-EC891874C9728DF6F264F53471EA9C94576F70D8",
+        "label": "Player Total Points | Shai Gilgeous-Alexander",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          120,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1419291",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 7.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Dominick Barlow"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Dominick Barlow",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB",
+        "label": "Player Total Points | Dominick Barlow",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "614746",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 7.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Andre Drummond"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Andre Drummond",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16",
+        "label": "Player Total Points | Andre Drummond",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "469218",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 16.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Paul George"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Paul George",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD",
+        "label": "Player Total Points | Paul George",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          120,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1132827",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 11.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Quentin Grimes"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Quentin Grimes",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-A9CE2ED166480DD140B01787E83227008A1F1A6D",
+        "label": "Player Total Points | Quentin Grimes",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1343009",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 17.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Chet Holmgren"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Chet Holmgren",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-A74D74BA6AB146E7D5604322B695D6F23662E5CD",
+        "label": "Player Total Points | Chet Holmgren",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1519361",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 13.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "VJ Edgecombe"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | VJ Edgecombe",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697",
+        "label": "Player Total Points | VJ Edgecombe",
+        "isHomeTeam": false
+      },
+      {
+        "eventId": "f-Szzm4os3pkGPDAOZFWv3kg",
+        "marketTemplateId": "PLYPROPPOINTS",
+        "lineValue": "",
+        "lineValueRaw": 0,
+        "status": "Open",
+        "validationRule": {
+          "code": 1,
+          "value": "NotWithinSameEvent"
+        },
+        "deadline": "2025-12-28T20:35:00Z",
+        "isCashoutAvailable": true,
+        "columnLayout": 2,
+        "helpText": "",
+        "isGroupableByMarketTemplate": true,
+        "betGroupDescription": "Including Overtime",
+        "marketTemplateTags": [
+          48,
+          134,
+          16,
+          120,
+          106,
+          104,
+          53,
+          133
+        ],
+        "marketSpecifics": {
+          "groupSortBy": [
+            {
+              "group": "PlayerProps",
+              "groupLevel": "0",
+              "groupType": 0
+            },
+            {
+              "group": "PLYPROPPOINTS",
+              "groupLevel": "1",
+              "groupType": 2
+            },
+            {
+              "group": "1186160",
+              "groupLevel": "2",
+              "groupType": 3
+            },
+            {
+              "groupLevel": "3",
+              "sort": 26.5,
+              "groupType": 0
+            }
+          ],
+          "groupLabels": {
+            "1": "Player Total Points",
+            "2": "Tyrese Maxey"
+          },
+          "groupTranslations": {}
+        },
+        "sortOrder": 300,
+        "marketFriendlyName": "Player Total Points | Tyrese Maxey",
+        "marketVersion": 2,
+        "betBuilderAvailability": {
+          "state": 1,
+          "data": {},
+          "isHomeTeam": false
+        },
+        "originSelections": {},
+        "id": "m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171",
+        "label": "Player Total Points | Tyrese Maxey",
+        "isHomeTeam": false
+      }
+    ],
+    "marketSelections": [
+      {
+        "marketId": "m-DC9F3546B740BBCE030612C241C675269F0219E5",
+        "odds": 1.8,
+        "alternateLabel": "Over 18.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2965847",
+        "participantLabel": "Over 18.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.80"
+        },
+        "id": "s-E761EE59AC370668C24EC0DA84F8029A526D6C52",
+        "label": "Over 18.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-DC9F3546B740BBCE030612C241C675269F0219E5",
+        "odds": 1.9,
+        "alternateLabel": "Under 18.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2965847",
+        "participantLabel": "Under 18.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.90"
+        },
+        "id": "s-B4C365A8C46E79D2A4FDDF6003AE735CA80C3800",
+        "label": "Under 18.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3",
+        "odds": 2.05,
+        "alternateLabel": "Over 10.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2865755",
+        "participantLabel": "Over 10.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "2.05"
+        },
+        "id": "s-858775A522B1C725906F7ED95AD02822AAFF5D1E",
+        "label": "Over 10.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-D17DFE98556E5CA3F6FC01359BD606ACE0E090F3",
+        "odds": 1.68,
+        "alternateLabel": "Under 10.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2865755",
+        "participantLabel": "Under 10.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.68"
+        },
+        "id": "s-E0B3D324AAE283F32CF430D9779CDD0987B95365",
+        "label": "Under 10.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-45A5A0F379AB410982500404188CD2A930404BC7",
+        "odds": 1.8,
+        "alternateLabel": "Over 5.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "4249180",
+        "participantLabel": "Over 5.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.80"
+        },
+        "id": "s-88542B11AC313EAC592D7889711F6F5E17B314FB",
+        "label": "Over 5.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-45A5A0F379AB410982500404188CD2A930404BC7",
+        "odds": 1.9,
+        "alternateLabel": "Under 5.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "4249180",
+        "participantLabel": "Under 5.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.90"
+        },
+        "id": "s-422C3FA50207122864C33DE3E15784B1EF5FA443",
+        "label": "Under 5.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-F959C6F674C906BC4F9A7347DAB6F9633E02C867",
+        "odds": 1.68,
+        "alternateLabel": "Over 4.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2525899",
+        "participantLabel": "Over 4.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.68"
+        },
+        "id": "s-A7097DF17513986D5CC354F0860DC4347689D6CE",
+        "label": "Over 4.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-F959C6F674C906BC4F9A7347DAB6F9633E02C867",
+        "odds": 2.1,
+        "alternateLabel": "Under 4.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2525899",
+        "participantLabel": "Under 4.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "2.10"
+        },
+        "id": "s-C82DFB415DB9C4467469D380409C8729D7264CF2",
+        "label": "Under 4.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-34D09544350E61464E9D32595F889C8CAC26099C",
+        "odds": 1.76,
+        "alternateLabel": "Over 7.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "5532882",
+        "participantLabel": "Over 7.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.76"
+        },
+        "id": "s-206F58F295283CDED6D8260B5BB949F76393789A",
+        "label": "Over 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-34D09544350E61464E9D32595F889C8CAC26099C",
+        "odds": 1.95,
+        "alternateLabel": "Under 7.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "5532882",
+        "participantLabel": "Under 7.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.95"
+        },
+        "id": "s-DB41479675646F5569BE96380D6557339C5639D7",
+        "label": "Under 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-C28C4675F46521E01494654C421552B84EF24D33",
+        "odds": 1.8,
+        "alternateLabel": "Over 9.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "4249537",
+        "participantLabel": "Over 9.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.80"
+        },
+        "id": "s-593344873766EB1BAF2F9BF73123C3A1E52D116C",
+        "label": "Over 9.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-C28C4675F46521E01494654C421552B84EF24D33",
+        "odds": 1.9,
+        "alternateLabel": "Under 9.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "4249537",
+        "participantLabel": "Under 9.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.90"
+        },
+        "id": "s-577F3BF0BFDF8479E5AD5A6D2DC8D74582AB6C69",
+        "label": "Under 9.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91",
+        "odds": 2,
+        "alternateLabel": "Over 8.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "5267840",
+        "participantLabel": "Over 8.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "2.00"
+        },
+        "id": "s-E449E41824D51974ADFF36B6DAD45F35C6CA23BF",
+        "label": "Over 8.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-2AC77A5DECE2ACFC508467891DB9B908CC5B0A91",
+        "odds": 1.72,
+        "alternateLabel": "Under 8.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "5267840",
+        "participantLabel": "Under 8.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.72"
+        },
+        "id": "s-1FC73034C4211288EF27779AB088D40A68EF7A87",
+        "label": "Under 8.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-EC891874C9728DF6F264F53471EA9C94576F70D8",
+        "odds": 1.85,
+        "alternateLabel": "Over 30.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "5267843",
+        "participantLabel": "Over 30.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-7FFF830389E7A052E728A01E5BFD85DFE4F3F7F9",
+        "label": "Over 30.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-EC891874C9728DF6F264F53471EA9C94576F70D8",
+        "odds": 1.85,
+        "alternateLabel": "Under 30.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "5267843",
+        "participantLabel": "Under 30.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-3E3EF247DE2ED6B49AE35883F25D1F643C45FBF5",
+        "label": "Under 30.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB",
+        "odds": 1.85,
+        "alternateLabel": "Over 7.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "4136726",
+        "participantLabel": "Over 7.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-78ACB21351201513284491E1B1F5E5BB955C0145",
+        "label": "Over 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-2B9DA2F1273AD5301AAF1444A7DFD96E1890D7EB",
+        "odds": 1.85,
+        "alternateLabel": "Under 7.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "4136726",
+        "participantLabel": "Under 7.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-65594104251F83C5076FFFA0FE47E5B81B88023E",
+        "label": "Under 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16",
+        "odds": 1.9,
+        "alternateLabel": "Over 7.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "171930",
+        "participantLabel": "Over 7.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.90"
+        },
+        "id": "s-0EC53A932283D34717F614DB87DFA62F10F3E294",
+        "label": "Over 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-43D2D78F4B3768F8801E561B2D79673B7B8FAE16",
+        "odds": 1.8,
+        "alternateLabel": "Under 7.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "171930",
+        "participantLabel": "Under 7.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.80"
+        },
+        "id": "s-CCF72CB48AC18A7BB5141A7F4DC8A58F56C16A5C",
+        "label": "Under 7.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD",
+        "odds": 1.9,
+        "alternateLabel": "Over 16.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "161742",
+        "participantLabel": "Over 16.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.90"
+        },
+        "id": "s-5387C49F015C60E45D5C85BBBEB11C4715EB0581",
+        "label": "Over 16.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-5BEF5D9A3C41D6036C8712A543568BBB6E06A1DD",
+        "odds": 1.8,
+        "alternateLabel": "Under 16.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "161742",
+        "participantLabel": "Under 16.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.80"
+        },
+        "id": "s-977FF4CB9ECE8EDD1CD40D43625B8ABD54765ACF",
+        "label": "Under 16.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-A9CE2ED166480DD140B01787E83227008A1F1A6D",
+        "odds": 1.95,
+        "alternateLabel": "Over 11.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2881287",
+        "participantLabel": "Over 11.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.95"
+        },
+        "id": "s-9E14847AB190D9AD82FE4D8CE9D6E51A89E97F5B",
+        "label": "Over 11.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-A9CE2ED166480DD140B01787E83227008A1F1A6D",
+        "odds": 1.76,
+        "alternateLabel": "Under 11.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2881287",
+        "participantLabel": "Under 11.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.76"
+        },
+        "id": "s-184C2759E72796E00AF45B4E0299B8C7DD2387DE",
+        "label": "Under 11.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-A74D74BA6AB146E7D5604322B695D6F23662E5CD",
+        "odds": 1.85,
+        "alternateLabel": "Over 17.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2947527",
+        "participantLabel": "Over 17.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-D12F8B70CC10F78B94BCA31CC1F529E7FF6F026C",
+        "label": "Over 17.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-A74D74BA6AB146E7D5604322B695D6F23662E5CD",
+        "odds": 1.85,
+        "alternateLabel": "Under 17.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2947527",
+        "participantLabel": "Under 17.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-0B5E351540331CB8F88B02A9E98E533745BC7C2C",
+        "label": "Under 17.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697",
+        "odds": 1.76,
+        "alternateLabel": "Over 13.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "6027635",
+        "participantLabel": "Over 13.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.76"
+        },
+        "id": "s-31156A1DACAA7AADACEAF1F7664B94E290F72115",
+        "label": "Over 13.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-AC17FDEE3905517FC986C2CEB54AFE77A2D87697",
+        "odds": 1.95,
+        "alternateLabel": "Under 13.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "6027635",
+        "participantLabel": "Under 13.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.95"
+        },
+        "id": "s-652C52C4D53E7D4C824839E63A717F8C2E812202",
+        "label": "Under 13.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171",
+        "odds": 1.85,
+        "alternateLabel": "Over 26.5",
+        "status": "Open",
+        "sortOrder": 1,
+        "participantId": "2528402",
+        "participantLabel": "Over 26.5",
+        "selectionTemplateId": "OVERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-3309C10FD16DF7ADAA1F0451D632AA6A0F5A4AC2",
+        "label": "Over 26.5",
+        "isHomeTeam": false
+      },
+      {
+        "marketId": "m-4D567AC6233BBDB34E37C5EC3FD5790EB7491171",
+        "odds": 1.85,
+        "alternateLabel": "Under 26.5",
+        "status": "Open",
+        "sortOrder": 2,
+        "participantId": "2528402",
+        "participantLabel": "Under 26.5",
+        "selectionTemplateId": "UNDERPOINTSPROP",
+        "marketSelectionPriceFormats": {
+          "1": "1.85"
+        },
+        "id": "s-AFB6E5EF38FB3B018D06FD78CB9964AAFBDDE366",
+        "label": "Under 26.5",
+        "isHomeTeam": false
+      }
+    ],
+    "scoreboards": []
+  },
+  "referenceId": "26c029fe-f696-431b-b8c4-226771c34752"
+}

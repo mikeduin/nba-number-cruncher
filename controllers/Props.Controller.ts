@@ -83,11 +83,13 @@ export const playerNameMismatches = {
     'Bogdan Bogdanovic': 'Bogdan Bogdanović',
     'Cam Thomas': 'Cameron Thomas',
     'Dennis Schroder': 'Dennis Schröder',
+    'Jimmy Butler': 'Jimmy Butler III',
     'Jonas Valanciunas': 'Jonas Valančiūnas',
     'Luka Doncic': 'Luka Dončić',
     'Nikola Jokic': 'Nikola Jokić',
     'Nikola Jovic': 'Nikola Jović',
     'Nikola Vucevic': 'Nikola Vučević',
+    'S Gilgeous-Alexander': 'Shai Gilgeous-Alexander',
     'Nic Claxton': 'Nicolas Claxton',
     // Add more as you discover mismatches
   }

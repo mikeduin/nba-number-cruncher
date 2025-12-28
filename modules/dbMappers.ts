@@ -20,6 +20,7 @@ const marketMappers = {
     'Total Points': 'pts', // Bovada + Betsson
     'Total Rebounds': 'reb', // Bovada + Betsson
     'Total Assists': 'ast', // Bovada + Betsson
+    'Total Blocks': 'blk', // Betsson
     "Total Three's Made": 'fg3m', // Betsson
     'Total Points + Assists + Rebounds': 'pts+reb+ast', // Betsson
     'Total Points + Rebounds': 'pts+reb', // Betsson
@@ -28,6 +29,7 @@ const marketMappers = {
     'Player Total Points': 'pts', // Bovada + Betsson
     'Player Total Rebounds': 'reb', // Bovada + Betsson
     'Player Total Assists': 'ast', // Bovada + Betsson
+    'Player Total Blocks': 'blk', // Betsson
     "Player Total Three's Made": 'fg3m', // Betsson
     'Player Total Points + Assists + Rebounds': 'pts+reb+ast', // Betsson
     'Player Total Points + Rebounds': 'pts+reb', // Betsson

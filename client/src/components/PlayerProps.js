@@ -44,17 +44,29 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
   const [activeTimeframe, setActiveTimeframe] = useState('full');
   const [bovadaUrl, setBovadaUrl] = useState('');
   const [betssonUrl, setBetssonUrl] = useState('');
-  const [fanDuelCurl, setFanDuelCurl] = useState('');
+  const [fanDuelCurl, setFanDuelCurl] = useState(() => {
+    // Load from sessionStorage on mount
+    return sessionStorage.getItem('fanDuelCurl') || '';
+  });
   const [storedPxContext, setStoredPxContext] = useState(null);
   const [pxContextAge, setPxContextAge] = useState(null);
   const [teamFilter, setTeamFilter] = useState(null);
-  const [sortProps, setSortProps] = useState(true); 
+  const [sortProps, setSortProps] = useState(true);
+  const [fanDuelEventId, setFanDuelEventId] = useState(game.fanduel_event_id || null); 
 
   useEffect(() => {
     setPlayerProps(allPlayerProps.data.filter(prop => prop.gid === game.gid));
     setLastUpdated(allPlayerProps.fetchedAt);
     fetchStoredPxContext();
-  }, [allPlayerProps.fetchedAt]);
+    setFanDuelEventId(game.fanduel_event_id || null);
+  }, [allPlayerProps.fetchedAt, game.fanduel_event_id]);
+
+  // Save cURL to sessionStorage whenever it changes
+  useEffect(() => {
+    if (fanDuelCurl) {
+      sessionStorage.setItem('fanDuelCurl', fanDuelCurl);
+    }
+  }, [fanDuelCurl]);
 
   // Auto-save px-context when cURL is pasted
   useEffect(() => {
@@ -205,6 +217,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     const gid = game.gid;
     try {
       const response = await axios.post('/api/updateFanDuelEventId', {gid, curlCommand: fanDuelCurl});
+      setFanDuelEventId(response.data.eventId);
       if (response.data.message === 'success') {
         toast({
           type: 'success',
@@ -323,7 +336,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
           <div style={{marginRight: 10}}><i>FANDUEL cURL:</i></div>
           <Input 
-            placeholder="Paste cURL command from FanDuel (token auto-saves)"
+            placeholder={fanDuelEventId ? `Event ID: ${fanDuelEventId}` : "Paste cURL command from FanDuel (token auto-saves)"}
             style={{width: 700}} 
             onChange={(e) => setFanDuelCurl(e.target.value)}
             value={fanDuelCurl}

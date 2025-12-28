@@ -1,0 +1,413 @@
+{
+  "url": "https://www.betsson.com/en/sportsbook/live/basketball?eventId=f--M5-fjk2rkyAutsiDU1vCA&eti=1&mtg=4",
+  "totalRequests": 69,
+  "allRequests": [
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/en/sportsbook/live/basketball?eventId=f--M5-fjk2rkyAutsiDU1vCA&eti=1&mtg=4",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/main.b706a372f71d29ed.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/polyfills.94ae077618afc568.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/runtime.b3bc704ee5566e54.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/vendor.3d4cc272f70e4034.js",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://c6572918bc10.edge.sdk.awswaf.com/c6572918bc10/a3b0bb466576/verify",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://c6572918bc10.edge.sdk.awswaf.com/c6572918bc10/a3b0bb466576/inputs?client=browser",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v1/content/groups/common",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v1/content/groups/general",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v1/content/groups/casino",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/optimizely-feature-flags?id=",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v1/content/groups/general-image",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/content/documentgroups/mobile-common-menus",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/cdn/fraud/api/fl/idgib-w-bab-betsson",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://c6572918bc10.edge.sdk.awswaf.com/c6572918bc10/a3b0bb466576/verify",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/main.b706a372f71d29ed.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/polyfills.94ae077618afc568.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/runtime.b3bc704ee5566e54.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/vendor.3d4cc272f70e4034.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/4965.d4430d4ad4ac6330.js",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://logx.optimizely.com/v1/events",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/6804.99327c2b6746676f.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/sb/fe-api/v1/user-context",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://pagead2.googlesyndication.com/ccm/collect?frm=0&en=page_view&dl=https%3A%2F%2Fwww.betsson.com%2Fen%2Fsportsbook%2Flive%2Fbasketball&scrsrc=www.googletagmanager.com&rnd=783497908.1766874872&navt=n&npa=1&_tu=CA&gtm=45He5ca1v9180745485za200zd9180745485xea&gcs=G101&gcd=13p3t3p3p5l1&dma_cps=-&dma=0&tag_exp=102015666~103116026~103200004~104527907~104528500~104684208~104684211~105391253~115583767~115938465~115938469~116184927~116184929~116251938~116251940&tft=1766874871900&tfd=1755&apve=1&apvf=f",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/sb/fe-api/v2/configuration",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/config/6a6d80b9-16ac-4387-a413-244d93a74deb/c53dcc17-cf18-4998-8252-a31707057d36/7.29/config.json",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://www.betsson.com/cdn/fraud/api/fl?u=9b4cba40-42b7-11ef-a7bb-222281000000&cfidsgib-w-bab-betsson=ZRaZrBo9DydSTrccPxvkU%2BtiBsaxqQtJ42QIIkaZ2nv5brY%2F1Oo9kOvUW63TRjRfokyFbJMLM2denba36nYhZ6xfSIUdWykCbnetFCGYwAZQ1lNJKwI%2F1zXZseHZCQFYo1Q1ptk5ve1TiJZV3nurpwR%2F",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/7666.9c22fc04cdc017f8.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/content/groups/mappings",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/categories/v2",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-page-schema/v1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/competitions/liveEvents",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/content",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/context-details",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/widget-config/v1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/9337.1a2122a5b093ef8b.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/1784.c166d3290ec59e62.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/1024.70b119b642ba66e1.js",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://www.google-analytics.com/g/collect?v=2&tid=G-BBLKWV84WH&gtm=45je5ca1v882549267z89180745485za20gzb9180745485zd9180745485&_p=1766874871544&gcs=G101&gcd=13p3t3p3p7l1&npa=1&dma_cps=-&dma=0&ir=0&tt=external&cid=900247916.1766874873&ul=en-us&sr=1728x1117&uaa=&uab=&uafvl=&uamb=0&uam=&uap=macOS&uapv=&uaw=0&frm=0&pscdl=denied&ngs=1&_s=1&tag_exp=103116026~103200004~104527907~104528501~104684208~104684211~105391253~115583767~115616986~115938465~115938469~116184927~116184929~116251938~116251940&dr=&dt=Sportsbook%20Live%20Category&dl=https%3A%2F%2Fwww.betsson.com%2Flive%2Fbasketball%3FeventId%3Df--M5-fjk2rkyAutsiDU1vCA%26eti%3D1%26mtg%3D4&sid=1766874872&sct=1&seg=0&_tu=DAg&tfd=2480",
+      "hasPostData": true
+    },
+    {
+      "method": "POST",
+      "url": "https://logx.optimizely.com/v1/events",
+      "hasPostData": true
+    },
+    {
+      "method": "POST",
+      "url": "https://o525973.ingest.sentry.io/api/5640905/envelope/?sentry_key=b646da23354441a0a411bf82b354033b&sentry_version=7",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/sb/fe-api/v1/route-data/live/basketball?eventId=f--M5-fjk2rkyAutsiDU1vCA&eti=1&mtg=4",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/868.7820c53efd82d993.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/2365.44195c4faa6e5b43.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/8467.3e51e8abfa2a1421.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/user-context?include=context-information,customer-favourites,customer-preferences,settings",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v2/content/filtered-content/sportsbooktooltips?isLoggedIn=false&jurisdiction=Mga",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/globalbonuses/v1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/competitions/liveEvents",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/view/v1?configurationKey=sportsbook.live.v3&priceFormats=1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/4546.ac8e4a93fb782700.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/4542.fbdf920bbfc9013e.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/7907.6c873ad72f12ad97.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/9902.5b28c2af40ce8862.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/dist/prod/xp/widgets/sportsbook/6a6d80b9-16ac-4387-a413-244d93a74deb/7.29.2.224-r5069bc3/desktop/files/4704.289da48ca1056343.js",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/sb/fe-api/v1/route-data/live/basketball?eventId=f--M5-fjk2rkyAutsiDU1vCA&eti=1&mtg=4&fs=true",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/content/documentgroups/mobile-common-icons",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-market/v1?includescoreboards=true&marketids=m-0AE500DAF62145BA7EBC18B31285C04153A0A553,m-0C2701F678DDB430C60C19C4E0241557048B514F,m-16CF7BE1028C25F1D6B2B6988349B93A89A94ADE,m-28108C2C3B4478083128651650442EDF8FCF4DBD,m-56B5B9A28ADC9FF37C06ADDD7DA3D5415252505E,m-58EBD7FA62BC32AA62EA838AEEA619C7EB8B18A3,m-6211A36564ED441A90143A74794821FEB77F3FCB,m-72D0530A7EFFF416D0910564AB8F02DADE81F3EF,m-7EF781A70EFD91793A0DB19BDA6C1333C3CC8A4C,m-94983D7561D808BE94675D52A424324B39E7D627,m-A55795559447DCC62CAC11FA6E8E660B4EB40FC6,m-A914DC335534D246D58A6A209BC934F60A4F664A,m-B2A26FC0F7DDB6C36ADAC34F920DF40CD296BE05,m-BB3C7E545976D5016950A040D1C8BF712FE32166,m-BEF2BEB85D1545E72516B312B2E65DD50643CEAB,m-D10F87FAF0DFC9A9F4330F2D36AAFFEAB4A76F18,m-D143C83595E360DC67AC0E8214FB088AB1F6DCE3,m-D4C4517492FFD430C9947D9CFEE15988929E6705,m-D7C7858630E8695EB902DF500061661E11B884C5,m-F3C25D0327656FCAE8D518F2954C555DE33809D0,m-f--_BQ355SG0Sd2Fu-dYIDPg-AWTN,m-f--_BQ355SG0Sd2Fu-dYIDPg-MWOU-2.5,m-f--_BQ355SG0Sd2Fu-dYIDPg-WM,m-f--_zs94_ze0GAmpSE2iGk8w-BTTSOU-2.5,m-f-3kPxJiXXLkav1M7pCh7lTw-HTFTFB",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-market/v1?includescoreboards=true&marketids=m-F660A93EEE7A5E0B07009D1A0F94A09372316C33,m-F7D59FEA0DFDCBDF03EF0DC519CFF7415788A383,m-f-6Py1oDOhcEeCfCp9Yc0auQ-ATG-2.5,m-f-6Py1oDOhcEeCfCp9Yc0auQ-HTFTFB,m-f-6Py1oDOhcEeCfCp9Yc0auQ-HTG-2.5,m-f-6Py1oDOhcEeCfCp9Yc0auQ-MW3W1H,m-f-6Py1oDOhcEeCfCp9Yc0auQ-MWOU-2.5,m-f-9IywLp4j90uGYGYVC1GBxg-BTTSOU-2.5,m-f-9s-EplBu9UKTgAGm9q2HQQ-ATCS,m-f-9s-EplBu9UKTgAGm9q2HQQ-BTTSOU-2.5,m-f-9s-EplBu9UKTgAGm9q2HQQ-MWOU-1.5,m-f-Bf2E6_-chESBqYqr0uzFxQ-BTTSOU-2.5,m-f-C0Cd5LX7zkSq76pU_nCI6Q-BTTSOU-2.5,m-f-C0Cd5LX7zkSq76pU_nCI6Q-HWTN,m-f-C0Cd5LX7zkSq76pU_nCI6Q-MWOU-2.5,m-f-C8b0dLbytk6U003uXQxu4w-BTTSOU-2.5,m-f-C8b0dLbytk6U003uXQxu4w-HTCS,m-f-C8b0dLbytk6U003uXQxu4w-MWOU-1.5,m-f-GwvlNqfz30mOPlBt7qou2g-HTCS,m-f-dLYUb2fJxkCeswBAGu_xyg-AWTN,m-f-dLYUb2fJxkCeswBAGu_xyg-MWOU-3.5,m-f-edF-waEydE2u3Wx03uxJng-MWOU-2.5,m-f-h9-ZsE4g8kyUt6i-Cfpwqg-HWTN,m-f-h9-ZsE4g8kyUt6i-Cfpwqg-MWOU-3.5,m-f-kflMG8k9Hk2yjPbRTA52Iw-BTTSOU-2.5",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-market/v1?includescoreboards=true&marketids=m-f-KzcOHyyEB0uyujyyeTbfCA-MWOU-2.5,m-f-QFyzRJvj_USC4myOJcsmfg-MWOU-2.5,m-f-SO5Xir2EGkqblTvxnB662w-HTCS,m-f-UPhz_uYJc0CavAhSik_EiQ-HTFTFB,m-f-UhiEdHABCkq_I6vNVB1Fsg-MWOU-2.5,m-f-VN2J_Kie_UWPNZAX9gQncg-MWOU-3.5,m-f-llw7VXHKMkaSbDLaQ9ci3A-ATG-1.5,m-f-llw7VXHKMkaSbDLaQ9ci3A-HTFTFB,m-f-llw7VXHKMkaSbDLaQ9ci3A-MWOU-2.5,m-f-n0y46aLSSkaFvTET6Ma8mA-HTCS,m-f-n0y46aLSSkaFvTET6Ma8mA-RT-2,m-f-n0y46aLSSkaFvTET6Ma8mA-WM,m-f-p1WXJtDG3EeqqHjb9PnlnQ-MWOU-4.5,m-f-rg9XxbzZPEiArIoblEkXcA-MWOU-3.5,m-f-rhwSf_7EME-dBn6PP_CNKQ-AWTN,m-f-rhwSf_7EME-dBn6PP_CNKQ-MWOU-2.5,m-f-roJfrs8mdEG-U71mg8Z7-w-AGSNAB,m-f-uPS3DUjfhkODWZH7ssNtYA-BTTSOU-2.5,m-f-uPS3DUjfhkODWZH7ssNtYA-HTCS,m-f-uPS3DUjfhkODWZH7ssNtYA-MWOU-1.5,m-f-vaQC3vwcBk6qn-w9lWcDpQ-HTCS,m-f-vaQC3vwcBk6qn-w9lWcDpQ-MWOU-2.5,m-f-xhyYV1U9nEyhdTd0dYvBCg-HWTN,m-f-xhyYV1U9nEyhdTd0dYvBCg-MWOU-3.5,m-f-yNebiV74BkSdfk4Oik78sw-WM",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-market/v1?includescoreboards=true&marketids=m-f-Zc361BncnEC0ix9nBMtblw-AWTN,m-f-Zc361BncnEC0ix9nBMtblw-MWOU-1.5,m-f-Zc361BncnEC0ix9nBMtblw-WM",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/gamecollections",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/content/pagetypes/flags",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/content/documentgroups/desktop-mega-menu",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/v2/content/documentgroups/desktop-common-menus",
+      "hasPostData": false
+    },
+    {
+      "method": "POST",
+      "url": "https://www.betsson.com/cdn/fraud/api/fl?u=9b4cba40-42b7-11ef-a7bb-222281000000&cfidsgib-w-bab-betsson=q5%2BRs5kJ8mE%2FXNVqQNwi5S%2FRzMlv6Y1aWImQI3nr%2BX8%2BvsISida10IhNuiKZ8KYzVv%2F%2BTLeDTukitpR4EYwXK6K3ELKtgw3JHcXBWWEGd4IvgfChBuzf4S%2FKmYDWXeEQ0iivPds1WWdh8btw0w83ac7uMwPhTTxvI4ty",
+      "hasPostData": true
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/most-popular-competitions/v1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/most-popular-categories/v1",
+      "hasPostData": false
+    },
+    {
+      "method": "GET",
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event/v2?eventId=f--M5-fjk2rkyAutsiDU1vCA",
+      "hasPostData": false
+    }
+  ],
+  "apiResponses": [
+    {
+      "url": "https://www.betsson.com/api/v1/content/groups/general",
+      "status": 200,
+      "dataPreview": "{\"ukgc.asa.title\":\"Sign in to play\",\"ukgc.asa.message\":\"In compliance with UK Regulations you need to login before you can access the casino games.\",\"ukgc.asa.create-account\":\"Create Account\",\"uk-funds-protection.message-mobile\":\"We are required by our licence to inform customers about what happens to funds which we hold on account for you, and the extent to which funds are protected in the event of insolvency.<br /><br /><a href=\\\"http://www.gamblingcommission.gov.uk/for-the-public/Your-rights/"
+    },
+    {
+      "url": "https://www.betsson.com/api/v1/content/groups/casino",
+      "status": 200,
+      "dataPreview": "{\"live-casino-filter.lobbies\":\"Lobbies\",\"live-casino-filter.low-stake\":\"Low Stake\",\"live-casino-filter.open-tables\":\"Open Tables\",\"live-casino-filter.live-filters\":\"Live Filters\",\"live-casino-filter.available-seats\":\"Available Seats\",\"live-casino-filter.bet-behind\":\"Bet Behind\",\"live-casino-filter.high-stake\":\"High Stake\",\"game-carousel.favorite-games\":\"Favourite Games\",\"game-carousel.crosssellgamesturkish-poker\":\"Games\",\"game-carousel.crosssellgamespoker\":\"Games\",\"my-casino.favorites-info\":\"You"
+    },
+    {
+      "url": "https://www.betsson.com/api/v1/content/groups/common",
+      "status": 200,
+      "dataPreview": "{\"dga.deposit-limit.confirmation-caption\":\"You are about to set a deposit limit. You can change your limit at any time, but if you want to raise or delete your limit, it will take 24 hours before the change occurs.<br /><br />Do you want to set this limit?\",\"sga.deposit-limit.reconfirmation.raise-popup.message\":\"Your 7 day deposit limit cool-off period has passed. Are you sure you would like to increase your limit from {{currentAmount}}/{{currentPeriod}} to {{queuedAmount}}/{{queuedPeriod}}?\",\"s"
+    },
+    {
+      "url": "https://www.betsson.com/api/v1/content/groups/general-image",
+      "status": 200,
+      "dataPreview": "{\"internal-error.image_v4\":{\"url\":\"https://imageapi.bpsgameserver1.com/v3/bgr/Betsson/Common/neutral/image/2025/10/internal-error.image_v4_v3.svg\",\"height\":0,\"width\":0},\"internal-error.image\":{\"url\":\"https://imageapi.bpsgameserver1.com/v3/bgr/Betsson/Common/neutral/image/2016/09/internal-error.image.png\",\"altText\":\"Internal error\",\"height\":303,\"width\":345},\"general.quick-deposit-open\":{\"url\":\"https://imageapi.bpsgameserver1.com/v3/bgr/Common/Common/neutral/image/2019/04/general.quick-deposit-ope"
+    },
+    {
+      "url": "https://www.betsson.com/api/v2/content/documentgroups/mobile-common-menus",
+      "status": 200,
+      "dataPreview": "{\"id\":\"mobile-common-menus\",\"documents\":{\"lobbyMenu\":[{\"documentKey\":\"lobby.home\",\"content\":{\"route\":[\"home\"],\"title\":[\"Home\"],\"iconTag\":[\"ico-home\"],\"visualTag\":[\"\"],\"fabricIcon\":[\"fabric-icons-home1\"],\"fabricRoute\":[\"/pages/\"],\"link\":[{\"url\":\"\",\"target\":\"\",\"onClick\":\"\",\"rel\":\"\"}],\"metadata\":{\"userState\":[\"any\"]}}},{\"documentKey\":\"lobby.casino\",\"content\":{\"route\":[\"casino\"],\"title\":[\"Casino\"],\"iconTag\":[\"ico-dice\"],\"visualTag\":[\"\"],\"fabricIcon\":[\"fabric-icons-cherry\"],\"fabricRoute\":[\"/pages/cas"
+    },
+    {
+      "url": "https://www.betsson.com/optimizely-feature-flags?id=",
+      "status": 200,
+      "dataPreview": "{\"featureFlags\":{\"navigation_2_0\":{\"isEnabled\":false,\"variationKey\":\"off\",\"enabled\":false},\"newcashier\":{\"iframe_url\":\"\",\"variationKey\":\"off\",\"enabled\":false},\"cross-sell\":{\"enabled\":true,\"variationKey\":\"on\"},\"mx_new_registration_flow_phase1\":{\"variationKey\":\"off\",\"enabled\":false},\"testingtestflag\":{\"className\":\"redsquares\",\"additional_configuration\":{\"auth\":{\"redirectionDomainByCustomerCountry\":{\"areCountriesForbidden\":true,\"customerCountries\":[\"PE\"],\"redirectionDomain\":\"betsson.pe\"}}},\"configD"
+    },
+    {
+      "url": "https://www.betsson.com/sb/fe-api/v2/configuration",
+      "status": 200,
+      "dataPreview": "{\"device\":{\"deviceType\":\"Desktop\",\"deviceExperience\":\"Web\"},\"disabledRoutes\":[\"sportsbook.live-stream-calendar\",\"sportsbook.live-stream-calendar-category\"],\"marketList\":[{\"culture\":\"en-GB\",\"currency\":\"EUR\",\"jurisdiction\":\"\",\"key\":\"mga.en\",\"name\":\"English\",\"slug\":\"en\",\"languageCode\":\"en\"},{\"culture\":\"en-CA\",\"currency\":\"CAD\",\"jurisdiction\":\"\",\"key\":\"mga.ca\",\"name\":\"Canadian\",\"slug\":\"ca\",\"languageCode\":\"ca\"},{\"culture\":\"nb-NO\",\"currency\":\"NOK\",\"jurisdiction\":\"\",\"key\":\"mga.no\",\"name\":\"Norwegian\",\"sl"
+    },
+    {
+      "url": "https://www.betsson.com/dist/prod/config/6a6d80b9-16ac-4387-a413-244d93a74deb/c53dcc17-cf18-4998-8252-a31707057d36/7.29/config.json",
+      "status": 200,
+      "dataPreview": "{\"$dimensions\":{\"bleSource\":{\"core\":{\"appContext\":{\"apiBaseUri\":\"https://d-cf.alpha.btsplayground.net/api\",\"beta\":{}}},\"globalRealTime\":{\"realTime\":{\"authOptions\":{\"host\":\"realtime6-alpha.bgplayground.net\"}}}},\"noCloudfront-test\":{\"core\":{\"appContext\":{\"apiBaseUri\":\"https://sbtobgapib2b-origin.test.bgplayground.net/api\",\"beta\":{}}}},\"noCloudfront-qa\":{\"core\":{\"appContext\":{\"apiBaseUri\":\"https://sbqobgapib2b-origin.qa.bgplayground.net/api\",\"beta\":{}}}},\"e2e\":{\"core\":{\"appContext\":{\"apiBaseUri\":\"h"
+    },
+    {
+      "url": "https://www.betsson.com/api/sb/v1/widgets/event-page-schema/v1",
+      "status": 200,
+      "dataPreview": "{\"data\":{\"eventPageSchema\":{\"0\":{\"marketTemplateGroupings\":[{\"type\":0,\"marketTemplateTag\":0,\"defaultOpenAccordions\":8,\"sortOrder\":0,\"subTabs\":[]}],\"accordionGroupings\":{},\"playerStatistics\":[],\"mainLineTags\":[118,119,120]},\"1\":{\"marketTemplateGroupings\":[{\"id\":\"1\",\"label\":\"Popular\",\"type\":2,\"marketTemplateTag\":7,\"defaultOpenAccordions\":8,\"sortOrder\":3,\"subTabs\":[]},{\"id\":\"2\",\"label\":\"Bet Builder\",\"type\":3,\"marketTemplateTag\":133,\"defaultOpenAccordions\":8,\"sortOrder\":4,\"iconTag\":\"ico-bet-builder\""
+    },
+    {
+      "url": "https://www.betsson.com/api/sb/v1/widgets/widget-config/v1",
+      "status": 200,
+      "dataPreview": "{\"data\":{\"quickBetslip\":{\"desktopEnabled\":false,\"mobileEnabled\":true,\"predefinedStakes\":{\"ARS\":[1000,5000,10000],\"BOB\":[1,10,50],\"BRL\":[10,50,200],\"CAD\":[10,25,50],\"CLP\":[1000,10000,25000],\"COP\":[10000,20000,50000],\"DKK\":[100,500,1000],\"EUR\":[10,25,100],\"ISK\":[100,1000,10000],\"INR\":[200,500,1000],\"MXN\":[10,100,500],\"NOK\":[100,200,500],\"NZD\":[20,50,100],\"PEN\":[20,100,300],\"SEK\":[100,500,1000],\"TRY\":[100,500,1000],\"USD\":[5,10,50]}},\"winAnimations\":{\"enabled\":true,\"ranges\":{\"ARS\":{\"0\":{\"1000\":\"anim"
+    },
+    {
+      "url": "https://www.betsson.com/api/sb/v1/widgets/globalbonuses/v1",
+      "status": 200,
+      "dataPreview": "{\"skeleton\":{\"marketDetailsQueries\":[\"m-0AE500DAF62145BA7EBC18B31285C04153A0A553,m-0C2701F678DDB430C60C19C4E0241557048B514F,m-16CF7BE1028C25F1D6B2B6988349B93A89A94ADE,m-28108C2C3B4478083128651650442EDF8FCF4DBD,m-56B5B9A28ADC9FF37C06ADDD7DA3D5415252505E,m-58EBD7FA62BC32AA62EA838AEEA619C7EB8B18A3,m-6211A36564ED441A90143A74794821FEB77F3FCB,m-72D0530A7EFFF416D0910564AB8F02DADE81F3EF,m-7EF781A70EFD91793A0DB19BDA6C1333C3CC8A4C,m-94983D7561D808BE94675D52A424324B39E7D627,m-A55795559447DCC62CAC11FA6E8E66"
+    },
+    {
+      "url": "https://www.betsson.com/api/sb/v1/widgets/view/v1?configurationKey=sportsbook.live.v3&priceFormats=1",
+      "status": 200,
+      "dataPreview": "{\"data\":{\"widgets\":[{\"key\":\"sportsbook.live.v3.live\",\"type\":\"MasterDetailContainer\",\"version\":\"v1\",\"data\":{\"data\":{\"eventsTableWidgetRequestTemplate\":{\"_Id\":\"EventsTable-v1-621-Live-1-----4--0--0---True\",\"eventPhase\":\"Live\",\"pageNumber\":1,\"maxMarketCount\":4,\"maxEventCount\":0,\"minutesFromStartTime\":0,\"eventSortBy\":\"Popularity\",\"priceFormats\":[\"Decimal\"],\"includeOutrights\":true,\"brandGuid\":\"00000000-0000-0000-0000-000000000000\",\"brandId\":99999999,\"segmentGuid\":\"25c324e2-e8f4-4d0a-b7bc-aac8eb6df66b"
+    }
+  ]
+}

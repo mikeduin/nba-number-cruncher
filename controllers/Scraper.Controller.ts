@@ -104,325 +104,243 @@ export const scrapeBovada = async (gameUrl) => {
   }
 };
 
-export const scrapeBetsson = async (gameUrl: string) => {
-  let browser;
+/**
+ * Helper: Capture session token from Betsson page via Puppeteer
+ * This is the slow part (~4-5s) but only needs to be done once per scrape
+ */
+const getBetssonSessionToken = async (gameUrl: string): Promise<any> => {
+  console.log('🌐 Opening Betsson page to get session token...');
+  const startTime = Date.now();
+  
+  const browser = await puppeteer.launch({
+    executablePath: '/opt/homebrew/bin/chromium',
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
 
-  // const executablePath = await chromium.executablePath;
+  const page = await browser.newPage();
+  
+  let capturedHeaders: any = null;
+  
+  // Intercept the first API call to capture headers with session token
+  page.on('request', request => {
+    const url = request.url();
+    if (url.includes('/api/sb/v1/widgets/accordion/v1') && !capturedHeaders) {
+      capturedHeaders = request.headers();
+      console.log('✅ Captured session token and headers!');
+    }
+  });
 
-  if (app.get('env') === 'development') {
-    browser = await puppeteer.launch({
-      executablePath: '/opt/homebrew/bin/chromium',
-      headless: true, // Try with visible browser first to debug
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-blink-features=AutomationControlled', // Hide automation
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      ]
-    });
+  await page.goto(gameUrl, { 
+    waitUntil: 'networkidle2',
+    timeout: 30000 
+  });
+
+  // Wait a moment for API calls to fire
+  if (!capturedHeaders) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
   }
 
-  console.log('gameUrl is ', gameUrl);
+  await browser.close();
+  
+  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`⏱️  Token acquisition took ${duration}s\n`);
+  
+  return capturedHeaders;
+};
 
-  if (gameUrl) {
-    try {
-      // const browser = await puppeteer.launch({
-      //   executablePath: '/opt/homebrew/bin/chromium',
-      //   args: ['--no-sandbox']
-      // });
-      const page = await browser.newPage();
-      
-      // Set a realistic viewport
-      await page.setViewport({ width: 1920, height: 1080 });
-      
-      // Mask that we're using automation
-      await page.evaluateOnNewDocument(() => {
-        Object.defineProperty(navigator, 'webdriver', {
-          get: () => false,
-        });
-      });
-
-      // If GameURL does not have "&mtg=3" at the end, add it
-      if (!gameUrl.includes('&mtg=4')) {
-        gameUrl += '&mtg=4';
+/**
+ * Helper: Fetch props for a specific market template via Betsson API
+ * This is fast (~0.3-0.5s per template)
+ */
+const fetchBetssonPropsByTemplate = async (
+  headers: any, 
+  eventId: string, 
+  templateId: string, 
+  templateName: string
+) => {
+  const url = `https://www.betsson.com/api/sb/v1/widgets/accordion/v1?eventId=${eventId}&marketTemplateIds=${templateId}`;
+  
+  try {
+    const response = await axios.get(url, { headers });
+    
+    // Extract markets from accordion structure
+    const accordions = response.data?.data?.accordions || {};
+    let allMarkets: any[] = [];
+    
+    Object.values(accordions).forEach((accordion: any) => {
+      if (accordion.markets) {
+        allMarkets = allMarkets.concat(accordion.markets);
       }
-  
-      // Navigate to the URL with longer timeout
-      await page.goto(gameUrl, { 
-        waitUntil: 'networkidle2',
-        timeout: 60000 
-      });
-
-      console.log('has gone to gameUrl');
-  
-      const props = [];
-  
+    });
+    
+    // Fetch odds for these markets
+    if (allMarkets.length > 0) {
+      const marketIds = allMarkets.map((m: any) => m.id).join(',');
+      const oddsUrl = `https://www.betsson.com/api/sb/v1/widgets/event-market/v1?includescoreboards=true&marketids=${marketIds}`;
+      
       try {
-        console.log('⏳ Waiting for page to fully load...');
+        const oddsResponse = await axios.get(oddsUrl, { headers });
+        const marketSelections = oddsResponse.data?.data?.marketSelections || [];
         
-        // // Wait longer for JS-heavy sites
-        // await new Promise(resolve => setTimeout(resolve, 8000));
-        
-        // console.log('🔍 Analyzing page structure...');
-        
-        // // Comprehensive debugging and Shadow DOM traversal
-        // const debugInfo = await page.evaluate(() => {
-        //   // Helper function to recursively search through Shadow DOM
-        //   const findInShadowDom = (root: Document | ShadowRoot, selector: string): Element | null => {
-        //     // First try in current root
-        //     let element = root.querySelector(selector);
-        //     if (element) return element;
-            
-        //     // Then search in all shadow roots
-        //     const allElements = root.querySelectorAll('*');
-        //     for (const el of allElements) {
-        //       if ((el as any).shadowRoot) {
-        //         element = findInShadowDom((el as any).shadowRoot, selector);
-        //         if (element) return element;
-        //       }
-        //     }
-        //     return null;
-        //   };
-          
-        //   // Helper to get all classes from Shadow DOM
-        //   const getAllClassesFromShadowDom = (root: Document | ShadowRoot): string[] => {
-        //     const classes: string[] = [];
-        //     const elements = root.querySelectorAll('*');
-            
-        //     elements.forEach(el => {
-        //       if (el.className && typeof el.className === 'string') {
-        //         el.className.split(' ').forEach(c => {
-        //           if (c && c.includes('obg')) classes.push(c);
-        //         });
-        //       }
-              
-        //       if ((el as any).shadowRoot) {
-        //         classes.push(...getAllClassesFromShadowDom((el as any).shadowRoot));
-        //       }
-        //     });
-            
-        //     return classes;
-        //   };
-          
-        //   // Helper to get all elements matching selector from Shadow DOM
-        //   const getAllFromShadowDom = (root: Document | ShadowRoot, selector: string): Element[] => {
-        //     const results: Element[] = [];
-            
-        //     // Get from current root
-        //     const elements = root.querySelectorAll(selector);
-        //     results.push(...Array.from(elements));
-            
-        //     // Recursively search shadow roots
-        //     const allElements = root.querySelectorAll('*');
-        //     allElements.forEach(el => {
-        //       if ((el as any).shadowRoot) {
-        //         results.push(...getAllFromShadowDom((el as any).shadowRoot, selector));
-        //       }
-        //     });
-            
-        //     return results;
-        //   };
-          
-        //   // Collect debug information
-        //   const shadowHosts: string[] = [];
-        //   document.querySelectorAll('*').forEach(el => {
-        //     if ((el as any).shadowRoot) {
-        //       shadowHosts.push(el.tagName.toLowerCase());
-        //     }
-        //   });
-          
-        //   const obgClasses = getAllClassesFromShadowDom(document);
-        //   const marketGroups = getAllFromShadowDom(document, '.obg-m-event-market-group');
-          
-        //   return {
-        //     shadowHosts: shadowHosts.slice(0, 10),
-        //     obgClassCount: obgClasses.length,
-        //     obgClassesSample: obgClasses.slice(0, 20),
-        //     marketGroupsFound: marketGroups.length,
-        //     marketGroupClasses: marketGroups.slice(0, 3).map(el => el.className)
-        //   };
-        // });
-        
-        // console.log('📊 Debug Info:');
-        // console.log('  - Shadow DOM hosts:', debugInfo.shadowHosts);
-        // console.log('  - OBG classes found:', debugInfo.obgClassCount);
-        // console.log('  - Sample OBG classes:', debugInfo.obgClassesSample);
-        // console.log('  - Market groups found:', debugInfo.marketGroupsFound);
-        // console.log('  - Market group classes:', debugInfo.marketGroupClasses);
-        
-        // Save debug files
-        // const debugDir = path.join(process.cwd(), 'debug');
-        // if (!fs.existsSync(debugDir)) {
-        //   fs.mkdirSync(debugDir, { recursive: true });
-        // }
-        
-        // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        // const screenshotPath = path.join(debugDir, `betsson-${timestamp}.png`);
-        
-        // await page.screenshot({ path: screenshotPath, fullPage: true });
-        // console.log('✅ Screenshot saved to:', screenshotPath);
-        
-        // if (debugInfo.marketGroupsFound === 0) {
-        //   throw new Error(`No betting markets found in Shadow DOM. Found ${debugInfo.obgClassCount} obg classes but no market groups.`);
-        // }
-        
-        // console.log(`✅ Found ${debugInfo.marketGroupsFound} market groups in Shadow DOM!`);
-
-        console.log('🔓 Attempting to expand accordions and show-more buttons...');
-        
-        // Expand accordions and show-more buttons using Shadow DOM traversal
-        const expandResult = await page.evaluate(() => {
-          const clickInShadowDom = (root: Document | ShadowRoot, selector: string): number => {
-            let clickCount = 0;
-            
-            // Click in current root
-            const elements = root.querySelectorAll(selector);
-            elements.forEach(el => {
-              (el as HTMLElement).click();
-              clickCount++;
-            });
-            
-            // Recursively search shadow roots
-            const allElements = root.querySelectorAll('*');
-            allElements.forEach(el => {
-              if ((el as any).shadowRoot) {
-                clickCount += clickInShadowDom((el as any).shadowRoot, selector);
-              }
-            });
-            
-            return clickCount;
-          };
-          
-          const accordionClicks = clickInShadowDom(document, '.obg-uiuplift-accordion-item-close');
-          const buttonClicks = clickInShadowDom(document, '.obg-show-more-less-button');
-          
-          return { accordionClicks, buttonClicks };
+        // Group selections by marketId
+        const selectionsByMarket: Record<string, any[]> = {};
+        marketSelections.forEach((sel: any) => {
+          if (!selectionsByMarket[sel.marketId]) {
+            selectionsByMarket[sel.marketId] = [];
+          }
+          selectionsByMarket[sel.marketId].push(sel);
         });
         
-        console.log(`  - Expanded ${expandResult.accordionClicks} accordions`);
-        console.log(`  - Clicked ${expandResult.buttonClicks} show-more buttons`);
-        
-        // Wait for animations to complete
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        console.log('📦 Extracting betting data from Shadow DOM...');
-        
-        // Extract the data directly from Shadow DOM (no Cheerio needed)
-        const extractedProps = await page.evaluate(() => {
-          const getAllFromShadowDom = (root: Document | ShadowRoot, selector: string): Element[] => {
-            const results: Element[] = [];
-            const elements = root.querySelectorAll(selector);
-            results.push(...Array.from(elements));
-            
-            const allElements = root.querySelectorAll('*');
-            allElements.forEach(el => {
-              if ((el as any).shadowRoot) {
-                results.push(...getAllFromShadowDom((el as any).shadowRoot, selector));
-              }
-            });
-            
-            return results;
-          };
-          
-          const propsData: any[] = [];
-          const marketGroups = getAllFromShadowDom(document, '.obg-m-event-market-group');
-          
-          console.log(`Found ${marketGroups.length} market groups to process`);
-          
-          marketGroups.forEach((marketGroupEl, idx) => {
-            const marketHeader = marketGroupEl.querySelector('.obg-m-event-market-group-header');
-            const market = marketHeader ? marketHeader.textContent?.trim() : 'Unknown';
-            
-            console.log(`Processing market ${idx + 1}: ${market}`);
-            
-            // Find all individual selection containers (each represents one bet - over or under)
-            const selections = marketGroupEl.querySelectorAll('obg-selection-container-v2[playerpropsvariant]');
-            console.log(`  Found ${selections.length} player prop selections`);
-            
-            // Group selections by player (they come in pairs: over/under)
-            const playerProps = new Map();
-            
-            selections.forEach((selection, selIdx) => {
-              try {
-                const playerLabel = selection.querySelector('span.obg-selection-v2-group-label');
-                const player = playerLabel ? playerLabel.textContent?.trim() : '';
-                
-                const lineLabel = selection.querySelector('span.obg-selection-v2-label:not(.obg-selection-v2-group-label)');
-                const lineText = lineLabel ? lineLabel.textContent?.trim() : '';
-                // lineText is like "Over 12.5" or "Under 12.5"
-                const lineParts = lineText.split(' ');
-                const direction = lineParts[0]; // "Over" or "Under"
-                const lineValue = lineParts.length > 1 ? lineParts[1] : '';
-                
-                const oddsElement = selection.querySelector('span.obg-numeric-change-container-odds-value');
-                const odds = oddsElement ? oddsElement.textContent?.trim() : '';
-                
-                if (player && lineValue && odds) {
-                  // Create a unique key for this player/line combination
-                  const key = `${player}-${lineValue}`;
-                  
-                  if (!playerProps.has(key)) {
-                    playerProps.set(key, {
-                      market,
-                      player,
-                      line: parseFloat(lineValue),
-                      over: null,
-                      under: null
-                    });
-                  }
-                  
-                  const prop = playerProps.get(key);
-                  if (direction.toLowerCase() === 'over') {
-                    prop.over = parseFloat(odds);
-                  } else if (direction.toLowerCase() === 'under') {
-                    prop.under = parseFloat(odds);
-                  }
-                }
-              } catch (err) {
-                console.log(`    Error extracting selection ${selIdx + 1}:`, err);
-              }
-            });
-            
-            // Add completed props (those with both over and under)
-            playerProps.forEach((prop, key) => {
-              if (prop.over !== null && prop.under !== null) {
-                propsData.push(prop);
-                console.log(`    Prop: ${prop.player} ${prop.line} (${prop.over}/${prop.under})`);
-              }
-            });
-          });
-          
-          return propsData;
-        });
-        
-        console.log(`✅ Extracted ${extractedProps.length} player props`);
-        
-        // Convert European (decimal) odds to American (moneyline) odds
-        console.log('🔄 Converting European odds to American format...');
-        const convertedProps = extractedProps.map(prop => ({
-          ...prop,
-          over: convertDecimalToAmerican(prop.over),
-          under: convertDecimalToAmerican(prop.under)
+        // Add selections to each market
+        allMarkets = allMarkets.map((market: any) => ({
+          ...market,
+          selectionsData: selectionsByMarket[market.id] || []
         }));
-        
-        console.log(`✅ Converted ${convertedProps.length} props to American odds format`);
-        
-        // Add converted props to our results
-        props.push(...convertedProps);
-      } catch (e) {
-        console.log('error scraping Betsson props for ', gameUrl, ' and error is ', e);
+      } catch (oddsError) {
+        console.log(`  ⚠️  ${templateName}: Got markets but failed to fetch odds`);
       }
-
-      // Close the browser when you're done
-      await browser.close();
-  
-      return props;
-    } catch (e) {
-      console.log('OUTER error scraping Betsson props for ', gameUrl, ' and error is ', e);
     }
-  } else {
+    
+    return {
+      template: templateName,
+      success: true,
+      markets: allMarkets
+    };
+  } catch (error) {
+    console.log(`  ❌ ${templateName}: ${(error as any).message}`);
+    return {
+      template: templateName,
+      success: false,
+      markets: []
+    };
+  }
+};
+
+/**
+ * Scrape Betsson player props using hybrid approach:
+ * 1. Brief Puppeteer session (~5s) to capture session token
+ * 2. Direct API calls (~0.5s) for all prop types
+ * Total: ~6-8s vs 15-30s with old Shadow DOM scraping
+ */
+export const scrapeBetsson = async (gameUrl: string) => {
+  console.log('🚀 Fast Betsson scraper starting...');
+  const totalStart = Date.now();
+
+  if (!gameUrl) {
     console.log('No gameUrl provided');
+    return [];
+  }
+
+  try {
+    // Ensure URL has proper market group parameter
+    if (!gameUrl.includes('&mtg=4')) {
+      gameUrl += '&mtg=4';
+    }
+
+    // Extract event ID from URL
+    const eventIdMatch = gameUrl.match(/eventId=([^&]+)/);
+    if (!eventIdMatch) {
+      console.log('❌ Could not extract event ID from URL');
+      return [];
+    }
+    const eventId = eventIdMatch[1];
+
+    // Step 1: Get session token (slow part - ~4-5s)
+    const headers = await getBetssonSessionToken(gameUrl);
+    
+    if (!headers || !headers.sessiontoken) {
+      console.error('❌ Failed to capture session token');
+      return [];
+    }
+    
+    // Step 2: Fetch all prop types in parallel (fast - ~0.5s total)
+    console.log('📊 Fetching player props via API...\n');
+    
+    const MARKET_TEMPLATES: Record<string, string> = {
+      POINTS: 'PLYPROPPOINTS',
+      REBOUNDS: 'PLYPROPREBOUNDS',
+      ASSISTS: 'PLYPROPASSISTS',
+      THREES: 'PLYPROPTHRSMDE',
+      BLOCKS: 'PLYPROPTM',
+      PRA: 'PLYPROPPNTSASSTSRBNDS',
+      PR: 'PLYPROPPNTSRBNDS'
+    };
+    
+    const promises = Object.entries(MARKET_TEMPLATES).map(([name, templateId]) =>
+      fetchBetssonPropsByTemplate(headers, eventId, templateId, name)
+    );
+    
+    const results = await Promise.all(promises);
+    
+    // Step 3: Map API data to our prop format
+    const props: any[] = [];
+    
+    results.forEach(result => {
+      if (!result.success || !result.markets) return;
+      
+      result.markets.forEach((market: any) => {
+        if (!market.selectionsData || market.selectionsData.length === 0) return;
+        
+        try {
+          // Extract player name from marketFriendlyName (format: "Game | Player Name")
+          const playerName = market.marketFriendlyName?.split(' | ')[1];
+          if (!playerName) return;
+          
+          // Extract line value from groupSortBy
+          const lineData = market.marketSpecifics?.groupSortBy?.find(
+            (g: any) => g.groupLevel === '3'
+          );
+          const line = lineData?.sort;
+          if (!line) return;
+          
+          // Extract over/under odds
+          const overSelection = market.selectionsData.find(
+            (s: any) => s.label?.toLowerCase().includes('over')
+          );
+          const underSelection = market.selectionsData.find(
+            (s: any) => s.label?.toLowerCase().includes('under')
+          );
+          
+          if (!overSelection || !underSelection) return;
+          
+          // Map market template to Betsson prop type naming (must match dbMappers.ts)
+          const marketTypeMap: Record<string, string> = {
+            'PLYPROPPOINTS': 'Total Points',
+            'PLYPROPREBOUNDS': 'Total Rebounds',
+            'PLYPROPASSISTS': 'Total Assists',
+            'PLYPROPTHRSMDE': "Total Three's Made",
+            'PLYPROPTM': 'Total Blocks',
+            'PLYPROPPNTSASSTSRBNDS': 'Total Points + Assists + Rebounds',
+            'PLYPROPPNTSRBNDS': 'Total Points + Rebounds'
+          };
+          
+          const propType = marketTypeMap[market.marketTemplateId] || market.marketTemplateId;
+          
+          // Convert European odds to American format
+          const overAmerican = convertDecimalToAmerican(overSelection.odds);
+          const underAmerican = convertDecimalToAmerican(underSelection.odds);
+          
+          props.push({
+            market: propType,
+            player: playerName,
+            line: parseFloat(line),
+            over: overAmerican,
+            under: underAmerican
+          });
+        } catch (err) {
+          console.log('Error mapping market:', err);
+        }
+      });
+    });
+    
+    const totalDuration = ((Date.now() - totalStart) / 1000).toFixed(1);
+    console.log(`\n✅ Fast Betsson scraper complete: ${props.length} props in ${totalDuration}s\n`);
+    
+    return props;
+  } catch (e) {
+    console.log('Error in fast Betsson scraper:', e);
+    return [];
   }
 };
 

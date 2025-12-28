@@ -66,7 +66,9 @@ export interface ParsedMarketName {
 
 export function parseFanDuelMarketName(marketName: string): ParsedMarketName | null {
   // FanDuel format: "Player Name - Prop Type"
-  const match = marketName.match(/^(.+?)\s*-\s*(.+)$/);
+  // Use greedy match and match the LAST " - " to handle hyphens in player names
+  // e.g., "Shai Gilgeous-Alexander - Points" should split at the " - " with spaces
+  const match = marketName.match(/^(.+)\s+-\s+(.+)$/);
   
   if (!match) {
     console.warn(`Could not parse FanDuel market name: ${marketName}`);
