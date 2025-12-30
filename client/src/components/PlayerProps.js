@@ -44,29 +44,26 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
   const [activeTimeframe, setActiveTimeframe] = useState('full');
   const [bovadaUrl, setBovadaUrl] = useState('');
   const [betssonUrl, setBetssonUrl] = useState('');
-  const [fanDuelCurl, setFanDuelCurl] = useState(() => {
-    // Load from sessionStorage on mount
-    return sessionStorage.getItem('fanDuelCurl') || '';
-  });
+  const [fanDuelCurl, setFanDuelCurl] = useState('');
+  const [draftKingsUrl, setDraftKingsUrl] = useState('');
   const [storedPxContext, setStoredPxContext] = useState(null);
   const [pxContextAge, setPxContextAge] = useState(null);
   const [teamFilter, setTeamFilter] = useState(null);
   const [sortProps, setSortProps] = useState(true);
-  const [fanDuelEventId, setFanDuelEventId] = useState(game.fanduel_event_id || null); 
+  const [fanDuelEventId, setFanDuelEventId] = useState(game.fanduel_event_id || null);
+  const [draftKingsEventId, setDraftKingsEventId] = useState(game.draftkings_event_id || null); 
 
   useEffect(() => {
     setPlayerProps(allPlayerProps.data.filter(prop => prop.gid === game.gid));
     setLastUpdated(allPlayerProps.fetchedAt);
     fetchStoredPxContext();
     setFanDuelEventId(game.fanduel_event_id || null);
-  }, [allPlayerProps.fetchedAt, game.fanduel_event_id]);
+    setDraftKingsEventId(game.draftkings_event_id || null);
+    // Don't sync curl/url to state - let placeholder show saved values (like Betsson)
+    // State is only used when user is actively editing
+  }, [allPlayerProps.fetchedAt, game.gid, game.fanduel_event_id, game.draftkings_event_id, game.fanduel_curl, game.draftkings_url]);
 
-  // Save cURL to sessionStorage whenever it changes
-  useEffect(() => {
-    if (fanDuelCurl) {
-      sessionStorage.setItem('fanDuelCurl', fanDuelCurl);
-    }
-  }, [fanDuelCurl]);
+
 
   // Auto-save px-context when cURL is pasted
   useEffect(() => {
@@ -246,6 +243,51 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
     }
   }
 
+  const saveDraftKingsEventId = async () => {
+    if (!draftKingsUrl) {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'No URL or Event ID provided',
+        description: `Please enter a DraftKings URL or event ID`,
+        animation: 'slide down',
+        time: 3000
+      });
+      return;
+    }
+
+    const gid = game.gid;
+    try {
+      const response = await axios.post('/api/updateDraftKingsEventId', {gid, urlOrEventId: draftKingsUrl});
+      setDraftKingsEventId(response.data.eventId);
+      if (response.data.message === 'success') {
+        toast({
+          type: 'success',
+          icon: 'check circle',
+          color: 'green',
+          title: 'Event ID Saved',
+          description: `DraftKings event ID ${response.data.eventId} saved for game ${gid}`,
+          animation: 'slide down',
+          time: 4000
+        });
+        // Keep the URL in the input - don't clear it
+      } else {
+        throw new Error(response.data.error || 'Unknown error');
+      }
+    } catch (error) {
+      toast({
+        type: 'error',
+        icon: 'exclamation',
+        color: 'red',
+        title: 'Error updating event ID',
+        description: error.response?.data?.error || error.message,
+        animation: 'slide down',
+        time: 3000
+      });
+    }
+  }
+
   const updateProps = async (sportsbook) => {
     const gid = game.gid;
     
@@ -336,7 +378,7 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
           <div style={{marginRight: 10}}><i>FANDUEL cURL:</i></div>
           <Input 
-            placeholder={fanDuelEventId ? `Event ID: ${fanDuelEventId}` : "Paste cURL command from FanDuel (token auto-saves)"}
+            placeholder={game.fanduel_curl || "Paste cURL command from FanDuel (token auto-saves)"}
             style={{width: 700}} 
             onChange={(e) => setFanDuelCurl(e.target.value)}
             value={fanDuelCurl}
@@ -349,6 +391,17 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
             <i>✓ Token stored ({pxContextAge < 60 ? `${pxContextAge}min ago` : `${Math.floor(pxContextAge/60)}h ago`})</i>
           </div>
         )}
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 5}}>
+          <div style={{marginRight: 10}}><i>DRAFTKINGS URL:</i></div>
+          <Input 
+            placeholder={game.draftkings_url || "Paste DraftKings URL or event ID"}
+            style={{width: 700}} 
+            onChange={(e) => setDraftKingsUrl(e.target.value)}
+            value={draftKingsUrl}
+          />
+          <Button primary style={{marginLeft: 10}} onClick={saveDraftKingsEventId}>Save Event ID</Button>
+          <Button color='teal' style={{marginLeft: 10}} onClick={() => updateProps('DraftKings')}>Update Props [DK]</Button>
+        </div>
         <div style={{display: 'inline-flex', alignItems: 'center', marginBottom: 5}}>
           <div style={{marginRight: 10}}><i>MARKET:</i></div>
           {Object.values(marketMappers).map(market => 

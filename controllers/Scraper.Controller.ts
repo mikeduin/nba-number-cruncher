@@ -19,6 +19,12 @@ import {
   FanDuelMarket, 
   FanDuelProp 
 } from '../types/FanDuel.js';
+import {
+  DraftKingsMarketResponse,
+  DraftKingsMarket,
+  DraftKingsSelection,
+  DraftKingsParsedProp
+} from '../types/DraftKings.js';
 
 const app = express();
 
@@ -512,4 +518,191 @@ export const scrapeFanDuel = async (
     
     return [];
   }
+};
+
+/**
+ * Scrape DraftKings player props for a given event
+ * Fetches from multiple subcategories to get all prop types
+ * 
+ * @param eventId - DraftKings event ID (e.g., "33365894")
+ * @param region - State abbreviation for sportsbook (default: "NJ")
+ * @returns Array of parsed player props with Over/Under odds
+ */
+export const scrapeDraftKings = async (
+  eventId: string,
+  region: string = 'NJ'
+): Promise<DraftKingsParsedProp[]> => {
+  console.log(`🎯 Scraping DraftKings props for event ${eventId}...`);
+  
+  const baseUrl = `https://sportsbook-nash.draftkings.com/sites/US-${region}-SB/api/sportscontent/controldata/event/eventSubcategory/v1/markets`;
+  
+  const client = axios.create({
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Content-Type': 'application/json charset=utf-8',
+      'DNT': '1',
+      'Origin': 'https://sportsbook.draftkings.com',
+      'Referer': 'https://sportsbook.draftkings.com/',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-site',
+      'x-client-feature': 'eventSubcategory',
+      'x-client-name': 'web',
+      'x-client-page': 'event',
+      'x-client-version': '2551.1.1.9',
+      'x-client-widget-name': 'cms',
+      'x-client-widget-version': '1.7.0',
+    },
+    timeout: 30000
+  });
+  
+  // Step 1: Dynamically discover active subcategories for this event
+  console.log(`  🔍 Scanning subcategories 16400-16500 to find active props...`);
+  const activeSubcategoryIds: number[] = [];
+  
+  // Scan range in batches to find which subcategories have data
+  const scanPromises = [];
+  for (let id = 16400; id <= 16500; id++) {
+    scanPromises.push(
+      (async () => {
+        try {
+          const url = `${baseUrl}?isBatchable=false&templateVars=${eventId}%2C${id}&marketsQuery=%24filter%3DeventId%20eq%20%27${eventId}%27%20AND%20clientMetadata%2FsubCategoryId%20eq%20%27${id}%27%20AND%20tags%2Fall%28t%3A%20t%20ne%20%27SportcastBetBuilder%27%29&entity=markets`;
+          const response = await client.get<DraftKingsMarketResponse>(url, { timeout: 5000 });
+          if (response.data.markets && response.data.markets.length > 0) {
+            return id;
+          }
+        } catch (error) {
+          // Silently skip failed requests
+        }
+        return null;
+      })()
+    );
+  }
+  
+  const results = await Promise.all(scanPromises);
+  activeSubcategoryIds.push(...results.filter((id): id is number => id !== null));
+  
+  console.log(`  ✅ Found ${activeSubcategoryIds.length} active subcategories: ${activeSubcategoryIds.join(', ')}`);
+  
+  if (activeSubcategoryIds.length === 0) {
+    console.log(`  ⚠️ No active subcategories found for event ${eventId}`);
+    return [];
+  }
+  
+  // Step 2: Fetch full data from active subcategories
+  const allProps: DraftKingsParsedProp[] = [];
+  
+  for (const subcatId of activeSubcategoryIds) {
+    try {
+      const url = `${baseUrl}?isBatchable=false&templateVars=${eventId}%2C${subcatId}&marketsQuery=%24filter%3DeventId%20eq%20%27${eventId}%27%20AND%20clientMetadata%2FsubCategoryId%20eq%20%27${subcatId}%27%20AND%20tags%2Fall%28t%3A%20t%20ne%20%27SportcastBetBuilder%27%29&entity=markets`;
+      
+      const response = await client.get<DraftKingsMarketResponse>(url);
+      const { markets = [], selections = [] } = response.data;
+      
+      console.log(`  📊 Subcategory ${subcatId}: ${markets.length} markets, ${selections.length} selections`);
+      
+      // Group selections by marketId
+      const selectionsByMarket: Record<string, DraftKingsSelection[]> = {};
+      selections.forEach(selection => {
+        if (!selectionsByMarket[selection.marketId]) {
+          selectionsByMarket[selection.marketId] = [];
+        }
+        selectionsByMarket[selection.marketId].push(selection);
+      });
+      
+      // Parse each market
+      for (const market of markets) {
+        const marketSelections = selectionsByMarket[market.id] || [];
+        
+        // Parse market name - DraftKings format: "{Player Name} {Stat Type} O/U"
+        // Examples: "Kawhi Leonard Points O/U", "Cade Cunningham Points + Rebounds + Assists O/U"
+        // First strip the " O/U" suffix
+        let marketNameWithoutOU = market.name;
+        if (market.name.endsWith(' O/U')) {
+          marketNameWithoutOU = market.name.slice(0, -4); // Remove " O/U"
+        }
+        
+        // Split on the last occurrence of a known stat pattern
+        const statPatterns = [
+          'Points + Rebounds + Assists',
+          'Points + Rebounds',
+          'Points + Assists',
+          'Rebounds + Assists',
+          'Three Pointers Made',
+          'Points',
+          'Rebounds',
+          'Assists',
+          'Blocks',
+          'Steals',
+          'Turnovers'
+        ];
+        
+        let playerName = '';
+        let statType = '';
+        
+        for (const pattern of statPatterns) {
+          if (marketNameWithoutOU.endsWith(pattern)) {
+            const splitIndex = marketNameWithoutOU.lastIndexOf(' ' + pattern);
+            if (splitIndex !== -1) {
+              playerName = marketNameWithoutOU.substring(0, splitIndex);
+              statType = pattern;
+              break;
+            }
+          }
+        }
+        
+        if (!playerName || !statType) {
+          console.warn(`⚠️  Could not parse market name: ${market.name}`);
+          continue;
+        }
+        
+        // Find Over and Under selections
+        const overSelection = marketSelections.find(s => s.outcomeType === 'Over');
+        const underSelection = marketSelections.find(s => s.outcomeType === 'Under');
+        
+        if (!overSelection || !underSelection) {
+          console.warn(`⚠️  Missing Over/Under for: ${market.name}`);
+          continue;
+        }
+        
+        // Get player info from participants
+        const player = overSelection.participants?.find(p => p.type === 'Player');
+        if (!player) {
+          console.warn(`⚠️  No player participant found for: ${market.name}`);
+          continue;
+        }
+        
+        // Normalize odds - DraftKings uses Unicode minus sign (−) instead of hyphen (-)
+        const normalizeOdds = (odds: string): string => {
+          // Replace Unicode minus (U+2212) with regular hyphen-minus (U+002D)
+          return odds.replace(/−/g, '-');
+        };
+        
+        const overOdds = normalizeOdds(overSelection.displayOdds.american);
+        const underOdds = normalizeOdds(underSelection.displayOdds.american);
+        
+        allProps.push({
+          player: player.name,
+          propType: statType,
+          line: overSelection.points,
+          overOdds: overOdds,
+          underOdds: underOdds,
+          marketId: market.id,
+          overSelectionId: overSelection.id,
+          underSelectionId: underSelection.id,
+          marketType: market.marketType.name,
+          isSuspended: market.isSuspended || false,
+        });
+      }
+      
+    } catch (error) {
+      console.warn(`  ⚠️  Subcategory ${subcatId} failed:`, error instanceof Error ? error.message : String(error));
+    }
+  }
+  
+  console.log(`📊 Total DraftKings props scraped: ${allProps.length}`);
+  return allProps;
 };

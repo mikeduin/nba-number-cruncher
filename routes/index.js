@@ -84,7 +84,7 @@ rule.second = 48;
 //   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
 //   // schedule.scheduleJob(rule, async () => {
 //     let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//     while (moment(yesterday).isAfter('2025-11-18')) {
+//     while (moment(yesterday).isAfter('2025-12-18')) {
 //       await updatePlayerBoxScoresByPeriod(yesterday);
 //       await delay(1000);
 //       yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
@@ -201,12 +201,56 @@ router.post("/api/updateFanDuelEventId", async (req, res, next) => {
       console.log('✅ Saved px-context to database');
     }
     
-    // Save event ID to schedule
-    await knex('schedule').where({ gid }).update({ fanduel_event_id: eventId });
+    // Save event ID and cURL to schedule
+    await knex('schedule').where({ gid }).update({ 
+      fanduel_event_id: eventId,
+      fanduel_curl: curlCommand 
+    });
     
-    res.send({message: 'success', eventId});
+    res.send({message: 'success', eventId, savedCurl: curlCommand});
   } catch (e) {
     console.log('error updating fanduel event id for ', gid, ' is ', e);
+    res.send({message: 'error', error: e.message});
+  }
+})
+
+router.post("/api/updateDraftKingsEventId", async (req, res, next) => {
+  const { gid, urlOrEventId } = req.body;
+  try {
+    let eventId;
+    
+    // Check if it's already just an event ID (all digits)
+    if (/^\d+$/.test(urlOrEventId.trim())) {
+      eventId = urlOrEventId.trim();
+    } else {
+      // Extract event ID from URL - DraftKings format: /event/{team-slug}/{id}
+      // Try to match the event ID after the team slug
+      const eventIdMatch = urlOrEventId.match(/\/event\/[^\/]+\/(\d+)/);
+      if (!eventIdMatch) {
+        // Fallback: try to get last numeric segment in URL
+        const lastNumberMatch = urlOrEventId.match(/\/(\d+)(?:\/|$|#|\?)/);
+        if (!lastNumberMatch) {
+          return res.status(400).send({
+            message: 'error', 
+            error: 'Could not find event ID. Please provide either a DraftKings URL or just the event ID number'
+          });
+        }
+        eventId = lastNumberMatch[1];
+      } else {
+        eventId = eventIdMatch[1];
+      }
+    }
+    
+    // Save event ID and URL to schedule
+    await knex('schedule').where({ gid }).update({ 
+      draftkings_event_id: eventId,
+      draftkings_url: urlOrEventId 
+    });
+    
+    console.log(`✅ Saved DraftKings event ID ${eventId} for game ${gid}`);
+    res.send({message: 'success', eventId, savedUrl: urlOrEventId});
+  } catch (e) {
+    console.log('error updating draftkings event id for ', gid, ' is ', e);
     res.send({message: 'error', error: e.message});
   }
 })
@@ -650,7 +694,7 @@ router.get("/api/fetchWeek/:date", async (req, res, next) => {
   }
   
   query
-    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url', 's.betsson_url')
+    .select('odds.*', 's.id', 's.gid', 's.gcode', 's.gdte', 's.etm', 's.gweek', 's.h', 's.v', 's.stt', 's.bovada_url', 's.betsson_url', 's.fanduel_event_id', 's.fanduel_curl', 's.draftkings_event_id', 's.draftkings_url')
     .orderBy('s.etm')
     .then(async (games) => {
       res.send({

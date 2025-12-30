@@ -21,9 +21,9 @@ const findPlayerTeam = (propPlayerName: string, dailyPlayers, sportsbook: Sports
   // console.log('dailyPlayers is ', dailyPlayers);
   let player = dailyPlayers.find(player => player.player_name === propPlayerName);
   
-  // If not found, check playerNameMismatches for this sportsbook
-  if (!player && playerNameMismatches[sportsbook] && playerNameMismatches[sportsbook][propPlayerName]) {
-    const dbPlayerName = playerNameMismatches[sportsbook][propPlayerName];
+  // If not found, check unified playerNameMismatches
+  if (!player && playerNameMismatches[propPlayerName]) {
+    const dbPlayerName = playerNameMismatches[propPlayerName];
     player = dailyPlayers.find(player => player.player_name === dbPlayerName);
   }
   

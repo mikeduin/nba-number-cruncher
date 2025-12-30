@@ -2,6 +2,7 @@ export enum SportsbookName {
   Bovada = 'Bovada',
   Betsson = 'Betsson',
   FanDuel = 'FanDuel',
+  DraftKings = 'DraftKings',
 }
 
 // Type guard for runtime checking

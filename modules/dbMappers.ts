@@ -49,6 +49,20 @@ const marketMappers = {
     'Pts + Reb': 'pts+reb',
     'Pts + Ast': 'pts+ast',
     'Reb + Ast': 'reb+ast',
+  },
+  DraftKings: {
+    // DraftKings uses "{Stat} O/U" format
+    'Points': 'pts',
+    'Rebounds': 'reb',
+    'Assists': 'ast',
+    'Steals': 'stl',
+    'Blocks': 'blk',
+    'Turnovers': 'tov',
+    'Three Pointers Made': 'fg3m',
+    'Points + Rebounds + Assists': 'pts+reb+ast',
+    'Points + Rebounds': 'pts+reb',
+    'Points + Assists': 'pts+ast',
+    'Rebounds + Assists': 'reb+ast',
   }
 }
 
