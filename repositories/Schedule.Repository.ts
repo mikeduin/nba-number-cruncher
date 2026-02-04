@@ -18,10 +18,11 @@ export const getCompletedGameGids = async (gdte: string) => await Schedule()
   .pluck('gid');
 
 export const getCompletedGamesWithNoGameStints = async (season: number) => await knex("schedule as s")
-  .innerJoin("box_scores_v2 as bs", "s.gid", "=", "bs.gid")
+  // .innerJoin("box_scores_v2 as bs", "s.gid", "=", "bs.gid")
   .whereNotNull("s.gweek")
-  .where('bs.final', true)
-  .andWhere({ season_year: season })
+  .where('s.stt', "Final")
+  .andWhere('s.season_year', season)
+  .andWhere('s.season_name', 'regular')
   .whereNull("s.game_stints")
   .pluck("s.gid");
 

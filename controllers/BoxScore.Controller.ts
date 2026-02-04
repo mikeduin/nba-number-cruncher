@@ -6,11 +6,27 @@ import { CompletedBoxScoreDb, NbaApiBoxScore, UpdateBoxScore } from "../models"
 import { updateGameBoxScore } from "../repositories";
 import { BoxScoreResponse } from "../types"
 import { GAME_BOX_SCORE_URL } from "../constants";
+import { set } from "lodash";
 
 export const fetchBoxScore = async (vAbb: string, hAbb: string, gid: number) => {
   try {
     const gameUrl = GAME_BOX_SCORE_URL(vAbb, hAbb, gid);
-    const { data } = await axios.get(gameUrl);
+    
+    const { data } = await axios.get(gameUrl, {
+      timeout: 10000, // 10 second timeout
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0'
+      }
+    });
     const $ = cheerio.load(data);
     const boxScoreData = $('#__NEXT_DATA__').text();
     const parsedBoxScore = JSON.parse(boxScoreData);
@@ -18,6 +34,15 @@ export const fetchBoxScore = async (vAbb: string, hAbb: string, gid: number) => 
     return parsedBoxScore;
   } catch (error) {
     console.error('Error fetching box score:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error details:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers
+      });
+    }
     return null;
   }
 };
@@ -38,7 +63,7 @@ export const getCompletedGameResponse = (boxScore: CompletedBoxScoreDb): BoxScor
   }
 }
 
-export const parseGameData = async (boxScore: NbaApiBoxScore) => {
+export const parseGameData = async (boxScore: NbaApiBoxScore, setToFinal?: boolean) => {
   const { period, gameClock, gameStatus, gameStatusText, homeTeam, homeTeamId: hTid, awayTeam, awayTeamId: vTid, gameId} = boxScore;
   const gid = parseInt(gameId.slice(2));
 
@@ -70,6 +95,8 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
       player_stats: JSON.stringify(playerStats),
     }
 
+    console.log('Processing box score for game ', gid, ' period ', period, ' gameOver: ', gameOver);
+
     if (period === 1) {
       try {
         const entry = await BoxScores().where({gid});
@@ -92,7 +119,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
     } else if (period === 2 || period === 3 || period === 4) {
       try {
         const qTest = await BoxScores().where({gid}).pluck(`${qVariable}`);
-        if (qTest[0] == null) {
+        if (qTest[0] == null && !setToFinal) {
           const updatePayload: UpdateBoxScore = {
             ...baseUpdatePayload,
             [qVariable]: [currentQuarter],
@@ -101,6 +128,7 @@ export const parseGameData = async (boxScore: NbaApiBoxScore) => {
           console.log(`${qVariable} stats inserted for ${gid}`);
         } else if (period === 4 && gameOver) { 
           await updateGameBoxScore(gid, {final: true})
+          console.log('should be setting schedule to final');
           await Schedule().where({gid: gid}).update({
             stt: "Final",
             result: `${awayTeam.teamTricode} ${awayTeam.score} @ ${homeTeam.teamTricode} ${homeTeam.score}`,

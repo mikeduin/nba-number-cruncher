@@ -1,6 +1,6 @@
-import knex from './db/knex.js';
-import { updateSingleGameProps } from './controllers/Props.Controller.ts';
-import { SportsbookName } from './types/index.ts';
+import knex from '../db/knex.js';
+import { updateSingleGameProps } from '../controllers/Props.Controller.ts';
+import { SportsbookName } from '../types/index.ts';
 
 async function testDraftKings() {
   try {

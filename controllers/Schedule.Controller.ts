@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as Db from './Db.Controller.js';
 import { LEAGUE_SCHEDULE_URL, SEASON_DATES } from '../constants';
 import { Month, SeasonNameFull, SeasonNameAbb } from '../types';
-import { fetchBoxScore } from './BoxScore.Controller.js';
+import { fetchBoxScore, parseGameData } from './BoxScore.Controller.js';
 import { getBoxScoreFromDb, getExistingSeasonGames, updateGameBoxScore, updateScheduleGame } from '../repositories';
 import {
   formBovadaUrl,
@@ -12,7 +12,6 @@ import {
   getSeasonNameAbb,
   getSeasonNameFull,
 } from '../utils';
-import { update } from 'lodash';
 
 const getPrePostGameWeek = (gameDate: string, dashedDateWeeks: string[][]) => {
   return dashedDateWeeks.findIndex((week: string[]) => week.includes(gameDate));
@@ -427,6 +426,75 @@ export const updatePastScheduleForResults = async () => {
 
     console.log('result have been set for gid ', game.gid);
   })
+}
+
+const delay = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Reprocesses box scores for games that haven't been marked as final.
+ * Useful for catching games that were missed or had processing errors.
+ * 
+ * @param {number} seasonYear - The season year to reprocess (e.g., 2024 for 2024-25 season)
+ * @param {string} beforeDate - Only reprocess games before this date (format: 'YYYY-MM-DD')
+ * @returns {Promise<object>} Results object with total, processed count, and any errors
+ */
+export const reprocessNonFinalGames = async (seasonYear: number, beforeDate: string) => {
+  try {
+    // Find all games from specified season before given date that aren't marked as final
+    const nonFinalGames = await Db.Schedule()
+      .where('season_year', seasonYear)
+      .where('season_name', 'regular')
+      .where('gdte', '<', beforeDate)
+      .whereNot('stt', 'Final')
+      .select('gid', 'gdte', 'h', 'v')
+      .orderBy('gdte', 'asc');
+
+    console.log(`Found ${nonFinalGames.length} non-final games to reprocess`);
+    
+    const results = {
+      total: nonFinalGames.length,
+      processed: 0,
+      errors: []
+    };
+
+    for (const game of nonFinalGames) {
+      const hAbb = game.h[0].ta;
+      const vAbb = game.v[0].ta;
+      const { gid } = game;
+
+      try {
+        console.log(`Processing game ${gid} (${vAbb} @ ${hAbb}) from ${game.gdte}`);
+        const response = await fetchBoxScore(vAbb, hAbb, gid);
+        const boxScore = response.props.pageProps.game;
+        await parseGameData(boxScore, true);
+        results.processed++;
+        console.log(`✓ Successfully processed game ${gid}`);
+        
+        // Add delay to avoid rate limiting
+        await delay(2000);
+      } catch (e) {
+        console.log(`✗ Error processing game ${gid}: ${e.message}`);
+        results.errors.push({
+          gid,
+          date: game.gdte,
+          matchup: `${vAbb} @ ${hAbb}`,
+          error: e.message
+        });
+      }
+    }
+
+    console.log(`Reprocessing complete: ${results.processed}/${results.total} games processed`);
+    if (results.errors.length > 0) {
+      console.log(`Errors encountered for ${results.errors.length} games:`, results.errors);
+    }
+    
+    return results;
+  } catch (e) {
+    console.log('Error in reprocessNonFinalGames:', e);
+    throw e;
+  }
 }
 
 

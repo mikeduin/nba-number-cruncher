@@ -240,8 +240,8 @@ export const scrapeBetsson = async (gameUrl: string) => {
 
   try {
     // Ensure URL has proper market group parameter
-    if (!gameUrl.includes('&mtg=4')) {
-      gameUrl += '&mtg=4';
+    if (!gameUrl.includes('&mtg=5')) {
+      gameUrl += '&mtg=5';
     }
 
     // Extract event ID from URL
@@ -706,3 +706,276 @@ export const scrapeDraftKings = async (
   console.log(`📊 Total DraftKings props scraped: ${allProps.length}`);
   return allProps;
 };
+
+/**
+ * Fetch all NBA games from DraftKings API
+ * Returns array of games with eventId and team abbreviations
+ */
+export const fetchDraftKingsGames = async (): Promise<Array<{
+  eventId: string;
+  awayTeam: string;
+  homeTeam: string;
+  startDate: string;
+  name: string;
+}>> => {
+  const DRAFT_KINGS_GAMES_URL = 
+    'https://sportsbook-nash.draftkings.com/sites/US-SB/api/sportscontent/controldata/league/leagueSubcategory/v1/markets?' +
+    'isBatchable=false&templateVars=42648%2C4511' +
+    '&eventsQuery=%24filter%3DleagueId%20eq%20%2742648%27%20AND%20clientMetadata%2FSubcategories%2Fany%28s%3A%20s%2FId%20eq%20%274511%27%29' +
+    '&marketsQuery=%24filter%3DclientMetadata%2FsubCategoryId%20eq%20%274511%27%20AND%20tags%2Fall%28t%3A%20t%20ne%20%27SportcastBetBuilder%27%29' +
+    '&include=Events&entity=events';
+
+  console.log('🏀 Fetching DraftKings NBA games...');
+
+  try {
+    const response = await axios.get(DRAFT_KINGS_GAMES_URL, {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.data || !response.data.events) {
+      console.error('❌ Invalid response from DraftKings API');
+      return [];
+    }
+
+    const games = response.data.events.map((event: any) => {
+      const away = event.participants?.find((p: any) => p.venueRole === 'Away');
+      const home = event.participants?.find((p: any) => p.venueRole === 'Home');
+
+      return {
+        eventId: event.id,
+        awayTeam: away?.metadata?.shortName || away?.name || '',
+        homeTeam: home?.metadata?.shortName || home?.name || '',
+        startDate: event.startEventDate,
+        name: event.name
+      };
+    });
+
+    console.log(`✅ Found ${games.length} DraftKings games`);
+    return games;
+  } catch (error) {
+    console.error('❌ Error fetching DraftKings games:', error instanceof Error ? error.message : String(error));
+    return [];
+  }
+};
+
+/**
+ * Fetch all NBA games from FanDuel using Puppeteer with Stealth Plugin
+ * Returns array of games with eventId and team names
+ */
+export const fetchFanDuelGames = async (): Promise<Array<{
+  eventId: string;
+  awayTeam: string;
+  homeTeam: string;
+  startTime: string;
+  gameName: string;
+}>> => {
+  console.log('🏀 Fetching FanDuel NBA games with Puppeteer (stealth mode)...');
+  
+  const puppeteer = require('puppeteer-extra');
+  const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+  
+  // Add stealth plugin to avoid detection
+  puppeteer.use(StealthPlugin());
+  
+  let browser;
+
+  try {
+    console.log('🚀 Launching browser with stealth mode...');
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-dev-shm-usage'
+      ]
+    });
+
+    const page = await browser.newPage();
+    
+    // Set viewport and user agent
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    
+    console.log('📄 Loading FanDuel NBA page...');
+    await page.goto('https://nj.sportsbook.fanduel.com/navigation/nba', {
+      waitUntil: 'networkidle2',
+      timeout: 60000
+    });
+
+    // Wait longer for JavaScript to render
+    console.log('⏳ Waiting for page to fully render...');
+    await page.waitForTimeout(5000);
+    
+    // Check if we got blocked
+    const pageTitle = await page.title();
+    console.log('📋 Page title:', pageTitle);
+    
+    if (pageTitle.includes('denied') || pageTitle.includes('Access')) {
+      throw new Error('Page access denied - bot detection still active');
+    }
+    
+    // Try to find event links
+    console.log('🔍 Extracting game data from DOM...');
+    
+    const games: Array<{
+      eventId: string;
+      awayTeam: string;
+      homeTeam: string;
+      startTime: string;
+      gameName: string;
+    }> = await page.evaluate(() => {
+      const extractedGames: Array<{
+        eventId: string;
+        awayTeam: string;
+        homeTeam: string;
+        startTime: string;
+        gameName: string;
+      }> = [];
+
+      // Look for links with /event/ in them
+      const eventLinks = document.querySelectorAll('a[href*="/event/"]');
+      
+      eventLinks.forEach((link: Element) => {
+        try {
+          const href = link.getAttribute('href') || '';
+          const eventIdMatch = href.match(/\/event\/(\d+)/);
+          
+          if (!eventIdMatch) return;
+          
+          const eventId = eventIdMatch[1];
+          
+          // Try to extract team names from the link text or nearby elements
+          const linkText = link.textContent?.trim() || '';
+          
+          // Look for team names in parent containers
+          const parent = link.closest('[class*="event"], [class*="game"], [class*="card"]');
+          const teamElements = parent ? 
+            Array.from(parent.querySelectorAll('[class*="team"], [class*="participant"]')) : 
+            [];
+          
+          const teamTexts: string[] = [];
+          teamElements.forEach((el: Element) => {
+            const text = el.textContent?.trim();
+            if (text && text.length > 2 && text.length < 50) {
+              teamTexts.push(text);
+            }
+          });
+          
+          // If we found teams, add the game
+          if (teamTexts.length >= 2) {
+            extractedGames.push({
+              eventId,
+              awayTeam: teamTexts[0],
+              homeTeam: teamTexts[1],
+              startTime: new Date().toISOString(),
+              gameName: linkText || `${teamTexts[0]} @ ${teamTexts[1]}`
+            });
+          } else if (linkText.includes('@') || linkText.includes('vs')) {
+            // Try to parse from link text
+            const parts = linkText.split(/@|vs/i).map(s => s.trim());
+            if (parts.length >= 2) {
+              extractedGames.push({
+                eventId,
+                awayTeam: parts[0],
+                homeTeam: parts[1],
+                startTime: new Date().toISOString(),
+                gameName: linkText
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Error extracting game:', err);
+        }
+      });
+
+      return extractedGames;
+    });
+
+    console.log(`✅ Found ${games.length} FanDuel games`);
+    
+    // Remove duplicates based on eventId
+    const uniqueGames: Array<{
+      eventId: string;
+      awayTeam: string;
+      homeTeam: string;
+      startTime: string;
+      gameName: string;
+    }> = Array.from(
+      new Map(games.map(game => [game.eventId, game])).values()
+    );
+    
+    console.log(`✅ After deduplication: ${uniqueGames.length} unique games`);
+    
+    await browser.close();
+    return uniqueGames;
+
+  } catch (error) {
+    console.error('❌ Error fetching FanDuel games:', error instanceof Error ? error.message : String(error));
+    if (browser) {
+      await browser.close();
+    }
+    return [];
+  }
+};
+
+/**
+ * Helper function to parse games from various FanDuel API response formats
+ */
+function parseFanDuelGames(data: any): Array<{
+  eventId: string;
+  awayTeam: string;
+  homeTeam: string;
+  startTime: string;
+  gameName: string;
+}> {
+  const games: Array<{
+    eventId: string;
+    awayTeam: string;
+    homeTeam: string;
+    startTime: string;
+    gameName: string;
+  }> = [];
+
+  try {
+    // Try different data structures
+    let events = data.events || data.attachments?.events || data.data?.events || [];
+    
+    if (Array.isArray(events)) {
+      events.forEach((event: any) => {
+        const eventId = event.eventId || event.id || event.marketId;
+        const name = event.name || event.eventName || '';
+        const openDate = event.openDate || event.startTime || new Date().toISOString();
+        
+        // Try to extract team names from the event name or competitors
+        let awayTeam = '';
+        let homeTeam = '';
+        
+        if (event.competitors && Array.isArray(event.competitors)) {
+          awayTeam = event.competitors[0]?.name || '';
+          homeTeam = event.competitors[1]?.name || '';
+        } else if (name.includes(' @ ') || name.includes(' vs ')) {
+          const teams = name.split(/ @ | vs /);
+          awayTeam = teams[0]?.trim() || '';
+          homeTeam = teams[1]?.trim() || '';
+        }
+        
+        if (eventId && awayTeam && homeTeam) {
+          games.push({
+            eventId: String(eventId),
+            awayTeam,
+            homeTeam,
+            startTime: openDate,
+            gameName: name
+          });
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error parsing FanDuel games:', err);
+  }
+
+  return games;
+}

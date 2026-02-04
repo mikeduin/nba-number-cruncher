@@ -17,9 +17,16 @@ export const addGameStints = async () => {
   const games = await getCompletedGamesWithNoGameStints(season)
   console.log('games are ', games); 
 
-  games.forEach(game => {
-    buildGameStints(game);
-  });
+  for (const game of games) {
+    try {
+      await buildGameStints(game);
+      console.log(`Successfully processed game ${game}`);
+    } catch (error) {
+      console.error(`Error processing game ${game}:`, error.message);
+    }
+  }
+  
+  console.log(`Finished processing ${games.length} games`);
 };
 
 export const buildGameStints = async (gid) => {
@@ -30,11 +37,52 @@ export const buildGameStints = async (gid) => {
   // const gdte = gDetail.data.g.gdte;
 
   const gameInDb = await getScheduleGame(gid);
-  const boxScoreInDb = await getBoxScoreFromDb(gid);
+  let boxScoreInDb = await getBoxScoreFromDb(gid);
 
   const { gcode, gdte, h, v  } = gameInDb;
-  const { player_stats } = boxScoreInDb;
+  const hAbb = h[0].ta;
+  const vAbb = v[0].ta;
 
+  // If box score doesn't exist in DB, fetch it from NBA API
+  if (!boxScoreInDb) {
+    console.log(`Box score not found for game ${gid}, fetching from NBA API...`);
+    const boxScoreResponse = await fetchBoxScore(vAbb, hAbb, gid);
+    
+    if (!boxScoreResponse) {
+      throw new Error(`Failed to fetch box score from NBA API for game ${gid}`);
+    }
+    
+    const boxScore = boxScoreResponse.props.pageProps.game;
+    const { homeTeam, awayTeam } = boxScore;
+    
+    // Import the necessary functions from BoxScore.Controller
+    const { mapPlayerStatistics } = await import('../utils/index.js');
+    const { BoxScores } = await import('./Db.Controller.js');
+    
+    const hTid = h[0].tid;
+    const vTid = v[0].tid;
+    
+    const hPlayerStats = mapPlayerStatistics(homeTeam.players, hTid, homeTeam.teamTricode, homeTeam.statistics);
+    const vPlayerStats = mapPlayerStatistics(awayTeam.players, vTid, awayTeam.teamTricode, awayTeam.statistics);
+    const playerStats = [...hPlayerStats, ...vPlayerStats];
+    
+    // Insert box score into database
+    await BoxScores().insert({
+      gid: gid,
+      h_tid: hTid,
+      v_tid: vTid,
+      player_stats: JSON.stringify(playerStats),
+      final: true,
+      updated_at: new Date()
+    });
+    
+    console.log(`Box score saved to DB for game ${gid}`);
+    
+    // Refetch the box score from DB
+    boxScoreInDb = await getBoxScoreFromDb(gid);
+  }
+
+  const { player_stats } = boxScoreInDb;
   const playerStats = JSON.parse(player_stats);
 
   // console.log('gameInDb is ', gameInDb);
@@ -42,13 +90,11 @@ export const buildGameStints = async (gid) => {
   const finalPlayerBoxScores = await getFinalPlayerBoxScoresForGame(gid);
 
   const starters = playerStats
-    .filter((player) => player.starter === '1')
+    .filter((player) => player.starter === '1' || player.starter === 1 || player.starter === true)
     .map((player) => player.player_id);
 
   const hTid = h[0].tid;
   const vTid = v[0].tid;
-  const hAbb = h[0].ta;
-  const vAbb = v[0].ta;
 
   // const boxScoreResponse = await fetchBoxScore(vAbb, hAbb, gid); // pull live NBA.com data, convert to JSON
   // const boxScore = boxScoreResponse.props.pageProps.game;

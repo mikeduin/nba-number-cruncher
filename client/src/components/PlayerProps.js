@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { connect } from 'react-redux';
-import { Button, Input, Segment, Image } from 'semantic-ui-react';
+import { Button, Input, Segment, Image, Icon } from 'semantic-ui-react';
 import PropsTable from './playerProps/PropsTable';
 import { toast } from 'react-semantic-toasts';
 import logos from '../modules/logos';
@@ -300,18 +300,22 @@ const PlayerProps = ({ game, playersMetadata, boxScore, allPlayerProps }) => {
       }
     }
     
-    // If FanDuel but no px-context extracted and no stored one, show error
-    if (sportsbook === 'FanDuel' && !pxContext && !storedPxContext) {
-      toast({
-        type: 'error',
-        icon: 'exclamation',
-        color: 'red',
-        title: 'No px-context Available',
-        description: `Please paste a cURL command first to set px-context token`,
-        animation: 'slide down',
-        time: 3000
-      });
-      return;
+    // If FanDuel and no px-context extracted, use stored one
+    if (sportsbook === 'FanDuel' && !pxContext) {
+      if (storedPxContext) {
+        pxContext = storedPxContext;
+      } else {
+        toast({
+          type: 'error',
+          icon: 'exclamation',
+          color: 'red',
+          title: 'No px-context Available',
+          description: `Please paste a cURL command first to set px-context token`,
+          animation: 'slide down',
+          time: 3000
+        });
+        return;
+      }
     }
     
     const response = await axios.post(`/api/updateProps`, {gid, sportsbook, pxContext});

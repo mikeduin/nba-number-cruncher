@@ -181,6 +181,7 @@ const updateGamblecast = (game) => async (dispatch) => {
 export const fetchDailyBoxScores = () => async (dispatch, getState) => {
   const activeDay = getState().activeDay;
   const dailyBoxScores = await axios.get(`/api/fetchDailyBoxScores/${activeDay}`);
+  console.log('dailyBoxScores.data ', dailyBoxScores.data);
   dailyBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });
@@ -188,7 +189,9 @@ export const fetchDailyBoxScores = () => async (dispatch, getState) => {
  
 export const fetchActiveBoxScores = () => async (dispatch, getState) => {
   const activeDay = getState().activeDay;
+  console.log('calling fetchActiveBoxScores for activeDay ', activeDay);
   const activeBoxScores = await axios.get(`/api/fetchActiveBoxScores/${activeDay}`);
+  console.log('activeBoxScores.data ', activeBoxScores.data);
   activeBoxScores.data.forEach(game => {
     dispatch(updateGamblecast(game));
   });
