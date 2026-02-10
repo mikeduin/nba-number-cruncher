@@ -81,48 +81,25 @@ rule.second = 48;
 // })()
 
 // (async () => { 
-//   // await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
-//   // schedule.scheduleJob(rule, async () => {
-//     // let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
-//     // while (moment(yesterday).isAfter('2026-01-14')) {
-//     //   await updatePlayerBoxScoresByPeriod(yesterday);
-//     //   await delay(1000);
-//     //   yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
-//     // }
-//     // // Team Stat Updaters
-//     // // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
-//     // // setTimeout(()=>{updateStarterBuilds()}, 10000);
-//     // // setTimeout(()=>{updateBenchBuilds()}, 20000);
-//     // // setTimeout(()=>{updateQ1Builds()}, 30000);
-//     // // setTimeout(()=>{updateQ2Builds()}, 40000);
-//     // // setTimeout(()=>{updateQ3Builds()}, 50000); 
-//     // // setTimeout(()=>{updateQ4Builds()}, 60000);XX
-//     // // setTimeout(()=>{mapTeamNetRatings()}, 70000);
-//     // // setTimeout(()=>{mapTeamPace()}, 80000);
-//     // //
-//     // // Player Stat Updaters
-//     // setTimeout(()=>{updatePlayerPositions()}, 500);
-//     // setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
-//     // setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
-//     // setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
-//     // setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
-//     // setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
-//     // setTimeout(()=>{updateSchedule()}, 55000); // not working for playoffs
-//     // setTimeout(()=>{updateScheduleNewUrl()}, 1000);
-//     // setTimeout(()=>{checkForMissingInactives()}, 85000);
-//     // setTimeout(()=>{mapFullPlayerData()}, 100000);
-//     // setTimeout(()=>{addGameStints()}, 130000);
-//     // setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
-//     // setTimeout(()=>{mapSegmentedPlayerData()}, 170000);
-//   // }) 
-// })()
-
-
-// Scheduled job runs daily at 2:00 AM PT
-schedule.scheduleJob(rule, async () => {
-  console.log(`Starting nightly data updates at ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-  
-  try {
+//   await updatePastScheduleForResults(); // don't think we need this anymore, but confirm no FE errors
+  schedule.scheduleJob(rule, async () => {
+    let yesterday = moment().subtract(24, 'hours').format('YYYY-MM-DD');
+    while (moment(yesterday).isAfter('2026-01-14')) {
+      await updatePlayerBoxScoresByPeriod(yesterday);
+      await delay(1000);
+      yesterday = moment(yesterday).subtract(1, 'days').format('YYYY-MM-DD');
+    }
+    // Team Stat Updaters
+    // setTimeout(()=>{updateFullTeamBuilds()}, 1000);
+    // setTimeout(()=>{updateStarterBuilds()}, 10000);
+    // setTimeout(()=>{updateBenchBuilds()}, 20000);
+    // setTimeout(()=>{updateQ1Builds()}, 30000);
+    // setTimeout(()=>{updateQ2Builds()}, 40000);
+    // setTimeout(()=>{updateQ3Builds()}, 50000); 
+    // setTimeout(()=>{updateQ4Builds()}, 60000);XX
+    // setTimeout(()=>{mapTeamNetRatings()}, 70000);
+    // setTimeout(()=>{mapTeamPace()}, 80000);
+    //
     // Player Stat Updaters
     setTimeout(()=>{updatePlayerPositions()}, 500);
     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
@@ -130,19 +107,42 @@ schedule.scheduleJob(rule, async () => {
     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
-    setTimeout(()=>{updateSchedule()}, 55000);
-    setTimeout(()=>{updateScheduleNewUrl()}, 60000);
+    setTimeout(()=>{updateSchedule()}, 55000); // not working for playoffs
+    setTimeout(()=>{updateScheduleNewUrl()}, 1000);
     setTimeout(()=>{checkForMissingInactives()}, 85000);
     setTimeout(()=>{mapFullPlayerData()}, 100000);
     setTimeout(()=>{addGameStints()}, 130000);
     setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
     setTimeout(()=>{mapSegmentedPlayerData()}, 170000);
+  }) 
+// })()
+
+
+// Scheduled job runs daily at 2:00 AM PT
+// schedule.scheduleJob(rule, async () => {
+//   console.log(`Starting nightly data updates at ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+  
+//   try {
+//     // Player Stat Updaters
+//     setTimeout(()=>{updatePlayerPositions()}, 500);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(0)}, 5000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(3)}, 10000);
+//     setTimeout(()=>{updatePlayerBaseStatBuilds(4)}, 20000);
+//     setTimeout(()=>{updatePlayerAdvancedStatBuilds()}, 30000);
+//     setTimeout(()=>{updatePlayerBaseStatBuildsPlayoffs()}, 45000);
+//     setTimeout(()=>{updateSchedule()}, 55000);
+//     setTimeout(()=>{updateScheduleNewUrl()}, 60000);
+//     setTimeout(()=>{checkForMissingInactives()}, 85000);
+//     setTimeout(()=>{mapFullPlayerData()}, 100000);
+//     setTimeout(()=>{addGameStints()}, 130000);
+//     setTimeout(()=>{mapPlayerPlayoffData()}, 140000);
+//     setTimeout(()=>{mapSegmentedPlayerData()}, 170000);
     
-    console.log('Nightly update jobs scheduled successfully');
-  } catch (error) {
-    console.error('Error during nightly updates:', error);
-  }
-});
+//     console.log('Nightly update jobs scheduled successfully');
+//   } catch (error) {
+//     console.error('Error during nightly updates:', error);
+//   }
+// });
 
 // (async () => {
 //   await reprocessNonFinalGames(2025, '2026-02-01');
